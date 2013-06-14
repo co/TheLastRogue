@@ -1,6 +1,6 @@
 #TheLastRogue
 
-A roguelike game
+A roguelike game.
 
 ##Installation
 
@@ -12,7 +12,7 @@ This will be made more automatic in the future, promise.
 2. Read the top of makefile you think is correct and the readme in the makefiles folder.
 3. Install the dependencies.
 3. Build libtcod.
-4. Copy libtcod.so to the root of this repository.
+4. Copy all .so files to the root of this repository.
 
 ###Windows
 
