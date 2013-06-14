@@ -13,7 +13,7 @@ It's in the public domain.
 
 
 import libtcodpy as libtcod
-import DungeonLevel
+import DungeonLevel as dungeonLevel
 import Init as init
 import Player as player
 import Vector2D as vector2D
@@ -29,7 +29,7 @@ hero = player.Player(vector2D.Vector2D(20, 10))
 fov_recompute = True
 fov_radius = 4
 
-dungeonLevel = DungeonLevel.DungeonLevel()
+dungeon_level = dungeonLevel.test_dungeon_level()
 
 #############################################
 # drawing
@@ -37,7 +37,7 @@ dungeonLevel = DungeonLevel.DungeonLevel()
 
 
 def draw():
-    dungeonLevel.Draw(hero.position)
+    dungeon_level.draw(hero)
     hero.draw()
 
 #############################################
@@ -46,7 +46,7 @@ def draw():
 
 
 def update():
-    hero.update(dungeonLevel)
+    hero.update(dungeon_level)
 
 
 #############################################

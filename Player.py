@@ -1,4 +1,5 @@
 import Counter as counter
+import DungeonLevel as dungeonLevel
 import libtcodpy as libtcod
 
 # TODO move to settings.
@@ -24,6 +25,10 @@ class Player(object):
     def __init__(self, position):
         self.hp = counter.Counter(10, 10)
         self.position = position
+        self.current_depth = 0
+        self.fov_map = None
+        self._sight_radius = 10
+        self._memory_map = []
 
     def draw(self):
         libtcod.console_put_char(0, self.position.x, self.position.y,
@@ -34,5 +39,25 @@ class Player(object):
         key = get_key(key)
         if key in move_controls:
             dx, dy = move_controls[key]
-            if dungeonLevel.isTilePassable(self.position + (dx, dy)):
+            if dungeonLevel.is_tile_passable(self.position + (dx, dy)):
                 self.position = self.position + (dx, dy)
+
+    def get_memory_of_map(self, dungeon_level):
+        self.set_memory_map_if_not_set(dungeon_level)
+        return self._memory_map[dungeon_level.depth]
+
+    def set_memory_map_if_not_set(self, dungeon_level):
+        depth = dungeon_level.depth
+        while(len(self._memory_map) <= depth):
+            self._memory_map.append(None)
+        if(self._memory_map[depth] is None):
+            self._memory_map[depth] = dungeonLevel.unknown_level_map(
+                dungeon_level.width, dungeon_level.height, dungeon_level.depth)
+
+    def update_memory_of_tile(self, tile, x, y, depth):
+        self._memory_map[depth].tile_matrix[y][x] = tile
+
+    def update_fov_map(self):
+        libtcod.map_compute_fov(self.fov_map,
+                                self.position.x, self.position.y,
+                                self._sight_radius, True)

@@ -8,34 +8,34 @@ class Terrain(object):
         self.position = position
 
     @staticmethod
-    def GetColorBG():
+    def get_color_bg():
         return colors.UNINITIALIZED_BG
 
     @staticmethod
-    def GetColorFG():
+    def get_color_fg():
         return colors.UNINITIALIZED_FG
 
     @staticmethod
-    def IsSolid():
+    def is_solid():
         return False
 
     @staticmethod
-    def GetSymbol():
+    def get_symbol():
         return '?'
 
     @staticmethod
-    def IsTransparent():
+    def is_transparent():
         return True
 
-    def Draw(self, isSeen):
+    def draw(self, isSeen):
         if(isSeen):
             libtcod.console_put_char_ex(0, self.position[0], self.position[1],
-                                        self.GetSymbol(), self.GetColorFG(),
-                                        self.GetColorBG())
+                                        self.get_symbol(), self.get_color_fg(),
+                                        self.get_color_bg())
         else:
             libtcod.console_put_char_ex(0, self.position[0],
                                         self.position[1],
-                                        self.GetSymbol(),
+                                        self.get_symbol(),
                                         colors.PURPLE_SHADOW_DARK,
                                         colors.BLACK)
 
@@ -46,22 +46,22 @@ class Wall(Terrain):
         super(Wall, self).__init__(position)
 
     @staticmethod
-    def GetColorBG():
+    def get_color_bg():
         return colors.WALL_BG
 
     @staticmethod
-    def GetColorFG():
+    def get_color_fg():
         return colors.FLOOR_FG
 
     @staticmethod
-    def GetSymbol():
+    def get_symbol():
         return '#'
 
     @staticmethod
-    def IsSolid():
+    def is_solid():
         return True
 
-    def IsTransparent(self):
+    def is_transparent(self):
         return False
 
 
@@ -71,15 +71,15 @@ class Floor(Terrain):
         super(Floor, self).__init__(position)
 
     @staticmethod
-    def GetColorBG():
+    def get_color_bg():
         return colors.FLOOR_BG
 
     @staticmethod
-    def GetColorFG():
+    def get_color_fg():
         return colors.FLOOR_FG
 
     @staticmethod
-    def GetSymbol():
+    def get_symbol():
         return '.'
 
 
@@ -88,7 +88,7 @@ class Water(Terrain):
     def __init__(self, position):
         super(Water, self).__init__(position)
 
-    def GetSymbol():
+    def get_symbol():
         return '~'
 
 
@@ -98,13 +98,13 @@ class Door(Terrain):
         super(Door, self).__init__(position)
         self.IsOpen = isOpen
 
-    def GetSymbol(self):
+    def get_symbol(self):
         if(self.IsOpen):
             return "'"
         else:
             return "+"
 
-    def IsTransparent(self):
+    def is_transparent(self):
         if self.IsOpen:
             return True
         else:
@@ -115,3 +115,21 @@ class Door(Terrain):
 
     def Open(self):
         self.isOpen = True
+
+
+class Unknown(Terrain):
+
+    def __init__(self, position):
+        super(Unknown, self).__init__(position)
+
+    @staticmethod
+    def get_color_bg():
+        return colors.BLACK
+
+    @staticmethod
+    def get_color_fg():
+        return colors.BLACK
+
+    @staticmethod
+    def get_symbol():
+        return ' '

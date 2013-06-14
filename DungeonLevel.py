@@ -1,16 +1,35 @@
-import Terrain
+import Terrain as terrain
 import libtcodpy as libtcod
 
 
-def charToTerrain(c, position):
+def unknown_level_map(width, height, depth):
+    tile_matrix = [[terrain.Unknown((x, y))
+                    for x in range(width)]
+                   for y in range(height)]
+    return DungeonLevel(tile_matrix, depth)
+
+
+def test_dungeon_level():
+    dungeon = read_file("test.level")
+    width = len(dungeon[0])
+    height = len(dungeon)
+
+    depth = 0
+    tile_matrix = [[char_to_terrain(dungeon[y][x], (x, y))
+                    for x in range(width)]
+                   for y in range(height)]
+    return DungeonLevel(tile_matrix, depth)
+
+
+def char_to_terrain(c, position):
     if(c == '#'):
-        return Terrain.Wall(position)
+        return terrain.Wall(position)
     elif(c == '+'):
-        return Terrain.Door(position, False)
+        return terrain.Door(position, False)
     elif(c == '~'):
-        return Terrain.Water(position)
+        return terrain.Water(position)
     elif(c == ' '):
-        return Terrain.Floor(position)
+        return terrain.Floor(position)
 
 
 def read_file(file_name):
@@ -23,36 +42,33 @@ def read_file(file_name):
 
 class DungeonLevel(object):
 
-    #def __init__(self, TerrainMatrix):
-        #self.TerrainMatrix = TerrainMatrix
+    def __init__(self, tile_matrix, depth):
+        self.height = len(tile_matrix)
+        self.width = len(tile_matrix[0])
+        self.tile_matrix = tile_matrix
+        self.depth = depth
 
-    def __init__(self):
-        dungeon = read_file("test.level")
-        self.width = len(dungeon[0])
-        self.height = len(dungeon)
-
-        self.terrainMatrix = [[charToTerrain(dungeon[y][x], (x, y))
-                              for x in range(self.width)]
-                              for y in range(self.height)]
-
-    def Draw(self, playerPosition):
-        fovRadius = 5
-        self.UpdateCalculateDungeonPropertyMap()
-        libtcod.map_compute_fov(self.fovMap,
-                                playerPosition.x, playerPosition.y,
-                                fovRadius, True)
-        for y, row in enumerate(self.terrainMatrix):
+    def draw(self, player):
+        self.update_calculate_dungeon_property_map(player)
+        player.update_fov_map()
+        player_memory_of_map = player.get_memory_of_map(self)
+        for y, row in enumerate(self.tile_matrix):
             for x, tile in enumerate(row):
-                tile.Draw(libtcod.map_is_in_fov(self.fovMap, x, y))
+                if(libtcod.map_is_in_fov(player.fov_map, x, y)):
+                    player.update_memory_of_tile(tile, x, y, self.depth)
+                    tile.draw(True)
+                else:
+                    print(x, y)
+                    player_memory_of_map.tile_matrix[y][x].draw(False)
 
-    def isTilePassable(self, position):
-        return not self.terrainMatrix[position.y][position.x].IsSolid()
+    def is_tile_passable(self, position):
+        return not self.tile_matrix[position.y][position.x].is_solid()
 
-    def UpdateCalculateDungeonPropertyMap(self):
-        self.fovMap = libtcod.map_new(self.width, self.height)
+    def update_calculate_dungeon_property_map(self, player):
+        player.fov_map = libtcod.map_new(self.width, self.height)
         for y in range(self.height):
             for x in range(self.width):
-                tile = self.terrainMatrix[y][x]
-                libtcod.map_set_properties(self.fovMap, x, y,
-                                           tile.IsTransparent(),
-                                           tile.IsSolid())
+                tile = self.tile_matrix[y][x]
+                libtcod.map_set_properties(player.fov_map, x, y,
+                                           tile.is_transparent(),
+                                           tile.is_solid())
