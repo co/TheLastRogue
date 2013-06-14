@@ -36,8 +36,8 @@ class Terrain(object):
             libtcod.console_put_char_ex(0, self.position[0],
                                         self.position[1],
                                         self.get_symbol(),
-                                        colors.PURPLE_SHADOW_DARK,
-                                        colors.BLACK)
+                                        colors.UNSEEN_FG,
+                                        colors.UNSEEN_BG)
 
 
 class Wall(Terrain):
@@ -51,7 +51,7 @@ class Wall(Terrain):
 
     @staticmethod
     def get_color_fg():
-        return colors.FLOOR_FG
+        return colors.WALL_FG
 
     @staticmethod
     def get_symbol():
@@ -97,6 +97,14 @@ class Door(Terrain):
     def __init__(self, position, isOpen):
         super(Door, self).__init__(position)
         self.IsOpen = isOpen
+
+    @staticmethod
+    def get_color_bg():
+        return colors.DB_OILED_CEDAR
+
+    @staticmethod
+    def get_color_fg():
+        return colors.DB_LOULOU
 
     def get_symbol(self):
         if(self.IsOpen):
