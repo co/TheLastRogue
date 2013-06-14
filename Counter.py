@@ -1,9 +1,6 @@
-import math
-
-
 class Counter(object):
     def __init__(self, initValue, maxValue, minValue=0):
-        if initValue < minValue or initValue > maxValue or minValue > maxValue:
+        if(not(minValue <= initValue <= maxValue)):
             raise Exception("Incorrectly Initialized Counter")
 
         self.value = initValue
