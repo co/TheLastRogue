@@ -22,25 +22,28 @@ def get_key(key):
 
 class Player(object):
 
-    def __init__(self, position):
+    def __init__(self, dungeon_location):
         self.hp = counter.Counter(10, 10)
-        self.position = position
+        self.dungeon_location = dungeon_location
         self.current_depth = 0
         self.fov_map = None
         self._sight_radius = 10
         self._memory_map = []
 
     def draw(self):
-        libtcod.console_put_char(0, self.position.x, self.position.y,
+        libtcod.console_put_char(0,
+                                 self.dungeon_location.position.x,
+                                 self.dungeon_location.position.y,
                                  '@', libtcod.BKGND_NONE)
 
     def update(self, dungeonLevel):
         key = libtcod.console_wait_for_keypress(True)
         key = get_key(key)
+        position = self.dungeon_location.position
         if key in move_controls:
             dx, dy = move_controls[key]
-            if dungeonLevel.is_tile_passable(self.position + (dx, dy)):
-                self.position = self.position + (dx, dy)
+            if dungeonLevel.is_tile_passable(position + (dx, dy)):
+                self.dungeon_location.position = position + (dx, dy)
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)
@@ -59,5 +62,6 @@ class Player(object):
 
     def update_fov_map(self):
         libtcod.map_compute_fov(self.fov_map,
-                                self.position.x, self.position.y,
+                                self.dungeon_location.position.x,
+                                self.dungeon_location.position.y,
                                 self._sight_radius, True)

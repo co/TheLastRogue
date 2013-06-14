@@ -58,7 +58,6 @@ class DungeonLevel(object):
                     player.update_memory_of_tile(tile, x, y, self.depth)
                     tile.draw(True)
                 else:
-                    print(x, y)
                     player_memory_of_map.tile_matrix[y][x].draw(False)
 
     def is_tile_passable(self, position):
