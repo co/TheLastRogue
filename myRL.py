@@ -14,7 +14,6 @@ It's in the public domain.
 
 import libtcodpy as libtcod
 import DungeonLevel as dungeonLevel
-import DungeonLocation as dungeonLocation
 import Init as init
 import Player as player
 import Monster as monster
@@ -27,11 +26,8 @@ import Vector2D as vector2D
 
 init.init_libtcod()
 start_position = vector2D.Vector2D(20, 10)
-start_depth = 0
-hero_start_position = dungeonLocation.DungeonLocation(start_depth,
-                                                      start_position)
 
-hero = player.Player(hero_start_position)
+hero = player.Player(start_position)
 fov_recompute = True
 fov_radius = 4
 
@@ -47,7 +43,7 @@ dungeon_level.try_add_monster(monster.RatMan(rat_pos))
 
 def draw():
     dungeon_level.draw(hero)
-    hero.draw()
+    hero.draw(True)
 
 #############################################
 # game state update
