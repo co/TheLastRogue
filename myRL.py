@@ -17,6 +17,7 @@ import DungeonLevel as dungeonLevel
 import DungeonLocation as dungeonLocation
 import Init as init
 import Player as player
+import Monster as monster
 import Vector2D as vector2D
 
 
@@ -36,6 +37,9 @@ fov_radius = 4
 
 dungeon_level = dungeonLevel.test_dungeon_level()
 
+rat_pos = vector2D.Vector2D(15, 15)
+dungeon_level.try_add_monster(monster.RatMan(rat_pos))
+
 #############################################
 # drawing
 #############################################
@@ -52,7 +56,7 @@ def draw():
 
 def update():
     hero.update(dungeon_level)
-
+    dungeon_level.update(hero)
 
 #############################################
 # main loop
