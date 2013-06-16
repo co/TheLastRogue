@@ -1,6 +1,8 @@
 import Counter as counter
 import DungeonLevel as dungeonLevel
 import libtcodpy as libtcod
+import Entity as entity
+
 
 # TODO move to settings.
 move_controls = {
@@ -8,19 +10,31 @@ move_controls = {
     'h': (0, 1),   # down
     'd': (-1, 0),  # left
     'n': (1, 0),   # right
-    libtcod.KEY_UP: (0, -1),  # example of alternate key
-    libtcod.KEY_KP8: (0, -1)  # example of alternate key
 }
 
 
-def get_key(key):
+def wait_for_keypress():
+    key = libtcod.Key()
+    mouse = libtcod.Mouse()
+
+    libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS,
+                                key, mouse)
+    key_char = get_key_char(key)
+    while not any(key_char == k for k in move_controls.keys()):
+        libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS,
+                                    key, mouse)
+        key_char = get_key_char(key)
+    return key_char
+
+
+def get_key_char(key):
     if key.vk == libtcod.KEY_CHAR:
         return chr(key.c)
     else:
         return key.vk
 
 
-class Player(object):
+class Player(entity.Entity):
 
     def __init__(self, dungeon_location):
         self.hp = counter.Counter(10, 10)
@@ -37,8 +51,7 @@ class Player(object):
                                  '@', libtcod.BKGND_NONE)
 
     def update(self, dungeonLevel):
-        key = libtcod.console_wait_for_keypress(True)
-        key = get_key(key)
+        key = wait_for_keypress()
         position = self.dungeon_location.position
         if key in move_controls:
             dx, dy = move_controls[key]
