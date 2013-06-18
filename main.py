@@ -18,6 +18,7 @@ import Init as init
 import Player as player
 import Monster as monster
 import Vector2D as vector2D
+import Item as item
 
 
 #############################################
@@ -31,10 +32,16 @@ hero = player.Player(start_position)
 fov_recompute = True
 fov_radius = 4
 
+
 dungeon_level = dungeonLevel.test_dungeon_level()
 
 rat_pos = vector2D.Vector2D(15, 15)
 dungeon_level.try_add_monster(monster.RatMan(rat_pos))
+
+gun = item.Gun()
+item_position = vector2D.Vector2D(20, 20)
+
+dungeon_level.put_item_on_tile(gun, item_position)
 
 #############################################
 # drawing

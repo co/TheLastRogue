@@ -68,6 +68,9 @@ class DungeonLevel(object):
     def update(self, player):
         self.update_monsters(player)
 
+    def put_item_on_tile(self, item, position):
+        self.tile_matrix[position.y][position.x].items.append(item)
+
     def update_monsters(self, player):
         for monster in self.__monsters:
             monster.update(self, player)
