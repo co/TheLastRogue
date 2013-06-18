@@ -23,7 +23,7 @@ class RatMan(Monster):
 
     @staticmethod
     def get_color_fg():
-        return colors.DB_OILED_CEDAR
+        return colors.DB_TAHITI_GOLD
 
     def update(self, dungeon_level, player):
         self.step_random_direction(dungeon_level)

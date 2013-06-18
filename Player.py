@@ -59,6 +59,13 @@ class Player(entity.Entity):
                 move_succeded = self.try_move_to_new_position(dungeonLevel,
                                                               new_position)
                 done = move_succeded
+            elif key == libtcod.KEY_ESCAPE:
+                self.kill()
+                done = True
+            elif key == 'r':  # Rest
+                done = True
+            elif key == 'p':  # Pick up
+                done = True
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)

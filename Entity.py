@@ -25,6 +25,12 @@ class Entity(object):
     def get_color_fg():
         return colors.UNINITIALIZED_FG
 
+    def is_dead(self):
+        return self.hp.value == 0
+
+    def kill(self):
+        self.hp.value = 0
+
     @staticmethod
     def get_symbol():
         return ord('?')

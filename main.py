@@ -73,7 +73,7 @@ def main_loop():
         draw()
         libtcod.console_flush()
         update()
-        if hero.hp.value == 0:
+        if(hero.is_dead()):
             break
 
 main_loop()
