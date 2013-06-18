@@ -1,3 +1,11 @@
+def tile_copy(tile):
+    tile_copy = Tile(tile.terrain)
+    tile_copy.entity = tile.entity
+    tile_copy.items = tile.items
+    tile_copy.sceneries = tile.sceneries
+    return tile_copy
+
+
 class Tile(object):
     def __init__(self, terrain):
         self.terrain = terrain

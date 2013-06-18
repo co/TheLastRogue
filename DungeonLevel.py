@@ -1,7 +1,6 @@
 import Terrain as terrain
 import Tile as tile
 import libtcodpy as libtcod
-import copy
 
 
 def unknown_level_map(width, height, depth):
@@ -58,11 +57,11 @@ class DungeonLevel(object):
         player.update_fov_map()
         player_memory_of_map = player.get_memory_of_map(self)
         for y, row in enumerate(self.tile_matrix):
-            for x, tile in enumerate(row):
+            for x, current_tile in enumerate(row):
                 if(libtcod.map_is_in_fov(player.fov_map, x, y)):
-                    player.update_memory_of_tile(copy.deepcopy(tile),
+                    player.update_memory_of_tile(tile.tile_copy(current_tile),
                                                  x, y, self.depth)
-                    tile.draw((x, y), True)
+                    current_tile.draw((x, y), True)
                 else:
                     player_memory_of_map.tile_matrix[y][x].draw((x, y), False)
 
