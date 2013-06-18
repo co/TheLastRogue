@@ -58,12 +58,15 @@ def update():
 # main loop
 #############################################
 
-frame = 0
-while not libtcod.console_is_window_closed():
-    print(frame)
-    frame = frame + 1
-    draw()
-    libtcod.console_flush()
-    update()
-    if hero.hp.value == 0:
-        break
+
+def main_loop():
+    frame = 0
+    while not libtcod.console_is_window_closed():
+        frame = frame + 1
+        draw()
+        libtcod.console_flush()
+        update()
+        if hero.hp.value == 0:
+            break
+
+main_loop()

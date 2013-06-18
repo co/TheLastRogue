@@ -74,11 +74,11 @@ class Floor(Terrain):
 
     @staticmethod
     def get_color_bg():
-        return colors.FLOOR_BG
+        return colors.DB_LOULOU
 
     @staticmethod
     def get_color_fg():
-        return colors.FLOOR_FG
+        return colors.DB_STINGER
 
     @staticmethod
     def get_symbol():
@@ -115,7 +115,7 @@ class Door(Terrain):
 
     @staticmethod
     def get_color_fg():
-        return colors.DB_LOULOU
+        return colors.DB_ROPE
 
     def is_solid(self):
         return not self.is_open
