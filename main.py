@@ -26,22 +26,23 @@ import Item as item
 #############################################
 
 init.init_libtcod()
-start_position = vector2D.Vector2D(20, 10)
-
-hero = player.Player(start_position)
-fov_recompute = True
-fov_radius = 4
-
 
 dungeon_level = dungeonLevel.test_dungeon_level()
 
+hero = player.Player()
+start_position = vector2D.Vector2D(20, 10)
+hero.try_move_to_position(dungeon_level, start_position)
+fov_recompute = True
+fov_radius = 4
+
+rat = monster.RatMan()
 rat_pos = vector2D.Vector2D(15, 15)
-dungeon_level.try_add_monster(monster.RatMan(rat_pos))
+rat.try_move_to_position(dungeon_level, rat_pos)
 
 gun = item.Gun()
 item_position = vector2D.Vector2D(20, 20)
 
-dungeon_level.put_item_on_tile(gun, item_position)
+gun.try_move_to_position(dungeon_level, item_position)
 
 #############################################
 # drawing
@@ -58,7 +59,6 @@ def draw():
 
 
 def update():
-    hero.update(dungeon_level)
     dungeon_level.update(hero)
 
 #############################################

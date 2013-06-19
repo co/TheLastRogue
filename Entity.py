@@ -1,7 +1,6 @@
 import random
 import Counter as counter
-import Colors as colors
-import libtcodpy as libtcod
+import GamePiece as gamePiece
 
 directions = {
     "E": (1, 0),
@@ -15,58 +14,44 @@ directions = {
 }
 
 
-class Entity(object):
-    def __init__(self, position):
-        self.position = position
+class Entity(gamePiece.GamePiece):
+    def __init__(self):
+        super(Entity, self).__init__()
         self.hp = counter.Counter(1, 1)
+
+        self.piece_type = gamePiece.ENTITY_GAME_PIECE
+        self.max_instances_in_single_tile = 1
+        self.draw_order = 0
+
+    def update(self, dungeon_level, player):
         pass
 
-    @staticmethod
-    def get_color_fg():
-        return colors.UNINITIALIZED_FG
+    def step_random_direction(self, dungeon_level):
+        direction = random.sample(list(directions.values()), 1)
+        new_position = self.position + direction[0]
+        self.try_move_to_position(dungeon_level, new_position)
+
+    def try_move_to_position(self, new_dungeon_level, new_position):
+        old_dungeon_level = self.dungeon_level
+        move_succeded = super(Entity, self).\
+            try_move_to_position(new_dungeon_level, new_position)
+        if(move_succeded):
+            if(not old_dungeon_level is None and
+               (not old_dungeon_level is new_dungeon_level)):
+                old_dungeon_level.remove_entity_if_present(self)
+            new_dungeon_level.add_entity_if_not_present(self)
+        return move_succeded
+
+    def try_remove_from_dungeon(self):
+        old_dungeon_level = self.dungeon_level
+        remove_succeded = super(Entity, self).\
+            try_remove_from_dungeon()
+        if(remove_succeded and (not old_dungeon_level is None)):
+            old_dungeon_level.remove_entity_if_present(self)
+        return remove_succeded
 
     def is_dead(self):
         return self.hp.value == 0
 
     def kill(self):
         self.hp.value = 0
-
-    @staticmethod
-    def get_symbol():
-        return ord('?')
-
-    def draw(self, is_seen):
-        if(is_seen):
-            fg_color = self.get_color_fg()
-        else:
-            fg_color = colors.UNSEEN_FG
-
-        libtcod.console_set_char_foreground(0, self.position.x,
-                                            self.position.y, fg_color)
-        libtcod.console_set_char(0, self.position.x, self.position.y,
-                                 self.get_symbol())
-
-    def step_random_direction(self, dungeon_level):
-        direction = random.sample(list(directions.values()), 1)
-        new_position = self.position + direction[0]
-        if(dungeon_level.is_tile_passable(new_position)):
-            self.try_move_to_new_position(dungeon_level, new_position)
-
-    def try_move_to_new_position(self, dungeon_level, new_position):
-        new_tile = dungeon_level.tile_matrix[new_position.y][new_position.x]
-        if((not new_tile.entity is None) or
-           new_tile.terrain.is_solid()):
-            return False
-        self.__move_to_new_position(dungeon_level, new_position)
-        return True
-
-    def __move_to_new_position(self, dungeon_level, new_position):
-        old_position = self.position
-        entity_on_my_position = dungeon_level.\
-            tile_matrix[old_position.y][old_position.x].entity
-        if(entity_on_my_position is self):
-            dungeon_level.\
-                tile_matrix[old_position.y][old_position.x].entity = None
-
-        self.position = new_position
-        dungeon_level.tile_matrix[new_position.y][new_position.x].entity = self

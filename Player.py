@@ -33,8 +33,8 @@ def get_key_char(key):
 
 class Player(entity.Entity):
 
-    def __init__(self, position):
-        super(Player, self).__init__(position)
+    def __init__(self):
+        super(Player, self).__init__()
         self.hp = counter.Counter(10, 10)
         self.fov_map = None
         self._sight_radius = 10
@@ -48,7 +48,7 @@ class Player(entity.Entity):
     def get_symbol():
         return ord('@')
 
-    def update(self, dungeonLevel):
+    def update(self, dungeonLevel, _):
         done = False
         while not done:
             key = wait_for_keypress()
@@ -56,8 +56,8 @@ class Player(entity.Entity):
             if key in move_controls:
                 dx, dy = move_controls[key]
                 new_position = position + (dx, dy)
-                move_succeded = self.try_move_to_new_position(dungeonLevel,
-                                                              new_position)
+                move_succeded = self.try_move_to_position(dungeonLevel,
+                                                          new_position)
                 done = move_succeded
             elif key == libtcod.KEY_ESCAPE:
                 self.kill()

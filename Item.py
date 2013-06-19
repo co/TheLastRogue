@@ -1,18 +1,15 @@
 import Colors as colors
-import libtcodpy as libtcod
+import GamePiece as gamePiece
 
 
-class Item(object):
+class Item(gamePiece.GamePiece):
     def __init__(self):
+        super(Item, self).__init__()
+
+        self.piece_type = gamePiece.ITEM_GAME_PIECE
+        self.max_instances_in_single_tile = 1
+        self.draw_order = 1
         pass
-
-    @staticmethod
-    def get_color_fg():
-        return colors.UNINITIALIZED_FG
-
-    @staticmethod
-    def get_symbol():
-        return ord('?')
 
     @staticmethod
     def get_name():
@@ -21,18 +18,6 @@ class Item(object):
     @staticmethod
     def get_description():
         return "XXX_DESCRIPTION_XXX"
-
-    def draw(self, position, is_seen):
-        if(is_seen):
-            fg_color = self.get_color_fg()
-        else:
-            fg_color = colors.UNSEEN_FG
-
-        print(position)
-        libtcod.console_set_char_foreground(0, position[0],
-                                            position[1], fg_color)
-        libtcod.console_set_char(0, position[0], position[1],
-                                 self.get_symbol())
 
 
 class Gun(Item):

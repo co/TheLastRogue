@@ -50,7 +50,11 @@ class DungeonLevel(object):
         self.width = len(tile_matrix[0])
         self.tile_matrix = tile_matrix
         self.depth = depth
-        self.__monsters = []
+        self.__entities = []
+
+    @property
+    def entities(self):
+        return self.__entities
 
     def draw(self, player):
         self.update_calculate_dungeon_property_map(player)
@@ -65,32 +69,23 @@ class DungeonLevel(object):
                 else:
                     player_memory_of_map.tile_matrix[y][x].draw((x, y), False)
 
+    def add_entity_if_not_present(self, new_entity):
+        if(not any(new_entity is entity for entity in self.entities)):
+            self.__entities.append(new_entity)
+
+    def remove_entity_if_present(self, entity_to_remove):
+        if(any(entity_to_remove is entity for entity in self.entities)):
+            self.__entities.remove(entity_to_remove)
+
     def update(self, player):
-        self.update_monsters(player)
+        self.update_entities(player)
 
     def put_item_on_tile(self, item, position):
-        self.tile_matrix[position.y][position.x].items.append(item)
+        self.__entities[position.y][position.x].items.append(item)
 
-    def update_monsters(self, player):
-        for monster in self.__monsters:
-            monster.update(self, player)
-
-    def is_tile_empty_of_entity(self, position):
-        if(self.tile_matrix[position.y][position.x].entity is None):
-            return True
-        return False
-
-    def try_add_monster(self, monster):
-        if((any(monster is m for m in self.__monsters)) or
-           (not self.is_tile_empty_of_entity(monster.position))):
-            return False
-
-        self.__monsters.append(monster)
-        new_pos = monster.position
-        self.tile_matrix[new_pos.y][new_pos.x].entity = monster
-
-    def is_tile_passable(self, position):
-        return not self.tile_matrix[position.y][position.x].terrain.is_solid()
+    def update_entities(self, player):
+        for entity in self.entities:
+            entity.update(self, player)
 
     def update_calculate_dungeon_property_map(self, player):
         player.fov_map = libtcod.map_new(self.width, self.height)

@@ -4,17 +4,13 @@ import Entity as entity
 
 
 class Monster(entity.Entity):
-    def __init__(self, position):
-        super(Monster, self).__init__(position)
+    def __init__(self):
+        super(Monster, self).__init__()
         self.fov_map = None
 
-    def update(self, dungeon_level, player):
-        pass
-
-
 class RatMan(Monster):
-    def __init__(self, position):
-        super(RatMan, self).__init__(position)
+    def __init__(self):
+        super(RatMan, self).__init__()
         self.hp = counter.Counter(10, 10)
 
     @staticmethod
