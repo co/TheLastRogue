@@ -21,4 +21,4 @@ This will be made more automatic in the future, promise.
 
 ##Start Playing
 
-Run Main.py with python 3.
+Run Main.py with python (both 2 and 3 should work).
