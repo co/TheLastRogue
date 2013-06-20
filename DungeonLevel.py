@@ -63,7 +63,7 @@ class DungeonLevel(object):
         for y, row in enumerate(self.tile_matrix):
             for x, current_tile in enumerate(row):
                 if(libtcod.map_is_in_fov(player.fov_map, x, y)):
-                    player.update_memory_of_tile(tile.tile_copy(current_tile),
+                    player.update_memory_of_tile(current_tile,
                                                  x, y, self.depth)
                     current_tile.draw((x, y), True)
                 else:

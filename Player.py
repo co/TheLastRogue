@@ -80,7 +80,7 @@ class Player(entity.Entity):
                 dungeon_level.width, dungeon_level.height, dungeon_level.depth)
 
     def update_memory_of_tile(self, tile, x, y, depth):
-        self._memory_map[depth].tile_matrix[y][x] = tile
+        self._memory_map[depth].tile_matrix[y][x] = tile.copy()
 
     def update_fov_map(self):
         libtcod.map_compute_fov(self.fov_map,

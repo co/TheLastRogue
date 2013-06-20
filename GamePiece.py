@@ -39,6 +39,16 @@ class GamePiece(object):
     def get_symbol():
         return ord('?')
 
+    def piece_copy(self, copy=None):
+        if(copy is None):
+            copy = self.__class__()
+        copy.__position = self.__position
+        copy.__dungeon_level = self.__dungeon_level
+        copy.piece_type = self.piece_type
+        copy.max_instances_in_single_tile = self.max_instances_in_single_tile
+        copy.draw_order = self.draw_order
+        return copy
+
     def draw(self, is_seen):
         if(not self.get_color_fg() is None):
             if(is_seen):

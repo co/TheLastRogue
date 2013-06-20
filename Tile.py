@@ -1,12 +1,6 @@
 import GamePiece as gamePiece
 
 
-def tile_copy(tile):
-    tile_copy = Tile(tile.terrain)
-    tile_copy.game_pieces = tile.game_pieces
-    return tile_copy
-
-
 class Tile(object):
     def __init__(self, terrain):
         self.terrain = terrain
@@ -29,3 +23,11 @@ class Tile(object):
                                             key=lambda piece_list:
                                             piece_list[0].draw_order)
         return lists_sorted_on_draw_order
+
+    def copy(self):
+        copy = Tile(self.terrain)
+        copy.game_pieces = dict()
+        for piece_type, piece_list in self.game_pieces.items():
+            copy.game_pieces[piece_type] =\
+                [piece.piece_copy() for piece in piece_list]
+        return copy

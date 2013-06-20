@@ -8,6 +8,7 @@ class Monster(entity.Entity):
         super(Monster, self).__init__()
         self.fov_map = None
 
+
 class RatMan(Monster):
     def __init__(self):
         super(RatMan, self).__init__()

@@ -8,7 +8,7 @@ def init_libtcod():
     libtcod.console_set_custom_font(font,
                                     libtcod.FONT_LAYOUT_ASCII_INROW |
                                     libtcod.FONT_TYPE_GREYSCALE)
-    libtcod.console_init_root(settings.window_width,
-                              settings.window_height,
-                              b'Desert Crawl',
+    libtcod.console_init_root(settings.WINDOW_WIDTH,
+                              settings.WINDOW_HEIGHT,
+                              b'The Last Rogue',
                               False)
