@@ -50,8 +50,14 @@ class Entity(gamePiece.GamePiece):
             old_dungeon_level.remove_entity_if_present(self)
         return remove_succeded
 
+    def hurt(self, damage):
+        self.hp.decrease(damage)
+
+    def heal(self, health):
+        self.hp.increase(health)
+
     def is_dead(self):
         return self.hp.value == 0
 
     def kill(self):
-        self.hp.value = 0
+        self.hp.set_min()

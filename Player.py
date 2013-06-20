@@ -66,6 +66,12 @@ class Player(entity.Entity):
                 done = True
             elif key == 'p':  # Pick up
                 done = True
+            elif key == 'a':
+                self.hurt(1)
+                done = True
+            elif key == 'o':
+                self.heal(1)
+                done = True
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)

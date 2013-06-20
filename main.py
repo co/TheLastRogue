@@ -19,6 +19,10 @@ import Player as player
 import Monster as monster
 import Vector2D as vector2D
 import Item as item
+import Screen as screen
+import Settings
+import Constants
+import Colors
 
 
 #############################################
@@ -44,6 +48,16 @@ item_position = vector2D.Vector2D(20, 20)
 
 gun.try_move_to_position(dungeon_level, item_position)
 
+status_bar = screen.Screen(vector2D.Vector2D(Settings.WINDOW_WIDTH -
+                                             Constants.STATUS_BAR_WIDTH, 0),
+                           Constants.STATUS_BAR_WIDTH,
+                           Constants.STATUS_BAR_HEIGHT,
+                           Colors.DB_BLACK)
+
+hp_bar = screen.CounterBar(hero.hp, 10, Colors.DB_BROWN, Colors.DB_LOULOU)
+
+status_bar.elements.append(hp_bar)
+
 #############################################
 # drawing
 #############################################
@@ -52,6 +66,7 @@ gun.try_move_to_position(dungeon_level, item_position)
 def draw():
     dungeon_level.draw(hero)
     hero.draw(True)
+    status_bar.draw()
 
 #############################################
 # game state update
