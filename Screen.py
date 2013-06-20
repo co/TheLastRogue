@@ -44,3 +44,19 @@ class CounterBar(object):
             x = position.x + i + self.margin_x
             libtcod.console_set_char(0, x, y, ' ')
             libtcod.console_set_char_background(0, x, y, self.inactive_color)
+
+
+class TextBox(object):
+    def __init__(self, text, width, height,
+                 active_color, margin_x=1, margin_y=1):
+        self.text = text
+        self.width = width
+        self.height = height
+        self.active_color = active_color
+        self.margin_x = margin_x
+        self.margin_y = margin_y
+        self.total_height = height + margin_y * 2
+
+    def draw(self, position):
+        libtcod.console_print(None, position.x + self.margin_x,
+                              position.y + self.margin_y, self.text)

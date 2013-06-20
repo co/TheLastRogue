@@ -54,8 +54,12 @@ status_bar = screen.Screen(vector2D.Vector2D(Settings.WINDOW_WIDTH -
                            Constants.STATUS_BAR_HEIGHT,
                            Colors.DB_BLACK)
 
-hp_bar = screen.CounterBar(hero.hp, 10, Colors.DB_BROWN, Colors.DB_LOULOU)
+hp_bar = screen.CounterBar(hero.hp, Constants.STATUS_BAR_WIDTH - 2,
+                           Colors.DB_BROWN, Colors.DB_LOULOU)
+text_box = screen.TextBox("CO\nThe Brave", Constants.STATUS_BAR_WIDTH - 2,
+                          1, Colors.DB_TOPAZ)
 
+status_bar.elements.append(text_box)
 status_bar.elements.append(hp_bar)
 
 #############################################
