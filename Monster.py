@@ -1,6 +1,7 @@
 import Counter as counter
 import Colors as colors
 import Entity as entity
+import Messenger as messenger
 
 
 class Monster(entity.Entity):
@@ -24,3 +25,5 @@ class RatMan(Monster):
 
     def update(self, dungeon_level, player):
         self.step_random_direction(dungeon_level)
+        message = "The rat-man looks at you."
+        messenger.messenger_instance.message(message)

@@ -1,4 +1,6 @@
 import libtcodpy as libtcod
+import Messenger as messenger
+import Colors as colors
 
 
 class Screen(object):
@@ -20,6 +22,19 @@ class Screen(object):
         for element in self.elements:
             element.draw(element_position)
             element_position = element_position + (0, element.total_height)
+
+
+class MessageDisplay(Screen):
+    def __init__(self, position, width, height, color):
+        super(MessageDisplay, self).__init__(position, width, height, color)
+
+    def update(self):
+        messenger.messenger_instance.push_new_messages()
+        messages = messenger.messenger_instance.tail(self.height)
+        self.elements = []
+        for message in messages:
+            self.elements.append(TextBox(message, self.width,
+                                         1, colors.DB_WHITE, 1, 0))
 
 
 class CounterBar(object):

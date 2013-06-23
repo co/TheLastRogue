@@ -62,6 +62,12 @@ text_box = screen.TextBox("CO\nThe Brave", Constants.STATUS_BAR_WIDTH - 2,
 status_bar.elements.append(text_box)
 status_bar.elements.append(hp_bar)
 
+message_bar = screen.MessageDisplay(vector2D.Vector2D(0,
+                                                      Constants.LEVEL_HEIGHT),
+                                    Constants.MESSAGES_BAR_WIDTH,
+                                    Constants.MESSAGES_BAR_HEIGHT,
+                                    Colors.DB_BLACK)
+
 #############################################
 # drawing
 #############################################
@@ -71,6 +77,7 @@ def draw():
     dungeon_level.draw(hero)
     hero.draw(True)
     status_bar.draw()
+    message_bar.draw()
 
 #############################################
 # game state update
@@ -79,6 +86,7 @@ def draw():
 
 def update():
     dungeon_level.update(hero)
+    message_bar.update()
 
 #############################################
 # main loop
