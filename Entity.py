@@ -1,6 +1,7 @@
 import random
 import Counter as counter
 import GamePiece as gamePiece
+import libtcodpy as libtcod
 
 directions = {
     "E": (1, 0),
@@ -18,6 +19,8 @@ class Entity(gamePiece.GamePiece):
     def __init__(self):
         super(Entity, self).__init__()
         self.hp = counter.Counter(1, 1)
+        self.fov_map = None
+        self._sight_radius = 10
 
         self.piece_type = gamePiece.ENTITY_GAME_PIECE
         self.max_instances_in_single_tile = 1
@@ -49,6 +52,24 @@ class Entity(gamePiece.GamePiece):
         if(remove_succeded and (not old_dungeon_level is None)):
             old_dungeon_level.remove_entity_if_present(self)
         return remove_succeded
+
+    def update_fov_map(self):
+        libtcod.map_compute_fov(self.fov_map,
+                                self.position.x,
+                                self.position.y,
+                                self._sight_radius, True)
+
+    def get_seen_entities(self):
+        self.update_fov_map()
+        seen_entities = []
+        for y, row in enumerate(self.dungeon_level.tile_matrix):
+            for x, current_tile in enumerate(row):
+                entity = current_tile.get_first_entity()
+                if(not entity is None and
+                   libtcod.map_is_in_fov(self.fov_map, x, y)):
+                    seen_entities.append(entity)
+        seen_entities.remove(self)
+        return seen_entities
 
     def hurt(self, damage):
         self.hp.decrease(damage)

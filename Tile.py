@@ -24,6 +24,11 @@ class Tile(object):
                                             piece_list[0].draw_order)
         return lists_sorted_on_draw_order
 
+    def get_first_entity(self):
+        if(len(self.game_pieces[gamePiece.ENTITY_GAME_PIECE]) < 1):
+            return None
+        return self.game_pieces[gamePiece.ENTITY_GAME_PIECE][0]
+
     def copy(self):
         copy = Tile(self.terrain)
         copy.game_pieces = dict()

@@ -36,8 +36,6 @@ class Player(entity.Entity):
     def __init__(self):
         super(Player, self).__init__()
         self.hp = counter.Counter(10, 10)
-        self.fov_map = None
-        self._sight_radius = 10
         self._memory_map = []
 
     @staticmethod
@@ -88,9 +86,3 @@ class Player(entity.Entity):
     def update_memory_of_tile(self, tile, position, depth):
         self._memory_map[depth].tile_matrix[position.y][position.x]\
             = tile.copy()
-
-    def update_fov_map(self):
-        libtcod.map_compute_fov(self.fov_map,
-                                self.position.x,
-                                self.position.y,
-                                self._sight_radius, True)

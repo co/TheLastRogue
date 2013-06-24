@@ -104,3 +104,6 @@ def Dot(a, b):
 def ProjectOnto(w, v):
     'Projects w onto v.'
     return v * Dot(w, v) / LengthSqrd(v)
+
+
+ZERO = Vector2D(0, 0)

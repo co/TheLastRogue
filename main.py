@@ -61,14 +61,16 @@ status_bar = screen.Screen(vector2D.Vector2D(Settings.WINDOW_WIDTH -
                            Constants.STATUS_BAR_HEIGHT,
                            Colors.DB_BLACK)
 
-monster_status_bar = screen.Screen(vector2D.Vector2D(0, 0),
-                                   Constants.MONSTER_STATUS_BAR_WIDTH,
-                                   Constants.MONSTER_STATUS_BAR_HEIGHT,
-                                   Colors.DB_BLACK)
+monster_status_bar =\
+    screen.EntityStatusList(vector2D.Vector2D(0, 0),
+                            Constants.MONSTER_STATUS_BAR_WIDTH,
+                            Constants.MONSTER_STATUS_BAR_HEIGHT,
+                            Colors.DB_BLACK)
 
 hp_bar = screen.CounterBar(hero.hp, Constants.STATUS_BAR_WIDTH - 2,
                            Colors.DB_BROWN, Colors.DB_LOULOU)
-text_box = screen.TextBox("CO\nThe Brave", Constants.STATUS_BAR_WIDTH - 2,
+text_box = screen.TextBox("CO\nThe Brave", vector2D.Vector2D(0, 0),
+                          Constants.STATUS_BAR_WIDTH - 2,
                           1, Colors.DB_PANCHO)
 
 status_bar.elements.append(text_box)
@@ -91,6 +93,7 @@ def draw(camera):
     message_bar.draw()
     dungeon_level.draw(hero, camera)
     hero.draw(True, camera)
+    monster_status_bar.draw()
 
 #############################################
 # game state update
@@ -99,6 +102,7 @@ def draw(camera):
 
 def update():
     dungeon_level.update(hero)
+    monster_status_bar.update(hero)
     message_bar.update()
 
 #############################################

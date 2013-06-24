@@ -14,6 +14,7 @@ class RatMan(Monster):
     def __init__(self):
         super(RatMan, self).__init__()
         self.hp = counter.Counter(10, 10)
+        self.name = "Rat-man"
 
     @staticmethod
     def get_symbol():

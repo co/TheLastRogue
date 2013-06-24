@@ -1,33 +1,89 @@
 import libtcodpy as libtcod
 import Messenger as messenger
 import Colors as colors
+import Vector2D as vector2D
 import turn
 
 
-class Screen(object):
-    def __init__(self, position, width, height, color_bg):
-        self.position = position
+class UIElement(object):
+    def __init__(self, offset, width, height,
+                 margin=vector2D.ZERO):
+        self.offset = offset
         self.width = width
         self.height = height
-        self.color_bg = color_bg
+        self.margin = margin
         self.elements = []
 
-    def draw(self):
-        for y in range(self.position.y, self.height):
-            for x in range(self.position.x, self.width + self.position.x):
+    def draw(self, offset=vector2D.ZERO):
+        pass
+
+    def update(self):
+        pass
+
+    @property
+    def total_height(self):
+        return self.height + 2 * self.margin.y
+
+    @property
+    def total_width(self):
+        return self.width + 2 * self.margin.x
+
+
+class Screen(UIElement):
+    def __init__(self, offset, width, height, color_bg,
+                 margin=vector2D.ZERO):
+        super(Screen, self).__init__(offset, width, height, margin)
+        self.color_bg = color_bg
+
+    def draw(self, position=vector2D.ZERO):
+        position = position + self.offset
+        for y in range(position.y, self.height):
+            for x in range(position.x, self.width + position.x):
                 libtcod.console_set_char_background(0, x, y,
                                                     self.color_bg)
                 libtcod.console_set_char(0, x, y, ' ')
 
-        element_position = self.position
+        element_position = position
         for element in self.elements:
             element.draw(element_position)
             element_position = element_position + (0, element.total_height)
 
 
+class EntityStatusList(Screen):
+    def __init__(self, offset, width, height, color_bg):
+        super(EntityStatusList, self).__init__(offset, width,
+                                               height, color_bg)
+
+    def update(self, entity):
+        seen_entities = entity.get_seen_entities()
+        self.elements = [EntityStatusGUIElement(seen_entity,
+                                                vector2D.ZERO,
+                                                self.width, 3)
+                         for seen_entity in seen_entities]
+
+
+class EntityStatusGUIElement(Screen):
+    def __init__(self, entity, offset, width, height):
+        super(EntityStatusGUIElement, self).__init__(offset, width,
+                                                     height,
+                                                     colors.INTERFACE_BG)
+        horizontal_margin = 0
+        vertical_margin = 0
+        text_height = 1
+        monster_name_text_box = TextBox(entity.name[:width], vector2D.ZERO,
+                                        width, text_height, colors.TEXT_ACTIVE,
+                                        vector2D.Vector2D(horizontal_margin,
+                                                          vertical_margin))
+        monster_health_bar = CounterBar(entity.hp, self.width - 2,
+                                        colors.DB_BROWN, colors.DB_LOULOU)
+
+        self.elements.append(monster_name_text_box)
+        self.elements.append(monster_health_bar)
+
+
 class MessageDisplay(Screen):
-    def __init__(self, position, width, height, color_bg):
-        super(MessageDisplay, self).__init__(position, width, height, color_bg)
+    def __init__(self, offset, width, height, color_bg):
+        super(MessageDisplay, self).__init__(offset, width, height, color_bg)
 
     def update(self):
         messenger.messenger.push_new_messages()
@@ -38,46 +94,46 @@ class MessageDisplay(Screen):
                 color = colors.TEXT_NEW
             else:
                 color = colors.TEXT_OLD
-            self.elements.append(TextBox(str(message), self.width,
-                                         1, color, 1, 0))
+            self.elements.append(TextBox(str(message), vector2D.ZERO,
+                                         self.width, 1, color,
+                                         vector2D.Vector2D(0, 0)))
 
 
-class CounterBar(object):
+class CounterBar(UIElement):
     def __init__(self, counter, width, active_color,
-                 inactive_color, margin_x=1, margin_y=1):
+                 inactive_color,
+                 margin=vector2D.Vector2D(1, 1),
+                 offset=vector2D.ZERO):
+        super(CounterBar, self).__init__(offset, width,
+                                         1, margin)
         self.counter = counter
-        self.width = width
         self.active_color = active_color
         self.inactive_color = inactive_color
-        self.margin_x = margin_x
-        self.margin_y = margin_y
-        self.total_height = 1 + margin_y * 2
 
-    def draw(self, position):
+    def draw(self, position=vector2D.ZERO):
         tiles_active = int(self.counter.ratio_of_full() * self.width)
-        y = position.y + self.margin_y
+        y = position.y + self.offset.y + self.margin.y
+        x = position.x + self.offset.x + self.margin.x
+
         for i in range(tiles_active):
-            x = position.x + i + self.margin_x
-            libtcod.console_set_char(0, x, y, ' ')
-            libtcod.console_set_char_background(0, x, y, self.active_color)
+            libtcod.console_set_char(0, x + i, y, ' ')
+            libtcod.console_set_char_background(0, x + i, y,
+                                                self.active_color)
         for i in range(tiles_active, self.width):
-            x = position.x + i + self.margin_x
-            libtcod.console_set_char(0, x, y, ' ')
-            libtcod.console_set_char_background(0, x, y, self.inactive_color)
+            libtcod.console_set_char(0, x + i, y, ' ')
+            libtcod.console_set_char_background(0, x + i, y,
+                                                self.inactive_color)
 
 
-class TextBox(object):
-    def __init__(self, text, width, height,
-                 text_color, margin_x=1, margin_y=1):
+class TextBox(UIElement):
+    def __init__(self, text, offset, width, height,
+                 text_color, margin=vector2D.Vector2D(1, 1)):
+        super(TextBox, self).__init__(offset, width, height, margin)
         self.text = text
-        self.width = width
-        self.height = height
         self.text_color = text_color
-        self.margin_x = margin_x
-        self.margin_y = margin_y
-        self.total_height = height + margin_y * 2
 
-    def draw(self, position):
+    def draw(self, position=vector2D.ZERO):
+        position = position + self.offset
         libtcod.console_set_default_foreground(None, self.text_color)
-        libtcod.console_print(None, position.x + self.margin_x,
-                              position.y + self.margin_y, self.text)
+        libtcod.console_print(None, position.x + self.margin.x,
+                              position.y + self.margin.y, self.text)
