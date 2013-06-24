@@ -1,4 +1,5 @@
 import collections
+import turn
 
 
 class Messenger(object):
@@ -15,7 +16,7 @@ class Messenger(object):
                 self.__new_messages_counter[message] + 1
 
     def tail(self, length):
-        return self.__messages[:length]
+        return self.__messages[-length:]
 
     def push_new_messages(self):
         for message, count in self.__new_messages_counter.items():
@@ -30,4 +31,14 @@ class Messenger(object):
         else:
             return message + " x" + str(repeat_count)
 
-messenger_instance = Messenger()
+messenger = Messenger()
+
+
+class Message(object):
+    def __init__(self, message, turn_created=None):
+        self.message = message
+        if(turn_created is None):
+            self.turn_created = turn.current_turn
+
+    def __str__(self):
+        return self.message

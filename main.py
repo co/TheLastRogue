@@ -20,15 +20,18 @@ import Monster as monster
 import Vector2D as vector2D
 import Item as item
 import Screen as screen
+import turn
 import Settings
 import Constants
 import Colors
+import logging
 
 
 #############################################
 # global constants and variables
 #############################################
 
+logging.basicConfig(filename="debug.log", level=logging.DEBUG, filemode="w")
 init.init_libtcod()
 
 dungeon_level = dungeonLevel.test_dungeon_level()
@@ -94,9 +97,9 @@ def update():
 
 
 def main_loop():
-    frame = 0
+    global turn
     while not libtcod.console_is_window_closed():
-        frame = frame + 1
+        turn.current_turn = turn.current_turn + 1
         draw()
         libtcod.console_flush()
         update()

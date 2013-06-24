@@ -1,21 +1,22 @@
 import libtcodpy as libtcod
 import Messenger as messenger
 import Colors as colors
+import turn
 
 
 class Screen(object):
-    def __init__(self, position, width, height, color):
+    def __init__(self, position, width, height, color_bg):
         self.position = position
         self.width = width
         self.height = height
-        self.color = color
+        self.color_bg = color_bg
         self.elements = []
 
     def draw(self):
         for y in range(self.position.y, self.height):
             for x in range(self.position.x, self.width + self.position.x):
                 libtcod.console_set_char_background(0, x, y,
-                                                    self.color)
+                                                    self.color_bg)
                 libtcod.console_set_char(0, x, y, ' ')
 
         element_position = self.position
@@ -25,16 +26,20 @@ class Screen(object):
 
 
 class MessageDisplay(Screen):
-    def __init__(self, position, width, height, color):
-        super(MessageDisplay, self).__init__(position, width, height, color)
+    def __init__(self, position, width, height, color_bg):
+        super(MessageDisplay, self).__init__(position, width, height, color_bg)
 
     def update(self):
-        messenger.messenger_instance.push_new_messages()
-        messages = messenger.messenger_instance.tail(self.height)
+        messenger.messenger.push_new_messages()
+        messages = messenger.messenger.tail(self.height)
         self.elements = []
         for message in messages:
-            self.elements.append(TextBox(message, self.width,
-                                         1, colors.DB_WHITE, 1, 0))
+            if(message.turn_created == turn.current_turn):
+                color = colors.TEXT_NEW
+            else:
+                color = colors.TEXT_OLD
+            self.elements.append(TextBox(str(message), self.width,
+                                         1, color, 1, 0))
 
 
 class CounterBar(object):

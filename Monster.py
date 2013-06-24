@@ -26,4 +26,4 @@ class RatMan(Monster):
     def update(self, dungeon_level, player):
         self.step_random_direction(dungeon_level)
         message = "The rat-man looks at you."
-        messenger.messenger_instance.message(message)
+        messenger.messenger.message(messenger.Message(message))
