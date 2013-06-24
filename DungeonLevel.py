@@ -1,10 +1,11 @@
 import Terrain as terrain
 import Tile as tile
+import Vector2D as vector2D
 import libtcodpy as libtcod
 
 
 def unknown_level_map(width, height, depth):
-    tile_matrix = [[terrain.Unknown()
+    tile_matrix = [[tile.Tile(terrain.Unknown())
                     for x in range(width)]
                    for y in range(height)]
     return DungeonLevel(tile_matrix, depth)
@@ -56,18 +57,20 @@ class DungeonLevel(object):
     def entities(self):
         return self.__entities
 
-    def draw(self, player):
+    def draw(self, player, camera):
         self.update_calculate_dungeon_property_map(player)
         player.update_fov_map()
         player_memory_of_map = player.get_memory_of_map(self)
         for y, row in enumerate(self.tile_matrix):
             for x, current_tile in enumerate(row):
+                position = vector2D.Vector2D(x, y)
                 if(libtcod.map_is_in_fov(player.fov_map, x, y)):
                     player.update_memory_of_tile(current_tile,
-                                                 x, y, self.depth)
-                    current_tile.draw((x, y), True)
+                                                 position, self.depth)
+                    current_tile.draw(position, True, camera)
                 else:
-                    player_memory_of_map.tile_matrix[y][x].draw((x, y), False)
+                    player_memory_of_map.tile_matrix[y][x].draw(position,
+                                                                False, camera)
 
     def add_entity_if_not_present(self, new_entity):
         if(not any(new_entity is entity for entity in self.entities)):

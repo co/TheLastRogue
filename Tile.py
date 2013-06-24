@@ -10,11 +10,11 @@ class Tile(object):
             gamePiece.DECORATION_GAME_PIECE: []
         }
 
-    def draw(self, position, is_seen):
-        self.terrain.draw(position, is_seen)
+    def draw(self, position, is_seen, camera):
+        self.terrain.draw(position + camera.offset, is_seen)
         for piece_list in self.__pieces_lists_sorted_on_draw_order():
             for piece in piece_list:
-                piece.draw(is_seen)
+                piece.draw(is_seen, camera)
 
     def __pieces_lists_sorted_on_draw_order(self):
         piece_lists = self.game_pieces.values()

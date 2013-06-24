@@ -20,6 +20,7 @@ import Monster as monster
 import Vector2D as vector2D
 import Item as item
 import Screen as screen
+import Camera as camera
 import turn
 import Settings
 import Constants
@@ -35,6 +36,9 @@ logging.basicConfig(filename="debug.log", level=logging.DEBUG, filemode="w")
 init.init_libtcod()
 
 dungeon_level = dungeonLevel.test_dungeon_level()
+camera = camera.Camera(vector2D.Vector2D(Constants.MONSTER_STATUS_BAR_WIDTH,
+                                         0),
+                       vector2D.Vector2D(0, 0))
 
 hero = player.Player()
 start_position = vector2D.Vector2D(20, 10)
@@ -57,6 +61,11 @@ status_bar = screen.Screen(vector2D.Vector2D(Settings.WINDOW_WIDTH -
                            Constants.STATUS_BAR_HEIGHT,
                            Colors.DB_BLACK)
 
+monster_status_bar = screen.Screen(vector2D.Vector2D(0, 0),
+                                   Constants.MONSTER_STATUS_BAR_WIDTH,
+                                   Constants.MONSTER_STATUS_BAR_HEIGHT,
+                                   Colors.DB_BLACK)
+
 hp_bar = screen.CounterBar(hero.hp, Constants.STATUS_BAR_WIDTH - 2,
                            Colors.DB_BROWN, Colors.DB_LOULOU)
 text_box = screen.TextBox("CO\nThe Brave", Constants.STATUS_BAR_WIDTH - 2,
@@ -65,22 +74,23 @@ text_box = screen.TextBox("CO\nThe Brave", Constants.STATUS_BAR_WIDTH - 2,
 status_bar.elements.append(text_box)
 status_bar.elements.append(hp_bar)
 
-message_bar = screen.MessageDisplay(vector2D.Vector2D(0,
-                                                      Constants.LEVEL_HEIGHT),
-                                    Constants.MESSAGES_BAR_WIDTH,
-                                    Constants.MESSAGES_BAR_HEIGHT,
-                                    Colors.DB_BLACK)
+message_bar = screen.\
+    MessageDisplay(vector2D.Vector2D(Constants.MONSTER_STATUS_BAR_WIDTH,
+                                     Constants.LEVEL_HEIGHT),
+                   Constants.MESSAGES_BAR_WIDTH,
+                   Constants.MESSAGES_BAR_HEIGHT,
+                   Colors.DB_BLACK)
 
 #############################################
 # drawing
 #############################################
 
 
-def draw():
-    dungeon_level.draw(hero)
-    hero.draw(True)
+def draw(camera):
     status_bar.draw()
     message_bar.draw()
+    dungeon_level.draw(hero, camera)
+    hero.draw(True, camera)
 
 #############################################
 # game state update
@@ -100,7 +110,7 @@ def main_loop():
     global turn
     while not libtcod.console_is_window_closed():
         turn.current_turn = turn.current_turn + 1
-        draw()
+        draw(camera)
         libtcod.console_flush()
         update()
         if(hero.is_dead()):

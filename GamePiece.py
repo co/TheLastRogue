@@ -49,22 +49,23 @@ class GamePiece(object):
         copy.draw_order = self.draw_order
         return copy
 
-    def draw(self, is_seen):
+    def draw(self, is_seen, camera):
+        position = self.position + camera.offset
         if(not self.get_color_fg() is None):
             if(is_seen):
                 fg_color = self.get_color_fg()
             else:
                 fg_color = colors.UNSEEN_FG
-            libtcod.console_set_char_foreground(0, self.position.x,
-                                                self.position.y, fg_color)
+            libtcod.console_set_char_foreground(0, position.x,
+                                                position.y, fg_color)
 
         if(not self.get_color_bg() is None):
-            libtcod.console_set_char_foreground(0, self.position.x,
-                                                self.position.y,
+            libtcod.console_set_char_foreground(0, position.x,
+                                                position.y,
                                                 self.get_color_bg())
         if(not (self.get_color_bg() is None and
                 self.get_color_fg() is None)):
-            libtcod.console_set_char(0, self.position.x, self.position.y,
+            libtcod.console_set_char(0, position.x, position.y,
                                      self.get_symbol())
 
     def try_move_to_position(self, new_dungeon_level, new_position):
