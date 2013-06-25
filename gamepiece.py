@@ -28,6 +28,10 @@ class GamePiece(object):
     def dungeon_level(self):
         return self.__dungeon_level
 
+    @dungeon_level.setter
+    def dungeon_level(self, value):
+        self.__dungeon_level = value
+
     @staticmethod
     def get_color_fg():
         return colors.UNINITIALIZED_FG
@@ -44,7 +48,7 @@ class GamePiece(object):
         if(copy is None):
             copy = self.__class__()
         copy.__position = self.__position
-        copy.__dungeon_level = self.__dungeon_level
+        copy.dungeon_level = self.dungeon_level
         copy.piece_type = self.piece_type
         copy.max_instances_in_single_tile = self.max_instances_in_single_tile
         copy.draw_order = self.draw_order
@@ -70,8 +74,7 @@ class GamePiece(object):
                                      self.get_symbol())
 
     def try_move_to_position(self, new_dungeon_level, new_position):
-        new_tile = new_dungeon_level.\
-            tile_matrix[new_position.y][new_position.x]
+        new_tile = new_dungeon_level.get_tile(new_position)
         if(not self.__can_place_piece_on_tile(new_tile)):
             return False
         self.__move_to_position(new_dungeon_level, new_position)
@@ -88,22 +91,21 @@ class GamePiece(object):
     def __try_remove_from_dungeon(self):
         if(self.dungeon_level is None):
             return True
-        tile_i_might_be_on = self.dungeon_level.\
-            tile_matrix[self.position.y][self.position.x]
+        tile_i_might_be_on = self.dungeon_level.get_tile(self.position)
 
         pieces_i_might_be_among = \
             tile_i_might_be_on.game_pieces[self.piece_type]
 
         if(any(self is piece for piece in pieces_i_might_be_among)):
             pieces_i_might_be_among.remove(self)
-            self.__dungeon_level = None
+            self.dungeon_level = None
             return True
 
         return False
 
     def __move_to_position(self, dungeon_level, new_position):
         self.__try_remove_from_dungeon()
-        new_tile = dungeon_level.tile_matrix[new_position.y][new_position.x]
+        new_tile = dungeon_level.get_tile(new_position)
         new_tile.game_pieces[self.piece_type].append(self)
         self.__position = new_position
-        self.__dungeon_level = dungeon_level
+        self.dungeon_level = dungeon_level

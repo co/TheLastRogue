@@ -32,11 +32,12 @@ def get_key_char(key):
 
 
 class Player(entity.Entity):
-
     def __init__(self):
         super(Player, self).__init__()
         self.hp = counter.Counter(10, 10)
         self._memory_map = []
+        self._faction = entity.FACTION_PLAYER
+        self.name = "CO"
 
     @staticmethod
     def get_color_fg():
@@ -57,6 +58,8 @@ class Player(entity.Entity):
                 move_succeded = self.try_move_to_position(dungeonlevel,
                                                           new_position)
                 done = move_succeded
+                if(not done):
+                    done = self.try_hit(new_position)
             elif key == libtcod.KEY_ESCAPE:
                 self.kill()
                 done = True

@@ -1,7 +1,11 @@
 import random
 import counter
 import gamepiece
+import messenger
 import libtcodpy as libtcod
+
+FACTION_PLAYER = 0
+FACTION_MONSTER = 1
 
 directions = {
     "E": (1, 0),
@@ -21,10 +25,24 @@ class Entity(gamepiece.GamePiece):
         self.hp = counter.Counter(1, 1)
         self.fov_map = None
         self._sight_radius = 10
+        self._strength = 3
+        self._faction = FACTION_MONSTER
 
         self.piece_type = gamepiece.ENTITY_GAME_PIECE
         self.max_instances_in_single_tile = 1
         self.draw_order = 0
+        self.__dungeon_level = None
+
+    @property
+    def dungeon_level(self):
+        return self.__dungeon_level
+
+    @dungeon_level.setter
+    def dungeon_level(self, value):
+        if(not self.dungeon_level is value and not value is None):
+            self.fov_map = libtcod.map_new(value.width, value.height)
+            self.update_calculate_dungeon_property_map(value)
+        self.__dungeon_level = value
 
     def update(self, dungeon_level, player):
         pass
@@ -58,19 +76,24 @@ class Entity(gamepiece.GamePiece):
                                 self.position.x,
                                 self.position.y,
                                 self._sight_radius, True)
+        print("post fov update: ", self.fov_map)
 
     def get_seen_entities(self):
         self.update_fov_map()
         seen_entities = []
         for entity in self.dungeon_level.entities:
+            print("class: ", self.__class__, " entity: ", entity)
             if libtcod.map_is_in_fov(self.fov_map, entity.position.x,
                                      entity.position.y):
                 seen_entities.append(entity)
+        print("fov: ", self.fov_map)
         seen_entities.remove(self)
         return seen_entities
 
-    def hurt(self, damage):
+    def hurt(self, damage, entity=None):
         self.hp.decrease(damage)
+        if(self.is_dead):
+            self.killer = entity
 
     def heal(self, health):
         self.hp.increase(health)
@@ -80,3 +103,26 @@ class Entity(gamepiece.GamePiece):
 
     def kill(self):
         self.hp.set_min()
+
+    def try_hit(self, position):
+        entity = self.dungeon_level.get_tile(position).get_first_entity()
+        if(entity is None or
+           entity._faction == self._faction):
+            return False
+        self.hit(entity)
+        return True
+
+    def hit(self, entity):
+        damage = random.randrange(1, self._strength)
+        message = "%s hits %s for %d damage." %\
+            (self.name, entity.name, damage)
+        messenger.messenger.message(messenger.Message(message))
+        entity.hurt(damage, self)
+
+    def update_calculate_dungeon_property_map(self, value):
+        for y in range(value.height):
+            for x in range(value.width):
+                terrain = value.tile_matrix[y][x].terrain
+                libtcod.map_set_properties(self.fov_map, x, y,
+                                           terrain.is_transparent(),
+                                           terrain.is_solid())

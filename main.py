@@ -50,6 +50,10 @@ rat = monster.RatMan()
 rat_pos = vector2d.Vector2D(15, 15)
 rat.try_move_to_position(dungeon_level, rat_pos)
 
+statue = monster.StoneStatue()
+statue_pos = vector2d.Vector2D(25, 7)
+statue.try_move_to_position(dungeon_level, statue_pos)
+
 gun = item.Gun()
 item_position = vector2d.Vector2D(20, 20)
 
@@ -94,6 +98,7 @@ def draw(camera):
     dungeon_level.draw(hero, camera)
     hero.draw(True, camera)
     monster_status_bar.draw()
+    libtcod.console_flush()
 
 #############################################
 # game state update
@@ -102,6 +107,7 @@ def draw(camera):
 
 def update():
     dungeon_level.update(hero)
+    dungeon_level.remove_dead_monsters()
     monster_status_bar.update(hero)
     message_bar.update()
 
@@ -115,7 +121,6 @@ def main_loop():
     while not libtcod.console_is_window_closed():
         turn.current_turn = turn.current_turn + 1
         draw(camera)
-        libtcod.console_flush()
         update()
         if(hero.is_dead()):
             break

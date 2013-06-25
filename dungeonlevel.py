@@ -51,14 +51,9 @@ class DungeonLevel(object):
         self.width = len(tile_matrix[0])
         self.tile_matrix = tile_matrix
         self.depth = depth
-        self.__entities = []
-
-    @property
-    def entities(self):
-        return self.__entities
+        self.entities = []
 
     def draw(self, player, camera):
-        self.update_calculate_dungeon_property_map(player)
         player.update_fov_map()
         player_memory_of_map = player.get_memory_of_map(self)
         for y, row in enumerate(self.tile_matrix):
@@ -74,27 +69,29 @@ class DungeonLevel(object):
 
     def add_entity_if_not_present(self, new_entity):
         if(not any(new_entity is entity for entity in self.entities)):
-            self.__entities.append(new_entity)
+            self.entities.append(new_entity)
 
     def remove_entity_if_present(self, entity_to_remove):
         if(any(entity_to_remove is entity for entity in self.entities)):
-            self.__entities.remove(entity_to_remove)
+            self.entities.remove(entity_to_remove)
+            return True
+        return False
+
+    def get_tile(self, position):
+        return self.tile_matrix[position.y][position.x]
 
     def update(self, player):
         self.update_entities(player)
 
     def put_item_on_tile(self, item, position):
-        self.__entities[position.y][position.x].items.append(item)
+        self.get_tile(position).items.append(item)
 
     def update_entities(self, player):
         for entity in self.entities:
-            entity.update(self, player)
+            if(not entity.is_dead()):
+                entity.update(self, player)
 
-    def update_calculate_dungeon_property_map(self, player):
-        player.fov_map = libtcod.map_new(self.width, self.height)
-        for y in range(self.height):
-            for x in range(self.width):
-                terrain = self.tile_matrix[y][x].terrain
-                libtcod.map_set_properties(player.fov_map, x, y,
-                                           terrain.is_transparent(),
-                                           terrain.is_solid())
+    def remove_dead_monsters(self):
+        for entity in self.entities:
+            if(entity.is_dead()):
+                entity.kill()

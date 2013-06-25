@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 import messenger
+import math
 import colors
 import vector2d
 import turn
@@ -94,7 +95,8 @@ class MessageDisplay(Screen):
                 color = colors.TEXT_NEW
             else:
                 color = colors.TEXT_OLD
-            self.elements.append(TextBox(str(message), vector2d.ZERO,
+            self.elements.append(TextBox(str(message).ljust(self.width),
+                                         vector2d.ZERO,
                                          self.width, 1, color,
                                          vector2d.Vector2D(0, 0)))
 
@@ -111,7 +113,8 @@ class CounterBar(UIElement):
         self.inactive_color = inactive_color
 
     def draw(self, position=vector2d.ZERO):
-        tiles_active = int(self.counter.ratio_of_full() * self.width)
+        tiles_active = int(math.ceil(self.counter.ratio_of_full() *
+                                     self.width))
         y = position.y + self.offset.y + self.margin.y
         x = position.x + self.offset.x + self.margin.x
 
