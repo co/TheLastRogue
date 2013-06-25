@@ -1,12 +1,12 @@
-import Colors as colors
-import GamePiece as gamePiece
+import colors
+import gamepiece
 
 
-class Item(gamePiece.GamePiece):
+class Item(gamepiece.GamePiece):
     def __init__(self):
         super(Item, self).__init__()
 
-        self.piece_type = gamePiece.ITEM_GAME_PIECE
+        self.piece_type = gamepiece.ITEM_GAME_PIECE
         self.max_instances_in_single_tile = 1
         self.draw_order = 1
         pass

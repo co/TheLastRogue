@@ -1,6 +1,6 @@
-import Terrain as terrain
-import Tile as tile
-import Vector2D as vector2D
+import terrain
+import tile
+import vector2d
 import libtcodpy as libtcod
 
 
@@ -63,7 +63,7 @@ class DungeonLevel(object):
         player_memory_of_map = player.get_memory_of_map(self)
         for y, row in enumerate(self.tile_matrix):
             for x, current_tile in enumerate(row):
-                position = vector2D.Vector2D(x, y)
+                position = vector2d.Vector2D(x, y)
                 if(libtcod.map_is_in_fov(player.fov_map, x, y)):
                     player.update_memory_of_tile(current_tile,
                                                  position, self.depth)

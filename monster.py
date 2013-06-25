@@ -1,7 +1,7 @@
-import Counter as counter
-import Colors as colors
-import Entity as entity
-import Messenger as messenger
+import counter
+import colors
+import entity
+import messenger
 
 
 class Monster(entity.Entity):

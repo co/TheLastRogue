@@ -1,6 +1,6 @@
 import random
-import Counter as counter
-import GamePiece as gamePiece
+import counter
+import gamepiece
 import libtcodpy as libtcod
 
 directions = {
@@ -15,14 +15,14 @@ directions = {
 }
 
 
-class Entity(gamePiece.GamePiece):
+class Entity(gamepiece.GamePiece):
     def __init__(self):
         super(Entity, self).__init__()
         self.hp = counter.Counter(1, 1)
         self.fov_map = None
         self._sight_radius = 10
 
-        self.piece_type = gamePiece.ENTITY_GAME_PIECE
+        self.piece_type = gamepiece.ENTITY_GAME_PIECE
         self.max_instances_in_single_tile = 1
         self.draw_order = 0
 

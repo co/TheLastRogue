@@ -1,4 +1,4 @@
-import Colors as colors
+import colors
 import libtcodpy as libtcod
 
 

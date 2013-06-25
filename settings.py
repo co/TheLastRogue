@@ -1,4 +1,4 @@
-import Constants as constants
+import constants
 
 
 WINDOW_WIDTH = constants.SCREEN_WIDTH

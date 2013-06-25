@@ -1,4 +1,4 @@
-import Settings as settings
+import settings
 import libtcodpy as libtcod
 import os
 

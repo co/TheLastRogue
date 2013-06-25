@@ -1,5 +1,5 @@
-import Colors as colors
-import Vector2D as vector2D
+import colors
+import vector2d
 import libtcodpy as libtcod
 
 
@@ -11,7 +11,7 @@ DECORATION_GAME_PIECE = 3
 
 class GamePiece(object):
     def __init__(self):
-        self.__position = vector2D.Vector2D(-1, -1)
+        self.__position = vector2d.Vector2D(-1, -1)
         self.__dungeon_level = None
         self.name = "XXX_unnamed_entity_XXX"
 

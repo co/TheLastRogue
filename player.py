@@ -1,8 +1,8 @@
-import Counter as counter
-import Colors as colors
-import DungeonLevel as dungeonLevel
+import counter
+import colors
+import dungeonlevel
+import entity
 import libtcodpy as libtcod
-import Entity as entity
 
 
 # TODO move to settings.
@@ -46,7 +46,7 @@ class Player(entity.Entity):
     def get_symbol():
         return ord('@')
 
-    def update(self, dungeonLevel, _):
+    def update(self, dungeonlevel, _):
         done = False
         while not done:
             key = wait_for_keypress()
@@ -54,7 +54,7 @@ class Player(entity.Entity):
             if key in move_controls:
                 dx, dy = move_controls[key]
                 new_position = position + (dx, dy)
-                move_succeded = self.try_move_to_position(dungeonLevel,
+                move_succeded = self.try_move_to_position(dungeonlevel,
                                                           new_position)
                 done = move_succeded
             elif key == libtcod.KEY_ESCAPE:
@@ -80,7 +80,7 @@ class Player(entity.Entity):
         while(len(self._memory_map) <= depth):
             self._memory_map.append(None)
         if(self._memory_map[depth] is None):
-            self._memory_map[depth] = dungeonLevel.unknown_level_map(
+            self._memory_map[depth] = dungeonlevel.unknown_level_map(
                 dungeon_level.width, dungeon_level.height, dungeon_level.depth)
 
     def update_memory_of_tile(self, tile, position, depth):

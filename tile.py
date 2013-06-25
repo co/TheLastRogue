@@ -1,13 +1,13 @@
-import GamePiece as gamePiece
+import gamepiece
 
 
 class Tile(object):
     def __init__(self, terrain):
         self.terrain = terrain
         self.game_pieces = {
-            gamePiece.ENTITY_GAME_PIECE: [],
-            gamePiece.ITEM_GAME_PIECE: [],
-            gamePiece.DECORATION_GAME_PIECE: []
+            gamepiece.ENTITY_GAME_PIECE: [],
+            gamepiece.ITEM_GAME_PIECE: [],
+            gamepiece.DECORATION_GAME_PIECE: []
         }
 
     def draw(self, position, is_seen, camera):
@@ -25,9 +25,9 @@ class Tile(object):
         return lists_sorted_on_draw_order
 
     def get_first_entity(self):
-        if(len(self.game_pieces[gamePiece.ENTITY_GAME_PIECE]) < 1):
+        if(len(self.game_pieces[gamepiece.ENTITY_GAME_PIECE]) < 1):
             return None
-        return self.game_pieces[gamePiece.ENTITY_GAME_PIECE][0]
+        return self.game_pieces[gamepiece.ENTITY_GAME_PIECE][0]
 
     def copy(self):
         copy = Tile(self.terrain)

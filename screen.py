@@ -1,20 +1,20 @@
 import libtcodpy as libtcod
-import Messenger as messenger
-import Colors as colors
-import Vector2D as vector2D
+import messenger
+import colors
+import vector2d
 import turn
 
 
 class UIElement(object):
     def __init__(self, offset, width, height,
-                 margin=vector2D.ZERO):
+                 margin=vector2d.ZERO):
         self.offset = offset
         self.width = width
         self.height = height
         self.margin = margin
         self.elements = []
 
-    def draw(self, offset=vector2D.ZERO):
+    def draw(self, offset=vector2d.ZERO):
         pass
 
     def update(self):
@@ -31,11 +31,11 @@ class UIElement(object):
 
 class Screen(UIElement):
     def __init__(self, offset, width, height, color_bg,
-                 margin=vector2D.ZERO):
+                 margin=vector2d.ZERO):
         super(Screen, self).__init__(offset, width, height, margin)
         self.color_bg = color_bg
 
-    def draw(self, position=vector2D.ZERO):
+    def draw(self, position=vector2d.ZERO):
         position = position + self.offset
         for y in range(position.y, self.height):
             for x in range(position.x, self.width + position.x):
@@ -57,7 +57,7 @@ class EntityStatusList(Screen):
     def update(self, entity):
         seen_entities = entity.get_seen_entities()
         self.elements = [EntityStatusGUIElement(seen_entity,
-                                                vector2D.ZERO,
+                                                vector2d.ZERO,
                                                 self.width, 3)
                          for seen_entity in seen_entities]
 
@@ -70,9 +70,9 @@ class EntityStatusGUIElement(Screen):
         horizontal_margin = 0
         vertical_margin = 0
         text_height = 1
-        monster_name_text_box = TextBox(entity.name[:width], vector2D.ZERO,
+        monster_name_text_box = TextBox(entity.name[:width], vector2d.ZERO,
                                         width, text_height, colors.TEXT_ACTIVE,
-                                        vector2D.Vector2D(horizontal_margin,
+                                        vector2d.Vector2D(horizontal_margin,
                                                           vertical_margin))
         monster_health_bar = CounterBar(entity.hp, self.width - 2,
                                         colors.DB_BROWN, colors.DB_LOULOU)
@@ -94,23 +94,23 @@ class MessageDisplay(Screen):
                 color = colors.TEXT_NEW
             else:
                 color = colors.TEXT_OLD
-            self.elements.append(TextBox(str(message), vector2D.ZERO,
+            self.elements.append(TextBox(str(message), vector2d.ZERO,
                                          self.width, 1, color,
-                                         vector2D.Vector2D(0, 0)))
+                                         vector2d.Vector2D(0, 0)))
 
 
 class CounterBar(UIElement):
     def __init__(self, counter, width, active_color,
                  inactive_color,
-                 margin=vector2D.Vector2D(1, 1),
-                 offset=vector2D.ZERO):
+                 margin=vector2d.Vector2D(1, 1),
+                 offset=vector2d.ZERO):
         super(CounterBar, self).__init__(offset, width,
                                          1, margin)
         self.counter = counter
         self.active_color = active_color
         self.inactive_color = inactive_color
 
-    def draw(self, position=vector2D.ZERO):
+    def draw(self, position=vector2d.ZERO):
         tiles_active = int(self.counter.ratio_of_full() * self.width)
         y = position.y + self.offset.y + self.margin.y
         x = position.x + self.offset.x + self.margin.x
@@ -127,12 +127,12 @@ class CounterBar(UIElement):
 
 class TextBox(UIElement):
     def __init__(self, text, offset, width, height,
-                 text_color, margin=vector2D.Vector2D(1, 1)):
+                 text_color, margin=vector2d.Vector2D(1, 1)):
         super(TextBox, self).__init__(offset, width, height, margin)
         self.text = text
         self.text_color = text_color
 
-    def draw(self, position=vector2D.ZERO):
+    def draw(self, position=vector2d.ZERO):
         position = position + self.offset
         libtcod.console_set_default_foreground(None, self.text_color)
         libtcod.console_print(None, position.x + self.margin.x,
