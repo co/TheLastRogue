@@ -62,12 +62,10 @@ class Entity(gamepiece.GamePiece):
     def get_seen_entities(self):
         self.update_fov_map()
         seen_entities = []
-        for y, row in enumerate(self.dungeon_level.tile_matrix):
-            for x, current_tile in enumerate(row):
-                entity = current_tile.get_first_entity()
-                if(not entity is None and
-                   libtcod.map_is_in_fov(self.fov_map, x, y)):
-                    seen_entities.append(entity)
+        for entity in self.dungeon_level.entities:
+            if libtcod.map_is_in_fov(self.fov_map, entity.position.x,
+                                     entity.position.y):
+                seen_entities.append(entity)
         seen_entities.remove(self)
         return seen_entities
 
