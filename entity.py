@@ -1,7 +1,7 @@
 import random
 import counter
 import gamepiece
-import messenger
+import entityeffect
 import libtcodpy as libtcod
 
 FACTION_PLAYER = 0
@@ -27,6 +27,7 @@ class Entity(gamepiece.GamePiece):
         self._sight_radius = 10
         self._strength = 3
         self._faction = FACTION_MONSTER
+        self.effect_queue = entityeffect.EffectQueue()
 
         self.piece_type = gamepiece.ENTITY_GAME_PIECE
         self.max_instances_in_single_tile = 1
@@ -76,17 +77,14 @@ class Entity(gamepiece.GamePiece):
                                 self.position.x,
                                 self.position.y,
                                 self._sight_radius, True)
-        print("post fov update: ", self.fov_map)
 
     def get_seen_entities(self):
         self.update_fov_map()
         seen_entities = []
         for entity in self.dungeon_level.entities:
-            print("class: ", self.__class__, " entity: ", entity)
             if libtcod.map_is_in_fov(self.fov_map, entity.position.x,
                                      entity.position.y):
                 seen_entities.append(entity)
-        print("fov: ", self.fov_map)
         seen_entities.remove(self)
         return seen_entities
 
@@ -112,12 +110,14 @@ class Entity(gamepiece.GamePiece):
         self.hit(entity)
         return True
 
-    def hit(self, entity):
+    def hit(self, target_entity):
         damage = random.randrange(1, self._strength)
-        message = "%s hits %s for %d damage." %\
-            (self.name, entity.name, damage)
-        messenger.messenger.message(messenger.Message(message))
-        entity.hurt(damage, self)
+        damage_effect = entityeffect.Damage(self, target_entity,
+                                            [entityeffect.PHYSICAL], damage)
+        target_entity.effect_queue.add(damage_effect)
+
+    def update_effect_queue(self):
+        self.effect_queue.update()
 
     def update_calculate_dungeon_property_map(self, value):
         for y in range(value.height):

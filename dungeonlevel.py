@@ -81,12 +81,17 @@ class DungeonLevel(object):
         return self.tile_matrix[position.y][position.x]
 
     def update(self, player):
-        self.update_entities(player)
+        self._entities_act(player)
+        self._entities_effects_update()
 
     def put_item_on_tile(self, item, position):
         self.get_tile(position).items.append(item)
 
-    def update_entities(self, player):
+    def _entities_effects_update(self):
+        for entity in self.entities:
+            entity.update_effect_queue()
+
+    def _entities_act(self, player):
         for entity in self.entities:
             if(not entity.is_dead()):
                 entity.update(self, player)
