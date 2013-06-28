@@ -23,7 +23,7 @@ class Entity(gamepiece.GamePiece):
     def __init__(self):
         super(Entity, self).__init__()
         self.hp = counter.Counter(1, 1)
-        self.fov_map = None
+        self.dungeon_map = None
         self._sight_radius = 10
         self._strength = 3
         self._faction = FACTION_MONSTER
@@ -41,9 +41,9 @@ class Entity(gamepiece.GamePiece):
     @dungeon_level.setter
     def dungeon_level(self, value):
         if(not self.dungeon_level is value and not value is None):
-            self.fov_map = libtcod.map_new(value.width, value.height)
-            self.update_calculate_dungeon_property_map(value)
-        self.__dungeon_level = value
+            self.dungeon_map = libtcod.map_new(value.width, value.height)
+            self.__dungeon_level = value
+            self.update_dungeon_map()
 
     def update(self, dungeon_level, player):
         pass
@@ -72,17 +72,10 @@ class Entity(gamepiece.GamePiece):
             old_dungeon_level.remove_entity_if_present(self)
         return remove_succeded
 
-    def update_fov_map(self):
-        libtcod.map_compute_fov(self.fov_map,
-                                self.position.x,
-                                self.position.y,
-                                self._sight_radius, True)
-
     def get_seen_entities(self):
-        self.update_fov_map()
         seen_entities = []
         for entity in self.dungeon_level.entities:
-            if libtcod.map_is_in_fov(self.fov_map, entity.position.x,
+            if libtcod.map_is_in_fov(self.dungeon_map, entity.position.x,
                                      entity.position.y):
                 seen_entities.append(entity)
         seen_entities.remove(self)
@@ -119,10 +112,14 @@ class Entity(gamepiece.GamePiece):
     def update_effect_queue(self):
         self.effect_queue.update()
 
-    def update_calculate_dungeon_property_map(self, value):
-        for y in range(value.height):
-            for x in range(value.width):
-                terrain = value.tile_matrix[y][x].terrain
-                libtcod.map_set_properties(self.fov_map, x, y,
+    def update_dungeon_map(self):
+        for y in range(self.dungeon_level.height):
+            for x in range(self.dungeon_level.width):
+                terrain = self.dungeon_level.tile_matrix[y][x].terrain
+                libtcod.map_set_properties(self.dungeon_map, x, y,
                                            terrain.is_transparent(),
                                            terrain.is_solid())
+        libtcod.map_compute_fov(self.dungeon_map,
+                                self.position.x,
+                                self.position.y,
+                                self._sight_radius, True)

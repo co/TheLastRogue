@@ -54,12 +54,12 @@ class DungeonLevel(object):
         self.entities = []
 
     def draw(self, player, camera):
-        player.update_fov_map()
+        player.update_dungeon_map()
         player_memory_of_map = player.get_memory_of_map(self)
         for y, row in enumerate(self.tile_matrix):
             for x, current_tile in enumerate(row):
                 position = vector2d.Vector2D(x, y)
-                if(libtcod.map_is_in_fov(player.fov_map, x, y)):
+                if(libtcod.map_is_in_fov(player.dungeon_map, x, y)):
                     player.update_memory_of_tile(current_tile,
                                                  position, self.depth)
                     current_tile.draw(position, True, camera)
@@ -81,11 +81,16 @@ class DungeonLevel(object):
         return self.tile_matrix[position.y][position.x]
 
     def update(self, player):
+        self._entities_dungeon_map_update()
         self._entities_act(player)
         self._entities_effects_update()
 
     def put_item_on_tile(self, item, position):
         self.get_tile(position).items.append(item)
+
+    def _entities_dungeon_map_update(self):
+        for entity in self.entities:
+            entity.update_dungeon_map()
 
     def _entities_effects_update(self):
         for entity in self.entities:

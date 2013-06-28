@@ -43,8 +43,6 @@ camera = camera.Camera(vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH,
 hero = player.Player()
 start_position = vector2d.Vector2D(20, 10)
 hero.try_move_to_position(dungeon_level, start_position)
-fov_recompute = True
-fov_radius = 4
 
 rat = monster.RatMan()
 rat_pos = vector2d.Vector2D(15, 15)

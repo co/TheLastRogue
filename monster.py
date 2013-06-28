@@ -20,12 +20,12 @@ class Monster(entity.Entity):
         return any(isinstance(entity, player.Player)
                    for entity in seen_entities)
 
-    def get_player_pos_if_player_is_seen(self):
+    def get_player_if_seen(self):
         seen_entities = self.get_seen_entities()
-        player_position_maybe = next((entity for entity in seen_entities
+        player = next((entity for entity in seen_entities
                                       if(isinstance(entity, player.Player))),
                                      None)
-        return player_position_maybe
+        return player
 
 
 class RatMan(Monster):
