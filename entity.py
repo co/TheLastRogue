@@ -1,4 +1,5 @@
 import random
+import vector2D
 import counter
 import gamepiece
 import entityeffect
@@ -23,7 +24,6 @@ class Entity(gamepiece.GamePiece):
     def __init__(self):
         super(Entity, self).__init__()
         self.hp = counter.Counter(1, 1)
-        self.dungeon_map = None
         self._sight_radius = 10
         self._strength = 3
         self._faction = FACTION_MONSTER
@@ -33,6 +33,8 @@ class Entity(gamepiece.GamePiece):
         self.max_instances_in_single_tile = 1
         self.draw_order = 0
         self.__dungeon_level = None
+        self.dungeon_map = None
+        self.path = None
 
     @property
     def dungeon_level(self):
@@ -44,6 +46,7 @@ class Entity(gamepiece.GamePiece):
             self.dungeon_map = libtcod.map_new(value.width, value.height)
             self.__dungeon_level = value
             self.update_dungeon_map()
+            self.path = libtcod.path_new_using_map(self.dungeon_map, 1.0)
 
     def update(self, dungeon_level, player):
         pass
@@ -51,12 +54,14 @@ class Entity(gamepiece.GamePiece):
     def step_random_direction(self, dungeon_level):
         direction = random.sample(list(directions.values()), 1)
         new_position = self.position + direction[0]
-        self.try_move_to_position(dungeon_level, new_position)
+        self.try_move(new_position, dungeon_level)
 
-    def try_move_to_position(self, new_dungeon_level, new_position):
+    def try_move(self, new_position, new_dungeon_level=None):
+        if(new_dungeon_level is None):
+            new_dungeon_level = self.dungeon_level
         old_dungeon_level = self.dungeon_level
         move_succeded = super(Entity, self).\
-            try_move_to_position(new_dungeon_level, new_position)
+            try_move(new_position, new_dungeon_level)
         if(move_succeded):
             if(not old_dungeon_level is None and
                (not old_dungeon_level is new_dungeon_level)):
@@ -123,3 +128,15 @@ class Entity(gamepiece.GamePiece):
                                 self.position.x,
                                 self.position.y,
                                 self._sight_radius, True)
+
+    def has_path(self):
+        if(self.path is None or libtcod.path_size(self.path) < 1):
+            return False
+        return True
+
+    def try_step_path(self):
+        if(not self.has_path()):
+            return False
+        x, y = libtcod.path_walk(self.path, True)
+        step_succeeded = self.try_move(vector2D.Vector2D(x, y))
+        return step_succeeded

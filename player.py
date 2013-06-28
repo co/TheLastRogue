@@ -55,8 +55,8 @@ class Player(entity.Entity):
             if key in move_controls:
                 dx, dy = move_controls[key]
                 new_position = position + (dx, dy)
-                move_succeded = self.try_move_to_position(dungeonlevel,
-                                                          new_position)
+                move_succeded = self.try_move(new_position,
+                                                          dungeonlevel)
                 done = move_succeded
                 if(not done):
                     done = self.try_hit(new_position)

@@ -73,11 +73,13 @@ class GamePiece(object):
             libtcod.console_set_char(0, position.x, position.y,
                                      self.get_symbol())
 
-    def try_move_to_position(self, new_dungeon_level, new_position):
+    def try_move(self, new_position, new_dungeon_level=None):
+        if(new_dungeon_level is None):
+            new_dungeon_level = self.dungeon_level
         new_tile = new_dungeon_level.get_tile(new_position)
         if(not self.__can_place_piece_on_tile(new_tile)):
             return False
-        self.__move_to_position(new_dungeon_level, new_position)
+        self.__move(new_dungeon_level, new_position)
         return True
 
     def __can_place_piece_on_tile(self, tile):
@@ -103,7 +105,7 @@ class GamePiece(object):
 
         return False
 
-    def __move_to_position(self, dungeon_level, new_position):
+    def __move(self, dungeon_level, new_position):
         self.__try_remove_from_dungeon()
         new_tile = dungeon_level.get_tile(new_position)
         new_tile.game_pieces[self.piece_type].append(self)
