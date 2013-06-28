@@ -47,7 +47,7 @@ class Player(entity.Entity):
     def get_symbol():
         return ord('@')
 
-    def update(self, dungeonlevel, _):
+    def update(self, _):
         done = False
         while not done:
             key = wait_for_keypress()
@@ -55,8 +55,7 @@ class Player(entity.Entity):
             if key in move_controls:
                 dx, dy = move_controls[key]
                 new_position = position + (dx, dy)
-                move_succeded = self.try_move(new_position,
-                                                          dungeonlevel)
+                move_succeded = self.try_move(new_position)
                 done = move_succeded
                 if(not done):
                     done = self.try_hit(new_position)

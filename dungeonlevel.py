@@ -99,7 +99,7 @@ class DungeonLevel(object):
     def _entities_act(self, player):
         for entity in self.entities:
             if(not entity.is_dead()):
-                entity.update(self, player)
+                entity.update(player)
 
     def remove_dead_monsters(self):
         for entity in self.entities:

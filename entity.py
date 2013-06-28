@@ -1,5 +1,5 @@
 import random
-import vector2D
+import vector2d
 import counter
 import gamepiece
 import entityeffect
@@ -32,9 +32,9 @@ class Entity(gamepiece.GamePiece):
         self.piece_type = gamepiece.ENTITY_GAME_PIECE
         self.max_instances_in_single_tile = 1
         self.draw_order = 0
-        self.__dungeon_level = None
         self.dungeon_map = None
         self.path = None
+        self.__dungeon_level = None
 
     @property
     def dungeon_level(self):
@@ -42,19 +42,20 @@ class Entity(gamepiece.GamePiece):
 
     @dungeon_level.setter
     def dungeon_level(self, value):
-        if(not self.dungeon_level is value and not value is None):
-            self.dungeon_map = libtcod.map_new(value.width, value.height)
+        if((not self.dungeon_level is value) and (not value is None)):
             self.__dungeon_level = value
             self.update_dungeon_map()
+            self.dungeon_map = libtcod.map_new(self.dungeon_level.width,
+                                               self.dungeon_level.height)
             self.path = libtcod.path_new_using_map(self.dungeon_map, 1.0)
 
-    def update(self, dungeon_level, player):
+    def update(self, player):
         pass
 
-    def step_random_direction(self, dungeon_level):
+    def step_random_direction(self):
         direction = random.sample(list(directions.values()), 1)
         new_position = self.position + direction[0]
-        self.try_move(new_position, dungeon_level)
+        self.try_move(new_position, self.dungeon_level)
 
     def try_move(self, new_position, new_dungeon_level=None):
         if(new_dungeon_level is None):
@@ -123,20 +124,30 @@ class Entity(gamepiece.GamePiece):
                 terrain = self.dungeon_level.tile_matrix[y][x].terrain
                 libtcod.map_set_properties(self.dungeon_map, x, y,
                                            terrain.is_transparent(),
-                                           terrain.is_solid())
+                                           not terrain.is_solid())
         libtcod.map_compute_fov(self.dungeon_map,
                                 self.position.x,
                                 self.position.y,
                                 self._sight_radius, True)
 
     def has_path(self):
-        if(self.path is None or libtcod.path_size(self.path) < 1):
+        if(self.path is None or libtcod.path_is_empty(self.path)):
             return False
         return True
+
+    def print_walkable_map(self):
+        for y in range(libtcod.map_get_height(self.dungeon_map)):
+            line = ""
+            for x in range(libtcod.map_get_width(self.dungeon_map)):
+                if(libtcod.map_is_walkable(self.dungeon_map, x, y)):
+                    line += " "
+                else:
+                    line += "#"
+            print(line)
 
     def try_step_path(self):
         if(not self.has_path()):
             return False
         x, y = libtcod.path_walk(self.path, True)
-        step_succeeded = self.try_move(vector2D.Vector2D(x, y))
+        step_succeeded = self.try_move(vector2d.Vector2D(x, y))
         return step_succeeded
