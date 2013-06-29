@@ -105,7 +105,6 @@ def draw(camera):
 
 def update():
     dungeon_level.update(hero)
-    dungeon_level.remove_dead_monsters()
     monster_status_bar.update(hero)
     message_bar.update()
 

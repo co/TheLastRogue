@@ -71,6 +71,9 @@ class DungeonLevel(object):
         if(not any(new_entity is entity for entity in self.entities)):
             self.entities.append(new_entity)
 
+    def put_item_on_tile(self, item, position):
+        self.get_tile(position).items.append(item)
+
     def remove_entity_if_present(self, entity_to_remove):
         if(any(entity_to_remove is entity for entity in self.entities)):
             self.entities.remove(entity_to_remove)
@@ -84,9 +87,7 @@ class DungeonLevel(object):
         self._entities_dungeon_map_update()
         self._entities_act(player)
         self._entities_effects_update()
-
-    def put_item_on_tile(self, item, position):
-        self.get_tile(position).items.append(item)
+        self._remove_dead_monsters()
 
     def _entities_dungeon_map_update(self):
         for entity in self.entities:
@@ -101,7 +102,7 @@ class DungeonLevel(object):
             if(not entity.is_dead()):
                 entity.update(player)
 
-    def remove_dead_monsters(self):
+    def _remove_dead_monsters(self):
         for entity in self.entities:
             if(entity.is_dead()):
                 entity.kill()

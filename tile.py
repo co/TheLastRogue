@@ -29,6 +29,11 @@ class Tile(object):
             return None
         return self.game_pieces[gamepiece.ENTITY_GAME_PIECE][0]
 
+    def has_entity(self):
+        if(len(self.game_pieces[gamepiece.ENTITY_GAME_PIECE]) < 1):
+            return False
+        return True
+
     def copy(self):
         copy = Tile(self.terrain)
         copy.game_pieces = dict()

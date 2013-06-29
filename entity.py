@@ -84,8 +84,7 @@ class Entity(gamepiece.GamePiece):
             if libtcod.map_is_in_fov(self.dungeon_map, entity.position.x,
                                      entity.position.y):
                 seen_entities.append(entity)
-        seen_entities.remove(self)
-        return seen_entities
+        return [entity for entity in seen_entities if not entity is self]
 
     def hurt(self, damage, entity=None):
         self.hp.decrease(damage)

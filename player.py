@@ -1,4 +1,5 @@
 import counter
+import monsterspawner
 import colors
 import dungeonlevel
 import entity
@@ -71,7 +72,8 @@ class Player(entity.Entity):
                 done = True
             elif key == 'o':
                 self.heal(1)
-                done = True
+            elif key == 'm':
+                monsterspawner.spawn_rat_man(self.dungeon_level)
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)
