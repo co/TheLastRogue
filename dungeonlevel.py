@@ -52,9 +52,11 @@ class DungeonLevel(object):
         self.tile_matrix = tile_matrix
         self.depth = depth
         self.entities = []
+        self.dungeon_map = libtcod.map_new(self.width, self.height)
+        self._update_dungeon_map()
 
     def draw(self, player, camera):
-        player.update_dungeon_map()
+        player.update_fov()
         player_memory_of_map = player.get_memory_of_map(self)
         for y, row in enumerate(self.tile_matrix):
             for x, current_tile in enumerate(row):
@@ -84,14 +86,35 @@ class DungeonLevel(object):
         return self.tile_matrix[position.y][position.x]
 
     def update(self, player):
-        self._entities_dungeon_map_update()
+        self._entities_calculate_fov()
         self._entities_act(player)
         self._entities_effects_update()
         self._remove_dead_monsters()
 
-    def _entities_dungeon_map_update(self):
+    def _entities_calculate_fov(self):
+        self._update_dungeon_map()
         for entity in self.entities:
-            entity.update_dungeon_map()
+            libtcod.map_copy(self.dungeon_map, entity.dungeon_map)
+            entity.update_fov()
+
+    def _update_dungeon_map(self):
+        for y in range(self.height):
+            for x in range(self.width):
+                terrain = self.tile_matrix[y][x].terrain
+                libtcod.map_set_properties(self.dungeon_map, x, y,
+                                           terrain.is_transparent(),
+                                           not terrain.is_solid())
+
+    def print_is_transparent_map(self):
+        print libtcod.map_get_height(self.dungeon_map)
+        for y in range(libtcod.map_get_height(self.dungeon_map)):
+            line = ""
+            for x in range(libtcod.map_get_width(self.dungeon_map)):
+                if(libtcod.map_is_transparent(self.dungeon_map, x, y)):
+                    line += " "
+                else:
+                    line += "#"
+            print(line)
 
     def _entities_effects_update(self):
         for entity in self.entities:

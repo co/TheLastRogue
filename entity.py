@@ -32,7 +32,6 @@ class Entity(gamepiece.GamePiece):
         self.piece_type = gamepiece.ENTITY_GAME_PIECE
         self.max_instances_in_single_tile = 1
         self.draw_order = 0
-        self.dungeon_map = None
         self.path = None
         self.__dungeon_level = None
 
@@ -44,9 +43,8 @@ class Entity(gamepiece.GamePiece):
     def dungeon_level(self, value):
         if((not self.dungeon_level is value) and (not value is None)):
             self.__dungeon_level = value
-            self.update_dungeon_map()
-            self.dungeon_map = libtcod.map_new(self.dungeon_level.width,
-                                               self.dungeon_level.height)
+            self.dungeon_map = libtcod.map_new(value.width, value.height)
+            libtcod.map_copy(value.dungeon_map, self.dungeon_map)
             self.path = libtcod.path_new_using_map(self.dungeon_map, 1.0)
 
     def update(self, player):
@@ -117,13 +115,7 @@ class Entity(gamepiece.GamePiece):
     def update_effect_queue(self):
         self.effect_queue.update()
 
-    def update_dungeon_map(self):
-        for y in range(self.dungeon_level.height):
-            for x in range(self.dungeon_level.width):
-                terrain = self.dungeon_level.tile_matrix[y][x].terrain
-                libtcod.map_set_properties(self.dungeon_map, x, y,
-                                           terrain.is_transparent(),
-                                           not terrain.is_solid())
+    def update_fov(self):
         libtcod.map_compute_fov(self.dungeon_map,
                                 self.position.x,
                                 self.position.y,
@@ -139,6 +131,27 @@ class Entity(gamepiece.GamePiece):
             line = ""
             for x in range(libtcod.map_get_width(self.dungeon_map)):
                 if(libtcod.map_is_walkable(self.dungeon_map, x, y)):
+                    line += " "
+                else:
+                    line += "#"
+            print(line)
+
+    def print_is_transparent_map(self):
+        for y in range(libtcod.map_get_height(self.dungeon_map)):
+            line = ""
+            for x in range(libtcod.map_get_width(self.dungeon_map)):
+                if(libtcod.map_is_transparent(self.dungeon_map, x, y)):
+                    line += " "
+                else:
+                    line += "#"
+            print(line)
+
+    def print_visible_map(self):
+        for y in range(libtcod.map_get_height(self.dungeon_map)):
+            print y
+            line = ""
+            for x in range(libtcod.map_get_width(self.dungeon_map)):
+                if(libtcod.map_is_in_fov(self.dungeon_map, x, y)):
                     line += " "
                 else:
                     line += "#"
