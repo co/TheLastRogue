@@ -88,6 +88,7 @@ class DungeonLevel(object):
     def update(self, player):
         self._entities_calculate_fov()
         self._entities_act(player)
+        self._entities_clear_status()
         self._entities_effects_update()
         self._remove_dead_monsters()
 
@@ -124,6 +125,10 @@ class DungeonLevel(object):
         for entity in self.entities:
             if(not entity.is_dead()):
                 entity.update(player)
+
+    def _entities_clear_status(self):
+        for entity in self.entities:
+            entity.clear_all_status()
 
     def _remove_dead_monsters(self):
         for entity in self.entities:

@@ -3,6 +3,8 @@ import monsterspawner
 import colors
 import dungeonlevel
 import entity
+import entityeffect
+import numpy
 import libtcodpy as libtcod
 
 
@@ -40,8 +42,9 @@ class Player(entity.Entity):
         self._faction = entity.FACTION_PLAYER
         self.name = "CO"
 
-    @staticmethod
-    def get_color_fg():
+    def get_color_fg(self):
+        if(self.has_status(entity.StatusFlags.INVISIBILE)):
+            return colors.DB_VIKING
         return colors.DB_WHITE
 
     @staticmethod
@@ -72,6 +75,13 @@ class Player(entity.Entity):
                 done = True
             elif key == 'o':
                 self.heal(1)
+            elif key == 'i':
+                invisibile_flag = entity.StatusFlags.INVISIBILE
+                effect = entityeffect.StatusFlagAdder(self, self,
+                                                      invisibile_flag,
+                                                      time_to_live=numpy.inf)
+                self.add_entity_effect(effect)
+
             elif key == 'm':
                 monsterspawner.spawn_rat_man(self.dungeon_level)
 

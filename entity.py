@@ -20,6 +20,13 @@ directions = {
 }
 
 
+class StatusFlags(object):
+    INVISIBILE = 0
+    SEE_INVISIBILITY = 1
+    FLYING = 2
+    HAS_MIND = 3
+
+
 class Entity(gamepiece.GamePiece):
     def __init__(self):
         super(Entity, self).__init__()
@@ -28,6 +35,7 @@ class Entity(gamepiece.GamePiece):
         self._strength = 3
         self._faction = FACTION_MONSTER
         self.effect_queue = entityeffect.EffectQueue()
+        self._status_flags = set()
 
         self.piece_type = gamepiece.ENTITY_GAME_PIECE
         self.max_instances_in_single_tile = 1
@@ -108,9 +116,13 @@ class Entity(gamepiece.GamePiece):
 
     def hit(self, target_entity):
         damage = random.randrange(1, self._strength)
+        damage_types = [entityeffect.DamageTypes.PHYSICAL]
         damage_effect = entityeffect.Damage(self, target_entity,
-                                            [entityeffect.PHYSICAL], damage)
-        target_entity.effect_queue.add(damage_effect)
+                                            damage_types, damage)
+        target_entity.add_entity_effect(damage_effect)
+
+    def add_entity_effect(self, effect):
+        self.effect_queue.add(effect)
 
     def update_effect_queue(self):
         self.effect_queue.update()
@@ -163,3 +175,12 @@ class Entity(gamepiece.GamePiece):
         x, y = libtcod.path_walk(self.path, True)
         step_succeeded = self.try_move(vector2d.Vector2D(x, y))
         return step_succeeded
+
+    def has_status(self, status):
+        return status in self._status_flags
+
+    def add_status(self, status):
+        return self._status_flags.add(status)
+
+    def clear_all_status(self):
+        self._status_flags = set()
