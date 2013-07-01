@@ -94,7 +94,6 @@ def draw(camera):
     status_bar.draw()
     message_bar.draw()
     dungeon_level.draw(hero, camera)
-    hero.draw(True, camera)
     monster_status_bar.draw()
     libtcod.console_flush()
 

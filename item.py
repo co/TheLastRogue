@@ -8,7 +8,7 @@ class Item(gamepiece.GamePiece):
 
         self.piece_type = gamepiece.ITEM_GAME_PIECE
         self.max_instances_in_single_tile = 1
-        self.draw_order = 1
+        self.draw_order = 0
         pass
 
     @staticmethod

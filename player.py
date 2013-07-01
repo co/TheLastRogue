@@ -77,13 +77,22 @@ class Player(entity.Entity):
                 self.heal(1)
             elif key == 'i':
                 invisibile_flag = entity.StatusFlags.INVISIBILE
-                effect = entityeffect.StatusFlagAdder(self, self,
-                                                      invisibile_flag,
-                                                      time_to_live=numpy.inf)
-                self.add_entity_effect(effect)
-
+                if(not self.has_status(invisibile_flag)):
+                    effect = entityeffect.\
+                        StatusAdder(self, self,
+                                    invisibile_flag,
+                                    time_to_live=numpy.inf)
+                    self.add_entity_effect(effect)
+                else:
+                    invisible_status = entity.StatusFlags.INVISIBILE
+                    effect = entityeffect.StatusRemover(self, self,
+                                                        invisible_status,
+                                                        time_to_live=1)
+                    self.add_entity_effect(effect)
+                done = True
             elif key == 'm':
                 monsterspawner.spawn_rat_man(self.dungeon_level)
+                done = True
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)

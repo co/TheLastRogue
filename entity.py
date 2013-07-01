@@ -31,7 +31,7 @@ class Entity(gamepiece.GamePiece):
     def __init__(self):
         super(Entity, self).__init__()
         self.hp = counter.Counter(1, 1)
-        self._sight_radius = 10
+        self._sight_radius = 8
         self._strength = 3
         self._faction = FACTION_MONSTER
         self.effect_queue = entityeffect.EffectQueue()
@@ -39,7 +39,7 @@ class Entity(gamepiece.GamePiece):
 
         self.piece_type = gamepiece.ENTITY_GAME_PIECE
         self.max_instances_in_single_tile = 1
-        self.draw_order = 0
+        self.draw_order = 1
         self.path = None
         self.__dungeon_level = None
 
@@ -116,7 +116,7 @@ class Entity(gamepiece.GamePiece):
 
     def hit(self, target_entity):
         damage = random.randrange(1, self._strength)
-        damage_types = [entityeffect.DamageTypes.PHYSICAL]
+        damage_types = entityeffect.DamageTypes.PHYSICAL
         damage_effect = entityeffect.Damage(self, target_entity,
                                             damage_types, damage)
         target_entity.add_entity_effect(damage_effect)
