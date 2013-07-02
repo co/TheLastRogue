@@ -30,10 +30,10 @@ class UIElement(object):
         return self.width + 2 * self.margin.x
 
 
-class Screen(UIElement):
+class StackPanel(UIElement):
     def __init__(self, offset, width, height, color_bg,
                  margin=vector2d.ZERO):
-        super(Screen, self).__init__(offset, width, height, margin)
+        super(StackPanel, self).__init__(offset, width, height, margin)
         self.color_bg = color_bg
 
     def draw(self, position=vector2d.ZERO):
@@ -50,7 +50,7 @@ class Screen(UIElement):
             element_position = element_position + (0, element.total_height)
 
 
-class EntityStatusList(Screen):
+class EntityStatusList(StackPanel):
     def __init__(self, offset, width, height, color_bg):
         super(EntityStatusList, self).__init__(offset, width,
                                                height, color_bg)
@@ -63,7 +63,7 @@ class EntityStatusList(Screen):
                          for seen_entity in seen_entities]
 
 
-class EntityStatusGUIElement(Screen):
+class EntityStatusGUIElement(StackPanel):
     def __init__(self, entity, offset, width, height):
         super(EntityStatusGUIElement, self).__init__(offset, width,
                                                      height,
@@ -82,7 +82,7 @@ class EntityStatusGUIElement(Screen):
         self.elements.append(monster_health_bar)
 
 
-class MessageDisplay(Screen):
+class MessageDisplay(StackPanel):
     def __init__(self, offset, width, height, color_bg):
         super(MessageDisplay, self).__init__(offset, width, height, color_bg)
 

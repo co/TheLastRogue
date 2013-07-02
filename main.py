@@ -19,7 +19,7 @@ import player
 import monster
 import vector2d
 import item
-import screen
+import gui
 import camera
 import turn
 import settings
@@ -57,28 +57,29 @@ item_position = vector2d.Vector2D(20, 20)
 
 gun.try_move(item_position, dungeon_level)
 
-status_bar = screen.Screen(vector2d.Vector2D(settings.WINDOW_WIDTH -
-                                             constants.STATUS_BAR_WIDTH, 0),
-                           constants.STATUS_BAR_WIDTH,
-                           constants.STATUS_BAR_HEIGHT,
-                           colors.DB_BLACK)
-
-monster_status_bar =\
-    screen.EntityStatusList(vector2d.Vector2D(0, 0),
-                            constants.MONSTER_STATUS_BAR_WIDTH,
-                            constants.MONSTER_STATUS_BAR_HEIGHT,
+status_bar = gui.StackPanel(vector2d.Vector2D(settings.WINDOW_WIDTH -
+                                              constants.STATUS_BAR_WIDTH,
+                                              0),
+                            constants.STATUS_BAR_WIDTH,
+                            constants.STATUS_BAR_HEIGHT,
                             colors.DB_BLACK)
 
-hp_bar = screen.CounterBar(hero.hp, constants.STATUS_BAR_WIDTH - 2,
-                           colors.DB_BROWN, colors.DB_LOULOU)
-text_box = screen.TextBox("CO\nThe Brave", vector2d.Vector2D(0, 0),
-                          constants.STATUS_BAR_WIDTH - 2,
-                          1, colors.DB_PANCHO)
+monster_status_bar =\
+    gui.EntityStatusList(vector2d.Vector2D(0, 0),
+                         constants.MONSTER_STATUS_BAR_WIDTH,
+                         constants.MONSTER_STATUS_BAR_HEIGHT,
+                         colors.DB_BLACK)
+
+hp_bar = gui.CounterBar(hero.hp, constants.STATUS_BAR_WIDTH - 2,
+                        colors.DB_BROWN, colors.DB_LOULOU)
+text_box = gui.TextBox("CO\nThe Brave", vector2d.Vector2D(0, 0),
+                       constants.STATUS_BAR_WIDTH - 2,
+                       1, colors.DB_PANCHO)
 
 status_bar.elements.append(text_box)
 status_bar.elements.append(hp_bar)
 
-message_bar = screen.\
+message_bar = gui.\
     MessageDisplay(vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH,
                                      constants.LEVEL_HEIGHT),
                    constants.MESSAGES_BAR_WIDTH,
