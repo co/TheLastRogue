@@ -4,36 +4,59 @@ import vector2d
 import libtcodpy as libtcod
 
 
+def get_empty_tile_matrix(width, height):
+    return [[tile.Tile()
+             for x in range(width)]
+            for y in range(height)]
+
+
 def unknown_level_map(width, height, depth):
-    tile_matrix = [[tile.Tile(terrain.Unknown())
-                    for x in range(width)]
-                   for y in range(height)]
-    return DungeonLevel(tile_matrix, depth)
+    tile_matrix = get_empty_tile_matrix(width, height)
+    dungeon_level = DungeonLevel(tile_matrix, depth)
+    for x in range(width):
+        for y in range(height):
+            unknown_terrain = terrain.Unknown()
+            unknown_terrain.replace_move(vector2d.Vector2D(x, y),
+                                         dungeon_level)
+    return dungeon_level
 
 
-def test_dungeon_level():
+def dungeon_level_from_file(file_name):
+    terrain_matrix = terrain_matrix_from_file(file_name)
+    dungeon_level = DungeonLevel(terrain_matrix, 1)
+    set_terrain_from_file(dungeon_level, file_name)
+    return dungeon_level
+
+
+def terrain_matrix_from_file(file_name):
     dungeon = read_file("test.level")
     width = len(dungeon[0])
     height = len(dungeon)
 
-    depth = 0
-    tile_matrix = [[char_to_tile(dungeon[y][x])
-                    for x in range(width)]
-                   for y in range(height)]
-    return DungeonLevel(tile_matrix, depth)
+    terrain_matrix = get_empty_tile_matrix(width, height)
+    return terrain_matrix
 
 
-def char_to_tile(c):
+def set_terrain_from_file(dungeon_level, file_name):
+    dungeon = read_file("test.level")
+
+    for x in range(dungeon_level.width):
+        for y in range(dungeon_level.height):
+            terrain = char_to_terrain(dungeon[y][x])
+            terrain.replace_move(vector2d.Vector2D(x, y), dungeon_level)
+
+
+def char_to_terrain(c):
     if(c == '#'):
-        return tile.Tile(terrain.Wall())
+        return terrain.Wall()
     elif(c == '+'):
-        return tile.Tile(terrain.Door(False))
+        return terrain.Door(False)
     elif(c == '~'):
-        return tile.Tile(terrain.Water())
+        return terrain.Water()
     elif(c == 'g'):
-        return tile.Tile(terrain.GlassWall())
+        return terrain.GlassWall()
     else:
-        return tile.Tile(terrain.Floor())
+        return terrain.Floor()
 
 
 def read_file(file_name):
@@ -53,7 +76,6 @@ class DungeonLevel(object):
         self.depth = depth
         self.entities = []
         self.dungeon_map = libtcod.map_new(self.width, self.height)
-        self._update_dungeon_map()
 
     def draw(self, player, camera):
         player.update_fov()
@@ -101,7 +123,7 @@ class DungeonLevel(object):
     def _update_dungeon_map(self):
         for y in range(self.height):
             for x in range(self.width):
-                terrain = self.tile_matrix[y][x].terrain
+                terrain = self.tile_matrix[y][x].get_terrain()
                 libtcod.map_set_properties(self.dungeon_map, x, y,
                                            terrain.is_transparent(),
                                            not terrain.is_solid())

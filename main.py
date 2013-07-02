@@ -35,7 +35,7 @@ import logging
 logging.basicConfig(filename="debug.log", level=logging.DEBUG, filemode="w")
 init.init_libtcod()
 
-dungeon_level = dungeonlevel.test_dungeon_level()
+dungeon_level = dungeonlevel.dungeon_level_from_file("test.level")
 camera = camera.Camera(vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH,
                                          0),
                        vector2d.Vector2D(0, 0))

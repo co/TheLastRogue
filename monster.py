@@ -49,16 +49,10 @@ class RatMan(Monster):
     def __init__(self):
         super(RatMan, self).__init__()
         self.hp = counter.Counter(10, 10)
-        self.name = "Rat-Man"
+        self._name = "Rat-Man"
         self.death_message = "The Rat-Man is beaten to a pulp."
-
-    @staticmethod
-    def get_symbol():
-        return 'r'
-
-    @staticmethod
-    def get_color_fg():
-        return colors.DB_TAHITI_GOLD
+        self._color_fg = colors.DB_TAHITI_GOLD
+        self._symbol = 'r'
 
     def update(self, player):
         self.step_looking_for_player()
@@ -71,17 +65,11 @@ class StoneStatue(Monster):
     def __init__(self):
         super(StoneStatue, self).__init__()
         self.hp = counter.Counter(30, 30)
-        self.name = "stone statue"
+        self._name = "stone statue"
         self.death_message = "The stone statue shatters pieces, "\
             "sharp rocks covers the ground."
-
-    @staticmethod
-    def get_symbol():
-        return '&'
-
-    @staticmethod
-    def get_color_fg():
-        return colors.DB_TOPAZ
+        self._color_fg = colors.DB_TOPAZ
+        self._symbol = '&'
 
     def update(self, player):
         if(rng.coin_flip() and self.can_see_player()):

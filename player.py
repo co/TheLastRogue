@@ -40,15 +40,16 @@ class Player(entity.Entity):
         self.hp = counter.Counter(10, 10)
         self._memory_map = []
         self._faction = entity.FACTION_PLAYER
-        self.name = "CO"
+        self._name = "CO"
 
-    def get_color_fg(self):
+    @property
+    def color_fg(self):
         if(self.has_status(entity.StatusFlags.INVISIBILE)):
             return colors.DB_VIKING
         return colors.DB_WHITE
 
-    @staticmethod
-    def get_symbol():
+    @property
+    def symbol(self):
         return ord('@')
 
     def update(self, _):

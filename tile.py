@@ -2,16 +2,15 @@ import gamepiece
 
 
 class Tile(object):
-    def __init__(self, terrain):
-        self.terrain = terrain
+    def __init__(self):
         self.game_pieces = {
             gamepiece.ENTITY_GAME_PIECE: [],
             gamepiece.ITEM_GAME_PIECE: [],
-            gamepiece.DECORATION_GAME_PIECE: []
+            gamepiece.DECORATION_GAME_PIECE: [],
+            gamepiece.TERRAIN_GAME_PIECE: []
         }
 
     def draw(self, position, is_seen, camera):
-        self.terrain.draw(position + camera.offset, is_seen)
         for piece_list in self.__pieces_lists_sorted_on_draw_order():
             for piece in piece_list:
                 piece.draw(is_seen, camera)
@@ -29,13 +28,18 @@ class Tile(object):
             return None
         return self.game_pieces[gamepiece.ENTITY_GAME_PIECE][0]
 
+    def get_terrain(self):
+        if(len(self.game_pieces[gamepiece.TERRAIN_GAME_PIECE]) < 1):
+            return None
+        return self.game_pieces[gamepiece.TERRAIN_GAME_PIECE][0]
+
     def has_entity(self):
         if(len(self.game_pieces[gamepiece.ENTITY_GAME_PIECE]) < 1):
             return False
         return True
 
     def copy(self):
-        copy = Tile(self.terrain)
+        copy = Tile()
         copy.game_pieces = dict()
         for piece_type, piece_list in self.game_pieces.items():
             copy.game_pieces[piece_type] =\

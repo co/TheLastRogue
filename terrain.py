@@ -1,63 +1,32 @@
 import colors
+import gamepiece
 import libtcodpy as libtcod
 
 
-class Terrain(object):
+class Terrain(gamepiece.GamePiece):
 
     def __init__(self):
-        pass
-
-    @staticmethod
-    def get_color_bg():
-        return colors.UNINITIALIZED_BG
-
-    @staticmethod
-    def get_color_fg():
-        return colors.UNINITIALIZED_FG
+        super(Terrain, self).__init__()
+        self.draw_order = 0
+        self.max_instances_in_single_tile = 1
+        self.piece_type = gamepiece.TERRAIN_GAME_PIECE
 
     @staticmethod
     def is_solid():
         return False
 
     @staticmethod
-    def get_symbol():
-        return '?'
-
-    @staticmethod
     def is_transparent():
         return True
-
-    def draw(self, position, is_seen):
-        if(is_seen):
-            fg_color = self.get_color_fg()
-            bg_color = self.get_color_bg()
-        else:
-            fg_color = colors.UNSEEN_FG
-            bg_color = colors.UNSEEN_BG
-
-        x = position[0]
-        y = position[1]
-        libtcod.console_set_char_foreground(0, x, y, fg_color)
-        libtcod.console_set_char_background(0, x, y, bg_color)
-        libtcod.console_set_char(0, x, y, self.get_symbol())
 
 
 class Wall(Terrain):
 
     def __init__(self):
         super(Wall, self).__init__()
-
-    @staticmethod
-    def get_color_bg():
-        return colors.WALL_BG
-
-    @staticmethod
-    def get_color_fg():
-        return colors.WALL_FG
-
-    @staticmethod
-    def get_symbol():
-        return '#'
+        self._color_fg = colors.WALL_FG
+        self._color_bg = colors.WALL_BG
+        self._symbol = '#'
 
     @staticmethod
     def is_solid():
@@ -71,36 +40,18 @@ class Floor(Terrain):
 
     def __init__(self):
         super(Floor, self).__init__()
-
-    @staticmethod
-    def get_color_bg():
-        return colors.DB_LOULOU
-
-    @staticmethod
-    def get_color_fg():
-        return colors.DB_STINGER
-
-    @staticmethod
-    def get_symbol():
-        return '.'
+        self._color_fg = colors.DB_STINGER
+        self._color_bg = colors.DB_LOULOU
+        self._symbol = '.'
 
 
 class Water(Terrain):
 
     def __init__(self):
         super(Water, self).__init__()
-
-    @staticmethod
-    def get_color_bg():
-        return colors.DB_VENICE_BLUE
-
-    @staticmethod
-    def get_color_fg():
-        return colors.DB_CORNFLOWER
-
-    @staticmethod
-    def get_symbol():
-        return '~'
+        self._color_fg = colors.DB_CORNFLOWER
+        self._color_bg = colors.DB_VENICE_BLUE
+        self._symbol = '~'
 
 
 class Door(Terrain):
@@ -108,19 +59,14 @@ class Door(Terrain):
     def __init__(self, is_open):
         super(Door, self).__init__()
         self.is_open = is_open
-
-    @staticmethod
-    def get_color_bg():
-        return colors.DB_OILED_CEDAR
-
-    @staticmethod
-    def get_color_fg():
-        return colors.DB_ROPE
+        self._color_fg = colors.DB_ROPE
+        self._color_bg = colors.DB_OILED_CEDAR
 
     def is_solid(self):
         return not self.is_open
 
-    def get_symbol(self):
+    @property
+    def symbol(self):
         if(self.is_open):
             return "'"
         else:
@@ -138,42 +84,38 @@ class Door(Terrain):
     def open(self):
         self.is_open = True
 
+    # TODO: make less ugly solution
+    def piece_copy(self, copy=None):
+        if(copy is None):
+            copy = Door(self.is_open)
+        copy.__position = self.position
+        copy.dungeon_level = self.dungeon_level
+        copy.piece_type = self.piece_type
+        copy.max_instances_in_single_tile = self.max_instances_in_single_tile
+        copy.draw_order = self.draw_order
+        return copy
+
 
 class GlassWall(Wall):
 
     def __init__(self):
         super(GlassWall, self).__init__()
-
-    @staticmethod
-    def get_color_bg():
-        return colors.DB_HEATHER
-
-    @staticmethod
-    def get_color_fg():
-        return colors.DB_LIGHT_STEEL_BLUE
+        self._color_fg = colors.DB_LIGHT_STEEL_BLUE
+        self._color_bg = colors.DB_HEATHER
+        self._symbol = libtcod.CHAR_DIAMOND
 
     @staticmethod
     def is_transparent():
         return True
-
-    @staticmethod
-    def get_symbol():
-        return libtcod.CHAR_DIAMOND
 
 
 class Unknown(Terrain):
 
     def __init__(self):
         super(Unknown, self).__init__()
+        self._color_fg = colors.DB_BLACK
+        self._color_bg = colors.DB_BLACK
 
-    @staticmethod
-    def get_color_bg():
-        return colors.BLACK
-
-    @staticmethod
-    def get_color_fg():
-        return colors.BLACK
-
-    @staticmethod
-    def get_symbol():
+    @property
+    def symbol(self):
         return ' '
