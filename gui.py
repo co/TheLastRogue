@@ -88,7 +88,6 @@ class MessageDisplay(StackPanel):
         super(MessageDisplay, self).__init__(offset, width, height, color_bg)
 
     def update(self):
-        messenger.messenger.push_new_messages()
         messages = messenger.messenger.tail(self.height)
         row_height = 1
         self.elements = []

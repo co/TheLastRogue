@@ -1,4 +1,3 @@
-import collections
 import turn
 
 
@@ -6,24 +5,20 @@ class Messenger(object):
 
     def __init__(self):
         self.__messages = []
-        self.__new_messages = []
 
     def message(self, new_message):
         new_message = Message(new_message)
-        old_message = next((message for message in self.__new_messages
-                           if message.message == new_message.message), None)
+        current_turn = turn.current_turn
+        old_message = next((message for message in self.__messages
+                           if message.message == new_message.message
+                           and message.turn_created == current_turn), None)
         if(old_message is None):
-            self.__new_messages.append(new_message)
+            self.__messages.append(new_message)
         else:
             old_message.increase()
 
     def tail(self, length):
         return self.__messages[-length:]
-
-    def push_new_messages(self):
-        self.__messages.extend(self.__new_messages)
-        self.__new_messages_counter = collections.OrderedDict()
-        self.__new_messages = []
 
 
 class Message(object):
