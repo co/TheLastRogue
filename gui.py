@@ -23,11 +23,11 @@ class UIElement(object):
 
     @property
     def total_height(self):
-        return self.height + 2 * self.margin.y
+        return self.height + self.margin.y * 2
 
     @property
     def total_width(self):
-        return self.width + 2 * self.margin.x
+        return self.width + self.margin.x * 2
 
 
 class StackPanel(UIElement):
@@ -36,8 +36,8 @@ class StackPanel(UIElement):
         super(StackPanel, self).__init__(offset, width, height, margin)
         self.color_bg = color_bg
 
-    def draw(self, position=vector2d.ZERO):
-        position = position + self.offset
+    def draw(self, offset=vector2d.ZERO):
+        position = offset + self.offset
         for y in range(position.y, self.height):
             for x in range(position.x, self.width + position.x):
                 libtcod.console_set_char_background(0, x, y,
@@ -57,17 +57,17 @@ class EntityStatusList(StackPanel):
 
     def update(self, entity):
         seen_entities = entity.get_seen_entities()
-        self.elements = [EntityStatusGUIElement(seen_entity,
-                                                vector2d.ZERO,
-                                                self.width, 3)
+        self.elements = [EntityStatus(seen_entity,
+                                      vector2d.ZERO,
+                                      self.width, 3)
                          for seen_entity in seen_entities]
 
 
-class EntityStatusGUIElement(StackPanel):
+class EntityStatus(StackPanel):
     def __init__(self, entity, offset, width, height):
-        super(EntityStatusGUIElement, self).__init__(offset, width,
-                                                     height,
-                                                     colors.INTERFACE_BG)
+        super(EntityStatus, self).__init__(offset, width,
+                                           height,
+                                           colors.INTERFACE_BG)
         horizontal_margin = 0
         vertical_margin = 0
         text_height = 1
@@ -76,7 +76,8 @@ class EntityStatusGUIElement(StackPanel):
                                         vector2d.Vector2D(horizontal_margin,
                                                           vertical_margin))
         monster_health_bar = CounterBar(entity.hp, self.width - 2,
-                                        colors.DB_BROWN, colors.DB_LOULOU)
+                                        colors.DB_BROWN, colors.DB_LOULOU,
+                                        margin=vector2d.Vector2D(1, 0))
 
         self.elements.append(monster_name_text_box)
         self.elements.append(monster_health_bar)
@@ -89,6 +90,7 @@ class MessageDisplay(StackPanel):
     def update(self):
         messenger.messenger.push_new_messages()
         messages = messenger.messenger.tail(self.height)
+        row_height = 1
         self.elements = []
         for message in messages:
             if(message.turn_created == turn.current_turn):
@@ -97,7 +99,7 @@ class MessageDisplay(StackPanel):
                 color = colors.TEXT_OLD
             self.elements.append(TextBox(str(message).ljust(self.width),
                                          vector2d.ZERO,
-                                         self.width, 1, color,
+                                         self.width, row_height, color,
                                          vector2d.Vector2D(0, 0)))
 
 
@@ -106,8 +108,7 @@ class CounterBar(UIElement):
                  inactive_color,
                  margin=vector2d.Vector2D(1, 1),
                  offset=vector2d.ZERO):
-        super(CounterBar, self).__init__(offset, width,
-                                         1, margin)
+        super(CounterBar, self).__init__(offset, width, 1, margin)
         self.counter = counter
         self.active_color = active_color
         self.inactive_color = inactive_color

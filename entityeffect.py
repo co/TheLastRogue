@@ -108,7 +108,7 @@ class Damage(EntityEffect):
     def message(self):
         message = "%s hits %s for %d damage." %\
             (self.source_entity.name, self.target_entity.name, self.damage)
-        messenger.messenger.message(messenger.Message(message))
+        messenger.messenger.message(message)
 
     def update(self):
         self.target_entity.hurt(self.damage)

@@ -6,39 +6,39 @@ class Messenger(object):
 
     def __init__(self):
         self.__messages = []
-        self.__new_messages_counter = collections.OrderedDict()
+        self.__new_messages = []
 
-    def message(self, message):
-        if(self.__new_messages_counter.get(message, None) is None):
-            self.__new_messages_counter[message] = 1
+    def message(self, new_message):
+        new_message = Message(new_message)
+        old_message = next((message for message in self.__new_messages
+                           if message.message == new_message.message), None)
+        if(old_message is None):
+            self.__new_messages.append(new_message)
         else:
-            self.__new_messages_counter[message] =\
-                self.__new_messages_counter[message] + 1
+            old_message.increase()
 
     def tail(self, length):
         return self.__messages[-length:]
 
     def push_new_messages(self):
-        for message, count in self.__new_messages_counter.items():
-            self.__messages.append(self.__get_line_with_repeat_count(message,
-                                                                     count))
+        self.__messages.extend(self.__new_messages)
         self.__new_messages_counter = collections.OrderedDict()
-
-    @staticmethod
-    def __get_line_with_repeat_count(message, repeat_count):
-        if(repeat_count <= 1):
-            return message
-        else:
-            return message + " x" + str(repeat_count)
-
-messenger = Messenger()
+        self.__new_messages = []
 
 
 class Message(object):
     def __init__(self, message, turn_created=None):
         self.message = message
+        self.count = 1
         if(turn_created is None):
             self.turn_created = turn.current_turn
 
+    def increase(self):
+        self.count += 1
+
     def __str__(self):
-        return self.message
+        if self.count > 1:
+            return str(self.message) + " x" + str(self.count)
+        return str(self.message)
+
+messenger = Messenger()
