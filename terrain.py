@@ -56,7 +56,7 @@ class Water(Terrain):
 
 class Door(Terrain):
 
-    def __init__(self, is_open):
+    def __init__(self, is_open=True):
         super(Door, self).__init__()
         self.is_open = is_open
         self._color_fg = colors.DB_ROPE
@@ -84,16 +84,10 @@ class Door(Terrain):
     def open(self):
         self.is_open = True
 
-    # TODO: make less ugly solution
     def piece_copy(self, copy=None):
         if(copy is None):
             copy = Door(self.is_open)
-        copy.__position = self.position
-        copy.dungeon_level = self.dungeon_level
-        copy.piece_type = self.piece_type
-        copy.max_instances_in_single_tile = self.max_instances_in_single_tile
-        copy.draw_order = self.draw_order
-        return copy
+        return super(Door, self).piece_copy(copy)
 
 
 class GlassWall(Wall):
