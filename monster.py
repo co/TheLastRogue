@@ -41,6 +41,8 @@ class Monster(entity.Entity):
 
     def step_looking_for_player(self):
         self.set_path_to_player_if_seen()
+        if(not self.has_path()):
+            self.set_path_to_random_walkable_point()
         step_succeeded = self.try_step_path()
         return step_succeeded
 

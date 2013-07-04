@@ -166,6 +166,13 @@ class Entity(gamepiece.GamePiece):
         step_succeeded = self.try_move(vector2d.Vector2D(x, y))
         return step_succeeded
 
+    def set_path_to_random_walkable_point(self):
+        positions = self.dungeon_level.\
+            get_walkable_positions_from_start_position(self.position)
+        destination = random.sample(positions, 1)[0]
+        libtcod.path_compute(self.path, self.position.x, self.position.y,
+                             destination.x, destination.y)
+
     def has_status(self, status):
         return status in self._status_flags
 
