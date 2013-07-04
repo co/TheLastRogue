@@ -73,6 +73,11 @@ class Player(entity.Entity):
                 done = True
             elif key == 'a':
                 self.hurt(1)
+            elif key == 'b':
+                effect = entityeffect.\
+                    Teleport(self, self,
+                             time_to_live=1)
+                self.add_entity_effect(effect)
                 done = True
             elif key == 'o':
                 self.heal(1)
@@ -108,5 +113,7 @@ class Player(entity.Entity):
                 dungeon_level.width, dungeon_level.height, dungeon_level.depth)
 
     def update_memory_of_tile(self, tile, position, depth):
+        if (tile.get_first_entity() is self):
+            return  # No need to remember where you was, you are not there.
         self._memory_map[depth].tile_matrix[position.y][position.x]\
             = tile.copy()

@@ -1,4 +1,5 @@
 import messenger
+import random
 import numpy
 
 
@@ -7,10 +8,11 @@ class EffectTypes(object):
     STATUS_REMOVER = 0
     BLOCKER = 1
     STATUS_ADDER = 2
-    HEAL = 3
-    DAMAGE = 4
+    TELEPORT = 3
+    HEAL = 4
+    DAMAGE = 5
 
-    ALLTYPES = [STATUS_REMOVER, BLOCKER, STATUS_ADDER, HEAL, DAMAGE]
+    ALLTYPES = [STATUS_REMOVER, BLOCKER, STATUS_ADDER, TELEPORT, HEAL, DAMAGE]
 
 
 class DamageTypes(object):
@@ -92,6 +94,27 @@ class StatusAdder(EntityEffect):
 
     def update(self):
         self.target_entity.add_status(self.status_flag)
+        self.tick()
+
+
+class Teleport(EntityEffect):
+    def __init__(self, source_entity, target_entity,
+                 time_to_live=1):
+        super(Teleport,
+              self).__init__(source_entity,
+                             target_entity,
+                             time_to_live,
+                             EffectTypes.TELEPORT)
+
+    def update(self):
+        dungeon_level = self.target_entity.dungeon_level
+        positions = dungeon_level.\
+            get_walkable_positions_from_start_position(self.target_entity.position)
+        random_positions = random.sample(positions, len(positions))
+        for position in random_positions:
+            teleport_successful = self.target_entity.try_move(position)
+            if teleport_successful:
+                break
         self.tick()
 
 

@@ -15,3 +15,14 @@ SCREEN_HEIGHT = LEVEL_HEIGHT + MESSAGES_BAR_HEIGHT
 
 ITEMS_ALLOWED_PER_TILE = 1
 ENTITIES_ALLOWED_PER_TILE = 1
+
+DIRECTIONS = {
+    "E": (1, 0),
+    "N": (0, 1),
+    "W": (-1, 0),
+    "S": (0, -1),
+    "NW": (-1, 1),
+    "NE": (1, 1),
+    "SW": (-1, -1),
+    "SE": (1, -1)
+}

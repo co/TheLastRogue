@@ -1,4 +1,5 @@
 import terrain
+import constants
 import tile
 import vector2d
 import libtcodpy as libtcod
@@ -156,3 +157,30 @@ class DungeonLevel(object):
         for entity in self.entities:
             if(entity.is_dead()):
                 entity.kill()
+
+    def get_walkable_positions_from_start_position(self, position):
+        visited = set()
+        visited.add(position)
+        queue = [position]
+        queue.extend(self._get_walkable_neighbors(position))
+        while (len(queue) > 0):
+            position = queue.pop()
+            while(len(queue) > 0 and position in visited):
+                position = queue.pop()
+            visited.add(position)
+            neighbors = set(self._get_walkable_neighbors(position)) - visited
+            queue.extend(neighbors)
+        return list(visited)
+
+    def _get_walkable_neighbors(self, position):
+        result_positions = []
+        for direction in constants.DIRECTIONS.values():
+            neighbor_position = position + direction
+            x, y = neighbor_position.x, neighbor_position.y
+            try:
+                neighbor = self.tile_matrix[y][x]
+                if(not neighbor.get_terrain().is_solid()):
+                    result_positions.append(neighbor_position)
+            except IndexError:
+                pass
+        return result_positions

@@ -1,23 +1,13 @@
 import random
 import vector2d
 import counter
+import constants
 import gamepiece
 import entityeffect
 import libtcodpy as libtcod
 
 FACTION_PLAYER = 0
 FACTION_MONSTER = 1
-
-directions = {
-    "E": (1, 0),
-    "N": (0, 1),
-    "W": (-1, 0),
-    "S": (0, -1),
-    "NW": (-1, 1),
-    "NE": (1, 1),
-    "SW": (-1, -1),
-    "SE": (1, -1)
-}
 
 
 class StatusFlags(object):
@@ -59,7 +49,7 @@ class Entity(gamepiece.GamePiece):
         pass
 
     def step_random_direction(self):
-        direction = random.sample(list(directions.values()), 1)
+        direction = random.sample(list(constants.DIRECTIONS.values()), 1)
         new_position = self.position + direction[0]
         self.try_move(new_position, self.dungeon_level)
 
