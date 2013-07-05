@@ -1,6 +1,7 @@
 import terrain
 import constants
 import tile
+import turn
 import vector2d
 import libtcodpy as libtcod
 
@@ -78,6 +79,9 @@ class DungeonLevel(object):
         self.entities = []
         self.dungeon_map = libtcod.map_new(self.width, self.height)
         self.suspended_entity = None
+        self._walkable_positions_dictionary_cache = {}
+        self._walkable_positions_cache_timestamp = -1
+        self._terrain_changed_timestamp = 0
 
     def draw(self, player, camera):
         player.update_fov()
@@ -168,6 +172,13 @@ class DungeonLevel(object):
                 entity.kill()
 
     def get_walkable_positions_from_start_position(self, position):
+        if(not (position in self._walkable_positions_dictionary_cache.keys()
+                and self._terrain_changed_timestamp <=
+                self._walkable_positions_cache_timestamp)):
+            self._calculate_walkable_positions_from_start_position(position)
+        return self._walkable_positions_dictionary_cache[position]
+
+    def _calculate_walkable_positions_from_start_position(self, position):
         visited = set()
         visited.add(position)
         queue = [position]
@@ -179,7 +190,10 @@ class DungeonLevel(object):
             visited.add(position)
             neighbors = set(self._get_walkable_neighbors(position)) - visited
             queue.extend(neighbors)
-        return list(visited)
+        visited = list(visited)
+        for point in visited:
+            self._walkable_positions_dictionary_cache[point] = visited
+        self._walkable_positions_cache_timestamp = turn.current_turn
 
     def _get_walkable_neighbors(self, position):
         result_positions = []

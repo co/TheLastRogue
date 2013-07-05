@@ -34,7 +34,6 @@ def get_keypress():
     libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS,
                                 key, mouse)
     key_char = get_key_char(key)
-    print "lol", key_char
     return key_char
 
 
