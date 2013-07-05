@@ -39,24 +39,24 @@ class Player(entity.Entity):
                 done = move_succeded
                 if(not done):
                     done = self.try_hit(new_position)
-            elif key == libtcod.KEY_ESCAPE:
+            elif key == inputhandler.ESCAPE:
                 self.kill()
                 done = True
-            elif key == 'r':  # Rest
+            elif key == inputhandler.REST:  # Rest
                 done = True
-            elif key == 'p':  # Pick up
+            elif key == inputhandler.REST:  # Pick up
                 done = True
-            elif key == 'a':
+            elif key == inputhandler.HURT:
                 self.hurt(1)
-            elif key == 'b':
+            elif key == inputhandler.TELEPORT:
                 effect = entityeffect.\
                     Teleport(self, self,
                              time_to_live=1)
                 self.add_entity_effect(effect)
                 done = True
-            elif key == 'o':
+            elif key == inputhandler.HEAL:
                 self.heal(1)
-            elif key == 'i':
+            elif key == inputhandler.INVISIBILITY:
                 invisibile_flag = entity.StatusFlags.INVISIBILE
                 if(not self.has_status(invisibile_flag)):
                     effect = entityeffect.\
@@ -71,7 +71,7 @@ class Player(entity.Entity):
                                                         time_to_live=1)
                     self.add_entity_effect(effect)
                 done = True
-            elif key == 'm':
+            elif key == inputhandler.SPAWN:
                 monsterspawner.spawn_rat_man(self.dungeon_level)
                 done = True
         return done
