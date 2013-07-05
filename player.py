@@ -5,43 +5,8 @@ import dungeonlevel
 import entity
 import entityeffect
 import numpy
+import inputhandler
 import libtcodpy as libtcod
-
-
-# TODO move to settings.
-move_controls = {
-    't': (0, -1),  # up
-    'h': (0, 1),   # down
-    'd': (-1, 0),  # left
-    'n': (1, 0),   # right
-}
-
-
-def wait_for_keypress():
-    key = libtcod.Key()
-    mouse = libtcod.Mouse()
-
-    libtcod.sys_wait_for_event(libtcod.EVENT_KEY_PRESS,
-                               key, mouse, False)
-    key_char = get_key_char(key)
-    return key_char
-
-
-def get_keypress():
-    key = libtcod.Key()
-    mouse = libtcod.Mouse()
-
-    libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS,
-                                key, mouse)
-    key_char = get_key_char(key)
-    return key_char
-
-
-def get_key_char(key):
-    if key.vk == libtcod.KEY_CHAR:
-        return chr(key.c)
-    else:
-        return key.vk
 
 
 class Player(entity.Entity):
@@ -65,10 +30,10 @@ class Player(entity.Entity):
     def update(self, _):
         done = False
         while not done:
-            key = get_keypress()
+            key = inputhandler.get_keypress()
             position = self.position
-            if key in move_controls:
-                dx, dy = move_controls[key]
+            if key in inputhandler.move_controls:
+                dx, dy = inputhandler.move_controls[key]
                 new_position = position + (dx, dy)
                 move_succeded = self.try_move(new_position)
                 done = move_succeded

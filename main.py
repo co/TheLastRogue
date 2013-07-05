@@ -26,6 +26,7 @@ import settings
 import constants
 import colors
 import logging
+import gamestate
 from time import sleep
 
 
@@ -112,6 +113,12 @@ def update():
 #############################################
 # main loop
 #############################################
+
+main_menu = gamestate.MainMenu(vector2d.ZERO, 0, 0)
+
+gamestate.game_state_stack.push(main_menu)
+
+gamestate.game_state_stack.main_loop()
 
 
 def main_loop():

@@ -13,7 +13,6 @@ class UIElement(object):
         self.width = width
         self.height = height
         self.margin = margin
-        self.elements = []
 
     def draw(self, offset=vector2d.ZERO):
         pass
@@ -35,6 +34,7 @@ class StackPanel(UIElement):
                  margin=vector2d.ZERO):
         super(StackPanel, self).__init__(offset, width, height, margin)
         self.color_bg = color_bg
+        self.elements = []
 
     def draw(self, offset=vector2d.ZERO):
         position = offset + self.offset
