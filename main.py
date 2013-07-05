@@ -26,6 +26,7 @@ import settings
 import constants
 import colors
 import logging
+from time import sleep
 
 
 #############################################
@@ -119,6 +120,7 @@ def main_loop():
         turn.current_turn = turn.current_turn + 1
         draw(camera)
         update()
+        sleep(0.0001)
         if(hero.is_dead()):
             break
 
