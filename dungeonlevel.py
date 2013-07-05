@@ -77,6 +77,7 @@ class DungeonLevel(object):
         self.depth = depth
         self.entities = []
         self.dungeon_map = libtcod.map_new(self.width, self.height)
+        self.suspended_entity = None
 
     def draw(self, player, camera):
         player.update_fov()
@@ -146,8 +147,16 @@ class DungeonLevel(object):
 
     def _entities_act(self, player):
         for entity in self.entities:
+            if(not(self.suspended_entity is None or
+               entity is self.suspended_entity)):
+                continue
             if(not entity.is_dead()):
-                entity.update(player)
+                done = entity.update(player)
+                if not done:
+                    self.suspended_entity = entity
+                    break
+                else:
+                    self.suspended_entity = None
 
     def _entities_clear_status(self):
         for entity in self.entities:

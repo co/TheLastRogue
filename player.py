@@ -27,6 +27,17 @@ def wait_for_keypress():
     return key_char
 
 
+def get_keypress():
+    key = libtcod.Key()
+    mouse = libtcod.Mouse()
+
+    libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS,
+                                key, mouse)
+    key_char = get_key_char(key)
+    print "lol", key_char
+    return key_char
+
+
 def get_key_char(key):
     if key.vk == libtcod.KEY_CHAR:
         return chr(key.c)
@@ -55,7 +66,7 @@ class Player(entity.Entity):
     def update(self, _):
         done = False
         while not done:
-            key = wait_for_keypress()
+            key = get_keypress()
             position = self.position
             if key in move_controls:
                 dx, dy = move_controls[key]
@@ -99,6 +110,7 @@ class Player(entity.Entity):
             elif key == 'm':
                 monsterspawner.spawn_rat_man(self.dungeon_level)
                 done = True
+        return done
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)

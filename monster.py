@@ -61,6 +61,7 @@ class RatMan(Monster):
         if(rng.coin_flip() and self.can_see_player()):
             message = "The rat-man looks at you."
             messenger.messenger.message(message)
+        return True
 
 
 class StoneStatue(Monster):
@@ -77,3 +78,4 @@ class StoneStatue(Monster):
         if(rng.coin_flip() and self.can_see_player()):
             message = "The stone statue casts a long shadow on the floor."
             messenger.messenger.message(message)
+        return True
