@@ -29,12 +29,11 @@ class UIElement(object):
         return self.width + self.margin.x * 2
 
 
-class StackPanel(UIElement):
+class Rectangle(UIElement):
     def __init__(self, offset, width, height, color_bg,
                  margin=vector2d.ZERO):
-        super(StackPanel, self).__init__(offset, width, height, margin)
+        super(Rectangle, self).__init__(offset, width, height, margin)
         self.color_bg = color_bg
-        self.elements = []
 
     def draw(self, offset=vector2d.ZERO):
         position = offset + self.offset
@@ -43,6 +42,19 @@ class StackPanel(UIElement):
                 libtcod.console_set_char_background(0, x, y,
                                                     self.color_bg)
                 libtcod.console_set_char(0, x, y, ' ')
+
+
+class StackPanel(UIElement):
+    def __init__(self, offset, width, height, color_bg,
+                 margin=vector2d.ZERO):
+        super(StackPanel, self).__init__(offset, width, height, margin)
+        self.color_bg = color_bg
+        self.elements = []
+        self.rectangle_bg = Rectangle(offset, width, height, color_bg, margin)
+
+    def draw(self, offset=vector2d.ZERO):
+        position = offset + self.offset
+        self.rectangle_bg.draw(position)
 
         element_position = position
         for element in self.elements:

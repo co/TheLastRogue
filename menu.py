@@ -3,6 +3,7 @@ import colors
 import gui
 import vector2d
 import gamestate
+import settings
 import game
 
 
@@ -72,6 +73,8 @@ class MainMenu(Menu):
         self.start_game_option = "Start Game"
         self.quit_option = "Quit"
         self._menu_items = [self.start_game_option, self.quit_option]
+        self.rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
+                                          height, colors.DB_BLACK)
 
     def activate(self, index):
         selected_option = self._menu_items[self._selected_index]
@@ -80,3 +83,8 @@ class MainMenu(Menu):
             gamestate.game_state_stack.push(new_game)
         elif(selected_option == self.quit_option):
             gamestate.game_state_stack.pop()
+
+    def draw(self):
+        self.rectangle_bg.draw()
+        draw_position = vector2d.Vector2D(0, settings.WINDOW_HEIGHT - 7)
+        self._item_stack_panel.draw(draw_position)
