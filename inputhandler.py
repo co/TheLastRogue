@@ -12,6 +12,7 @@ TELEPORT = 8
 SPAWN = 9
 INVISIBILITY = 10
 ESCAPE = 11
+PICKUP = 12
 
 # TODO move to settings.
 move_controls = {
@@ -29,12 +30,16 @@ controls = {
     libtcod.KEY_DOWN: DOWN,  # up
 
     'd': LEFT,  # left
+    libtcod.KEY_LEFT: LEFT,  # left
+
     'n': RIGHT,   # right
+    libtcod.KEY_RIGHT: RIGHT,  # right
 
     libtcod.KEY_ENTER: ENTER,
     libtcod.KEY_ESCAPE: ESCAPE,
 
     "r": REST,
+    "p": PICKUP,
     libtcod.KEY_1: HEAL,
     libtcod.KEY_2: HURT,
     libtcod.KEY_3: TELEPORT,

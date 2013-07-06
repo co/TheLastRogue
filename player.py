@@ -5,8 +5,9 @@ import dungeonlevel
 import entity
 import entityeffect
 import numpy
+import inventory
+import messenger
 import inputhandler
-import libtcodpy as libtcod
 
 
 class Player(entity.Entity):
@@ -15,6 +16,7 @@ class Player(entity.Entity):
         self.hp = counter.Counter(10, 10)
         self._memory_map = []
         self._faction = entity.FACTION_PLAYER
+        self.inventory = inventory.Inventory(self)
         self._name = "CO"
 
     @property
@@ -44,8 +46,19 @@ class Player(entity.Entity):
                 done = True
             elif key == inputhandler.REST:  # Rest
                 done = True
-            elif key == inputhandler.REST:  # Pick up
-                done = True
+            elif key == inputhandler.PICKUP:  # Pick up
+                item =\
+                    self.dungeon_level.get_tile(self.position).get_first_item()
+                if(not item is None):
+                    pickup_succeded = self.inventory.try_add(item)
+                    if(pickup_succeded):
+                        message = "Picked up: " + item.name
+                        messenger.messenger.message(message)
+                        done = True
+                    else:
+                        message = "Could not pick up: " + item.name +\
+                            ", the inventory is full."
+                        messenger.messenger.message(message)
             elif key == inputhandler.HURT:
                 self.hurt(1)
             elif key == inputhandler.TELEPORT:

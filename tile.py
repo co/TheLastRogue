@@ -23,15 +23,19 @@ class Tile(object):
                                             piece_list[0].draw_order)
         return lists_sorted_on_draw_order
 
+    def get_first_item(self):
+        return self.get_first_piece_of_type(gamepiece.ITEM_GAME_PIECE)
+
     def get_first_entity(self):
-        if(len(self.game_pieces[gamepiece.ENTITY_GAME_PIECE]) < 1):
-            return None
-        return self.game_pieces[gamepiece.ENTITY_GAME_PIECE][0]
+        return self.get_first_piece_of_type(gamepiece.ENTITY_GAME_PIECE)
 
     def get_terrain(self):
-        if(len(self.game_pieces[gamepiece.TERRAIN_GAME_PIECE]) < 1):
+        return self.get_first_piece_of_type(gamepiece.TERRAIN_GAME_PIECE)
+
+    def get_first_piece_of_type(self, piece_type):
+        if(len(self.game_pieces[piece_type]) < 1):
             return None
-        return self.game_pieces[gamepiece.TERRAIN_GAME_PIECE][0]
+        return self.game_pieces[piece_type][0]
 
     def has_entity(self):
         if(len(self.game_pieces[gamepiece.ENTITY_GAME_PIECE]) < 1):

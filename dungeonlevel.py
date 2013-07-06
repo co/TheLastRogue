@@ -98,17 +98,12 @@ class DungeonLevel(object):
                                                                 False, camera)
 
     def add_entity_if_not_present(self, new_entity):
-        if(not any(new_entity is entity for entity in self.entities)):
+        if(not new_entity in self.entities):
             self.entities.append(new_entity)
 
-    def put_item_on_tile(self, item, position):
-        self.get_tile(position).items.append(item)
-
     def remove_entity_if_present(self, entity_to_remove):
-        if(any(entity_to_remove is entity for entity in self.entities)):
+        if(entity_to_remove in self.entities):
             self.entities.remove(entity_to_remove)
-            return True
-        return False
 
     def get_tile(self, position):
         return self.tile_matrix[position.y][position.x]

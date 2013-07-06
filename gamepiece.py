@@ -146,5 +146,4 @@ class GamePiece(object):
             pieces_i_might_be_among.remove(self)
             self.dungeon_level = None
             return True
-
         return False
