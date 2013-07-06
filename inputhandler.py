@@ -13,6 +13,7 @@ SPAWN = 9
 INVISIBILITY = 10
 ESCAPE = 11
 PICKUP = 12
+INVENTORY = 13
 
 # TODO move to settings.
 move_controls = {
@@ -40,6 +41,7 @@ controls = {
 
     "r": REST,
     "p": PICKUP,
+    "i": INVENTORY,
     libtcod.KEY_1: HEAL,
     libtcod.KEY_2: HURT,
     libtcod.KEY_3: TELEPORT,

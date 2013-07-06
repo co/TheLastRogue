@@ -8,6 +8,10 @@ import numpy
 import inventory
 import messenger
 import inputhandler
+import menu
+import vector2d
+import settings
+import gamestate
 
 
 class Player(entity.Entity):
@@ -41,11 +45,14 @@ class Player(entity.Entity):
                 done = move_succeded
                 if(not done):
                     done = self.try_hit(new_position)
+
             elif key == inputhandler.ESCAPE:
                 self.kill()
                 done = True
+
             elif key == inputhandler.REST:  # Rest
                 done = True
+
             elif key == inputhandler.PICKUP:  # Pick up
                 item =\
                     self.dungeon_level.get_tile(self.position).get_first_item()
@@ -59,16 +66,20 @@ class Player(entity.Entity):
                         message = "Could not pick up: " + item.name +\
                             ", the inventory is full."
                         messenger.messenger.message(message)
+
             elif key == inputhandler.HURT:
                 self.hurt(1)
+
             elif key == inputhandler.TELEPORT:
                 effect = entityeffect.\
                     Teleport(self, self,
                              time_to_live=1)
                 self.add_entity_effect(effect)
                 done = True
+
             elif key == inputhandler.HEAL:
                 self.heal(1)
+
             elif key == inputhandler.INVISIBILITY:
                 invisibile_flag = entity.StatusFlags.INVISIBILE
                 if(not self.has_status(invisibile_flag)):
@@ -84,10 +95,21 @@ class Player(entity.Entity):
                                                         time_to_live=1)
                     self.add_entity_effect(effect)
                 done = True
+
             elif key == inputhandler.SPAWN:
                 monsterspawner.spawn_rat_man(self.dungeon_level)
                 done = True
-        return done
+
+            elif key == inputhandler.INVENTORY:
+                if(not self.inventory.is_empty()):
+                    inventory_position =\
+                        vector2d.Vector2D(settings.WINDOW_WIDTH - 24, 0)
+                    inventory_menu = menu.InventoryMenu(inventory_position,
+                                                        settings.WINDOW_WIDTH,
+                                                        settings.WINDOW_HEIGHT,
+                                                        self.inventory)
+                    gamestate.game_state_stack.push(inventory_menu)
+            return done
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)

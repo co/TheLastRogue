@@ -20,6 +20,7 @@ class Menu(gamestate.GameState):
         self.position = position
         self.width = width
         self.height = height
+        self.may_escape = True
         self._item_stack_panel = gui.StackPanel(vector2d.ZERO, self.width,
                                                 self.height, colors.DB_BLACK)
 
@@ -31,6 +32,8 @@ class Menu(gamestate.GameState):
             self.index_increase()
         if key == inputhandler.ENTER:
             self.activate(self._selected_index)
+        if key == inputhandler.ESCAPE and self.may_escape:
+            gamestate.game_state_stack.pop()
 
         self._recreate_option_list()
 
@@ -54,6 +57,8 @@ class Menu(gamestate.GameState):
         self._offset_index(-1)
 
     def _offset_index(self, offset):
+        if(len(self._menu_items) == 0):
+            return
         if(self._wrap):
     # Will behave strangely for when offset is less than -menu_size
             self._selected_index =\
@@ -88,3 +93,19 @@ class MainMenu(Menu):
         self.rectangle_bg.draw()
         draw_position = vector2d.Vector2D(0, settings.WINDOW_HEIGHT - 7)
         self._item_stack_panel.draw(draw_position)
+
+
+class InventoryMenu(Menu):
+    def __init__(self, position, width, height, inventory):
+        super(InventoryMenu, self).__init__(position, width, height)
+        self._inventory = inventory
+        self._menu_items = [item.name for item in inventory.items]
+        self.rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
+                                          height, colors.DB_BLACK)
+
+    def activate(self, index):
+        pass
+
+    def draw(self):
+        self.rectangle_bg.draw(self.position)
+        self._item_stack_panel.draw(self.position)
