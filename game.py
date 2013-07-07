@@ -73,11 +73,11 @@ class Game(gamestate.GameState):
     def draw(self):
         self.status_bar.draw()
         self.message_bar.draw()
-        self.dungeon_level.draw(self.hero, self.camera)
+        self.dungeon_level.draw(self.camera)
         self.monster_status_bar.draw()
 
     def update(self):
-        self.dungeon_level.update(self.hero)
+        self.dungeon_level.update()
         self.monster_status_bar.update(self.hero)
         self.message_bar.update()
         if(self.hero.is_dead()):

@@ -84,7 +84,8 @@ class DungeonLevel(object):
         self._walkable_positions_cache_timestamp = -1
         self._terrain_changed_timestamp = 0
 
-    def draw(self, player, camera):
+    def draw(self, camera):
+        player = self.get_player_if_available()
         player.update_fov()
         player_memory_of_map = player.get_memory_of_map(self)
         for y, row in enumerate(self.tile_matrix):
@@ -109,9 +110,9 @@ class DungeonLevel(object):
     def get_tile(self, position):
         return self.tile_matrix[position.y][position.x]
 
-    def update(self, player):
+    def update(self):
         self._entities_calculate_fov()
-        self._entities_act(player)
+        self._entities_act()
         self._entities_clear_status()
         self._entities_effects_update()
         self._remove_dead_monsters()
@@ -154,7 +155,7 @@ class DungeonLevel(object):
         return [entity for entity in self.entities
                 if(not isinstance(entity, player.Player))]
 
-    def _entities_act(self, player):
+    def _entities_act(self):
         monsters = self.get_all_non_players()
         player = self.get_player_if_available()
         if(not player is None and not player.is_dead()):
