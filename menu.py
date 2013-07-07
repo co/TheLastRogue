@@ -21,8 +21,10 @@ class Menu(gamestate.GameState):
         self.width = width
         self.height = height
         self.may_escape = True
-        self._item_stack_panel = gui.StackPanel(vector2d.ZERO, self.width,
-                                                self.height, colors.DB_BLACK)
+        self._item_stack_panel = gui.StackPanelVertical(vector2d.ZERO,
+                                                        self.width,
+                                                        colors.INTERFACE_BG,
+                                                        vertical_space=1)
 
     def update(self):
         key = inputhandler.get_keypress()
@@ -44,7 +46,7 @@ class Menu(gamestate.GameState):
                 color = colors.TEXT_ACTIVE
             else:
                 color = colors.TEXT_INACTIVE
-            menu_item = gui.TextBox(item, vector2d.ZERO, self.width, 1, color)
+            menu_item = gui.TextBox(item, vector2d.ZERO, color)
             self._item_stack_panel.elements.append(menu_item)
 
     def activate(self, index):
@@ -107,12 +109,14 @@ class InventoryMenu(Menu):
                               settings.WINDOW_WIDTH,
                               settings.WINDOW_HEIGHT,
                               colors.DB_OPAL)
-        self._heading = gui.TextBox("Inventory:", vector2d.ZERO,
-                                    width, 1, colors.INVENTORY_HEADING)
-        self._inventory_stack_panel = gui.StackPanel(vector2d.ZERO, width,
-                                                     height,
-                                                     colors.INTERFACE_BG)
-        self._inventory_stack_panel.elements.append(self._heading)
+        heading = gui.TextBox("Inventory:", vector2d.ZERO,
+                              colors.INVENTORY_HEADING,
+                              margin=vector2d.Vector2D(0, 1))
+        self._inventory_stack_panel =\
+            gui.StackPanelVertical(vector2d.ZERO,
+                                   width,
+                                   colors.INTERFACE_BG)
+        self._inventory_stack_panel.elements.append(heading)
         self._inventory_stack_panel.elements.append(self._item_stack_panel)
 
     def activate(self, index):

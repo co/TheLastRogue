@@ -50,13 +50,16 @@ class Game(gamestate.GameState):
                                 constants.STATUS_BAR_WIDTH,
                                 constants.STATUS_BAR_HEIGHT,
                                 colors.INTERFACE_BG,
-                                self.player)
+                                self.player,
+                                margin=vector2d.Vector2D(0, 1))
 
         self.monster_status_bar =\
             gui.EntityStatusList(vector2d.ZERO,
                                  constants.MONSTER_STATUS_BAR_WIDTH,
                                  constants.MONSTER_STATUS_BAR_HEIGHT,
-                                 colors.DB_BLACK)
+                                 colors.INTERFACE_BG,
+                                 margin=vector2d.Vector2D(0, 1),
+                                 vertical_space=1)
 
         message_bar_position =\
             vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH,
@@ -66,7 +69,7 @@ class Game(gamestate.GameState):
             gui.MessageDisplay(message_bar_position,
                                constants.MESSAGES_BAR_WIDTH,
                                constants.MESSAGES_BAR_HEIGHT,
-                               colors.DB_BLACK)
+                               colors.INTERFACE_BG)
         reset_globals()
 
     def draw(self):
