@@ -2,6 +2,7 @@ import terrain
 import constants
 import tile
 import turn
+import player
 import vector2d
 import libtcodpy as libtcod
 
@@ -144,18 +145,24 @@ class DungeonLevel(object):
         for entity in self.entities:
             entity.update_effect_queue()
 
+    def get_player_if_available(self):
+        return next((entity for entity in self.entities
+                     if(isinstance(entity, player.Player))),
+                    None)
+
+    def get_all_non_players(self):
+        return [entity for entity in self.entities
+                if(not isinstance(entity, player.Player))]
+
     def _entities_act(self, player):
-        for entity in self.entities:
-            if(not(self.suspended_entity is None or
-               entity is self.suspended_entity)):
-                continue
-            if(not entity.is_dead()):
-                done = entity.update(player)
-                if not done:
-                    self.suspended_entity = entity
-                    break
-                else:
-                    self.suspended_entity = None
+        monsters = self.get_all_non_players()
+        player = self.get_player_if_available()
+        if(not player is None and not player.is_dead()):
+            player_done = player.update()
+        if(player_done):
+            for monster in monsters:
+                if(not monster.is_dead()):
+                    monster.update(player)
 
     def _entities_clear_status(self):
         for entity in self.entities:

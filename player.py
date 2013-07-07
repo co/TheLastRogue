@@ -1,4 +1,5 @@
 import counter
+import turn
 import monsterspawner
 import colors
 import dungeonlevel
@@ -33,7 +34,7 @@ class Player(entity.Entity):
     def symbol(self):
         return ord('@')
 
-    def update(self, _):
+    def update(self):
         done = False
         while not done:
             key = inputhandler.get_keypress()
@@ -109,6 +110,8 @@ class Player(entity.Entity):
                                                         settings.WINDOW_HEIGHT,
                                                         self.inventory)
                     gamestate.game_state_stack.push(inventory_menu)
+            if(done):
+                turn.current_turn += 1
             return done
 
     def get_memory_of_map(self, dungeon_level):

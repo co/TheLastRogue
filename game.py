@@ -82,4 +82,3 @@ class Game(gamestate.GameState):
         self.message_bar.update()
         if(self.hero.is_dead()):
             gamestate.game_state_stack.pop()
-        turn.current_turn += 1
