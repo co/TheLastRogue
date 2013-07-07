@@ -79,7 +79,7 @@ class MainMenu(Menu):
         self.quit_option = "Quit"
         self._menu_items = [self.start_game_option, self.quit_option]
         self.rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
-                                          height, colors.DB_BLACK)
+                                          height, colors.INTERFACE_BG)
 
     def activate(self, index):
         selected_option = self._menu_items[self._selected_index]
@@ -101,11 +101,24 @@ class InventoryMenu(Menu):
         self._inventory = inventory
         self._menu_items = [item.name for item in inventory.items]
         self.rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
-                                          height, colors.DB_BLACK)
+                                          height, colors.INTERFACE_BG)
+        self.rectangle_screen_grey =\
+            gui.RectangleGray(vector2d.ZERO,
+                              settings.WINDOW_WIDTH,
+                              settings.WINDOW_HEIGHT,
+                              colors.DB_OPAL)
+        self._heading = gui.TextBox("Inventory:", vector2d.ZERO,
+                                    width, 1, colors.INVENTORY_HEADING)
+        self._inventory_stack_panel = gui.StackPanel(vector2d.ZERO, width,
+                                                     height,
+                                                     colors.INTERFACE_BG)
+        self._inventory_stack_panel.elements.append(self._heading)
+        self._inventory_stack_panel.elements.append(self._item_stack_panel)
 
     def activate(self, index):
         pass
 
     def draw(self):
+        self.rectangle_screen_grey.draw(vector2d.ZERO)
         self.rectangle_bg.draw(self.position)
-        self._item_stack_panel.draw(self.position)
+        self._inventory_stack_panel.draw(self.position)

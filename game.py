@@ -45,9 +45,12 @@ class Game(gamestate.GameState):
 
         status_bar_position = vector2d.Vector2D(settings.WINDOW_WIDTH -
                                                 constants.STATUS_BAR_WIDTH, 0)
-        self.status_bar =\
-            gui.StackPanel(status_bar_position, constants.STATUS_BAR_WIDTH,
-                           constants.STATUS_BAR_HEIGHT, colors.DB_BLACK)
+        self.player_status_bar =\
+            gui.PlayerStatusBar(status_bar_position,
+                                constants.STATUS_BAR_WIDTH,
+                                constants.STATUS_BAR_HEIGHT,
+                                colors.INTERFACE_BG,
+                                self.player)
 
         self.monster_status_bar =\
             gui.EntityStatusList(vector2d.ZERO,
@@ -55,30 +58,19 @@ class Game(gamestate.GameState):
                                  constants.MONSTER_STATUS_BAR_HEIGHT,
                                  colors.DB_BLACK)
 
-        self.hp_bar = gui.CounterBar(self.player.hp,
-                                     constants.STATUS_BAR_WIDTH - 2,
-                                     colors.DB_BROWN, colors.DB_LOULOU)
-
-        self.text_box = gui.TextBox("CO\nThe Brave", vector2d.ZERO,
-                                    constants.STATUS_BAR_WIDTH - 2,
-                                    1, colors.DB_PANCHO)
-
-        self.status_bar.elements.append(self.text_box)
-        self.status_bar.elements.append(self.hp_bar)
-
         message_bar_position =\
             vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH,
                               constants.LEVEL_HEIGHT)
 
         self.message_bar =\
-            gui. MessageDisplay(message_bar_position,
-                                constants.MESSAGES_BAR_WIDTH,
-                                constants.MESSAGES_BAR_HEIGHT,
-                                colors.DB_BLACK)
+            gui.MessageDisplay(message_bar_position,
+                               constants.MESSAGES_BAR_WIDTH,
+                               constants.MESSAGES_BAR_HEIGHT,
+                               colors.DB_BLACK)
         reset_globals()
 
     def draw(self):
-        self.status_bar.draw()
+        self.player_status_bar.draw()
         self.message_bar.draw()
         self.dungeon_level.draw(self.camera)
         self.monster_status_bar.draw()
@@ -88,6 +80,7 @@ class Game(gamestate.GameState):
             turn.current_turn += 1
         self.dungeon_level.update()
         self.monster_status_bar.update(self.player)
+        self.player_status_bar.update()
         self.message_bar.update()
         if(self.player.is_dead()):
             gamestate.game_state_stack.pop()

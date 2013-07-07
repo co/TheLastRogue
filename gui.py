@@ -44,22 +44,74 @@ class Rectangle(UIElement):
                 libtcod.console_set_char(0, x, y, ' ')
 
 
+class RectangleGray(UIElement):
+    def __init__(self, offset, width, height, color_bg,
+                 margin=vector2d.ZERO):
+        super(RectangleGray, self).__init__(offset, width, height, margin)
+        self.color_bg = color_bg
+
+    def draw(self, offset=vector2d.ZERO):
+        position = offset + self.offset
+        for y in range(position.y, self.height):
+            for x in range(position.x, self.width + position.x):
+                libtcod.console_set_char_background(0, x, y,
+                                                    self.color_bg,
+                                                    libtcod.BKGND_DARKEN)
+                libtcod.console_set_char_foreground(0, x, y,
+                                                    colors.DB_TOPAZ)
+
+
 class StackPanel(UIElement):
     def __init__(self, offset, width, height, color_bg,
                  margin=vector2d.ZERO):
         super(StackPanel, self).__init__(offset, width, height, margin)
         self.color_bg = color_bg
         self.elements = []
-        self.rectangle_bg = Rectangle(offset, width, height, color_bg, margin)
+        self._rectangle_bg = Rectangle(offset, width, height, color_bg, margin)
 
     def draw(self, offset=vector2d.ZERO):
         position = offset + self.offset
-        self.rectangle_bg.draw(position)
+        self._rectangle_bg.draw(position)
 
         element_position = position
         for element in self.elements:
             element.draw(element_position)
             element_position = element_position + (0, element.total_height)
+
+
+class PlayerStatusBar(UIElement):
+    def __init__(self, offset, width, height, color_bg, player,
+                 margin=vector2d.ZERO):
+        super(PlayerStatusBar, self).__init__(offset, width, height, margin)
+        self.color_bg = color_bg
+        self._status_stack_panel = StackPanel(offset, width, height, color_bg)
+
+        hp_bar = CounterBar(player.hp,
+                            width - 2,
+                            colors.DB_BROWN, colors.DB_LOULOU)
+
+        name_text_box = TextBox(player.name, vector2d.ZERO,
+                                width - 2,
+                                1, colors.DB_PANCHO,
+                                vector2d.Vector2D(1, 0))
+        description_text_box = TextBox(player.description, vector2d.ZERO,
+                                       width - 2,
+                                       1, colors.DB_PANCHO,
+                                       vector2d.Vector2D(1, 0))
+
+        self._rectangle_bg = Rectangle(offset, width,
+                                       height, colors.INTERFACE_BG)
+
+        self._status_stack_panel.elements.append(name_text_box)
+        self._status_stack_panel.elements.append(description_text_box)
+        self._status_stack_panel.elements.append(hp_bar)
+
+    def update(self):
+        self._status_stack_panel.update()
+
+    def draw(self):
+        self._rectangle_bg.draw()
+        self._status_stack_panel.draw()
 
 
 class EntityStatusList(StackPanel):

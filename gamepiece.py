@@ -16,6 +16,7 @@ class GamePiece(object):
         self.__position = vector2d.Vector2D(-1, -1)
         self.__dungeon_level = None
         self._name = "XXX_unnamed_entity_XXX"
+        self._description = "XXX_no_description_XXX"
 
         #  These fields should both be set by subclasses.
         self.piece_type = UNDEFINED_GAME_PIECE

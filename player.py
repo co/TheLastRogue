@@ -22,6 +22,7 @@ class Player(entity.Entity):
         self._faction = entity.FACTION_PLAYER
         self.inventory = inventory.Inventory(self)
         self._name = "CO"
+        self._description = "The Brave"
         self.turn_over = False
 
     @property
