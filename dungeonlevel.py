@@ -85,15 +85,15 @@ class DungeonLevel(object):
         self._terrain_changed_timestamp = 0
 
     def draw(self, camera):
-        player = self.get_player_if_available()
-        player.update_fov()
-        player_memory_of_map = player.get_memory_of_map(self)
+        the_player = self.get_player_if_available()
+        the_player.update_fov()
+        player_memory_of_map = the_player.get_memory_of_map(self)
         for y, row in enumerate(self.tile_matrix):
             for x, current_tile in enumerate(row):
                 position = vector2d.Vector2D(x, y)
-                if(libtcod.map_is_in_fov(player.dungeon_map, x, y)):
-                    player.update_memory_of_tile(current_tile,
-                                                 position, self.depth)
+                if(libtcod.map_is_in_fov(the_player.dungeon_map, x, y)):
+                    the_player.update_memory_of_tile(current_tile,
+                                                     position, self.depth)
                     current_tile.draw(position, True, camera)
                 else:
                     player_memory_of_map.tile_matrix[y][x].draw(position,
@@ -159,8 +159,8 @@ class DungeonLevel(object):
         monsters = self.get_all_non_players()
         player = self.get_player_if_available()
         if(not player is None and not player.is_dead()):
-            player_done = player.update()
-        if(player_done):
+            player.update()
+        if(player.turn_over):
             for monster in monsters:
                 if(not monster.is_dead()):
                     monster.update(player)

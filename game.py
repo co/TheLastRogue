@@ -8,8 +8,14 @@ import camera
 import settings
 import constants
 import colors
-import turn
 import gamestate
+import turn
+import messenger
+
+
+def reset_globals():
+    turn.current_turn = 0
+    messenger.messenger = messenger.Messenger()
 
 
 class Game(gamestate.GameState):
@@ -20,9 +26,9 @@ class Game(gamestate.GameState):
             vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH, 0)
         self.camera = camera.Camera(camera_position, vector2d.ZERO)
 
-        self.hero = player.Player()
+        self.player = player.Player()
         start_position = vector2d.Vector2D(20, 10)
-        self.hero.try_move(start_position, self.dungeon_level)
+        self.player.try_move(start_position, self.dungeon_level)
 
         rat = monster.RatMan()
         rat_pos = vector2d.Vector2D(15, 15)
@@ -49,7 +55,7 @@ class Game(gamestate.GameState):
                                  constants.MONSTER_STATUS_BAR_HEIGHT,
                                  colors.DB_BLACK)
 
-        self.hp_bar = gui.CounterBar(self.hero.hp,
+        self.hp_bar = gui.CounterBar(self.player.hp,
                                      constants.STATUS_BAR_WIDTH - 2,
                                      colors.DB_BROWN, colors.DB_LOULOU)
 
@@ -69,6 +75,7 @@ class Game(gamestate.GameState):
                                 constants.MESSAGES_BAR_WIDTH,
                                 constants.MESSAGES_BAR_HEIGHT,
                                 colors.DB_BLACK)
+        reset_globals()
 
     def draw(self):
         self.status_bar.draw()
@@ -77,8 +84,10 @@ class Game(gamestate.GameState):
         self.monster_status_bar.draw()
 
     def update(self):
+        if(self.player.turn_over):
+            turn.current_turn += 1
         self.dungeon_level.update()
-        self.monster_status_bar.update(self.hero)
+        self.monster_status_bar.update(self.player)
         self.message_bar.update()
-        if(self.hero.is_dead()):
+        if(self.player.is_dead()):
             gamestate.game_state_stack.pop()

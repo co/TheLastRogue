@@ -104,7 +104,7 @@ class MessageDisplay(StackPanel):
         row_height = 1
         self.elements = []
         for message in messages:
-            if(message.turn_created == turn.current_turn):
+            if(message.turn_created == turn.current_turn - 1):
                 color = colors.TEXT_NEW
             else:
                 color = colors.TEXT_OLD
