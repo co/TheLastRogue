@@ -1,6 +1,7 @@
 import colors
 import action
 import gamepiece
+import equipment
 
 
 class Item(gamepiece.GamePiece):
@@ -16,9 +17,15 @@ class Item(gamepiece.GamePiece):
         self.actions = []
 
 
-class Gun(Item):
+class EquipableItem(Item):
+    def __init__(self, equipment_slot):
+        super(EquipableItem, self).__init__()
+        self.equipment_slot = equipment_slot
+
+
+class Gun(EquipableItem):
     def __init__(self):
-        super(Gun, self).__init__()
+        super(Gun, self).__init__(equipment.EquipmentSlots.MAINHAND)
         self._color_fg = colors.DB_WHITE
         self._color_bg = None
         self._symbol = ord('(')
@@ -27,6 +34,7 @@ class Gun(Item):
             "This was once a fine weapon, but age has torn it real bad.\n\
             The wooden handle is dry and gray \
             and you see rust eating into the iron pipe."
+        self.actions.append(action.EquipAction(self))
 
 
 class Potion(Item):

@@ -11,8 +11,10 @@ class EffectTypes(object):
     TELEPORT = 3
     HEAL = 4
     DAMAGE = 5
+    EQUIPMENT = 6
 
-    ALLTYPES = [STATUS_REMOVER, BLOCKER, STATUS_ADDER, TELEPORT, HEAL, DAMAGE]
+    ALLTYPES = [STATUS_REMOVER, BLOCKER, STATUS_ADDER,
+                TELEPORT, HEAL, DAMAGE, EQUIPMENT]
 
 
 class DamageTypes(object):
@@ -22,7 +24,7 @@ class DamageTypes(object):
 
 class EffectQueue(object):
     def __init__(self):
-        self._effect_queue = [None for x in range(EffectTypes.DAMAGE + 1)]
+        self._effect_queue = [None for x in range(len(EffectTypes.ALLTYPES))]
         for effect_type in EffectTypes.ALLTYPES:
             self._effect_queue[effect_type] = []
 
@@ -51,9 +53,6 @@ class EntityEffect(object):
         self.time_to_live = time_to_live
         self.effect_type = effect_type
         self.is_blocked = False
-
-    def message(self):
-        pass
 
     def update(self):
         pass
@@ -156,4 +155,24 @@ class Heal(EntityEffect):
     def update(self):
         self.target_entity.heal(self.health)
         self.message()
+        self.tick()
+
+
+class Equip(EntityEffect):
+    def __init__(self, source_entity, target_entity, item):
+        super(Equip, self).__init__(source_entity=source_entity,
+                                    target_entity=target_entity,
+                                    effect_type=EffectTypes.EQUIPMENT,
+                                    time_to_live=1)
+        self.item = item
+
+    def message(self):
+        message = "%s equips %s." % (self.source_entity.name, self.item.name)
+        messenger.messenger.message(message)
+
+    def update(self):
+        equipment = self.target_entity.equipment
+        equip_succeded = equipment.try_equip(self.item)
+        if(equip_succeded):
+            self.message()
         self.tick()

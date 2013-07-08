@@ -19,6 +19,27 @@ class ItemAction(Action):
     def act(self, source_entity, target_entity):
         pass
 
+    def remove(self):
+        self.source_item.inventory.remove_item(self.source_item)
+
+
+class EquipAction(ItemAction):
+    def __init__(self, source_item):
+        super(EquipAction, self).__init__(source_item)
+        self.name = "Equip"
+
+    def act(self, source_entity, target_entity):
+        self.equip(target_entity)
+
+    def equip(self, target_entity):
+        equipment = target_entity.equipment
+        can_equip = not equipment.has(self.source_item.equipment_slot)
+        if(can_equip):
+            equip_effect = entityeffect.Equip(target_entity,
+                                              target_entity, self.source_item)
+            target_entity.add_entity_effect(equip_effect)
+            self.remove()
+
 
 class DrinkAction(ItemAction):
     def __init__(self, source_item):
@@ -31,9 +52,6 @@ class DrinkAction(ItemAction):
 
     def drink(self):
         pass
-
-    def remove(self):
-        self.source_item.inventory.remove_item(self.source_item)
 
 
 class HealingPotionDrink(DrinkAction):

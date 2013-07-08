@@ -83,11 +83,11 @@ class Game(gamestate.GameState):
         self.monster_status_bar.draw()
 
     def update(self):
-        if(self.player.turn_over):
-            turn.current_turn += 1
         self.dungeon_level.update()
         self.monster_status_bar.update(self.player)
         self.player_status_bar.update()
+        if(self.player.turn_over):
+            turn.current_turn += 1
         self.message_bar.update()
         if(self.player.is_dead()):
             gamestate.game_state_stack.pop()

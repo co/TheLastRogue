@@ -4,6 +4,7 @@ import counter
 import constants
 import gamepiece
 import entityeffect
+import equipment
 import libtcodpy as libtcod
 
 FACTION_PLAYER = 0
@@ -23,6 +24,8 @@ class Entity(gamepiece.GamePiece):
         self.hp = counter.Counter(1, 1)
         self._sight_radius = 8
         self._strength = 3
+        self.equipment = equipment.Equipment()
+
         self._faction = FACTION_MONSTER
         self.effect_queue = entityeffect.EffectQueue()
         self._status_flags = set()
