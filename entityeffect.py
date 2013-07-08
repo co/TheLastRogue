@@ -22,6 +22,11 @@ class DamageTypes(object):
     MAGIC = 1
 
 
+class EffectCause(object):
+    ITEM = 0
+    MAGIC = 1
+
+
 class EffectQueue(object):
     def __init__(self):
         self._effect_queue = [None for x in range(len(EffectTypes.ALLTYPES))]

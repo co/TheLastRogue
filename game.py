@@ -44,8 +44,12 @@ class Game(gamestate.GameState):
         potion = item.HealthPotion()
         potion_position = vector2d.Vector2D(24, 16)
 
+        ring = item.RingOfInvisibility()
+        ring_position = vector2d.Vector2D(20, 13)
+
         gun.try_move(gun_position, self.dungeon_level)
         potion.try_move(potion_position, self.dungeon_level)
+        ring.try_move(ring_position, self.dungeon_level)
 
         status_bar_position = vector2d.Vector2D(settings.WINDOW_WIDTH -
                                                 constants.STATUS_BAR_WIDTH, 0)

@@ -2,6 +2,8 @@ import colors
 import action
 import gamepiece
 import equipment
+import entityeffect
+import entity
 
 
 class Item(gamepiece.GamePiece):
@@ -13,6 +15,7 @@ class Item(gamepiece.GamePiece):
         self.draw_order = 1
         self._name = "XXX_UNNAMED_XXX"
         self._description = "XXX_DESCRIPTION_XXX"
+        self._color_bg = None
         self.inventory = None
         self.actions = []
 
@@ -22,12 +25,40 @@ class EquipableItem(Item):
         super(EquipableItem, self).__init__()
         self.equipment_slot = equipment_slot
 
+    def equip_effect(self, entity):
+        pass
+
+    def unequip_effect(self, entity):
+        pass
+
+    def equiped_effect(self, entity):
+        pass
+
+
+class RingOfInvisibility(EquipableItem):
+    def __init__(self):
+        super(RingOfInvisibility,
+              self).__init__(equipment.EquipmentSlots.LEFTRING)
+        self._color_fg = colors.DB_GOLDEN_FIZZ
+        self._symbol = ord('o')
+        self._name = "Ring of Invisibility"
+        self._description =\
+            "The metal is warm to your skin,\
+            this ring will make you invisible"
+        self.actions.append(action.EquipAction(self))
+
+    def equiped_effect(self, target_entity):
+        invisibile_flag = entity.StatusFlags.INVISIBILE
+        invisibility_effect = entityeffect.\
+            StatusAdder(target_entity, target_entity,
+                        invisibile_flag, time_to_live=1)
+        target_entity.add_entity_effect(invisibility_effect)
+
 
 class Gun(EquipableItem):
     def __init__(self):
         super(Gun, self).__init__(equipment.EquipmentSlots.MAINHAND)
         self._color_fg = colors.DB_WHITE
-        self._color_bg = None
         self._symbol = ord('(')
         self._name = "Gun"
         self._description =\
