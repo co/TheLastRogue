@@ -109,7 +109,7 @@ class Teleport(EntityEffect):
     def update(self):
         dungeon_level = self.target_entity.dungeon_level
         positions = dungeon_level.\
-            get_walkable_positions_from_start_position(self.target_entity.position)
+            get_walkable_positions_from_position(self.target_entity.position)
         random_positions = random.sample(positions, len(positions))
         for position in random_positions:
             teleport_successful = self.target_entity.try_move(position)
@@ -119,11 +119,11 @@ class Teleport(EntityEffect):
 
 
 class Damage(EntityEffect):
-    def __init__(self, source_entity, target_entity, effect_type, damage,
+    def __init__(self, source_entity, target_entity, damage,
                  damage_types=[DamageTypes.PHYSICAL], time_to_live=1):
         super(Damage, self).__init__(source_entity=source_entity,
                                      target_entity=target_entity,
-                                     effect_type=effect_type,
+                                     effect_type=EffectTypes.DAMAGE,
                                      time_to_live=time_to_live)
         self.damage = damage
         self.damage_types = damage_types
@@ -135,5 +135,25 @@ class Damage(EntityEffect):
 
     def update(self):
         self.target_entity.hurt(self.damage)
+        self.message()
+        self.tick()
+
+
+class Heal(EntityEffect):
+    def __init__(self, source_entity, target_entity, health,
+                 time_to_live=1):
+        super(Heal, self).__init__(source_entity=source_entity,
+                                   target_entity=target_entity,
+                                   effect_type=EffectTypes.HEAL,
+                                   time_to_live=time_to_live)
+        self.health = health
+
+    def message(self):
+        message = "%s heals %s for %d health." %\
+            (self.source_entity.name, self.target_entity.name, self.health)
+        messenger.messenger.message(message)
+
+    def update(self):
+        self.target_entity.heal(self.health)
         self.message()
         self.tick()

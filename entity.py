@@ -106,9 +106,9 @@ class Entity(gamepiece.GamePiece):
 
     def hit(self, target_entity):
         damage = random.randrange(1, self._strength)
-        damage_types = entityeffect.DamageTypes.PHYSICAL
+        damage_types = [entityeffect.DamageTypes.PHYSICAL]
         damage_effect = entityeffect.Damage(self, target_entity,
-                                            damage_types, damage)
+                                            damage, damage_types=damage_types)
         target_entity.add_entity_effect(damage_effect)
 
     def add_entity_effect(self, effect):
@@ -168,7 +168,7 @@ class Entity(gamepiece.GamePiece):
 
     def set_path_to_random_walkable_point(self):
         positions = self.dungeon_level.\
-            get_walkable_positions_from_start_position(self.position)
+            get_walkable_positions_from_position(self.position)
         destination = random.sample(positions, 1)[0]
         libtcod.path_compute(self.path, self.position.x, self.position.y,
                              destination.x, destination.y)

@@ -17,6 +17,7 @@ class Inventory(object):
         else:
             item.try_remove_from_dungeon()
             self._items.append(item)
+            item.inventory = self
             return True
 
     def has_room_for_item(self, item):
@@ -24,7 +25,11 @@ class Inventory(object):
 
     def drop_item(self, item):
         item.try_move(self._entity.position, self._entity.dungeon_level)
+        self.remove_item(item)
+
+    def remove_item(self, item):
         self._items.remove(item)
+        item.inventory = None
 
     def has_item(self, item):
         return item in self._items

@@ -174,7 +174,7 @@ class DungeonLevel(object):
             if(entity.is_dead()):
                 entity.kill()
 
-    def get_walkable_positions_from_start_position(self, position):
+    def get_walkable_positions_from_position(self, position):
         if(not (position in self._walkable_positions_dictionary_cache.keys()
                 and self._terrain_changed_timestamp <=
                 self._walkable_positions_cache_timestamp)):

@@ -39,9 +39,13 @@ class Game(gamestate.GameState):
         statue.try_move(statue_pos, self.dungeon_level)
 
         gun = item.Gun()
-        item_position = vector2d.Vector2D(20, 20)
+        gun_position = vector2d.Vector2D(20, 20)
 
-        gun.try_move(item_position, self.dungeon_level)
+        potion = item.HealthPotion()
+        potion_position = vector2d.Vector2D(24, 16)
+
+        gun.try_move(gun_position, self.dungeon_level)
+        potion.try_move(potion_position, self.dungeon_level)
 
         status_bar_position = vector2d.Vector2D(settings.WINDOW_WIDTH -
                                                 constants.STATUS_BAR_WIDTH, 0)

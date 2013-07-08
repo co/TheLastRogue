@@ -108,7 +108,7 @@ class Player(entity.Entity):
                 inventory_menu = menu.InventoryMenu(inventory_position,
                                                     settings.WINDOW_WIDTH,
                                                     settings.WINDOW_HEIGHT,
-                                                    self.inventory)
+                                                    self)
                 gamestate.game_state_stack.push(inventory_menu)
 
     def get_memory_of_map(self, dungeon_level):

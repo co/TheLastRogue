@@ -27,19 +27,31 @@ class Menu(gamestate.GameState):
                                                         vertical_space=1)
 
     def update(self):
+        if(not self.has_valid_option_selected()):
+            self._selected_index = 0
+            if(not self.has_valid_option_selected()):
+                gamestate.game_state_stack.pop()
+                return
         key = inputhandler.get_keypress()
         if key == inputhandler.UP:
             self.index_decrease()
         if key == inputhandler.DOWN:
             self.index_increase()
         if key == inputhandler.ENTER:
-            self.activate(self._selected_index)
+            self.activate()
         if key == inputhandler.ESCAPE and self.may_escape:
             gamestate.game_state_stack.pop()
 
         self._recreate_option_list()
 
+    def has_valid_option_selected(self):
+        return 0 <= self._selected_index < len(self._menu_items)
+
+    def _update_menu_items(self):
+        pass
+
     def _recreate_option_list(self):
+        self._update_menu_items()
         self._item_stack_panel.elements = []
         for index, item in enumerate(self._menu_items):
             if(index == self._selected_index):
@@ -49,7 +61,7 @@ class Menu(gamestate.GameState):
             menu_item = gui.TextBox(item, vector2d.ZERO, color)
             self._item_stack_panel.elements.append(menu_item)
 
-    def activate(self, index):
+    def activate(self):
         pass
 
     def index_increase(self):
@@ -83,7 +95,7 @@ class MainMenu(Menu):
         self.rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
                                           height, colors.INTERFACE_BG)
 
-    def activate(self, index):
+    def activate(self):
         selected_option = self._menu_items[self._selected_index]
         if(selected_option == self.start_game_option):
             new_game = game.Game()
@@ -98,10 +110,9 @@ class MainMenu(Menu):
 
 
 class InventoryMenu(Menu):
-    def __init__(self, position, width, height, inventory):
+    def __init__(self, position, width, height, player):
         super(InventoryMenu, self).__init__(position, width, height)
-        self._inventory = inventory
-        self._menu_items = [item.name for item in inventory.items]
+        self._player = player
         self.rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
                                           height, colors.INTERFACE_BG)
         self.rectangle_screen_grey =\
@@ -119,10 +130,38 @@ class InventoryMenu(Menu):
         self._inventory_stack_panel.elements.append(heading)
         self._inventory_stack_panel.elements.append(self._item_stack_panel)
 
-    def activate(self, index):
-        pass
+    def activate(self):
+        item = self._player.inventory.items[self._selected_index]
+        if(len(item.actions) >= 1):  # No actions no need for menu.
+            item_actions_menu = ItemActionsMenu(self.position, self.width,
+                                                self.height, item,
+                                                self._player)
+            gamestate.game_state_stack.push(item_actions_menu)
+
+    def _update_menu_items(self):
+        self._menu_items = [item.name for item in self._player.inventory.items]
 
     def draw(self):
         self.rectangle_screen_grey.draw(vector2d.ZERO)
         self.rectangle_bg.draw(self.position)
         self._inventory_stack_panel.draw(self.position)
+
+
+class ItemActionsMenu(Menu):
+    def __init__(self, position, width, height, item, player):
+        super(ItemActionsMenu, self).__init__(position, width, height)
+        self._menu_items = [action.name for action in item.actions]
+        self.rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
+                                          height, colors.INTERFACE_BG)
+        self.item = item
+        self.player = player
+
+    def activate(self):
+        selected_action = self.item.actions[self._selected_index]
+        selected_action.act(self.player, self.player)
+        gamestate.game_state_stack.pop()
+
+    def draw(self):
+        self.rectangle_bg.draw()
+        draw_position = vector2d.Vector2D(0, settings.WINDOW_HEIGHT - 7)
+        self._item_stack_panel.draw(draw_position)
