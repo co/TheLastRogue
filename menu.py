@@ -103,11 +103,11 @@ class MainMenu(Menu):
         start_game_function =\
             lambda: gamestate.game_state_stack.push(game.Game())
         quit_game_function = lambda: gamestate.game_state_stack.pop()
-        self.start_game_option = MenuOption("Start Game", start_game_function)
-        self.quit_option = MenuOption("Quit", quit_game_function)
-        self._menu_items = [self.start_game_option, self.quit_option]
-        self.rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
-                                          height, colors.INTERFACE_BG)
+        start_game_option = MenuOption("Start Game", start_game_function)
+        quit_option = MenuOption("Quit", quit_game_function)
+        self._menu_items = [start_game_option, quit_option]
+        self._rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
+                                           height, colors.INTERFACE_BG)
 
     def start_game():
         new_game = game.Game()
@@ -117,7 +117,7 @@ class MainMenu(Menu):
         gamestate.game_state_stack.pop()
 
     def draw(self):
-        self.rectangle_bg.draw()
+        self._rectangle_bg.draw()
         draw_position = vector2d.Vector2D(0, settings.WINDOW_HEIGHT - 7)
         self._item_stack_panel.draw(draw_position)
 
@@ -126,8 +126,8 @@ class InventoryMenu(Menu):
     def __init__(self, position, width, height, player):
         super(InventoryMenu, self).__init__(position, width, height)
         self._player = player
-        self.rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
-                                          height, colors.INTERFACE_BG)
+        self._rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
+                                           height, colors.INTERFACE_BG)
         self.rectangle_screen_grey =\
             gui.RectangleGray(vector2d.ZERO,
                               settings.WINDOW_WIDTH,
@@ -171,7 +171,7 @@ class InventoryMenu(Menu):
 
     def draw(self):
         self.rectangle_screen_grey.draw(vector2d.ZERO)
-        self.rectangle_bg.draw(self.position)
+        self._rectangle_bg.draw(self.position)
         self._inventory_stack_panel.draw(self.position)
 
 
@@ -180,13 +180,13 @@ class OpenItemActionMenu():
         self.position = position
         self.width = width
         self.height = height
-        self.item = item
-        self.player = player
+        self._item = item
+        self._player = player
 
     def __call__(self):
         item_actions_menu = ItemActionsMenu(self.position, self.width,
-                                            self.height, self.item,
-                                            self.player)
+                                            self.height, self._item,
+                                            self._player)
         gamestate.game_state_stack.push(item_actions_menu)
 
 
@@ -194,28 +194,31 @@ class ItemActionsMenu(Menu):
     def __init__(self, position, width, height, item, player):
         super(ItemActionsMenu, self).__init__(position, width, height)
         self._menu_items = [action.name for action in item.actions]
-        self.rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
-                                          height, colors.INTERFACE_BG)
-        self.item = item
-        self.player = player
-
-    def activate(self):
-        selected_action = self.item.actions[self._selected_index]
-        if(selected_action.can_act(source_entity=self.player,
-                                   target_entity=self.player)):
-            selected_action.act(source_entity=self.player,
-                                target_entity=self.player)
-        gamestate.game_state_stack.pop()
+        self._rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
+                                           height, colors.INTERFACE_BG)
+        self._item = item
+        self._player = player
 
     def draw(self):
-        self.rectangle_bg.draw(self.position)
+        self._rectangle_bg.draw(self.position)
         self._item_stack_panel.draw(self.position)
 
     def _update_menu_items(self):
         self._menu_items =\
             [MenuOption(action.name,
-                        lambda: action.act(source_entity=self.player,
-                                           target_entity=self.player),
-                        lambda: action.can_act(source_entity=self.player,
-                                               target_entity=self.player))
-             for action in self.item.actions]
+                        DelayedAction(action, self._player, self._player),
+                        action.can_act(source_entity=self._player,
+                                       target_entity=self._player))
+             for action in self._item.actions]
+
+
+class DelayedAction(object):
+    def __init__(self, action, source_entity, target_entity):
+        self.action = action
+        self.source_entity = source_entity
+        self.target_entity = target_entity
+
+    def __call__(self):
+        self.action.act(source_entity=self.source_entity,
+                        target_entity=self.target_entity)
+        gamestate.game_state_stack.pop()
