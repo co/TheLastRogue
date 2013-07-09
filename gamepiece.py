@@ -1,14 +1,14 @@
 import colors
-import gamepiece
 import vector2d
 import libtcodpy as libtcod
 
 
-UNDEFINED_GAME_PIECE = 0
-ENTITY_GAME_PIECE = 1
-ITEM_GAME_PIECE = 2
-DECORATION_GAME_PIECE = 3
-TERRAIN_GAME_PIECE = 4
+class GamePieceType(object):
+    UNDEFINED = 0
+    ENTITY = 1
+    ITEM = 2
+    DECORATION = 3
+    TERRAIN = 4
 
 
 class GamePiece(object):
@@ -19,7 +19,7 @@ class GamePiece(object):
         self._description = "XXX_no_description_XXX"
 
         #  These fields should both be set by subclasses.
-        self.piece_type = UNDEFINED_GAME_PIECE
+        self.piece_type = GamePieceType.UNDEFINED
         self.max_instances_in_single_tile = -1
         self.draw_order = -1
 
@@ -94,7 +94,7 @@ class GamePiece(object):
         if(new_dungeon_level is None):
             new_dungeon_level = self.dungeon_level
         new_tile = new_dungeon_level.get_tile(new_position)
-        if(not self.__can_place_piece_on_tile(new_tile)):
+        if(not self.__can_pass_tile(new_tile)):
             return False
         return True
 
@@ -119,18 +119,16 @@ class GamePiece(object):
         self.__position = new_position
         self.dungeon_level = new_dungeon_level
 
-    def __can_place_piece_on_tile(self, tile):
+    def __can_pass_tile(self, tile):
         is_too_many = (len(tile.game_pieces[self.piece_type]) >=
                        self.max_instances_in_single_tile)
-        self_is_terrain = self.piece_type == gamepiece.TERRAIN_GAME_PIECE
-
-        if((not is_too_many) and self_is_terrain):
-            return True
-        if(tile.get_terrain() is None):
-            return False
-        if(not is_too_many and not tile.get_terrain().is_solid()):
+        if((not is_too_many) and
+           self._can_pass_terrain(tile.get_terrain())):
             return True
         return False
+
+    def _can_pass_terrain(self, terrain):
+        return True
 
     def __move(self, new_position, dungeon_level):
         self.__try_remove_from_dungeon()

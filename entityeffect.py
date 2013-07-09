@@ -111,9 +111,8 @@ class Teleport(EntityEffect):
                              EffectTypes.TELEPORT)
 
     def update(self):
-        dungeon_level = self.target_entity.dungeon_level
-        positions = dungeon_level.\
-            get_walkable_positions_from_position(self.target_entity.position)
+        positions =\
+            self.target_entity.get_walkable_positions_from_my_position()
         random_positions = random.sample(positions, len(positions))
         for position in random_positions:
             teleport_successful = self.target_entity.try_move(position)

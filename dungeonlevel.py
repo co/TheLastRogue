@@ -1,5 +1,4 @@
 import terrain
-import constants
 import tile
 import turn
 import player
@@ -78,11 +77,10 @@ class DungeonLevel(object):
         self.tile_matrix = tile_matrix
         self.depth = depth
         self.entities = []
-        self.dungeon_map = libtcod.map_new(self.width, self.height)
         self.suspended_entity = None
-        self._walkable_positions_dictionary_cache = {}
-        self._walkable_positions_cache_timestamp = -1
+
         self._terrain_changed_timestamp = 0
+        self._dungeon_map_timestamp = -1
 
     def draw(self, camera):
         the_player = self.get_player_if_available()
@@ -111,6 +109,8 @@ class DungeonLevel(object):
         return self.tile_matrix[position.y][position.x]
 
     def update(self):
+        if(self._dungeon_map_timestamp <= self._terrain_changed_timestamp):
+            self._entities_calculate_dungeon_map()
         self._entities_calculate_fov()
         self._entities_act()
         self._entities_equipment_effects()
@@ -118,30 +118,14 @@ class DungeonLevel(object):
         self._entities_effects_update()
         self._remove_dead_monsters()
 
-    def _entities_calculate_fov(self):
-        self._update_dungeon_map()
+    def _entities_calculate_dungeon_map(self):
         for entity in self.entities:
-            libtcod.map_copy(self.dungeon_map, entity.dungeon_map)
+            entity.update_dungeon_map()
+        self._dungeon_map_timestamp = turn.current_turn
+
+    def _entities_calculate_fov(self):
+        for entity in self.entities:
             entity.update_fov()
-
-    def _update_dungeon_map(self):
-        for y in range(self.height):
-            for x in range(self.width):
-                terrain = self.tile_matrix[y][x].get_terrain()
-                libtcod.map_set_properties(self.dungeon_map, x, y,
-                                           terrain.is_transparent(),
-                                           not terrain.is_solid())
-
-    def print_is_transparent_map(self):
-        print libtcod.map_get_height(self.dungeon_map)
-        for y in range(libtcod.map_get_height(self.dungeon_map)):
-            line = ""
-            for x in range(libtcod.map_get_width(self.dungeon_map)):
-                if(libtcod.map_is_transparent(self.dungeon_map, x, y)):
-                    line += " "
-                else:
-                    line += "#"
-            print(line)
 
     def _entities_effects_update(self):
         for entity in self.entities:
@@ -180,39 +164,5 @@ class DungeonLevel(object):
             if(entity.is_dead()):
                 entity.kill()
 
-    def get_walkable_positions_from_position(self, position):
-        if(not (position in self._walkable_positions_dictionary_cache.keys()
-                and self._terrain_changed_timestamp <=
-                self._walkable_positions_cache_timestamp)):
-            self._calculate_walkable_positions_from_start_position(position)
-        return self._walkable_positions_dictionary_cache[position]
-
-    def _calculate_walkable_positions_from_start_position(self, position):
-        visited = set()
-        visited.add(position)
-        queue = [position]
-        queue.extend(self._get_walkable_neighbors(position))
-        while (len(queue) > 0):
-            position = queue.pop()
-            while(len(queue) > 0 and position in visited):
-                position = queue.pop()
-            visited.add(position)
-            neighbors = set(self._get_walkable_neighbors(position)) - visited
-            queue.extend(neighbors)
-        visited = list(visited)
-        for point in visited:
-            self._walkable_positions_dictionary_cache[point] = visited
-        self._walkable_positions_cache_timestamp = turn.current_turn
-
-    def _get_walkable_neighbors(self, position):
-        result_positions = []
-        for direction in constants.DIRECTIONS.values():
-            neighbor_position = position + direction
-            x, y = neighbor_position.x, neighbor_position.y
-            try:
-                neighbor = self.tile_matrix[y][x]
-                if(not neighbor.get_terrain().is_solid()):
-                    result_positions.append(neighbor_position)
-            except IndexError:
-                pass
-        return result_positions
+    def signal_terrain_changed(self):
+        self._terrain_changed_timestamp = turn.current_turn

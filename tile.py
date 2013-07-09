@@ -4,10 +4,10 @@ import gamepiece
 class Tile(object):
     def __init__(self):
         self.game_pieces = {
-            gamepiece.ENTITY_GAME_PIECE: [],
-            gamepiece.ITEM_GAME_PIECE: [],
-            gamepiece.DECORATION_GAME_PIECE: [],
-            gamepiece.TERRAIN_GAME_PIECE: []
+            gamepiece.GamePieceType.ENTITY: [],
+            gamepiece.GamePieceType.ITEM: [],
+            gamepiece.GamePieceType.DECORATION: [],
+            gamepiece.GamePieceType.TERRAIN: []
         }
 
     def draw(self, position, is_seen, camera):
@@ -24,13 +24,13 @@ class Tile(object):
         return lists_sorted_on_draw_order
 
     def get_first_item(self):
-        return self.get_first_piece_of_type(gamepiece.ITEM_GAME_PIECE)
+        return self.get_first_piece_of_type(gamepiece.GamePieceType.ITEM)
 
     def get_first_entity(self):
-        return self.get_first_piece_of_type(gamepiece.ENTITY_GAME_PIECE)
+        return self.get_first_piece_of_type(gamepiece.GamePieceType.ENTITY)
 
     def get_terrain(self):
-        return self.get_first_piece_of_type(gamepiece.TERRAIN_GAME_PIECE)
+        return self.get_first_piece_of_type(gamepiece.GamePieceType.TERRAIN)
 
     def get_first_piece_of_type(self, piece_type):
         if(len(self.game_pieces[piece_type]) < 1):
@@ -38,7 +38,7 @@ class Tile(object):
         return self.game_pieces[piece_type][0]
 
     def has_entity(self):
-        if(len(self.game_pieces[gamepiece.ENTITY_GAME_PIECE]) < 1):
+        if(len(self.game_pieces[gamepiece.GamePiece.Entity]) < 1):
             return False
         return True
 

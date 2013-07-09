@@ -1,14 +1,19 @@
 import random
+import turn
+import numpy
 import vector2d
 import counter
 import constants
 import gamepiece
 import entityeffect
 import equipment
+import terrain
 import libtcodpy as libtcod
 
-FACTION_PLAYER = 0
-FACTION_MONSTER = 1
+
+class Faction(object):
+    PLAYER = 0
+    MONSTER = 1
 
 
 class StatusFlags(object):
@@ -16,25 +21,40 @@ class StatusFlags(object):
     SEE_INVISIBILITY = 1
     FLYING = 2
     HAS_MIND = 3
+    CAN_OPEN_DOORS = 4
 
 
 class Entity(gamepiece.GamePiece):
+
     def __init__(self):
         super(Entity, self).__init__()
         self.hp = counter.Counter(1, 1)
         self._sight_radius = 8
-        self._strength = 3
+        self._strength = 1
         self.equipment = equipment.Equipment(self)
 
-        self._faction = FACTION_MONSTER
+        self._faction = Faction.MONSTER
         self.effect_queue = entityeffect.EffectQueue()
         self._status_flags = set()
+        self._status_flags.add(StatusFlags.CAN_OPEN_DOORS)
 
-        self.piece_type = gamepiece.ENTITY_GAME_PIECE
+        self.piece_type = gamepiece.GamePieceType.ENTITY
         self.max_instances_in_single_tile = 1
         self.draw_order = 2
         self.path = None
         self.__dungeon_level = None
+        self._init_entity_effects()
+
+        #  Pathfinding Cache
+        self._walkable_positions_dictionary_cache = {}
+        self._walkable_positions_cache_timestamp = -1
+
+    def _init_entity_effects(self):
+        can_open_doors_flag = StatusFlags.CAN_OPEN_DOORS
+        effect = entityeffect.StatusAdder(self, self,
+                                          can_open_doors_flag,
+                                          time_to_live=numpy.inf)
+        self.add_entity_effect(effect)
 
     @property
     def dungeon_level(self):
@@ -45,7 +65,7 @@ class Entity(gamepiece.GamePiece):
         if((not self.dungeon_level is value) and (not value is None)):
             self.__dungeon_level = value
             self.dungeon_map = libtcod.map_new(value.width, value.height)
-            libtcod.map_copy(value.dungeon_map, self.dungeon_map)
+            self.update_dungeon_map()
             self.path = libtcod.path_new_using_map(self.dungeon_map, 1.0)
 
     def update(self, player):
@@ -54,7 +74,26 @@ class Entity(gamepiece.GamePiece):
     def step_random_direction(self):
         direction = random.sample(list(constants.DIRECTIONS.values()), 1)
         new_position = self.position + direction[0]
-        self.try_move(new_position, self.dungeon_level)
+        self.try_step_to(new_position)
+
+    def try_step_to(self, new_position):
+        x, y = new_position.x, new_position.y
+        terrain_to_step = self.dungeon_level.tile_matrix[y][x].get_terrain()
+        if(self.try_open_door(terrain_to_step)):
+            return True
+        if(self.try_hit(new_position)):
+            return True
+        if(self.try_move(new_position)):
+            return True
+        return False
+
+    def try_open_door(self, terrain_to_step):
+        if(isinstance(terrain_to_step, terrain.Door)):
+            door = terrain_to_step
+            if(not door.is_open):
+                door.is_open = True
+                return True
+        return False
 
     def try_move(self, new_position, new_dungeon_level=None):
         if(new_dungeon_level is None):
@@ -108,7 +147,7 @@ class Entity(gamepiece.GamePiece):
         return True
 
     def hit(self, target_entity):
-        damage = random.randrange(1, self._strength)
+        damage = random.randrange(0, self._strength)
         damage_types = [entityeffect.DamageTypes.PHYSICAL]
         damage_effect = entityeffect.Damage(self, target_entity,
                                             damage, damage_types=damage_types)
@@ -153,7 +192,6 @@ class Entity(gamepiece.GamePiece):
 
     def print_visible_map(self):
         for y in range(libtcod.map_get_height(self.dungeon_map)):
-            print y
             line = ""
             for x in range(libtcod.map_get_width(self.dungeon_map)):
                 if(libtcod.map_is_in_fov(self.dungeon_map, x, y)):
@@ -166,12 +204,11 @@ class Entity(gamepiece.GamePiece):
         if(not self.has_path()):
             return False
         x, y = libtcod.path_walk(self.path, True)
-        step_succeeded = self.try_move(vector2d.Vector2D(x, y))
+        step_succeeded = self.try_step_to(vector2d.Vector2D(x, y))
         return step_succeeded
 
     def set_path_to_random_walkable_point(self):
-        positions = self.dungeon_level.\
-            get_walkable_positions_from_position(self.position)
+        positions = self.get_walkable_positions_from_my_position()
         destination = random.sample(positions, 1)[0]
         libtcod.path_compute(self.path, self.position.x, self.position.y,
                              destination.x, destination.y)
@@ -184,3 +221,60 @@ class Entity(gamepiece.GamePiece):
 
     def clear_all_status(self):
         self._status_flags = set()
+
+    def _can_pass_terrain(self, terrain_to_pass):
+        if(terrain_to_pass is None):
+            return False
+        if(not terrain_to_pass.is_solid()):
+            return True
+        if(self.has_status(StatusFlags.CAN_OPEN_DOORS) and
+           isinstance(terrain_to_pass, terrain.Door)):
+            return True
+        return False
+
+    def get_walkable_positions_from_my_position(self):
+        position = self.position
+        if(not (position in self._walkable_positions_dictionary_cache.keys()
+                and self.dungeon_level._terrain_changed_timestamp <=
+                self._walkable_positions_cache_timestamp)):
+            self._calculate_walkable_positions_from_start_position(position)
+        return self._walkable_positions_dictionary_cache[position]
+
+    def _calculate_walkable_positions_from_start_position(self, position):
+        visited = set()
+        visited.add(position)
+        queue = [position]
+        queue.extend(self._get_walkable_neighbors(position))
+        while (len(queue) > 0):
+            position = queue.pop()
+            while(len(queue) > 0 and position in visited):
+                position = queue.pop()
+            visited.add(position)
+            neighbors = set(self._get_walkable_neighbors(position)) - visited
+            queue.extend(neighbors)
+        visited = list(visited)
+        for point in visited:
+            self._walkable_positions_dictionary_cache[point] = visited
+        self._walkable_positions_cache_timestamp = turn.current_turn
+
+    def _get_walkable_neighbors(self, position):
+        result_positions = []
+        for direction in constants.DIRECTIONS.values():
+            neighbor_position = position + direction
+            x, y = neighbor_position.x, neighbor_position.y
+            try:
+                neighbor = self.dungeon_level.tile_matrix[y][x]
+                if(self._can_pass_terrain(neighbor.get_terrain())):
+                    result_positions.append(neighbor_position)
+            except IndexError:
+                pass
+        return result_positions
+
+    def update_dungeon_map(self):
+        for y in range(self.dungeon_level.height):
+            for x in range(self.dungeon_level.width):
+                terrain = self.dungeon_level.tile_matrix[y][x].get_terrain()
+                libtcod.map_set_properties(self.dungeon_map, x, y,
+                                           terrain.is_transparent(),
+                                           self._can_pass_terrain(terrain))
+        self.update_fov()

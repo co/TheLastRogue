@@ -10,7 +10,7 @@ class Item(gamepiece.GamePiece):
     def __init__(self):
         super(Item, self).__init__()
 
-        self.piece_type = gamepiece.ITEM_GAME_PIECE
+        self.piece_type = gamepiece.GamePieceType.ITEM
         self.max_instances_in_single_tile = 1
         self.draw_order = 1
         self._name = "XXX_UNNAMED_XXX"

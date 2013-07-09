@@ -19,11 +19,12 @@ class Player(entity.Entity):
         super(Player, self).__init__()
         self.hp = counter.Counter(10, 10)
         self._memory_map = []
-        self._faction = entity.FACTION_PLAYER
+        self._faction = entity.Faction.PLAYER
         self.inventory = inventory.Inventory(self)
         self._name = "CO"
         self._description = "The Brave"
         self.turn_over = False
+        self._strength = 3
 
     @property
     def color_fg(self):
@@ -42,10 +43,8 @@ class Player(entity.Entity):
         if key in inputhandler.move_controls:
             dx, dy = inputhandler.move_controls[key]
             new_position = position + (dx, dy)
-            move_succeded = self.try_move(new_position)
+            move_succeded = self.try_step_to(new_position)
             self.turn_over = move_succeded
-            if(not self.turn_over):
-                self.turn_over = self.try_hit(new_position)
 
         elif key == inputhandler.ESCAPE:
             self.kill()

@@ -9,7 +9,7 @@ class Terrain(gamepiece.GamePiece):
         super(Terrain, self).__init__()
         self.draw_order = 0
         self.max_instances_in_single_tile = 1
-        self.piece_type = gamepiece.TERRAIN_GAME_PIECE
+        self.piece_type = gamepiece.GamePieceType.TERRAIN
 
     @staticmethod
     def is_solid():
@@ -58,12 +58,23 @@ class Door(Terrain):
 
     def __init__(self, is_open=True):
         super(Door, self).__init__()
-        self.is_open = is_open
+        self.__is_open = is_open
         self._color_fg = colors.DB_ROPE
         self._color_bg = colors.DB_OILED_CEDAR
 
     def is_solid(self):
         return not self.is_open
+
+    @property
+    def is_open(self):
+        return self.__is_open
+
+    @is_open.setter
+    def is_open(self, value):
+        if(self.__is_open == value):
+            return
+        self.__is_open = value
+        self.dungeon_level.signal_terrain_changed()
 
     @property
     def symbol(self):
