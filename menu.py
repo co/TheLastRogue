@@ -55,8 +55,10 @@ class Menu(gamestate.GameState):
         for index, item in enumerate(self._menu_items):
             if(index == self._selected_index):
                 color = colors.TEXT_SELECTED
-            else:
+            elif(item.can_activate):
                 color = colors.TEXT_UNSELECTED
+            else:
+                color = colors.TEXT_INACTIVE
             menu_item = gui.TextBox(item.text, vector2d.ZERO, color)
             self._item_stack_panel.elements.append(menu_item)
 
@@ -65,10 +67,18 @@ class Menu(gamestate.GameState):
         selected_option.activate()
 
     def index_increase(self):
+        if(not any(item.can_activate for item in self._menu_items)):
+            return
         self._offset_index(1)
+        if(not self._menu_items[self._selected_index].can_activate):
+            self.index_increase()
 
     def index_decrease(self):
+        if(not any(item.can_activate for item in self._menu_items)):
+            return
         self._offset_index(-1)
+        if(not self._menu_items[self._selected_index].can_activate):
+            self.index_decrease()
 
     def _offset_index(self, offset):
         if(len(self._menu_items) == 0):
@@ -221,4 +231,5 @@ class DelayedAction(object):
     def __call__(self):
         self.action.act(source_entity=self.source_entity,
                         target_entity=self.target_entity)
+        gamestate.game_state_stack.pop()
         gamestate.game_state_stack.pop()

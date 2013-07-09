@@ -38,8 +38,10 @@ class Game(gamestate.GameState):
         statue_pos = vector2d.Vector2D(25, 7)
         statue.try_move(statue_pos, self.dungeon_level)
 
-        gun = item.Gun()
-        gun_position = vector2d.Vector2D(20, 20)
+        gun1 = item.Gun()
+        gun2 = item.Gun()
+        gun1_position = vector2d.Vector2D(20, 20)
+        gun2_position = vector2d.Vector2D(22, 20)
 
         potion = item.HealthPotion()
         potion_position = vector2d.Vector2D(24, 16)
@@ -47,7 +49,8 @@ class Game(gamestate.GameState):
         ring = item.RingOfInvisibility()
         ring_position = vector2d.Vector2D(20, 13)
 
-        gun.try_move(gun_position, self.dungeon_level)
+        gun1.try_move(gun1_position, self.dungeon_level)
+        gun2.try_move(gun2_position, self.dungeon_level)
         potion.try_move(potion_position, self.dungeon_level)
         ring.try_move(ring_position, self.dungeon_level)
 
