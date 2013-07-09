@@ -29,10 +29,8 @@ class Menu(gamestate.GameState):
     def update(self):
         self._recreate_option_list()
         if(not self.has_valid_option_selected()):
-            self._selected_index = 0
-            if(not self.has_valid_option_selected()):
-                gamestate.game_state_stack.pop()
-                return
+            self.try_set_index_to_valid_value()
+
         key = inputhandler.get_keypress()
         if key == inputhandler.UP:
             self.index_decrease()
@@ -43,8 +41,17 @@ class Menu(gamestate.GameState):
         if key == inputhandler.ESCAPE and self.may_escape:
             gamestate.game_state_stack.pop()
 
+    def try_set_index_to_valid_value(self):
+        if(not any(menu_item.can_activate for menu_item in self._menu_items)):
+            self._selected_index = None
+        self._selected_index = 0
+        if(not self.has_valid_option_selected()):
+            print "time to increase", self._selected_index
+            self.index_increase()
+
     def has_valid_option_selected(self):
-        return 0 <= self._selected_index < len(self._menu_items)
+        return (0 <= self._selected_index < len(self._menu_items) and
+                self._menu_items[self._selected_index].can_activate)
 
     def _update_menu_items(self):
         pass
@@ -62,26 +69,32 @@ class Menu(gamestate.GameState):
             menu_item = gui.TextBox(item.text, vector2d.ZERO, color)
             self._item_stack_panel.elements.append(menu_item)
 
+    def can_activate(self):
+        return not self._selected_index is None
+
     def activate(self):
-        selected_option = self._menu_items[self._selected_index]
-        selected_option.activate()
+        if(self.can_activate()):
+            selected_option = self._menu_items[self._selected_index]
+            selected_option.activate()
 
     def index_increase(self):
-        if(not any(item.can_activate for item in self._menu_items)):
+        if(not any(item.can_activate for item in self._menu_items) or
+           self._selected_index is None):
             return
         self._offset_index(1)
         if(not self._menu_items[self._selected_index].can_activate):
             self.index_increase()
 
     def index_decrease(self):
-        if(not any(item.can_activate for item in self._menu_items)):
+        if(not any(item.can_activate for item in self._menu_items) or
+           self._selected_index is None):
             return
         self._offset_index(-1)
         if(not self._menu_items[self._selected_index].can_activate):
             self.index_decrease()
 
     def _offset_index(self, offset):
-        if(len(self._menu_items) == 0):
+        if(len(self._menu_items) == 0 or self._selected_index is None):
             return
         if(self._wrap):
             # Will behave strangely for when offset is less than -menu_size
@@ -152,10 +165,13 @@ class InventoryMenu(Menu):
                                    colors.INTERFACE_BG)
         self._inventory_stack_panel.elements.append(heading)
         self._inventory_stack_panel.elements.append(self._item_stack_panel)
+        self._update_menu_items()
+        self.try_set_index_to_valid_value()
 
     def activate(self):
-        selected_option = self._menu_items[self._selected_index]
-        selected_option.activate()
+        if(self.can_activate()):
+            selected_option = self._menu_items[self._selected_index]
+            selected_option.activate()
 
     @staticmethod
     def can_open_item_action_menu(item):
@@ -206,8 +222,11 @@ class ItemActionsMenu(Menu):
         self._menu_items = [action.name for action in item.actions]
         self._rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
                                            height, colors.INTERFACE_BG)
-        self._item = item
+        self._actions =\
+            sorted(item.actions, key=lambda action: action.display_order)
         self._player = player
+        self._update_menu_items()
+        self.try_set_index_to_valid_value()
 
     def draw(self):
         self._rectangle_bg.draw(self.position)
@@ -219,7 +238,7 @@ class ItemActionsMenu(Menu):
                         DelayedAction(action, self._player, self._player),
                         action.can_act(source_entity=self._player,
                                        target_entity=self._player))
-             for action in self._item.actions]
+             for action in self._actions]
 
 
 class DelayedAction(object):

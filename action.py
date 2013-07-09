@@ -9,6 +9,7 @@ TARGET_ENTITY = "target_entity"
 class Action(object):
     def __init__(self):
         self.name = "XXX_Action_name"
+        self.display_order = 100
 
     def act(self, **kwargs):
         pass
@@ -31,6 +32,7 @@ class EquipAction(ItemAction):
     def __init__(self, source_item):
         super(EquipAction, self).__init__(source_item)
         self.name = "Equip"
+        self.display_order = 90
 
     def act(self, **kwargs):
         target_entity = kwargs[TARGET_ENTITY]
@@ -51,6 +53,7 @@ class DrinkAction(ItemAction):
     def __init__(self, source_item):
         super(DrinkAction, self).__init__(source_item)
         self.name = "Drink"
+        self.display_order = 90
 
     def act(self, **kwargs):
         target_entity = kwargs[TARGET_ENTITY]
@@ -78,6 +81,7 @@ class DropAction(ItemAction):
     def __init__(self, source_item):
         super(DropAction, self).__init__(source_item)
         self.name = "Drop"
+        self.display_order = 110
 
     def act(self, **kwargs):
         if(not self.source_item.inventory is None):
