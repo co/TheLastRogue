@@ -90,14 +90,21 @@ class GamePiece(object):
                 self.color_fg is None)):
             libtcod.console_set_char(0, x, y, self.symbol)
 
-    def try_move(self, new_position, new_dungeon_level=None):
+    def can_move(self, new_position, new_dungeon_level=None):
         if(new_dungeon_level is None):
             new_dungeon_level = self.dungeon_level
         new_tile = new_dungeon_level.get_tile(new_position)
         if(not self.__can_place_piece_on_tile(new_tile)):
             return False
-        self.__move(new_position, new_dungeon_level)
         return True
+
+    def try_move(self, new_position, new_dungeon_level=None):
+        if(new_dungeon_level is None):
+            new_dungeon_level = self.dungeon_level
+        if(self.can_move(new_position, new_dungeon_level)):
+            self.__move(new_position, new_dungeon_level)
+            return True
+        return False
 
     def replace_move(self, new_position, new_dungeon_level=None):
         if(new_dungeon_level is None):

@@ -14,7 +14,7 @@ def clamp(n, minn, maxn):
 class Menu(gamestate.GameState):
     def __init__(self, position, width, height):
         super(Menu, self).__init__()
-        self._menu_items = ["XX_Menu_Item_XX"]
+        self._menu_items = []
         self._selected_index = 0
         self._wrap = True
         self.position = position
@@ -27,6 +27,7 @@ class Menu(gamestate.GameState):
                                                         vertical_space=1)
 
     def update(self):
+        self._recreate_option_list()
         if(not self.has_valid_option_selected()):
             self._selected_index = 0
             if(not self.has_valid_option_selected()):
@@ -42,8 +43,6 @@ class Menu(gamestate.GameState):
         if key == inputhandler.ESCAPE and self.may_escape:
             gamestate.game_state_stack.pop()
 
-        self._recreate_option_list()
-
     def has_valid_option_selected(self):
         return 0 <= self._selected_index < len(self._menu_items)
 
@@ -55,14 +54,15 @@ class Menu(gamestate.GameState):
         self._item_stack_panel.elements = []
         for index, item in enumerate(self._menu_items):
             if(index == self._selected_index):
-                color = colors.TEXT_ACTIVE
+                color = colors.TEXT_SELECTED
             else:
-                color = colors.TEXT_INACTIVE
-            menu_item = gui.TextBox(item, vector2d.ZERO, color)
+                color = colors.TEXT_UNSELECTED
+            menu_item = gui.TextBox(item.text, vector2d.ZERO, color)
             self._item_stack_panel.elements.append(menu_item)
 
     def activate(self):
-        pass
+        selected_option = self._menu_items[self._selected_index]
+        selected_option.activate()
 
     def index_increase(self):
         self._offset_index(1)
@@ -74,7 +74,7 @@ class Menu(gamestate.GameState):
         if(len(self._menu_items) == 0):
             return
         if(self._wrap):
-    # Will behave strangely for when offset is less than -menu_size
+            # Will behave strangely for when offset is less than -menu_size
             self._selected_index =\
                 (offset + self._selected_index + len(self._menu_items))\
                 % len(self._menu_items)
@@ -86,22 +86,35 @@ class Menu(gamestate.GameState):
         self._item_stack_panel.draw(self.position)
 
 
+class MenuOption(object):
+    def __init__(self, text, activate_function,
+                 can_activate=True):
+        self.text = text
+        self._activate_function = activate_function
+        self.can_activate = can_activate
+
+    def activate(self):
+        return self._activate_function()
+
+
 class MainMenu(Menu):
     def __init__(self, position, width, height):
         super(MainMenu, self).__init__(position, width, height)
-        self.start_game_option = "Start Game"
-        self.quit_option = "Quit"
+        start_game_function =\
+            lambda: gamestate.game_state_stack.push(game.Game())
+        quit_game_function = lambda: gamestate.game_state_stack.pop()
+        self.start_game_option = MenuOption("Start Game", start_game_function)
+        self.quit_option = MenuOption("Quit", quit_game_function)
         self._menu_items = [self.start_game_option, self.quit_option]
         self.rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
                                           height, colors.INTERFACE_BG)
 
-    def activate(self):
-        selected_option = self._menu_items[self._selected_index]
-        if(selected_option == self.start_game_option):
-            new_game = game.Game()
-            gamestate.game_state_stack.push(new_game)
-        elif(selected_option == self.quit_option):
-            gamestate.game_state_stack.pop()
+    def start_game():
+        new_game = game.Game()
+        gamestate.game_state_stack.push(new_game)
+
+    def quit():
+        gamestate.game_state_stack.pop()
 
     def draw(self):
         self.rectangle_bg.draw()
@@ -131,20 +144,50 @@ class InventoryMenu(Menu):
         self._inventory_stack_panel.elements.append(self._item_stack_panel)
 
     def activate(self):
-        item = self._player.inventory.items[self._selected_index]
+        selected_option = self._menu_items[self._selected_index]
+        selected_option.activate()
+
+    @staticmethod
+    def can_open_item_action_menu(item):
         if(len(item.actions) >= 1):  # No actions no need for menu.
-            item_actions_menu = ItemActionsMenu(self.position, self.width,
-                                                self.height, item,
-                                                self._player)
-            gamestate.game_state_stack.push(item_actions_menu)
+            return True
+        return False
+
+    @staticmethod
+    def open_item_action_menu(item, position, width, height, player):
+        item_actions_menu = ItemActionsMenu(position, width,
+                                            height, item,
+                                            player)
+        gamestate.game_state_stack.push(item_actions_menu)
 
     def _update_menu_items(self):
-        self._menu_items = [item.name for item in self._player.inventory.items]
+        self._menu_items =\
+            [MenuOption(item.name,
+                        OpenItemActionMenu(self.position, self.width,
+                                           self.height, item,
+                                           self._player),
+                        (len(item.actions) >= 1))
+             for item in self._player.inventory.items]
 
     def draw(self):
         self.rectangle_screen_grey.draw(vector2d.ZERO)
         self.rectangle_bg.draw(self.position)
         self._inventory_stack_panel.draw(self.position)
+
+
+class OpenItemActionMenu():
+    def __init__(self, position, width, height, item, player):
+        self.position = position
+        self.width = width
+        self.height = height
+        self.item = item
+        self.player = player
+
+    def __call__(self):
+        item_actions_menu = ItemActionsMenu(self.position, self.width,
+                                            self.height, self.item,
+                                            self.player)
+        gamestate.game_state_stack.push(item_actions_menu)
 
 
 class ItemActionsMenu(Menu):
@@ -158,9 +201,21 @@ class ItemActionsMenu(Menu):
 
     def activate(self):
         selected_action = self.item.actions[self._selected_index]
-        selected_action.act(self.player, self.player)
+        if(selected_action.can_act(source_entity=self.player,
+                                   target_entity=self.player)):
+            selected_action.act(source_entity=self.player,
+                                target_entity=self.player)
         gamestate.game_state_stack.pop()
 
     def draw(self):
         self.rectangle_bg.draw(self.position)
         self._item_stack_panel.draw(self.position)
+
+    def _update_menu_items(self):
+        self._menu_items =\
+            [MenuOption(action.name,
+                        lambda: action.act(source_entity=self.player,
+                                           target_entity=self.player),
+                        lambda: action.can_act(source_entity=self.player,
+                                               target_entity=self.player))
+             for action in self.item.actions]

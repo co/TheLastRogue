@@ -18,6 +18,7 @@ class Item(gamepiece.GamePiece):
         self._color_bg = None
         self.inventory = None
         self.actions = []
+        self.actions.append(action.DropAction(self))
 
 
 class EquipableItem(Item):

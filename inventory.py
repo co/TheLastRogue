@@ -23,9 +23,16 @@ class Inventory(object):
     def has_room_for_item(self, item):
         return len(self._items) + 1 > self._item_capacity
 
-    def drop_item(self, item):
-        item.try_move(self._entity.position, self._entity.dungeon_level)
-        self.remove_item(item)
+    def can_drop_item(self, item):
+        return item.can_move(self._entity.position,
+                             self._entity.dungeon_level)
+
+    def try_drop_item(self, item):
+        drop_successful = item.try_move(self._entity.position,
+                                        self._entity.dungeon_level)
+        if drop_successful:
+            self.remove_item(item)
+        return drop_successful
 
     def remove_item(self, item):
         self._items.remove(item)

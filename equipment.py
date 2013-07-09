@@ -44,12 +44,20 @@ class Equipment(object):
         self._equipment[equipment_slot] = None
         return equipment
 
-    def try_equip(self, equipment):
+    def can_equip(self, equipment):
         if(self.has(equipment.equipment_slot)):
             return False
+        return True
+
+    def try_equip(self, equipment):
+        if self.can_equip(equipment):
+            self.equip(equipment)
+            return True
+        return False
+
+    def equip(self, equipment):
         self._equipment[equipment.equipment_slot] = equipment
         equipment.equip_effect(self.entity)
-        return True
 
     def execute_equip_effects(self):
         for equipment_slot in EquipmentSlots.ALL:
