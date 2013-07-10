@@ -12,6 +12,7 @@ import menu
 import vector2d
 import settings
 import gamestate
+import tileselector
 
 
 class Player(entity.Entity):
@@ -52,6 +53,18 @@ class Player(entity.Entity):
 
         elif key == inputhandler.REST:  # Rest
             self.turn_over = True
+
+        elif key == inputhandler.EXAMINE:  # Rest
+            result = None
+            game_gamestate = gamestate.game_state_stack.peek()
+            gamestate.game_state_stack.\
+                push(tileselector.
+                     MissileDestinationSelector(self.position.copy(),
+                                                game_gamestate.camera,
+                                                self,
+                                                result,
+                                                game_gamestate,
+                                                self._sight_radius))
 
         elif key == inputhandler.PICKUP:  # Pick up
             item =\

@@ -7,6 +7,9 @@ class Vector2D:
         self.x = int(x)
         self.y = int(y)
 
+    def copy(self):
+        return Vector2D(self.x, self.y)
+
     def __add__(self, val):
         return Point(self[0] + val[0], self[1] + val[1])
 
@@ -66,7 +69,7 @@ class Vector2D:
 Point = Vector2D
 
 
-def DistanceSqrd(point1, point2):
+def distance_sqrd(point1, point2):
     '''
     Returns the distance between two points squared.
     Marginally faster than Distance()
@@ -74,12 +77,18 @@ def DistanceSqrd(point1, point2):
     return ((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
 
 
-def Distance(point1, point2):
+def distance(point1, point2):
     'Returns the distance between two points'
-    return math.sqrt(DistanceSqrd(point1, point2))
+    return math.sqrt(distance_sqrd(point1, point2))
 
 
-def LengthSqrd(vec):
+def chess_distance(point1, point2):
+    'Returns the chess distance between two points'
+    return max(abs(point1.x - point2.x),
+               abs(point1.y - point2.y))
+
+
+def length_sqrd(vec):
     '''
     Returns the length of a vector2D sqaured.
     Faster than Length(), but only marginally
@@ -87,29 +96,29 @@ def LengthSqrd(vec):
     return vec[0] ** 2 + vec[1] ** 2
 
 
-def Length(vec):
+def length(vec):
     'Returns the length of a vector2D'
-    return math.sqrt(LengthSqrd(vec))
+    return math.sqrt(length_sqrd(vec))
 
 
-def Normalize(vec):
+def normalize(vec):
     '''
     Returns a new vector that has the same direction as vec,
     but has a length of one.
     '''
     if(vec[0] == 0. and vec[1] == 0.):
         return Vector2D(0., 0.)
-    return vec / Length(vec)
+    return vec / length(vec)
 
 
-def Dot(a, b):
+def dot(a, b):
     'Computes the dot product of a and b'
     return a[0] * b[0] + a[1] * b[1]
 
 
-def ProjectOnto(w, v):
+def project_onto(w, v):
     'Projects w onto v.'
-    return v * Dot(w, v) / LengthSqrd(v)
+    return v * dot(w, v) / length_sqrd(v)
 
 
 ZERO = Vector2D(0, 0)

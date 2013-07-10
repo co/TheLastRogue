@@ -119,10 +119,12 @@ class Entity(gamepiece.GamePiece):
     def get_seen_entities(self):
         seen_entities = []
         for entity in self.dungeon_level.entities:
-            if libtcod.map_is_in_fov(self.dungeon_map, entity.position.x,
-                                     entity.position.y):
+            if self.can_see_point(entity.position.x, entity.position.y):
                 seen_entities.append(entity)
         return [entity for entity in seen_entities if not entity is self]
+
+    def can_see_point(self, x, y):
+        return libtcod.map_is_in_fov(self.dungeon_map, x, y)
 
     def hurt(self, damage, entity=None):
         self.hp.decrease(damage)

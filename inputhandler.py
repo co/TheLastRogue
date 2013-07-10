@@ -14,6 +14,10 @@ INVISIBILITY = 10
 ESCAPE = 11
 PICKUP = 12
 INVENTORY = 13
+EXAMINE = 14
+SHIFT = 15
+
+KEY_SHIFT = libtcod.KEY_SHIFT
 
 # TODO move to settings.
 move_controls = {
@@ -38,10 +42,12 @@ controls = {
 
     libtcod.KEY_ENTER: ENTER,
     libtcod.KEY_ESCAPE: ESCAPE,
+    libtcod.KEY_SHIFT: SHIFT,  # shift
 
     "r": REST,
     "p": PICKUP,
     "i": INVENTORY,
+    "x": EXAMINE,
     libtcod.KEY_1: HEAL,
     libtcod.KEY_2: HURT,
     libtcod.KEY_3: TELEPORT,
@@ -74,6 +80,12 @@ def get_keypress():
 
 def get_key_char(key):
     if key.vk == libtcod.KEY_CHAR:
-        return chr(key.c)
+        return chr(key.c).lower()  # Case insensetive
     else:
         return key.vk
+
+
+def is_special_key_pressed(special_key):
+    if special_key in controls.keys():
+        return libtcod.console_is_key_pressed(special_key)
+    return False

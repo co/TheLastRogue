@@ -71,8 +71,7 @@ class GamePiece(object):
 
     def draw(self, is_seen, camera):
         position = self.position + camera.offset
-        x = position.x
-        y = position.y
+        x, y = position.x, position.y
         if(not self.color_fg is None):
             if(is_seen):
                 fg_color = self.color_fg

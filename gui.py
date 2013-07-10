@@ -72,8 +72,14 @@ class RectangleGray(Rectangle):
                 libtcod.console_set_char_background(0, x, y,
                                                     self.color_bg,
                                                     libtcod.BKGND_DARKEN)
-                libtcod.console_set_char_foreground(0, x, y,
-                                                    colors.DB_TOPAZ)
+                old_fg = 0
+                libtcod.console_get_char_foreground(old_fg, x, y)
+                if(old_fg == colors.UNSEEN_FG):
+                    libtcod.console_set_char_foreground(0, x, y,
+                                                        colors.DB_SMOKEY_ASH)
+                else:
+                    libtcod.console_set_char_foreground(0, x, y,
+                                                        colors.INACTIVE_GAME_FG)
 
 
 class StackPanelVertical(UIElement):

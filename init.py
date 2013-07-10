@@ -1,4 +1,5 @@
 import settings
+import constants
 import libtcodpy as libtcod
 import os
 
@@ -12,5 +13,5 @@ def init_libtcod():
                               settings.WINDOW_HEIGHT,
                               b'The Last Rogue',
                               False)
-    fps = 60
+    fps = constants.FPS
     libtcod.sys_set_fps(fps)

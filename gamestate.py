@@ -1,4 +1,5 @@
 import libtcodpy as libtcod
+import frame
 
 
 class GameStateStack(object):
@@ -11,6 +12,7 @@ class GameStateStack(object):
             state.draw()
             libtcod.console_flush()
             state.update()
+            frame.current_frame += 1
 
     def push(self, game_state):
         self._stack.append(game_state)
