@@ -9,8 +9,9 @@ import numpy
 
 
 class PositionExaminer(gamestate.GameState):
-    def __init__(self, position, camera, background_state=None,
+    def __init__(self, state_stack, position, camera, background_state=None,
                  max_distance=numpy.inf):
+        self.state_stack = state_stack
         self.cursor_position = position
         self.max_distance = max_distance
         self.camera = camera
@@ -46,7 +47,7 @@ class PositionExaminer(gamestate.GameState):
 
     def _handle_escape(self, key):
         if key == inputhandler.ESCAPE:
-            gamestate.game_state_stack.pop()
+            self.state_stack.pop()
 
     def _draw_background(self):
         if(not self._background_state is None):
@@ -66,12 +67,16 @@ class PositionExaminer(gamestate.GameState):
 
 
 class PositionSelector(PositionExaminer):
-    def __init__(self, position, camera,
-                 return_position, background_state=None,
+    def __init__(self, state_stack, position, camera,
+                 background_state=None,
                  max_distance=numpy.inf):
-        super(PositionSelector, self).__init__(position, camera,
+        super(PositionSelector, self).__init__(state_stack, position, camera,
                                                background_state, max_distance)
-        self._return_position = return_position
+        self._return_position = None
+
+    @property
+    def selected_position(self):
+        return self._return_position.copy()
 
     def update(self):
         key = inputhandler.get_keypress()
@@ -82,33 +87,45 @@ class PositionSelector(PositionExaminer):
     def _handle_enter(self, key):
         if key == inputhandler.ENTER:
             self._return_position = self.cursor_position
-            gamestate.game_state_stack.pop()
+            print "about to return", self._return_position
+            self.state_stack.pop()
 
 
 class MissileDestinationSelector(PositionSelector):
-    def __init__(self, position, camera, entity,
-                 return_position, background_state=None,
+    def __init__(self, state_stack, position, camera, entity,
+                 background_state=None,
                  max_distance=numpy.inf):
         super(MissileDestinationSelector,
-              self).__init__(position, camera, return_position,
+              self).__init__(state_stack, position, camera,
                              background_state, max_distance)
         self.start_position = position.copy()
         self.entity = entity
 
-    def _draw_path(self):
+    @property
+    def selected_path(self):
+        return self._get_current_path()
+
+    def _get_current_path(self):
+        result = []
         sx, sy = self.start_position.x, self.start_position.y
         dx, dy = self.cursor_position.x, self.cursor_position.y
         libtcod.line_init(sx, sy, dx, dy)
         x, y = libtcod.line_step()
         while (not x is None):
-            self._draw_path_part(x, y)
+            result.append(vector2d.Vector2D(x, y))
             x, y = libtcod.line_step()
+        return result
 
-    def _draw_path_part(self, x, y):
-        screen_x = x + self.camera.offset.x
-        screen_y = y + self.camera.offset.y
-        terrain = self.entity.dungeon_level.tile_matrix[y][x].get_terrain()
-        if(self.entity.can_see_point(x, y) and terrain.is_solid()):
+    def _draw_path(self):
+        path = self._get_current_path()
+        for point in path:
+            self._draw_path_point(point)
+
+    def _draw_path_point(self, point):
+        screen_x = point.x + self.camera.offset.x
+        screen_y = point.y + self.camera.offset.y
+        terrain = self.entity.dungeon_level.get_tile(point).get_terrain()
+        if(self.entity.can_see_point(point) and terrain.is_solid()):
             libtcod.console_set_char(0, screen_x, screen_y, " ")
             libtcod.console_set_char_background(0, screen_x, screen_y,
                                                 colors.BLOCKED_PATH)
