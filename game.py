@@ -26,7 +26,7 @@ class Game(gamestate.GameState):
             vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH, 0)
         self.camera = camera.Camera(camera_position, vector2d.ZERO)
 
-        self.player = player.Player()
+        self.player = player.Player(self)
         start_position = vector2d.Vector2D(20, 10)
         self.player.try_move(start_position, self.dungeon_level)
 
@@ -97,4 +97,4 @@ class Game(gamestate.GameState):
             turn.current_turn += 1
         self.message_bar.update()
         if(self.player.is_dead()):
-            gamestate.game_state_stack.pop()
+            self.current_stack.pop()

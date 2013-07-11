@@ -39,7 +39,7 @@ class Menu(gamestate.GameState):
         if key == inputhandler.ENTER:
             self.activate()
         if key == inputhandler.ESCAPE and self.may_escape:
-            gamestate.game_state_stack.pop()
+            self.current_stack.pop()
 
     def try_set_index_to_valid_value(self):
         if(not any(menu_item.can_activate for menu_item in self._menu_items)):
@@ -124,20 +124,20 @@ class MainMenu(Menu):
     def __init__(self, position, width, height):
         super(MainMenu, self).__init__(position, width, height)
         start_game_function =\
-            lambda: gamestate.game_state_stack.push(game.Game())
-        quit_game_function = lambda: gamestate.game_state_stack.pop()
+            lambda: self.current_stack.push(game.Game())
+        quit_game_function = lambda: self.current_stack.pop()
         start_game_option = MenuOption("Start Game", start_game_function)
         quit_option = MenuOption("Quit", quit_game_function)
         self._menu_items = [start_game_option, quit_option]
         self._rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
                                            height, colors.INTERFACE_BG)
 
-    def start_game():
+    def start_game(self):
         new_game = game.Game()
-        gamestate.game_state_stack.push(new_game)
+        self.current_stack.push(new_game)
 
-    def quit():
-        gamestate.game_state_stack.pop()
+    def quit(self):
+        self.current_stack.pop()
 
     def draw(self):
         self._rectangle_bg.draw()
@@ -147,7 +147,8 @@ class MainMenu(Menu):
 
 class InventoryMenu(Menu):
     def __init__(self, position, width, height, player):
-        super(InventoryMenu, self).__init__(position, width, height)
+        super(InventoryMenu, self).__init__(position,
+                                            width, height)
         self._player = player
         self._rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
                                            height, colors.INTERFACE_BG)
@@ -179,17 +180,17 @@ class InventoryMenu(Menu):
             return True
         return False
 
-    @staticmethod
-    def open_item_action_menu(item, position, width, height, player):
+    def open_item_action_menu(self, item, position, width, height, player):
         item_actions_menu = ItemActionsMenu(position, width,
                                             height, item,
                                             player)
-        gamestate.game_state_stack.push(item_actions_menu)
+        self.current_stack.push(item_actions_menu)
 
     def _update_menu_items(self):
         self._menu_items =\
             [MenuOption(item.name,
-                        OpenItemActionMenu(self.position, self.width,
+                        OpenItemActionMenu(self.current_stack,
+                                           self.position, self.width,
                                            self.height, item,
                                            self._player),
                         (len(item.actions) >= 1))
@@ -202,18 +203,19 @@ class InventoryMenu(Menu):
 
 
 class OpenItemActionMenu():
-    def __init__(self, position, width, height, item, player):
+    def __init__(self, state_stack, position, width, height, item, player):
         self.position = position
         self.width = width
         self.height = height
         self._item = item
         self._player = player
+        self._state_stack = state_stack
 
     def __call__(self):
         item_actions_menu = ItemActionsMenu(self.position, self.width,
                                             self.height, self._item,
                                             self._player)
-        gamestate.game_state_stack.push(item_actions_menu)
+        self._state_stack.push(item_actions_menu)
 
 
 class ItemActionsMenu(Menu):
@@ -235,20 +237,22 @@ class ItemActionsMenu(Menu):
     def _update_menu_items(self):
         self._menu_items =\
             [MenuOption(action.name,
-                        DelayedAction(action, self._player, self._player),
+                        DelayedAction(self.current_stack, action,
+                                      self._player, self._player),
                         action.can_act(source_entity=self._player,
                                        target_entity=self._player))
              for action in self._actions]
 
 
 class DelayedAction(object):
-    def __init__(self, action, source_entity, target_entity):
+    def __init__(self, state_stack, action, source_entity, target_entity):
         self.action = action
         self.source_entity = source_entity
         self.target_entity = target_entity
+        self._state_stack = state_stack
 
     def __call__(self):
         self.action.act(source_entity=self.source_entity,
                         target_entity=self.target_entity)
-        gamestate.game_state_stack.pop()
-        gamestate.game_state_stack.pop()
+        self._state_stack.pop()
+        self._state_stack.pop()

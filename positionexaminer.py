@@ -23,6 +23,7 @@ class PositionExaminer(gamestate.GameState):
         key = inputhandler.get_keypress()
         self._handle_directional_input(key)
         self._handle_escape(key)
+        self._handle_enter(key)
 
     def _handle_directional_input(self, key):
         step_size = 1
@@ -47,6 +48,10 @@ class PositionExaminer(gamestate.GameState):
 
     def _handle_escape(self, key):
         if key == inputhandler.ESCAPE:
+            self.state_stack.pop()
+
+    def _handle_enter(self, key):
+        if key == inputhandler.ENTER:
             self.state_stack.pop()
 
     def _draw_background(self):
@@ -77,12 +82,6 @@ class PositionSelector(PositionExaminer):
     @property
     def selected_position(self):
         return self._return_position.copy()
-
-    def update(self):
-        key = inputhandler.get_keypress()
-        self._handle_directional_input(key)
-        self._handle_escape(key)
-        self._handle_enter(key)
 
     def _handle_enter(self, key):
         if key == inputhandler.ENTER:

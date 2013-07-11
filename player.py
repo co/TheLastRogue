@@ -16,7 +16,7 @@ import positionexaminer
 
 
 class Player(entity.Entity):
-    def __init__(self):
+    def __init__(self, game_state):
         super(Player, self).__init__()
         self.hp = counter.Counter(10, 10)
         self._memory_map = []
@@ -26,6 +26,10 @@ class Player(entity.Entity):
         self._description = "The Brave"
         self.turn_over = False
         self._strength = 3
+        self.game_state = game_state
+
+    def _current_state_stack(self):
+        return self.game_state.current_stack
 
     @property
     def color_fg(self):
@@ -55,7 +59,7 @@ class Player(entity.Entity):
             self.turn_over = True
 
         elif key == inputhandler.EXAMINE:  # Rest
-            game_gamestate = gamestate.game_state_stack.peek()
+            game_gamestate = self._current_state_stack().peek()
             choose_target_prompt = gamestate.GameStateStack()
             destination_selector =\
                 positionexaminer.\
@@ -123,7 +127,7 @@ class Player(entity.Entity):
                                                     settings.WINDOW_WIDTH,
                                                     settings.WINDOW_HEIGHT,
                                                     self)
-                gamestate.game_state_stack.push(inventory_menu)
+                self._current_state_stack().push(inventory_menu)
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)
