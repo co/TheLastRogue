@@ -1,39 +1,100 @@
-import libtcodpy as libtcod
-import frame
+import dungeonlevel
+import player
+import monster
+import vector2d
+import item
+import gui
+import camera
+import settings
+import constants
+import colors
+import turn
+import messenger
+import state
 
 
-class GameStateStack(object):
+def reset_globals():
+    turn.current_turn = 0
+    messenger.messenger = messenger.Messenger()
+
+
+class GameState(state.State):
     def __init__(self):
-        self._stack = []
+        super(GameState, self).__init__()
+        self.dungeon_level = dungeonlevel.dungeon_level_from_file("test.level")
+        camera_position =\
+            vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH, 0)
+        self.camera = camera.Camera(camera_position, vector2d.ZERO)
 
-    def main_loop(self):
-        while len(self._stack) > 0:
-            state = self.peek()
-            state.draw()
-            libtcod.console_flush()
-            state.update()
-            frame.current_frame += 1
+        self.player = player.Player(self)
+        start_position = vector2d.Vector2D(20, 10)
+        self.player.try_move(start_position, self.dungeon_level)
 
-    def push(self, game_state):
-        game_state.current_stack = self
-        self._stack.append(game_state)
+        rat = monster.RatMan()
+        rat_pos = vector2d.Vector2D(15, 15)
+        rat.try_move(rat_pos, self.dungeon_level)
 
-    def peek(self):
-        return self._stack[-1]
+        statue = monster.StoneStatue()
+        statue_pos = vector2d.Vector2D(25, 7)
+        statue.try_move(statue_pos, self.dungeon_level)
 
-    def pop(self):
-        state = self._stack.pop()
-        state.current_stack = None
-        return state
+        gun1 = item.Gun()
+        gun2 = item.Gun()
+        gun1_position = vector2d.Vector2D(20, 20)
+        gun2_position = vector2d.Vector2D(22, 20)
 
+        potion = item.HealthPotion()
+        potion_position = vector2d.Vector2D(24, 16)
 
-class GameState(object):
-    def __init__(self):
-        self.current_stack = None
-        pass
+        ring = item.RingOfInvisibility()
+        ring_position = vector2d.Vector2D(20, 13)
 
-    def update(self):
-        pass
+        gun1.try_move(gun1_position, self.dungeon_level)
+        gun2.try_move(gun2_position, self.dungeon_level)
+        potion.try_move(potion_position, self.dungeon_level)
+        ring.try_move(ring_position, self.dungeon_level)
+
+        status_bar_position = vector2d.Vector2D(settings.WINDOW_WIDTH -
+                                                constants.STATUS_BAR_WIDTH, 0)
+        self.player_status_bar =\
+            gui.PlayerStatusBar(status_bar_position,
+                                constants.STATUS_BAR_WIDTH,
+                                constants.STATUS_BAR_HEIGHT,
+                                colors.INTERFACE_BG,
+                                self.player,
+                                margin=vector2d.Vector2D(0, 1))
+
+        self.monster_status_bar =\
+            gui.EntityStatusList(vector2d.ZERO,
+                                 constants.MONSTER_STATUS_BAR_WIDTH,
+                                 constants.MONSTER_STATUS_BAR_HEIGHT,
+                                 colors.INTERFACE_BG,
+                                 margin=vector2d.Vector2D(0, 1),
+                                 vertical_space=1)
+
+        message_bar_position =\
+            vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH,
+                              constants.LEVEL_HEIGHT)
+
+        self.message_bar =\
+            gui.MessageDisplay(message_bar_position,
+                               constants.MESSAGES_BAR_WIDTH,
+                               constants.MESSAGES_BAR_HEIGHT,
+                               colors.INTERFACE_BG)
+        reset_globals()
 
     def draw(self):
-        pass
+        self.player_status_bar.draw()
+        self.message_bar.draw()
+        self.dungeon_level.draw(self.camera)
+        self.monster_status_bar.draw()
+
+    def update(self):
+        if(self.player.turn_over):
+            turn.current_turn += 1
+        self.message_bar.update()
+        self.dungeon_level.update()
+        self.monster_status_bar.update(self.player)
+        self.player_status_bar.update()
+        if(self.player.is_dead()):
+            self.current_stack.pop()

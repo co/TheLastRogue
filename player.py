@@ -11,7 +11,7 @@ import inputhandler
 import menu
 import vector2d
 import settings
-import gamestate
+import statestack
 import positionexaminer
 
 
@@ -30,6 +30,10 @@ class Player(entity.Entity):
 
     def _current_state_stack(self):
         return self.game_state.current_stack
+
+    @property
+    def strength(self):
+        return self._strength
 
     @property
     def color_fg(self):
@@ -60,7 +64,7 @@ class Player(entity.Entity):
 
         elif key == inputhandler.EXAMINE:  # Rest
             game_gamestate = self._current_state_stack().peek()
-            choose_target_prompt = gamestate.GameStateStack()
+            choose_target_prompt = statestack.StateStack()
             destination_selector =\
                 positionexaminer.\
                 MissileDestinationSelector(choose_target_prompt,

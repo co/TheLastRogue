@@ -38,7 +38,7 @@ class Tile(object):
         return self.game_pieces[piece_type][0]
 
     def has_entity(self):
-        if(len(self.game_pieces[gamepiece.GamePiece.Entity]) < 1):
+        if(len(self.game_pieces[gamepiece.GamePieceType.ENTITY]) < 1):
             return False
         return True
 

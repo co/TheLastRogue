@@ -1,4 +1,3 @@
-import gamestate
 import vector2d
 import frame
 import constants
@@ -6,11 +5,13 @@ import libtcodpy as libtcod
 import colors
 import inputhandler
 import numpy
+import state
 
 
-class PositionExaminer(gamestate.GameState):
+class PositionExaminer(state.State):
     def __init__(self, state_stack, position, camera, background_state=None,
                  max_distance=numpy.inf):
+        super(PositionExaminer, self).__init__()
         self.state_stack = state_stack
         self.cursor_position = position
         self.max_distance = max_distance
@@ -86,7 +87,6 @@ class PositionSelector(PositionExaminer):
     def _handle_enter(self, key):
         if key == inputhandler.ENTER:
             self._return_position = self.cursor_position
-            print "about to return", self._return_position
             self.state_stack.pop()
 
 

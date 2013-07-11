@@ -1,9 +1,12 @@
 import random
+import statestack
 import entityeffect
+import positionexaminer
 
 #  Arguments:
 SOURCE_ENTITY = "source_entity"
 TARGET_ENTITY = "target_entity"
+GAME_STATE = "game_state"
 
 
 class Action(object):
@@ -24,7 +27,7 @@ class ItemAction(Action):
         self.name = "XXX_Action_name"
         self.source_item = source_item
 
-    def remove(self):
+    def remove_from_inventory(self):
         self.source_item.inventory.remove_item(self.source_item)
 
 
@@ -46,7 +49,7 @@ class EquipAction(ItemAction):
         equip_effect = entityeffect.Equip(target_entity,
                                           target_entity, self.source_item)
         target_entity.add_entity_effect(equip_effect)
-        self.remove()
+        self.remove_from_inventory()
 
 
 class DrinkAction(ItemAction):
@@ -58,7 +61,7 @@ class DrinkAction(ItemAction):
     def act(self, **kwargs):
         target_entity = kwargs[TARGET_ENTITY]
         self.drink(target_entity)
-        self.remove()
+        self.remove_from_inventory()
         return True
 
     def drink(self):
@@ -89,3 +92,53 @@ class DropAction(ItemAction):
                 self.source_item.inventory.try_drop_item(self.source_item)
             return drop_successful
         return False
+
+
+class ThrowAction(ItemAction):
+    def __init__(self, source_item):
+        super(ThrowAction, self).__init__(source_item)
+        self.name = "Throw"
+        self.display_order = 95
+
+    def act(self, **kwargs):
+        source_entity = kwargs[SOURCE_ENTITY]
+        max_throw_distance = self.max_throw_distance(source_entity)
+        path = self.get_path(source_entity, max_throw_distance,
+                             kwargs[GAME_STATE])
+        if(path is None):
+            return False
+        dungeon_level = source_entity.dungeon_level
+        last_point = source_entity.position
+        for point in path:
+            if(dungeon_level.get_tile(point).get_terrain().is_solid()):
+                self.hit_position(dungeon_level, last_point)
+                return True
+            if(dungeon_level.get_tile(point).has_entity()):
+                self.hit_position(dungeon_level, point)
+                return True
+            last_point = point
+        self.hit_position(dungeon_level, last_point)
+        return True
+
+    def max_throw_distance(self, source_entity):
+        return source_entity.strength * 3 - self.source_item.weight
+
+    def hit_position(self, dungeon_level, position):
+        self.remove_from_inventory()
+        self.source_item.throw_effect(dungeon_level, position)
+
+    def get_path(self, entity, max_throw_distance, game_gamestate):
+        choose_target_prompt = statestack.StateStack()
+        camera = game_gamestate.current_stack.get_game_state().camera
+        destination_selector =\
+            positionexaminer.\
+            MissileDestinationSelector(choose_target_prompt,
+                                       entity.position.copy(),
+                                       camera,
+                                       entity,
+                                       game_gamestate,
+                                       max_throw_distance)
+        choose_target_prompt.push(destination_selector)
+        choose_target_prompt.main_loop()
+
+        return destination_selector.selected_path

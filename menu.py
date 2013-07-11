@@ -1,17 +1,18 @@
 import inputhandler
+import player
 import colors
 import gui
+import state
 import vector2d
 import gamestate
 import settings
-import game
 
 
 def clamp(n, minn, maxn):
     return max(min(maxn, n), minn)
 
 
-class Menu(gamestate.GameState):
+class Menu(state.State):
     def __init__(self, position, width, height):
         super(Menu, self).__init__()
         self._menu_items = []
@@ -124,20 +125,13 @@ class MainMenu(Menu):
     def __init__(self, position, width, height):
         super(MainMenu, self).__init__(position, width, height)
         start_game_function =\
-            lambda: self.current_stack.push(game.Game())
+            lambda: self.current_stack.push(gamestate.GameState())
         quit_game_function = lambda: self.current_stack.pop()
         start_game_option = MenuOption("Start Game", start_game_function)
         quit_option = MenuOption("Quit", quit_game_function)
         self._menu_items = [start_game_option, quit_option]
         self._rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
                                            height, colors.INTERFACE_BG)
-
-    def start_game(self):
-        new_game = game.Game()
-        self.current_stack.push(new_game)
-
-    def quit(self):
-        self.current_stack.pop()
 
     def draw(self):
         self._rectangle_bg.draw()
@@ -253,6 +247,9 @@ class DelayedAction(object):
 
     def __call__(self):
         self.action.act(source_entity=self.source_entity,
-                        target_entity=self.target_entity)
+                        target_entity=self.target_entity,
+                        game_state=self._state_stack.get_game_state())
+        if(isinstance(self.source_entity, player.Player)):
+            self.source_entity.turn_over = True
         self._state_stack.pop()
         self._state_stack.pop()

@@ -1,4 +1,5 @@
 import colors
+import messenger
 import action
 import gamepiece
 import equipment
@@ -19,6 +20,14 @@ class Item(gamepiece.GamePiece):
         self.inventory = None
         self.actions = []
         self.actions.append(action.DropAction(self))
+        self.actions.append(action.ThrowAction(self))
+        self.weight = 5
+
+    def throw_effect(self, dungeon_level, position):
+        self.try_move(position, dungeon_level)
+        message = "The " + self.name.lower() +\
+            " hits the ground with a thud."
+        messenger.messenger.message(message)
 
 
 class EquipableItem(Item):
@@ -76,6 +85,11 @@ class Potion(Item):
         self._name = "XXX_Potion_XXX"
         self._description =\
             "An unusual liquid contained in a glass flask."
+
+    def throw_effect(self, dungeon_level, position):
+        message = "The " + self.name.lower() +\
+            " smashes to the ground and breaks into pieces."
+        messenger.messenger.message(message)
 
 
 class HealthPotion(Potion):
