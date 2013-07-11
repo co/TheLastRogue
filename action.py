@@ -1,4 +1,5 @@
 import random
+import animation
 import statestack
 import entityeffect
 import positionexaminer
@@ -102,39 +103,45 @@ class ThrowAction(ItemAction):
 
     def act(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
+        game_state = kwargs[GAME_STATE]
         max_throw_distance = self.max_throw_distance(source_entity)
         path = self.get_path(source_entity, max_throw_distance,
-                             kwargs[GAME_STATE])
+                             game_state)
         if(path is None):
             return False
         dungeon_level = source_entity.dungeon_level
-        last_point = source_entity.position
-        for point in path:
+        for index, point in enumerate(path):
             if(dungeon_level.get_tile(point).get_terrain().is_solid()):
-                self.hit_position(dungeon_level, last_point)
+                self.hit_position(dungeon_level, path[:index - 1], game_state)
                 return True
             if(dungeon_level.get_tile(point).has_entity()):
-                self.hit_position(dungeon_level, point)
+                self.hit_position(dungeon_level, path[:index], game_state)
                 return True
-            last_point = point
-        self.hit_position(dungeon_level, last_point)
+        self.hit_position(dungeon_level, path[:index], game_state)
         return True
 
     def max_throw_distance(self, source_entity):
-        return source_entity.strength * 3 - self.source_item.weight
+        return source_entity.strength * 4 - self.source_item.weight
 
-    def hit_position(self, dungeon_level, position):
+    def hit_position(self, dungeon_level, path, game_state):
         self.remove_from_inventory()
-        self.source_item.throw_effect(dungeon_level, position)
+        self.animate_flight(game_state, path)
+        self.source_item.throw_effect(dungeon_level, path[-1])
+
+    def animate_flight(self, game_state, path):
+        flight_animation = animation.MissileAnimation(game_state,
+                                                      self.source_item.symbol,
+                                                      self.
+                                                      source_item.color_fg,
+                                                      path)
+        flight_animation.run_animation()
 
     def get_path(self, entity, max_throw_distance, game_gamestate):
         choose_target_prompt = statestack.StateStack()
-        camera = game_gamestate.current_stack.get_game_state().camera
         destination_selector =\
             positionexaminer.\
             MissileDestinationSelector(choose_target_prompt,
                                        entity.position.copy(),
-                                       camera,
                                        entity,
                                        game_gamestate,
                                        max_throw_distance)

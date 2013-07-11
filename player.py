@@ -69,7 +69,6 @@ class Player(entity.Entity):
                 positionexaminer.\
                 MissileDestinationSelector(choose_target_prompt,
                                            self.position.copy(),
-                                           game_gamestate.camera,
                                            self,
                                            game_gamestate,
                                            self._sight_radius)

@@ -81,6 +81,7 @@ class GameState(state.State):
                                constants.MESSAGES_BAR_WIDTH,
                                constants.MESSAGES_BAR_HEIGHT,
                                colors.INTERFACE_BG)
+
         reset_globals()
 
     def draw(self):

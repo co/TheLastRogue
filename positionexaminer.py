@@ -9,13 +9,13 @@ import state
 
 
 class PositionExaminer(state.State):
-    def __init__(self, state_stack, position, camera, background_state=None,
+    def __init__(self, state_stack, position, background_state,
                  max_distance=numpy.inf):
         super(PositionExaminer, self).__init__()
         self.state_stack = state_stack
         self.cursor_position = position
         self.max_distance = max_distance
-        self.camera = camera
+        self.camera = background_state.current_stack.get_game_state().camera
         self.cursor_symbol = 'X'
         self.cursor_color = colors.CURSOR
         self._background_state = background_state
@@ -73,10 +73,9 @@ class PositionExaminer(state.State):
 
 
 class PositionSelector(PositionExaminer):
-    def __init__(self, state_stack, position, camera,
-                 background_state=None,
+    def __init__(self, state_stack, position, background_state,
                  max_distance=numpy.inf):
-        super(PositionSelector, self).__init__(state_stack, position, camera,
+        super(PositionSelector, self).__init__(state_stack, position,
                                                background_state, max_distance)
         self._return_position = None
 
@@ -91,11 +90,10 @@ class PositionSelector(PositionExaminer):
 
 
 class MissileDestinationSelector(PositionSelector):
-    def __init__(self, state_stack, position, camera, entity,
-                 background_state=None,
+    def __init__(self, state_stack, position, entity, background_state,
                  max_distance=numpy.inf):
         super(MissileDestinationSelector,
-              self).__init__(state_stack, position, camera,
+              self).__init__(state_stack, position,
                              background_state, max_distance)
         self.start_position = position.copy()
         self.entity = entity
@@ -113,6 +111,7 @@ class MissileDestinationSelector(PositionSelector):
         while (not x is None):
             result.append(vector2d.Vector2D(x, y))
             x, y = libtcod.line_step()
+        result.append(self.cursor_position)
         return result
 
     def _draw_path(self):
