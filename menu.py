@@ -47,7 +47,6 @@ class Menu(state.State):
             self._selected_index = None
         self._selected_index = 0
         if(not self.has_valid_option_selected()):
-            print "time to increase", self._selected_index
             self.index_increase()
 
     def has_valid_option_selected(self):

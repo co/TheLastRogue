@@ -1,5 +1,5 @@
-import settings
 import constants
+import settings
 import libtcodpy as libtcod
 import os
 

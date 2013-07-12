@@ -69,9 +69,8 @@ class GamePiece(object):
         copy.draw_order = self.draw_order
         return copy
 
-    def draw(self, is_seen, camera):
-        position = self.position + camera.offset
-        x, y = position.x, position.y
+    def draw(self, is_seen, screen_position):
+        x, y = screen_position.x, screen_position.y
         if(not self.color_fg is None):
             if(is_seen):
                 fg_color = self.color_fg
@@ -92,6 +91,8 @@ class GamePiece(object):
     def can_move(self, new_position, new_dungeon_level=None):
         if(new_dungeon_level is None):
             new_dungeon_level = self.dungeon_level
+        if(not new_dungeon_level.has_tile(new_position)):
+            return False
         new_tile = new_dungeon_level.get_tile(new_position)
         if(not self.__can_pass_tile(new_tile)):
             return False
@@ -108,6 +109,8 @@ class GamePiece(object):
     def replace_move(self, new_position, new_dungeon_level=None):
         if(new_dungeon_level is None):
             new_dungeon_level = self.dungeon_level
+        if(not new_dungeon_level.has_tile(new_position)):
+            return False
         new_tile = new_dungeon_level.get_tile(new_position)
         self.__try_remove_from_dungeon()
         new_place = new_tile.game_pieces[self.piece_type]

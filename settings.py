@@ -1,5 +1,2 @@
-import constants
-
-
-WINDOW_WIDTH = constants.SCREEN_WIDTH
-WINDOW_HEIGHT = constants.SCREEN_HEIGHT
+WINDOW_WIDTH = 70
+WINDOW_HEIGHT = 50

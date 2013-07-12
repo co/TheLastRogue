@@ -111,10 +111,11 @@ class ThrowAction(ItemAction):
             return False
         dungeon_level = source_entity.dungeon_level
         for index, point in enumerate(path):
-            if(dungeon_level.get_tile(point).get_terrain().is_solid()):
+            tile = dungeon_level.get_tile_or_unknown(point)
+            if(tile.get_terrain().is_solid()):
                 self.hit_position(dungeon_level, path[:index - 1], game_state)
                 return True
-            if(dungeon_level.get_tile(point).has_entity()):
+            if(tile.has_entity()):
                 self.hit_position(dungeon_level, path[:index], game_state)
                 return True
         self.hit_position(dungeon_level, path[:index], game_state)

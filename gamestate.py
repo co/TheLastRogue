@@ -5,7 +5,6 @@ import vector2d
 import item
 import gui
 import camera
-import settings
 import constants
 import colors
 import turn
@@ -21,14 +20,19 @@ def reset_globals():
 class GameState(state.State):
     def __init__(self):
         super(GameState, self).__init__()
-        self.dungeon_level = dungeonlevel.dungeon_level_from_file("test.level")
+        self.dungeon_level =\
+            dungeonlevel.dungeon_level_from_file("big.level")
         camera_position =\
             vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH, 0)
         self.camera = camera.Camera(camera_position, vector2d.ZERO)
 
         self.player = player.Player(self)
         start_position = vector2d.Vector2D(20, 10)
-        self.player.try_move(start_position, self.dungeon_level)
+        player_move_success = self.player.try_move(start_position,
+                                                   self.dungeon_level)
+        if(not player_move_success):
+            self.player.try_move(vector2d.Vector2D(1, 1),
+                                 self.dungeon_level)
 
         rat = monster.RatMan()
         rat_pos = vector2d.Vector2D(15, 15)
@@ -54,8 +58,10 @@ class GameState(state.State):
         potion.try_move(potion_position, self.dungeon_level)
         ring.try_move(ring_position, self.dungeon_level)
 
-        status_bar_position = vector2d.Vector2D(settings.WINDOW_WIDTH -
-                                                constants.STATUS_BAR_WIDTH, 0)
+        status_bar_position =\
+            vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH +
+                              constants.GAME_STATE_WIDTH, 0)
+
         self.player_status_bar =\
             gui.PlayerStatusBar(status_bar_position,
                                 constants.STATUS_BAR_WIDTH,
@@ -74,20 +80,19 @@ class GameState(state.State):
 
         message_bar_position =\
             vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH,
-                              constants.LEVEL_HEIGHT)
+                              constants.GAME_STATE_HEIGHT)
 
         self.message_bar =\
             gui.MessageDisplay(message_bar_position,
                                constants.MESSAGES_BAR_WIDTH,
                                constants.MESSAGES_BAR_HEIGHT,
                                colors.INTERFACE_BG)
-
         reset_globals()
 
     def draw(self):
+        self.dungeon_level.draw(self.camera)
         self.player_status_bar.draw()
         self.message_bar.draw()
-        self.dungeon_level.draw(self.camera)
         self.monster_status_bar.draw()
 
     def update(self):
@@ -97,5 +102,6 @@ class GameState(state.State):
         self.dungeon_level.update()
         self.monster_status_bar.update(self.player)
         self.player_status_bar.update()
+        self.camera.update(self.player)
         if(self.player.is_dead()):
             self.current_stack.pop()

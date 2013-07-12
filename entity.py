@@ -67,6 +67,10 @@ class Entity(gamepiece.GamePiece):
             self.dungeon_map = libtcod.map_new(value.width, value.height)
             self.update_dungeon_map()
             self.path = libtcod.path_new_using_map(self.dungeon_map, 1.0)
+            self._signal_new_dungeon_level()
+
+    def _signal_new_dungeon_level(self):
+        pass
 
     def update(self, player):
         pass
@@ -77,8 +81,8 @@ class Entity(gamepiece.GamePiece):
         self.try_step_to(new_position)
 
     def try_step_to(self, new_position):
-        x, y = new_position.x, new_position.y
-        terrain_to_step = self.dungeon_level.tile_matrix[y][x].get_terrain()
+        terrain_to_step =\
+            self.dungeon_level.get_tile(new_position).get_terrain()
         if(self.try_open_door(terrain_to_step)):
             return True
         if(self.try_hit(new_position)):

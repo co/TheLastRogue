@@ -24,7 +24,7 @@ class MissileAnimation(InstantAnimation):
             libtcod.console_flush()
 
     def print_missile_at_point(self, point):
-        p = point + self.camera.offset
+        p = self.camera.dungeon_to_screen_position(point)
         x, y = p.x, p.y
         libtcod.console_set_char_foreground(0, x, y, self.color_fg)
         libtcod.console_set_char(0, x, y, self.symbol)

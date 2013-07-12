@@ -1,4 +1,12 @@
 import gamepiece
+import terrain
+
+
+def get_unknown_tile():
+    result = Tile()
+    result.game_pieces[gamepiece.GamePieceType.TERRAIN]\
+        .append(terrain.Unknown())
+    return result
 
 
 class Tile(object):
@@ -10,10 +18,18 @@ class Tile(object):
             gamepiece.GamePieceType.TERRAIN: []
         }
 
-    def draw(self, position, is_seen, camera):
+    @property
+    def symbol(self):
+        symbol = " "
         for piece_list in self.__pieces_lists_sorted_on_draw_order():
             for piece in piece_list:
-                piece.draw(is_seen, camera)
+                symbol = piece.symbol
+        return symbol
+
+    def draw(self, screen_position, is_seen):
+        for piece_list in self.__pieces_lists_sorted_on_draw_order():
+            for piece in piece_list:
+                piece.draw(is_seen, screen_position)
 
     def __pieces_lists_sorted_on_draw_order(self):
         piece_lists = self.game_pieces.values()

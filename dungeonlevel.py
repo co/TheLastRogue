@@ -2,6 +2,7 @@ import terrain
 import tile
 import turn
 import player
+import constants
 import vector2d
 import libtcodpy as libtcod
 
@@ -31,7 +32,7 @@ def dungeon_level_from_file(file_name):
 
 
 def terrain_matrix_from_file(file_name):
-    dungeon = read_file("test.level")
+    dungeon = read_file(file_name)
     width = len(dungeon[0])
     height = len(dungeon)
 
@@ -40,7 +41,7 @@ def terrain_matrix_from_file(file_name):
 
 
 def set_terrain_from_file(dungeon_level, file_name):
-    dungeon = read_file("test.level")
+    dungeon = read_file(file_name)
 
     for x in range(dungeon_level.width):
         for y in range(dungeon_level.height):
@@ -85,17 +86,23 @@ class DungeonLevel(object):
     def draw(self, camera):
         the_player = self.get_player_if_available()
         the_player.update_fov()
-        player_memory_of_map = the_player.get_memory_of_map(self)
-        for y, row in enumerate(self.tile_matrix):
-            for x, current_tile in enumerate(row):
+        for y in range(constants.GAME_STATE_HEIGHT):
+            for x in range(constants.GAME_STATE_WIDTH):
                 position = vector2d.Vector2D(x, y)
-                if(libtcod.map_is_in_fov(the_player.dungeon_map, x, y)):
-                    the_player.update_memory_of_tile(current_tile,
-                                                     position, self.depth)
-                    current_tile.draw(position, True, camera)
-                else:
-                    player_memory_of_map.tile_matrix[y][x].draw(position,
-                                                                False, camera)
+                self._draw_tile(camera, position, the_player)
+
+    def _draw_tile(self, camera, position, the_player):
+        tile_position = position + camera.camera_offset
+        screen_position = position + camera.screen_position
+        tile = self.get_tile_or_unknown(tile_position)
+        x, y = tile_position.x, tile_position.y
+        if(libtcod.map_is_in_fov(the_player.dungeon_map, x, y)):
+            the_player.update_memory_of_tile(tile, tile_position, self.depth)
+            tile.draw(screen_position, True)
+        else:
+            player_memory_of_map = the_player.get_memory_of_map(self)
+            player_memory_of_map.get_tile_or_unknown(tile_position).\
+                draw(screen_position, False)
 
     def add_entity_if_not_present(self, new_entity):
         if(not new_entity in self.entities):
@@ -105,8 +112,18 @@ class DungeonLevel(object):
         if(entity_to_remove in self.entities):
             self.entities.remove(entity_to_remove)
 
+    def has_tile(self, position):
+        return (0 <= position.y < len(self.tile_matrix) and
+                0 <= position.x < len(self.tile_matrix[0]))
+
     def get_tile(self, position):
         return self.tile_matrix[position.y][position.x]
+
+    def get_tile_or_unknown(self, position):
+        if(self.has_tile(position)):
+            return self.tile_matrix[position.y][position.x]
+        else:
+            return tile.get_unknown_tile()
 
     def update(self):
         if(self._dungeon_map_timestamp <= self._terrain_changed_timestamp):
@@ -166,3 +183,11 @@ class DungeonLevel(object):
 
     def signal_terrain_changed(self):
         self._terrain_changed_timestamp = turn.current_turn
+
+    def print_dungeon(self):
+        for y, row in enumerate(self.tile_matrix):
+            line = ""
+            for x, tile in enumerate(row):
+                line += str(self.get_tile_or_unknown
+                            (vector2d.Vector2D(x, y)).symbol)
+            print line

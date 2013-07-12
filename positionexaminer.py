@@ -62,7 +62,7 @@ class PositionExaminer(state.State):
     def _draw_cursor(self):
         if((frame.current_frame % (constants.FPS / 10)) < constants.FPS / 40):
             return
-        position = self.cursor_position + self.camera.offset
+        position = self.camera.dungeon_to_screen_position(self.cursor_position)
         x, y = position.x, position.y
         libtcod.console_set_char(0, x, y, self.cursor_symbol)
         libtcod.console_set_char_foreground(0, x, y, self.cursor_color)
@@ -120,15 +120,18 @@ class MissileDestinationSelector(PositionSelector):
             self._draw_path_point(point)
 
     def _draw_path_point(self, point):
-        screen_x = point.x + self.camera.offset.x
-        screen_y = point.y + self.camera.offset.y
-        terrain = self.entity.dungeon_level.get_tile(point).get_terrain()
+        screen_position = self.camera.dungeon_to_screen_position(point)
+        terrain = self.entity.dungeon_level.\
+            get_tile_or_unknown(point).get_terrain()
         if(self.entity.can_see_point(point) and terrain.is_solid()):
-            libtcod.console_set_char(0, screen_x, screen_y, " ")
-            libtcod.console_set_char_background(0, screen_x, screen_y,
+            libtcod.console_set_char(0, screen_position.x,
+                                     screen_position.y, " ")
+            libtcod.console_set_char_background(0, screen_position.x,
+                                                screen_position.y,
                                                 colors.BLOCKED_PATH)
         else:
-            libtcod.console_set_char_background(0, screen_x, screen_y,
+            libtcod.console_set_char_background(0, screen_position.x,
+                                                screen_position.y,
                                                 colors.PATH,
                                                 libtcod.BKGND_ADD)
 

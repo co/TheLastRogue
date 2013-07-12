@@ -45,6 +45,9 @@ class Player(entity.Entity):
     def symbol(self):
         return ord('@')
 
+    def _signal_new_dungeon_level(self):
+        self.set_memory_map_if_not_set(self.dungeon_level)
+
     def update(self):
         self.turn_over = False
         key = inputhandler.get_keypress()
@@ -147,5 +150,6 @@ class Player(entity.Entity):
     def update_memory_of_tile(self, tile, position, depth):
         if (tile.get_first_entity() is self):
             return  # No need to remember where you was, you are not there.
+        self.set_memory_map_if_not_set(self.dungeon_level)
         self._memory_map[depth].tile_matrix[position.y][position.x]\
             = tile.copy()

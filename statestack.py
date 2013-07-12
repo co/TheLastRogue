@@ -10,9 +10,9 @@ class StateStack(object):
     def main_loop(self):
         while len(self._stack) > 0:
             state = self.peek()
+            state.update()
             state.draw()
             libtcod.console_flush()
-            state.update()
             frame.current_frame += 1
 
     def push(self, game_state):
