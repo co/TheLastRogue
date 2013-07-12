@@ -1,5 +1,4 @@
 import random
-import turn
 import numpy
 import vector2d
 import counter
@@ -44,10 +43,6 @@ class Entity(gamepiece.GamePiece):
         self.path = None
         self.__dungeon_level = None
         self._init_entity_effects()
-
-        #  Pathfinding Cache
-        self._walkable_positions_dictionary_cache = {}
-        self._walkable_positions_cache_timestamp = -1
 
     def _init_entity_effects(self):
         can_open_doors_flag = StatusFlags.CAN_OPEN_DOORS
@@ -239,42 +234,8 @@ class Entity(gamepiece.GamePiece):
         return False
 
     def get_walkable_positions_from_my_position(self):
-        position = self.position
-        if(not (position in self._walkable_positions_dictionary_cache.keys()
-                and self.dungeon_level._terrain_changed_timestamp <=
-                self._walkable_positions_cache_timestamp)):
-            self._calculate_walkable_positions_from_start_position(position)
-        return self._walkable_positions_dictionary_cache[position]
-
-    def _calculate_walkable_positions_from_start_position(self, position):
-        visited = set()
-        visited.add(position)
-        queue = [position]
-        queue.extend(self._get_walkable_neighbors(position))
-        while (len(queue) > 0):
-            position = queue.pop()
-            while(len(queue) > 0 and position in visited):
-                position = queue.pop()
-            visited.add(position)
-            neighbors = set(self._get_walkable_neighbors(position)) - visited
-            queue.extend(neighbors)
-        visited = list(visited)
-        for point in visited:
-            self._walkable_positions_dictionary_cache[point] = visited
-        self._walkable_positions_cache_timestamp = turn.current_turn
-
-    def _get_walkable_neighbors(self, position):
-        result_positions = []
-        for direction in constants.DIRECTIONS.values():
-            neighbor_position = position + direction
-            x, y = neighbor_position.x, neighbor_position.y
-            try:
-                neighbor = self.dungeon_level.tile_matrix[y][x]
-                if(self._can_pass_terrain(neighbor.get_terrain())):
-                    result_positions.append(neighbor_position)
-            except IndexError:
-                pass
-        return result_positions
+        return self.dungeon_level.walkable_destinations.\
+            get_walkable_positions_from_my_position(self, self.position)
 
     def update_dungeon_map(self):
         for y in range(self.dungeon_level.height):

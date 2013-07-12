@@ -29,3 +29,5 @@ DIRECTIONS = {
     "SW": (-1, -1),
     "SE": (1, -1)
 }
+
+DIRECTIONS_LIST = DIRECTIONS.values()

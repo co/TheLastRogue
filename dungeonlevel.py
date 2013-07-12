@@ -2,6 +2,7 @@ import terrain
 import tile
 import turn
 import player
+import util
 import constants
 import vector2d
 import libtcodpy as libtcod
@@ -82,6 +83,8 @@ class DungeonLevel(object):
 
         self._terrain_changed_timestamp = 0
         self._dungeon_map_timestamp = -1
+
+        self.walkable_destinations = util.WalkableDestinatinationsPath()
 
     def draw(self, camera):
         the_player = self.get_player_if_available()
