@@ -34,9 +34,9 @@ class DungeonCreatorVisualizer(state.State):
         dungeon_level = self.dungeon_level
         center_position = v2d.Vector2D(dungeon_level.width / 2,
                                        dungeon_level.height / 2)
-        brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
+        brush = dgen.RandomTriShapedBrush(dgen.ReplaceTerrain(terrain.Floor))
         end_condition = dgen.CountDownCondition(dungeon_level.width *
-                                                dungeon_level.height * 0.1)
+                                                dungeon_level.height * 0.3)
         dgen.drunkard_walk(center_position, dungeon_level, brush,
                            end_condition)
 

@@ -89,9 +89,17 @@ def _apply_cellular_automata_rule_on_tile(position, dungeon_level,
 
 
 class TileBrush(object):
-    def __init__(self, shape, tile_modifier):
-        self.shape = shape
+    def __init__(self, tile_modifier):
         self.tile_modifier = tile_modifier
+
+    def apply_brush(self, position, dungeon_level):
+        pass
+
+
+class SingleShapeBrush(TileBrush):
+    def __init__(self, shape, tile_modifier):
+        super(SingleShapeBrush, self).__init__(tile_modifier)
+        self.shape = shape
 
     def apply_brush(self, position, dungeon_level):
         for point in self.shape:
@@ -99,10 +107,43 @@ class TileBrush(object):
             self.tile_modifier.modify(dungeon_position, dungeon_level)
 
 
-class SinglePointBrush(TileBrush):
+class RandomShapeBrush(TileBrush):
+    def __init__(self, shapes, tile_modifier):
+        super(RandomShapeBrush, self).__init__(tile_modifier)
+        self.shapes = shapes
+        self.tile_modifier = tile_modifier
+
+    def apply_brush(self, position, dungeon_level):
+        shape = random.sample(self.shapes, 1)[0]
+        for point in shape:
+            dungeon_position = point + position
+            self.tile_modifier.modify(dungeon_position, dungeon_level)
+
+
+class RandomTriShapedBrush(RandomShapeBrush):
+    def __init__(self, tile_modifier):
+        face = constants.DIRECTIONS
+        center = vector2d.Vector2D(0, 0)
+        shapes = [[center, face["N"], face["W"]],
+                  [center, face["N"], face["E"]],
+                  [center, face["S"], face["W"]],
+                  [center, face["S"], face["E"]]]
+        super(RandomTriShapedBrush, self).__init__(shapes, tile_modifier)
+
+
+class SinglePointBrush(SingleShapeBrush):
     def __init__(self, tile_modifier):
         super(SinglePointBrush, self).__init__([vector2d.Vector2D(0, 0)],
                                                tile_modifier)
+
+
+class SquareBrush(SingleShapeBrush):
+    def __init__(self, tile_modifier):
+        super(SquareBrush, self).__init__([vector2d.Vector2D(0, 0),
+                                           vector2d.Vector2D(1, 0),
+                                           vector2d.Vector2D(0, 1),
+                                           vector2d.Vector2D(1, 1)],
+                                          tile_modifier)
 
 
 class TileModifier(object):
