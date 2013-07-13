@@ -17,6 +17,10 @@ INVENTORY = 13
 EXAMINE = 14
 SHIFT = 15
 
+#Dungeon creator
+RESET = 16
+DRUNKWALK = 17
+
 KEY_SHIFT = libtcod.KEY_SHIFT
 
 # TODO move to settings.
@@ -48,7 +52,9 @@ controls = {
     "p": PICKUP,
     "i": INVENTORY,
     "x": EXAMINE,
+    libtcod.KEY_0: RESET,
     libtcod.KEY_1: HEAL,
+    libtcod.KEY_1: DRUNKWALK,
     libtcod.KEY_2: HURT,
     libtcod.KEY_3: TELEPORT,
     libtcod.KEY_4: SPAWN,

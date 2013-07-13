@@ -1,4 +1,5 @@
 import settings
+import vector2d as v2d
 
 FPS = 60
 
@@ -20,14 +21,14 @@ ITEMS_ALLOWED_PER_TILE = 1
 ENTITIES_ALLOWED_PER_TILE = 1
 
 DIRECTIONS = {
-    "E": (1, 0),
-    "N": (0, 1),
-    "W": (-1, 0),
-    "S": (0, -1),
-    "NW": (-1, 1),
-    "NE": (1, 1),
-    "SW": (-1, -1),
-    "SE": (1, -1)
+    "E": v2d.Vector2D(1, 0),
+    "N": v2d.Vector2D(0, 1),
+    "W": v2d.Vector2D(-1, 0),
+    "S": v2d.Vector2D(0, -1),
+    "NW": v2d.Vector2D(-1, 1),
+    "NE": v2d.Vector2D(1, 1),
+    "SW": v2d.Vector2D(-1, -1),
+    "SE": v2d.Vector2D(1, -1)
 }
 
 DIRECTIONS_LIST = DIRECTIONS.values()

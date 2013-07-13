@@ -21,10 +21,10 @@ class GameState(state.State):
     def __init__(self):
         super(GameState, self).__init__()
         self.dungeon_level =\
-            dungeonlevel.dungeon_level_from_file("big.level")
+            dungeonlevel.dungeon_level_from_file("test.level")
         camera_position =\
             vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH, 0)
-        self.camera = camera.Camera(camera_position, vector2d.ZERO)
+        self.camera = camera.Camera(camera_position, vector2d.zero())
 
         self.player = player.Player(self)
         start_position = vector2d.Vector2D(20, 10)
@@ -71,7 +71,7 @@ class GameState(state.State):
                                 margin=vector2d.Vector2D(0, 1))
 
         self.monster_status_bar =\
-            gui.EntityStatusList(vector2d.ZERO,
+            gui.EntityStatusList(vector2d.zero(),
                                  constants.MONSTER_STATUS_BAR_WIDTH,
                                  constants.MONSTER_STATUS_BAR_HEIGHT,
                                  colors.INTERFACE_BG,

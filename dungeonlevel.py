@@ -1,4 +1,5 @@
 import terrain
+import settings
 import tile
 import turn
 import player
@@ -85,6 +86,14 @@ class DungeonLevel(object):
         self._dungeon_map_timestamp = -1
 
         self.walkable_destinations = util.WalkableDestinatinationsPath()
+
+    def draw_everything(self, camera):
+        for y in range(settings.WINDOW_HEIGHT):
+            for x in range(settings.WINDOW_WIDTH):
+                position = vector2d.Vector2D(x, y)
+                tile_position = position + camera.camera_offset
+                tile = self.get_tile_or_unknown(tile_position)
+                tile.draw(position, True)
 
     def draw(self, camera):
         the_player = self.get_player_if_available()

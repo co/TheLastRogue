@@ -1,4 +1,5 @@
 import inputhandler
+import dungeoncreatorvisualizer
 import player
 import colors
 import gui
@@ -22,7 +23,7 @@ class Menu(state.State):
         self.width = width
         self.height = height
         self.may_escape = True
-        self._item_stack_panel = gui.StackPanelVertical(vector2d.ZERO,
+        self._item_stack_panel = gui.StackPanelVertical(vector2d.zero(),
                                                         self.width,
                                                         colors.INTERFACE_BG,
                                                         vertical_space=1)
@@ -66,7 +67,7 @@ class Menu(state.State):
                 color = colors.TEXT_UNSELECTED
             else:
                 color = colors.TEXT_INACTIVE
-            menu_item = gui.TextBox(item.text, vector2d.ZERO, color)
+            menu_item = gui.TextBox(item.text, vector2d.zero(), color)
             self._item_stack_panel.elements.append(menu_item)
 
     def can_activate(self):
@@ -126,10 +127,16 @@ class MainMenu(Menu):
         start_game_function =\
             lambda: self.current_stack.push(gamestate.GameState())
         quit_game_function = lambda: self.current_stack.pop()
+        dungeon_visualizer_function =\
+            lambda: self.current_stack.push(dungeoncreatorvisualizer.
+                                            DungeonCreatorVisualizer())
         start_game_option = MenuOption("Start Game", start_game_function)
+        dungeon_creator_option = MenuOption("Dungeon Creator",
+                                            dungeon_visualizer_function)
         quit_option = MenuOption("Quit", quit_game_function)
-        self._menu_items = [start_game_option, quit_option]
-        self._rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
+        self._menu_items = [start_game_option, dungeon_creator_option,
+                            quit_option]
+        self._rectangle_bg = gui.Rectangle(vector2d.zero(), width,
                                            height, colors.INTERFACE_BG)
 
     def draw(self):
@@ -143,18 +150,18 @@ class InventoryMenu(Menu):
         super(InventoryMenu, self).__init__(position,
                                             width, height)
         self._player = player
-        self._rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
+        self._rectangle_bg = gui.Rectangle(vector2d.zero(), width,
                                            height, colors.INTERFACE_BG)
         self.rectangle_screen_grey =\
-            gui.RectangleGray(vector2d.ZERO,
+            gui.RectangleGray(vector2d.zero(),
                               settings.WINDOW_WIDTH,
                               settings.WINDOW_HEIGHT,
                               colors.DB_OPAL)
-        heading = gui.TextBox("Inventory:", vector2d.ZERO,
+        heading = gui.TextBox("Inventory:", vector2d.zero(),
                               colors.INVENTORY_HEADING,
                               margin=vector2d.Vector2D(0, 1))
         self._inventory_stack_panel =\
-            gui.StackPanelVertical(vector2d.ZERO,
+            gui.StackPanelVertical(vector2d.zero(),
                                    width,
                                    colors.INTERFACE_BG)
         self._inventory_stack_panel.elements.append(heading)
@@ -190,7 +197,7 @@ class InventoryMenu(Menu):
              for item in self._player.inventory.items]
 
     def draw(self):
-        self.rectangle_screen_grey.draw(vector2d.ZERO)
+        self.rectangle_screen_grey.draw(vector2d.zero())
         self._rectangle_bg.draw(self.position)
         self._inventory_stack_panel.draw(self.position)
 
@@ -215,7 +222,7 @@ class ItemActionsMenu(Menu):
     def __init__(self, position, width, height, item, player):
         super(ItemActionsMenu, self).__init__(position, width, height)
         self._menu_items = [action.name for action in item.actions]
-        self._rectangle_bg = gui.Rectangle(vector2d.ZERO, width,
+        self._rectangle_bg = gui.Rectangle(vector2d.zero(), width,
                                            height, colors.INTERFACE_BG)
         self._actions =\
             sorted(item.actions, key=lambda action: action.display_order)

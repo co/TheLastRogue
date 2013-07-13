@@ -121,4 +121,5 @@ def project_onto(w, v):
     return v * dot(w, v) / length_sqrd(v)
 
 
-ZERO = Vector2D(0, 0)
+def zero():
+    return Vector2D(0, 0)

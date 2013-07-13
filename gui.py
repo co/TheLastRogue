@@ -7,11 +7,11 @@ import turn
 
 
 class UIElement(object):
-    def __init__(self, offset, margin=vector2d.ZERO):
+    def __init__(self, offset, margin=vector2d.zero()):
         self.offset = offset
         self.margin = margin
 
-    def draw(self, offset=vector2d.ZERO):
+    def draw(self, offset=vector2d.zero()):
         pass
 
     def update(self):
@@ -36,7 +36,7 @@ class UIElement(object):
 
 class Rectangle(UIElement):
     def __init__(self, offset, width, height, color_bg,
-                 margin=vector2d.ZERO):
+                 margin=vector2d.zero()):
         super(Rectangle, self).__init__(offset, margin)
         self._width = width
         self._height = height
@@ -50,7 +50,7 @@ class Rectangle(UIElement):
     def width(self):
         return self._width
 
-    def draw(self, offset=vector2d.ZERO):
+    def draw(self, offset=vector2d.zero()):
         position = offset + self.offset + self.margin
         for y in range(position.y, self.height):
             for x in range(position.x, self.width + position.x):
@@ -61,11 +61,11 @@ class Rectangle(UIElement):
 
 class RectangleGray(Rectangle):
     def __init__(self, offset, width, height, color_bg,
-                 margin=vector2d.ZERO):
+                 margin=vector2d.zero()):
         super(RectangleGray, self).__init__(offset, width, height,
                                             color_bg, margin)
 
-    def draw(self, offset=vector2d.ZERO):
+    def draw(self, offset=vector2d.zero()):
         position = offset + self.offset + self.margin
         for y in range(position.y, self.height):
             for x in range(position.x, self.width + position.x):
@@ -85,7 +85,7 @@ class RectangleGray(Rectangle):
 
 class StackPanelVertical(UIElement):
     def __init__(self, offset, width, color_bg,
-                 margin=vector2d.ZERO, vertical_space=0):
+                 margin=vector2d.zero(), vertical_space=0):
         super(StackPanelVertical, self).__init__(offset, margin=margin)
         self._width = width
         self._horizontal_space = vertical_space
@@ -100,7 +100,7 @@ class StackPanelVertical(UIElement):
     def height(self):
         return sum([element.total_height for element in self.elements])
 
-    def draw(self, offset=vector2d.ZERO):
+    def draw(self, offset=vector2d.zero()):
         position = offset + self.offset + self.margin
 
         element_position = position
@@ -115,19 +115,19 @@ class StackPanelVertical(UIElement):
 
 class PlayerStatusBar(UIElement):
     def __init__(self, offset, width, height, color_bg, player,
-                 margin=vector2d.ZERO):
+                 margin=vector2d.zero()):
         super(PlayerStatusBar, self).__init__(offset, margin=margin)
         self.color_bg = color_bg
         self._status_stack_panel = StackPanelVertical(offset, width,
                                                       color_bg, margin=margin)
 
-        name_text_box = TextBox(player.name, vector2d.ZERO,
+        name_text_box = TextBox(player.name, vector2d.zero(),
                                 colors.DB_PANCHO,
-                                vector2d.ZERO)
+                                vector2d.zero())
 
-        description_text_box = TextBox(player.description, vector2d.ZERO,
+        description_text_box = TextBox(player.description, vector2d.zero(),
                                        colors.DB_PANCHO,
-                                       vector2d.ZERO)
+                                       vector2d.zero())
 
         hp_bar = CounterBar(player.hp,
                             width - 2,
@@ -143,7 +143,7 @@ class PlayerStatusBar(UIElement):
     def update(self):
         self._status_stack_panel.update()
 
-    def draw(self, offset=vector2d.ZERO):
+    def draw(self, offset=vector2d.zero()):
         position = offset + self.offset + self.margin
         self._rectangle_bg.draw(position)
         self._status_stack_panel.draw(offset)
@@ -151,12 +151,12 @@ class PlayerStatusBar(UIElement):
 
 class EntityStatusList(StackPanelVertical):
     def __init__(self, offset, width, height, color_bg,
-                 margin=vector2d.ZERO, vertical_space=0):
+                 margin=vector2d.zero(), vertical_space=0):
         super(EntityStatusList, self).__init__(offset, width, color_bg,
                                                margin=margin,
                                                vertical_space=vertical_space)
         self._height = height
-        self.rectangle_bg = Rectangle(vector2d.ZERO, width,
+        self.rectangle_bg = Rectangle(vector2d.zero(), width,
                                       height, colors.INTERFACE_BG)
 
     @property
@@ -165,21 +165,21 @@ class EntityStatusList(StackPanelVertical):
 
     def update(self, entity):
         seen_entities = entity.get_seen_entities()
-        self.elements = [EntityStatus(seen_entity, vector2d.ZERO,
+        self.elements = [EntityStatus(seen_entity, vector2d.zero(),
                                       self.width)
                          for seen_entity in seen_entities]
 
-    def draw(self, offset=vector2d.ZERO):
+    def draw(self, offset=vector2d.zero()):
         position = offset + self.offset + self.margin
         self.rectangle_bg.draw(position)
         super(EntityStatusList, self).draw(offset)
 
 
 class EntityStatus(StackPanelVertical):
-    def __init__(self, entity, offset, width, margin=vector2d.ZERO):
+    def __init__(self, entity, offset, width, margin=vector2d.zero()):
         super(EntityStatus, self).__init__(offset, width,
                                            colors.INTERFACE_BG, margin)
-        monster_name_text_box = TextBox(entity.name[:width], vector2d.ZERO,
+        monster_name_text_box = TextBox(entity.name[:width], vector2d.zero(),
                                         colors.TEXT_ACTIVE)
         monster_health_bar = CounterBar(entity.hp, self.width - 2,
                                         colors.DB_BROWN, colors.DB_LOULOU,
@@ -207,7 +207,7 @@ class MessageDisplay(StackPanelVertical):
             else:
                 color = colors.TEXT_OLD
             self.elements.append(TextBox(str(message).ljust(self.width),
-                                         vector2d.ZERO, color,
+                                         vector2d.zero(), color,
                                          vector2d.Vector2D(0, 0)))
 
 
@@ -215,7 +215,7 @@ class CounterBar(UIElement):
     def __init__(self, counter, width, active_color,
                  inactive_color,
                  margin=vector2d.Vector2D(1, 1),
-                 offset=vector2d.ZERO):
+                 offset=vector2d.zero()):
         super(CounterBar, self).__init__(offset, margin)
         self.counter = counter
         self.active_color = active_color
@@ -230,7 +230,7 @@ class CounterBar(UIElement):
     def width(self):
         return self._width
 
-    def draw(self, offset=vector2d.ZERO):
+    def draw(self, offset=vector2d.zero()):
         tiles_active = int(math.ceil(self.counter.ratio_of_full() *
                                      self.width))
         y = offset.y + self.offset.y + self.margin.y
@@ -263,7 +263,7 @@ class TextBox(UIElement):
         lines = self.text.split("\n")
         return max([len(line) for line in lines])
 
-    def draw(self, position=vector2d.ZERO):
+    def draw(self, position=vector2d.zero()):
         position = position + self.offset + self.margin
         libtcod.console_set_default_foreground(None, self.text_color)
         libtcod.console_print(None, position.x + self.margin.x,
