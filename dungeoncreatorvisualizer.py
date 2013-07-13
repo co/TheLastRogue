@@ -40,6 +40,9 @@ class DungeonCreatorVisualizer(state.State):
         dgen.drunkard_walk(center_position, dungeon_level, brush,
                            end_condition)
 
+    def cellular_cave(self):
+        dgen.cellular_automata(self.dungeon_level)
+
     def handle_input(self):
         key = inputhandler.get_keypress()
         if key in inputhandler.move_controls:
@@ -51,6 +54,9 @@ class DungeonCreatorVisualizer(state.State):
 
         elif key == inputhandler.DRUNKWALK:
             self.drunkard_walk()
+
+        elif key == inputhandler.CELLULAR:
+            self.cellular_cave()
 
         elif key == inputhandler.RESET:
             self.fill_dungeon()

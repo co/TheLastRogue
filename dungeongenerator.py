@@ -61,6 +61,33 @@ def drunkard_walk(start_pos, dungeon_level, tile_brush, end_condition):
             position = random.sample(unvisited_positions, 1)[0]
 
 
+def cellular_automata(dungeon_level):
+    for y in range(dungeon_level.height):
+        for x in range(dungeon_level.width):
+            position = vector2d.Vector2D(x, y)
+            neighbors = [position + direction
+                         for direction in constants.DIRECTIONS_LIST]
+
+            solid_neighbors = 0
+            for point in neighbors:
+                if(not dungeon_level.has_tile(point) or
+                   dungeon_level.get_tile(point).get_terrain().is_solid()):
+                    solid_neighbors += 1
+            _apply_cellular_automata_rule_on_tile(position, dungeon_level,
+                                                  solid_neighbors)
+
+
+def _apply_cellular_automata_rule_on_tile(position, dungeon_level,
+                                          number_of_solid_neighbors):
+    this_terrain = dungeon_level.get_tile(position).get_terrain()
+    solid_neighborhood_size =\
+        number_of_solid_neighbors + (1 if this_terrain.is_solid() else 0)
+    if solid_neighborhood_size >= 5:
+        terrain.Wall().replace_move(position, dungeon_level)
+    else:
+        terrain.Floor().replace_move(position, dungeon_level)
+
+
 class TileBrush(object):
     def __init__(self, shape, tile_modifier):
         self.shape = shape
