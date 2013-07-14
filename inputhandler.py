@@ -21,6 +21,7 @@ SHIFT = 15
 RESET = 16
 DRUNKWALK = 17
 CELLULAR = 18
+EXPLOSION = 19
 
 KEY_SHIFT = libtcod.KEY_SHIFT
 
@@ -59,6 +60,7 @@ controls = {
     libtcod.KEY_2: HURT,
     libtcod.KEY_2: CELLULAR,
     libtcod.KEY_3: TELEPORT,
+    libtcod.KEY_3: EXPLOSION,
     libtcod.KEY_4: SPAWN,
     libtcod.KEY_5: INVISIBILITY,
 }

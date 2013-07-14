@@ -20,15 +20,21 @@ MONSTER_STATUS_BAR_HEIGHT = settings.WINDOW_HEIGHT + MESSAGES_BAR_HEIGHT
 ITEMS_ALLOWED_PER_TILE = 1
 ENTITIES_ALLOWED_PER_TILE = 1
 
-DIRECTIONS = {
+AXIS_DIRECTIONS = {
     "E": v2d.Vector2D(1, 0),
     "N": v2d.Vector2D(0, 1),
     "W": v2d.Vector2D(-1, 0),
-    "S": v2d.Vector2D(0, -1),
+    "S": v2d.Vector2D(0, -1)
+}
+
+DIAGONAL_DIRECTIONS = {
     "NW": v2d.Vector2D(-1, 1),
     "NE": v2d.Vector2D(1, 1),
     "SW": v2d.Vector2D(-1, -1),
     "SE": v2d.Vector2D(1, -1)
 }
 
+CENTER_DIRECTION = v2d.Vector2D(0, 0)
+
+DIRECTIONS = dict(AXIS_DIRECTIONS.items() + DIAGONAL_DIRECTIONS.items())
 DIRECTIONS_LIST = DIRECTIONS.values()

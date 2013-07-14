@@ -42,7 +42,10 @@ def is_solid_ratio(dungeon_level):
     return result
 
 
-def drunkard_walk(start_pos, dungeon_level, tile_brush, end_condition):
+def drunkard_walk(start_pos, dungeon_level, tile_brush, end_condition,
+                  move_list=None):
+    if move_list is None:
+        move_list = constants.DIRECTIONS_LIST
     position = start_pos.copy()
     visited = set()
     unvisited_positions = set()
@@ -50,7 +53,7 @@ def drunkard_walk(start_pos, dungeon_level, tile_brush, end_condition):
         tile_brush.apply_brush(position, dungeon_level)
         visited.add(position)
         neighbors = set([position + direction
-                         for direction in constants.DIRECTIONS_LIST])
+                         for direction in move_list])
         unvisited_neighbors = neighbors - visited
         unvisited_positions = unvisited_positions | unvisited_neighbors
         if(len(unvisited_neighbors) >= 1):
@@ -59,6 +62,26 @@ def drunkard_walk(start_pos, dungeon_level, tile_brush, end_condition):
             position = random.sample(unvisited_positions, 1)[0]
         while(not dungeon_level.has_tile(position)):
             position = random.sample(unvisited_positions, 1)[0]
+
+
+def random_exlosion(start_pos, dungeon_level, tile_brush,
+                    end_condition, move_list=None):
+    if move_list is None:
+        move_list = constants.DIRECTIONS_LIST
+    position = start_pos.copy()
+    visited = set()
+    unvisited_positions = set()
+    while not end_condition():
+        tile_brush.apply_brush(position, dungeon_level)
+        visited.add(position)
+        neighbors = set([position + direction
+                         for direction in move_list])
+        unvisited_neighbors = neighbors - visited
+        unvisited_positions = unvisited_positions | unvisited_neighbors
+        if(len(unvisited_positions) >= 1):
+            position = random.sample(unvisited_positions, 1)[0]
+        else:
+            break
 
 
 def cellular_automata(dungeon_level):
