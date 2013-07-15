@@ -7,7 +7,7 @@ class GamePieceType(object):
     UNDEFINED = 0
     ENTITY = 1
     ITEM = 2
-    DECORATION = 3
+    DUNGEON_FEATURE = 3
     TERRAIN = 4
 
 

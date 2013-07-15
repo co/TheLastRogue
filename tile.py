@@ -14,7 +14,7 @@ class Tile(object):
         self.game_pieces = {
             gamepiece.GamePieceType.ENTITY: [],
             gamepiece.GamePieceType.ITEM: [],
-            gamepiece.GamePieceType.DECORATION: [],
+            gamepiece.GamePieceType.DUNGEON_FEATURE: [],
             gamepiece.GamePieceType.TERRAIN: []
         }
 

@@ -124,18 +124,23 @@ class MenuOption(object):
 class MainMenu(Menu):
     def __init__(self, position, width, height):
         super(MainMenu, self).__init__(position, width, height)
+        start_test_game_function =\
+            lambda: self.current_stack.push(gamestate.TestGameState())
         start_game_function =\
             lambda: self.current_stack.push(gamestate.GameState())
         quit_game_function = lambda: self.current_stack.pop()
         dungeon_visualizer_function =\
             lambda: self.current_stack.push(dungeoncreatorvisualizer.
                                             DungeonCreatorVisualizer())
-        start_game_option = MenuOption("Start Game", start_game_function)
+        start_test_game_option = MenuOption("Start Test Dungeon",
+                                            start_test_game_function)
+        start_game_option = MenuOption("Start Dungeon",
+                                       start_game_function)
         dungeon_creator_option = MenuOption("Dungeon Creator",
                                             dungeon_visualizer_function)
         quit_option = MenuOption("Quit", quit_game_function)
-        self._menu_items = [start_game_option, dungeon_creator_option,
-                            quit_option]
+        self._menu_items = [start_test_game_option, start_game_option,
+                            dungeon_creator_option, quit_option]
         self._rectangle_bg = gui.Rectangle(vector2d.zero(), width,
                                            height, colors.INTERFACE_BG)
 

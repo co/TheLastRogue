@@ -150,3 +150,17 @@ class ThrowAction(ItemAction):
         choose_target_prompt.main_loop()
 
         return destination_selector.selected_path
+
+
+class DescendStairsAction(Action):
+    def __init__(self, source_item):
+        super(DropAction, self).__init__(source_item)
+        self.name = "Descend Stairs"
+        self.display_order = 50
+
+    def act(self, **kwargs):
+        if(not self.source_item.inventory is None):
+            drop_successful =\
+                self.source_item.inventory.try_drop_item(self.source_item)
+            return drop_successful
+        return False

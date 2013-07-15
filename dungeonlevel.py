@@ -1,4 +1,5 @@
 import terrain
+import dungeonfeature
 import settings
 import tile
 import turn
@@ -73,19 +74,29 @@ def read_file(file_name):
 
 
 class DungeonLevel(object):
-
     def __init__(self, tile_matrix, depth):
         self.height = len(tile_matrix)
         self.width = len(tile_matrix[0])
         self.tile_matrix = tile_matrix
         self.depth = depth
         self.entities = []
+        self.dungeon_features = []
         self.suspended_entity = None
 
         self._terrain_changed_timestamp = 0
         self._dungeon_map_timestamp = -1
 
         self.walkable_destinations = util.WalkableDestinatinationsPath()
+
+    @property
+    def up_stairs(self):
+        return [feature for feature in self.dungeon_features
+                if isinstance(feature, dungeonfeature.StairsUp)]
+
+    @property
+    def down_stairs(self):
+        return [feature for feature in self.dungeon_features
+                if isinstance(feature, dungeonfeature.StairsDown)]
 
     def draw_everything(self, camera):
         for y in range(settings.WINDOW_HEIGHT):
@@ -115,6 +126,14 @@ class DungeonLevel(object):
             player_memory_of_map = the_player.get_memory_of_map(self)
             player_memory_of_map.get_tile_or_unknown(tile_position).\
                 draw(screen_position, False)
+
+    def add_dungeon_feature_if_not_present(self, new_dungeon_feature):
+        if(not new_dungeon_feature in self.dungeon_features):
+            self.dungeon_features.append(new_dungeon_feature)
+
+    def remove_dungeon_feature_if_present(self, dungeon_feature_to_remove):
+        if(dungeon_feature_to_remove in self.dungeon_features):
+            self.dungeon_features.remove(dungeon_feature_to_remove)
 
     def add_entity_if_not_present(self, new_entity):
         if(not new_entity in self.entities):
