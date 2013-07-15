@@ -53,7 +53,8 @@ class Player(entity.Entity):
         key = inputhandler.get_keypress()
         position = self.position
         if key in inputhandler.move_controls:
-            dx, dy = inputhandler.move_controls[key]
+            dx = inputhandler.move_controls[key].x
+            dy = inputhandler.move_controls[key].y
             new_position = position + (dx, dy)
             move_succeded = self.try_step_to(new_position)
             self.turn_over = move_succeded

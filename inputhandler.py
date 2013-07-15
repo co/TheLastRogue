@@ -1,50 +1,81 @@
 import libtcodpy as libtcod
+import vector2d as v2d
 
-UP = 0
-DOWN = 1
-LEFT = 2
-RIGHT = 3
-ENTER = 4
-REST = 5
-HEAL = 6
-HURT = 7
-TELEPORT = 8
-SPAWN = 9
-INVISIBILITY = 10
-ESCAPE = 11
-PICKUP = 12
-INVENTORY = 13
-EXAMINE = 14
-SHIFT = 15
+NORTH = 0
+SOUTH = 1
+WEST = 2
+EAST = 3
+NORTHWEST = 4
+NORTHEAST = 5
+SOUTHWEST = 6
+SOUTHEAST = 7
+ENTER = 104
+REST = 105
+HEAL = 106
+HURT = 107
+TELEPORT = 108
+SPAWN = 109
+INVISIBILITY = 110
+ESCAPE = 111
+PICKUP = 112
+INVENTORY = 113
+EXAMINE = 114
+SHIFT = 115
 
 #Dungeon creator
-RESET = 16
-DRUNKWALK = 17
-CELLULAR = 18
-EXPLOSION = 19
+RESET = 116
+DRUNKWALK = 117
+CELLULAR = 118
+EXPLOSION = 119
+
+#Aliases:
+UP = NORTH
+DOWN = SOUTH
+LEFT = WEST
+RIGHT = EAST
 
 KEY_SHIFT = libtcod.KEY_SHIFT
 
 # TODO move to settings.
 move_controls = {
-    UP: (0, -1),  # up
-    DOWN: (0, 1),   # down
-    LEFT: (-1, 0),  # left
-    RIGHT: (1, 0),   # right
+    NORTH: v2d.Vector2D(0, -1),
+    SOUTH: v2d.Vector2D(0, 1),
+    WEST: v2d.Vector2D(-1, 0),
+    EAST: v2d.Vector2D(1, 0),
+    NORTHWEST: v2d.Vector2D(-1, -1),
+    NORTHEAST: v2d.Vector2D(1, -1),
+    SOUTHWEST: v2d.Vector2D(-1, 1),
+    SOUTHEAST: v2d.Vector2D(1, 1)
 }
 
 controls = {
-    't': UP,  # up
-    libtcod.KEY_UP: UP,  # up
+    't': NORTH,  # up
+    libtcod.KEY_UP: NORTH,  # up
+    libtcod.KEY_KP8: NORTH,  # up
 
-    'h': DOWN,   # down
-    libtcod.KEY_DOWN: DOWN,  # up
+    'h': SOUTH,   # down
+    libtcod.KEY_DOWN: SOUTH,  # up
+    libtcod.KEY_KP2: SOUTH,  # up
 
-    'd': LEFT,  # left
-    libtcod.KEY_LEFT: LEFT,  # left
+    'd': WEST,  # left
+    libtcod.KEY_LEFT: WEST,  # left
+    libtcod.KEY_KP4: WEST,  # up
 
-    'n': RIGHT,   # right
-    libtcod.KEY_RIGHT: RIGHT,  # right
+    'n': EAST,   # right
+    libtcod.KEY_RIGHT: EAST,  # right
+    libtcod.KEY_KP6: EAST,  # up
+
+    'g': NORTHWEST,   # up, left
+    libtcod.KEY_KP7: NORTHWEST,  # up, left
+
+    'c': NORTHEAST,   # up, right
+    libtcod.KEY_KP9: NORTHEAST,  # up, right
+
+    'm': SOUTHWEST,   # down, left
+    libtcod.KEY_KP1: SOUTHWEST,  # down, left
+
+    'w': SOUTHEAST,   # down, right
+    libtcod.KEY_KP3: SOUTHEAST,  # down, right
 
     libtcod.KEY_ENTER: ENTER,
     libtcod.KEY_ESCAPE: ESCAPE,
