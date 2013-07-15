@@ -153,14 +153,17 @@ class ThrowAction(ItemAction):
 
 
 class DescendStairsAction(Action):
-    def __init__(self, source_item):
-        super(DropAction, self).__init__(source_item)
+    def __init__(self):
+        super(DescendStairsAction, self).__init__()
         self.name = "Descend Stairs"
         self.display_order = 50
 
     def act(self, **kwargs):
-        if(not self.source_item.inventory is None):
-            drop_successful =\
-                self.source_item.inventory.try_drop_item(self.source_item)
-            return drop_successful
-        return False
+        target_entity = kwargs[TARGET_ENTITY]
+        current_dungeon_level = target_entity.dungeon_level
+        next_dungeon_level = current_dungeon_level.\
+            dungeon.get_dungeon_level(current_dungeon_level.depth + 1)
+        if(next_dungeon_level is None):
+            return False
+        destination_position = next_dungeon_level.up_stairs[0].position
+        target_entity.try_move(destination_position, next_dungeon_level)

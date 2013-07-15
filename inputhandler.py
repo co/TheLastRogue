@@ -11,22 +11,19 @@ SOUTHWEST = 6
 SOUTHEAST = 7
 ENTER = 104
 REST = 105
-HEAL = 106
-HURT = 107
-TELEPORT = 108
-SPAWN = 109
-INVISIBILITY = 110
+ONE = 106
+TWO = 107
+THREE = 108
+FOUR = 109
+FIVE = 110
 ESCAPE = 111
 PICKUP = 112
 INVENTORY = 113
 EXAMINE = 114
 SHIFT = 115
+DESCEND = 116
 
-#Dungeon creator
-RESET = 116
-DRUNKWALK = 117
-CELLULAR = 118
-EXPLOSION = 119
+ZERO = 117
 
 #Aliases:
 UP = NORTH
@@ -85,15 +82,13 @@ controls = {
     "p": PICKUP,
     "i": INVENTORY,
     "x": EXAMINE,
-    libtcod.KEY_0: RESET,
-    libtcod.KEY_1: HEAL,
-    libtcod.KEY_1: DRUNKWALK,
-    libtcod.KEY_2: HURT,
-    libtcod.KEY_2: CELLULAR,
-    libtcod.KEY_3: TELEPORT,
-    libtcod.KEY_3: EXPLOSION,
-    libtcod.KEY_4: SPAWN,
-    libtcod.KEY_5: INVISIBILITY,
+    ">": DESCEND,
+    libtcod.KEY_0: ZERO,
+    libtcod.KEY_1: ONE,
+    libtcod.KEY_2: TWO,
+    libtcod.KEY_3: THREE,
+    libtcod.KEY_4: FOUR,
+    libtcod.KEY_5: FIVE,
 }
 
 

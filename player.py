@@ -93,20 +93,20 @@ class Player(entity.Entity):
                         ", the inventory is full."
                     messenger.messenger.message(message)
 
-        elif key == inputhandler.HURT:
+        elif key == inputhandler.ONE:
             self.hurt(1)
 
-        elif key == inputhandler.TELEPORT:
+        elif key == inputhandler.TWO:
+            self.heal(1)
+
+        elif key == inputhandler.THREE:
             effect = entityeffect.\
                 Teleport(self, self,
                          time_to_live=1)
             self.add_entity_effect(effect)
             self.turn_over = True
 
-        elif key == inputhandler.HEAL:
-            self.heal(1)
-
-        elif key == inputhandler.INVISIBILITY:
+        elif key == inputhandler.FOUR:
             invisibile_flag = entity.StatusFlags.INVISIBILE
             if(not self.has_status(invisibile_flag)):
                 effect = entityeffect.\
@@ -122,7 +122,7 @@ class Player(entity.Entity):
                 self.add_entity_effect(effect)
             self.turn_over = True
 
-        elif key == inputhandler.SPAWN:
+        elif key == inputhandler.FIVE:
             monsterspawner.spawn_rat_man(self.dungeon_level)
             self.turn_over = True
 
@@ -135,6 +135,14 @@ class Player(entity.Entity):
                                                     settings.WINDOW_HEIGHT,
                                                     self)
                 self._current_state_stack().push(inventory_menu)
+
+        elif key == inputhandler.DESCEND:
+            dungeon_feature = self.dungeon_level.get_tile(self.position)\
+                .get_dungeon_feature()
+            if(not dungeon_feature is None and
+               len(dungeon_feature.player_actions) > 0):
+                dungeon_feature.player_actions[0].act(source_entity=self,
+                                                      target_entity=self)
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)

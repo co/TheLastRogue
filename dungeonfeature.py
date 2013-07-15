@@ -1,11 +1,12 @@
 import gamepiece
+import action
 import colors
 
 
 class DungeonFeature(gamepiece.GamePiece):
     def __init__(self):
         super(DungeonFeature, self).__init__()
-        self.piece_type = gamepiece.GamePieceType.ITEM
+        self.piece_type = gamepiece.GamePieceType.DUNGEON_FEATURE
         self.max_instances_in_single_tile = 1
         self.draw_order = 2
         self.player_actions = []
@@ -48,6 +49,7 @@ class StairsDown(Stairs):
         self._name = "Stairs Down"
         self._description =\
             "A dark passway downward. Oh, what horrors awaits there?"
+        self.player_actions.append(action.DescendStairsAction())
 
 
 class StairsUp(Stairs):

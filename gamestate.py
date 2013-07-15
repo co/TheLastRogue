@@ -26,6 +26,7 @@ class GameStateBase(state.State):
         camera_position =\
             vector2d.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH, 0)
         self.camera = camera.Camera(camera_position, vector2d.zero())
+        self.has_won = False
 
     def draw(self):
         dungeon_level = self.player.dungeon_level
@@ -44,6 +45,8 @@ class GameStateBase(state.State):
         self.player_status_bar.update()
         self.camera.update(self.player)
         if(self.player.is_dead()):
+            self.current_stack.pop()
+        if(self.has_won):
             self.current_stack.pop()
 
     def _init_gui(self):
@@ -81,7 +84,7 @@ class GameStateBase(state.State):
 class GameState(GameStateBase):
     def __init__(self):
         super(GameState, self).__init__()
-        self.dungeon = dungeon.Dungeon()
+        self.dungeon = dungeon.Dungeon(self)
         self._init_player_position()
 
     def _init_player_position(self):

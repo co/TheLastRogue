@@ -82,6 +82,7 @@ class DungeonLevel(object):
         self.entities = []
         self.dungeon_features = []
         self.suspended_entity = None
+        self.dungeon = None
 
         self._terrain_changed_timestamp = 0
         self._dungeon_map_timestamp = -1

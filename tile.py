@@ -48,6 +48,10 @@ class Tile(object):
     def get_terrain(self):
         return self.get_first_piece_of_type(gamepiece.GamePieceType.TERRAIN)
 
+    def get_dungeon_feature(self):
+        return self.\
+            get_first_piece_of_type(gamepiece.GamePieceType.DUNGEON_FEATURE)
+
     def get_first_piece_of_type(self, piece_type):
         if(len(self.game_pieces[piece_type]) < 1):
             return None

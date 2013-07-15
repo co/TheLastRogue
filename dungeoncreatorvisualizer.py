@@ -65,14 +65,14 @@ class DungeonCreatorVisualizer(state.State):
         elif key == inputhandler.ESCAPE:
             self.current_stack.pop()
 
-        elif key == inputhandler.DRUNKWALK:
+        elif key == inputhandler.ONE:
             self.drunkard_walk()
 
-        elif key == inputhandler.CELLULAR:
+        elif key == inputhandler.TWO:
             self.cellular_cave()
 
-        elif key == inputhandler.EXPLOSION:
+        elif key == inputhandler.THREE:
             self.random_exlosion()
 
-        elif key == inputhandler.RESET:
+        elif key == inputhandler.ZERO:
             self.fill_dungeon()
