@@ -1,6 +1,6 @@
 import random
 import numpy
-import vector2d
+import geometry as geo
 import counter
 import constants
 import gamepiece
@@ -205,7 +205,7 @@ class Entity(gamepiece.GamePiece):
         if(not self.has_path()):
             return False
         x, y = libtcod.path_walk(self.path, True)
-        step_succeeded = self.try_step_to(vector2d.Vector2D(x, y))
+        step_succeeded = self.try_step_to(geo.Vector2D(x, y))
         return step_succeeded
 
     def set_path_to_random_walkable_point(self):

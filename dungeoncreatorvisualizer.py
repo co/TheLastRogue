@@ -1,5 +1,5 @@
 import dungeongenerator as dgen
-import vector2d as v2d
+import geometry as geo
 import camera
 import turn
 import constants
@@ -18,7 +18,7 @@ class DungeonCreatorVisualizer(state.State):
     def __init__(self):
         super(DungeonCreatorVisualizer, self).__init__()
         self.dungeon_level = dgen.get_full_wall_dungeon(70, 55, 0)
-        self.camera = camera.Camera(v2d.zero(), v2d.zero())
+        self.camera = camera.Camera(geo.zero2d(), geo.zero2d())
 
     def fill_dungeon(self):
         width = self.dungeon_level.width
@@ -33,7 +33,7 @@ class DungeonCreatorVisualizer(state.State):
 
     def random_exlosion(self):
         dungeon_level = self.dungeon_level
-        center_position = v2d.Vector2D(dungeon_level.width / 2,
+        center_position = geo.Vector2D(dungeon_level.width / 2,
                                        dungeon_level.height / 2)
         brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
         end_condition = dgen.CountDownCondition(dungeon_level.width *
@@ -44,7 +44,7 @@ class DungeonCreatorVisualizer(state.State):
 
     def drunkard_walk(self):
         dungeon_level = self.dungeon_level
-        center_position = v2d.Vector2D(dungeon_level.width / 2,
+        center_position = geo.Vector2D(dungeon_level.width / 2,
                                        dungeon_level.height / 2)
         brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
         end_condition = dgen.CountDownCondition(dungeon_level.width *
@@ -59,8 +59,8 @@ class DungeonCreatorVisualizer(state.State):
     def handle_input(self):
         key = inputhandler.get_keypress()
         if key in inputhandler.move_controls:
-            dx, dy = inputhandler.move_controls[key]
-            self.camera.camera_offset += v2d.Vector2D(dx, dy)
+            dx, dy = inputhandler.move_controls[key].as_tuple()
+            self.camera.camera_offset += geo.Vector2D(dx, dy)
 
         elif key == inputhandler.ESCAPE:
             self.current_stack.pop()

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import init
-import vector2d
+import geometry as geo
 import logging
 import statestack
 import menu
@@ -11,7 +11,8 @@ logging.basicConfig(filename="debug.log", level=logging.DEBUG, filemode="w")
 init.init_libtcod()
 
 main_state_stack = statestack.StateStack()
-main_menu = menu.MainMenu(vector2d.zero(), settings.WINDOW_WIDTH,
+main_menu_rect = geo.Rect(geo.zero2d(), settings.WINDOW_WIDTH,
                           settings.WINDOW_HEIGHT)
+main_menu = menu.MainMenu(main_menu_rect)
 main_state_stack.push(main_menu)
 main_state_stack.main_loop()

@@ -1,6 +1,6 @@
 import random
 import monster
-import vector2d
+import geometry as geo
 import logging
 
 
@@ -10,8 +10,7 @@ def place_piece_on_random_tile(piece, dungeon_level):
     random.shuffle(positions)
     for position in positions:
         x, y = position
-        move_succeeded = piece.try_move(vector2d.Vector2D(x, y),
-                                        dungeon_level)
+        move_succeeded = piece.try_move(geo.Vector2D(x, y), dungeon_level)
         if(move_succeeded):
             return True
     return False

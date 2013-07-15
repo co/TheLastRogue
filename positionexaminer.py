@@ -1,4 +1,4 @@
-import vector2d
+import geometry as geo
 import frame
 import constants
 import libtcodpy as libtcod
@@ -42,7 +42,7 @@ class PositionExaminer(state.State):
     def offset_cursor_position(self, offset):
         new_cursor_position = self.cursor_position + offset
 
-        if(vector2d.chess_distance(new_cursor_position, self.start_position) >
+        if(geo.chess_distance(new_cursor_position, self.start_position) >
            self.max_distance):
             return
         self.cursor_position = new_cursor_position
@@ -109,7 +109,7 @@ class MissileDestinationSelector(PositionSelector):
         libtcod.line_init(sx, sy, dx, dy)
         x, y = libtcod.line_step()
         while (not x is None):
-            result.append(vector2d.Vector2D(x, y))
+            result.append(geo.Vector2D(x, y))
             x, y = libtcod.line_step()
         result.append(self.cursor_position)
         return result

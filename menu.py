@@ -1,10 +1,10 @@
 import inputhandler
+import geometry as geo
 import dungeoncreatorvisualizer
 import player
 import colors
 import gui
 import state
-import vector2d
 import gamestate
 import settings
 
@@ -14,19 +14,28 @@ def clamp(n, minn, maxn):
 
 
 class Menu(state.State):
-    def __init__(self, position, width, height):
+    def __init__(self, rect):
         super(Menu, self).__init__()
         self._menu_items = []
         self._selected_index = 0
         self._wrap = True
-        self.position = position
-        self.width = width
-        self.height = height
+        self.rect = rect
         self.may_escape = True
-        self._item_stack_panel = gui.StackPanelVertical(vector2d.zero(),
-                                                        self.width,
-                                                        colors.INTERFACE_BG,
-                                                        vertical_space=1)
+        self._item_stack_panel =\
+            gui.StackPanelVertical(geo.zero2d(), self.width,
+                                   colors.INTERFACE_BG, vertical_space=1)
+
+    @property
+    def position(self):
+        return self.rect.top_left
+
+    @property
+    def width(self):
+        return self.rect.width
+
+    @property
+    def height(self):
+        return self.rect.height
 
     def update(self):
         self._recreate_option_list()
@@ -67,7 +76,7 @@ class Menu(state.State):
                 color = colors.TEXT_UNSELECTED
             else:
                 color = colors.TEXT_INACTIVE
-            menu_item = gui.TextBox(item.text, vector2d.zero(), color)
+            menu_item = gui.TextBox(item.text, geo.zero2d(), color)
             self._item_stack_panel.elements.append(menu_item)
 
     def can_activate(self):
@@ -122,8 +131,8 @@ class MenuOption(object):
 
 
 class MainMenu(Menu):
-    def __init__(self, position, width, height):
-        super(MainMenu, self).__init__(position, width, height)
+    def __init__(self, rect):
+        super(MainMenu, self).__init__(rect)
         start_test_game_function =\
             lambda: self.current_stack.push(gamestate.TestGameState())
         start_game_function =\
@@ -141,33 +150,20 @@ class MainMenu(Menu):
         quit_option = MenuOption("Quit", quit_game_function)
         self._menu_items = [start_test_game_option, start_game_option,
                             dungeon_creator_option, quit_option]
-        self._rectangle_bg = gui.Rectangle(vector2d.zero(), width,
-                                           height, colors.INTERFACE_BG)
-
-    def draw(self):
-        self._rectangle_bg.draw()
-        draw_position = vector2d.Vector2D(0, settings.WINDOW_HEIGHT - 7)
-        self._item_stack_panel.draw(draw_position)
 
 
 class InventoryMenu(Menu):
-    def __init__(self, position, width, height, player):
-        super(InventoryMenu, self).__init__(position,
-                                            width, height)
+    def __init__(self, rect, player):
+        super(InventoryMenu, self).__init__(rect)
         self._player = player
-        self._rectangle_bg = gui.Rectangle(vector2d.zero(), width,
-                                           height, colors.INTERFACE_BG)
         self.rectangle_screen_grey =\
-            gui.RectangleGray(vector2d.zero(),
-                              settings.WINDOW_WIDTH,
-                              settings.WINDOW_HEIGHT,
-                              colors.DB_OPAL)
-        heading = gui.TextBox("Inventory:", vector2d.zero(),
+            gui.RectangleGray(geo.Rect(geo.zero2d(), settings.WINDOW_WIDTH,
+                                       settings.WINDOW_HEIGHT), colors.DB_OPAL)
+        heading = gui.TextBox("Inventory:", geo.zero2d(),
                               colors.INVENTORY_HEADING,
-                              margin=vector2d.Vector2D(0, 1))
+                              margin=geo.Vector2D(0, 1))
         self._inventory_stack_panel =\
-            gui.StackPanelVertical(vector2d.zero(),
-                                   width,
+            gui.StackPanelVertical(geo.zero2d(), self.width,
                                    colors.INTERFACE_BG)
         self._inventory_stack_panel.elements.append(heading)
         self._inventory_stack_panel.elements.append(self._item_stack_panel)
@@ -195,49 +191,39 @@ class InventoryMenu(Menu):
         self._menu_items =\
             [MenuOption(item.name,
                         OpenItemActionMenu(self.current_stack,
-                                           self.position, self.width,
-                                           self.height, item,
+                                           geo.Rect(self.position, self.width,
+                                           self.height), item,
                                            self._player),
                         (len(item.actions) >= 1))
              for item in self._player.inventory.items]
 
     def draw(self):
-        self.rectangle_screen_grey.draw(vector2d.zero())
-        self._rectangle_bg.draw(self.position)
-        self._inventory_stack_panel.draw(self.position)
+        super(InventoryMenu, self).draw()
+        self.rectangle_screen_grey.draw(geo.zero2d())
 
 
 class OpenItemActionMenu():
-    def __init__(self, state_stack, position, width, height, item, player):
-        self.position = position
-        self.width = width
-        self.height = height
+    def __init__(self, state_stack, rect, item, player):
+        self.rect = rect
         self._item = item
         self._player = player
         self._state_stack = state_stack
 
     def __call__(self):
-        item_actions_menu = ItemActionsMenu(self.position, self.width,
-                                            self.height, self._item,
+        item_actions_menu = ItemActionsMenu(self.rect, self._item,
                                             self._player)
         self._state_stack.push(item_actions_menu)
 
 
 class ItemActionsMenu(Menu):
-    def __init__(self, position, width, height, item, player):
-        super(ItemActionsMenu, self).__init__(position, width, height)
+    def __init__(self, rect, item, player):
+        super(ItemActionsMenu, self).__init__(rect)
         self._menu_items = [action.name for action in item.actions]
-        self._rectangle_bg = gui.Rectangle(vector2d.zero(), width,
-                                           height, colors.INTERFACE_BG)
         self._actions =\
             sorted(item.actions, key=lambda action: action.display_order)
         self._player = player
         self._update_menu_items()
         self.try_set_index_to_valid_value()
-
-    def draw(self):
-        self._rectangle_bg.draw(self.position)
-        self._item_stack_panel.draw(self.position)
 
     def _update_menu_items(self):
         self._menu_items =\
@@ -264,3 +250,14 @@ class DelayedAction(object):
             self.source_entity.turn_over = True
         self._state_stack.pop()
         self._state_stack.pop()
+
+
+class ContextMenu(Menu):
+    def __init__(self, position, width, height, item, player):
+        super(ItemActionsMenu, self).__init__(position, width, height)
+        self._menu_items = [action.name for action in item.actions]
+        self._actions =\
+            sorted(item.actions, key=lambda action: action.display_order)
+        self._player = player
+        self._update_menu_items()
+        self.try_set_index_to_valid_value()

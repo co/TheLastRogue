@@ -1,5 +1,5 @@
 import colors
-import vector2d
+import geometry as geo
 import libtcodpy as libtcod
 
 
@@ -13,7 +13,7 @@ class GamePieceType(object):
 
 class GamePiece(object):
     def __init__(self):
-        self.__position = vector2d.Vector2D(-1, -1)
+        self.__position = geo.Vector2D(-1, -1)
         self.__dungeon_level = None
         self._name = "XXX_unnamed_entity_XXX"
         self._description = "XXX_no_description_XXX"

@@ -1,5 +1,5 @@
 import libtcodpy as libtcod
-import vector2d as v2d
+import geometry as geo
 
 NORTH = 0
 SOUTH = 1
@@ -35,14 +35,14 @@ KEY_SHIFT = libtcod.KEY_SHIFT
 
 # TODO move to settings.
 move_controls = {
-    NORTH: v2d.Vector2D(0, -1),
-    SOUTH: v2d.Vector2D(0, 1),
-    WEST: v2d.Vector2D(-1, 0),
-    EAST: v2d.Vector2D(1, 0),
-    NORTHWEST: v2d.Vector2D(-1, -1),
-    NORTHEAST: v2d.Vector2D(1, -1),
-    SOUTHWEST: v2d.Vector2D(-1, 1),
-    SOUTHEAST: v2d.Vector2D(1, 1)
+    NORTH: geo.Vector2D(0, -1),
+    SOUTH: geo.Vector2D(0, 1),
+    WEST: geo.Vector2D(-1, 0),
+    EAST: geo.Vector2D(1, 0),
+    NORTHWEST: geo.Vector2D(-1, -1),
+    NORTHEAST: geo.Vector2D(1, -1),
+    SOUTHWEST: geo.Vector2D(-1, 1),
+    SOUTHEAST: geo.Vector2D(1, 1)
 }
 
 controls = {

@@ -6,7 +6,7 @@ import turn
 import player
 import util
 import constants
-import vector2d
+import geometry as geo
 import libtcodpy as libtcod
 
 
@@ -22,7 +22,7 @@ def unknown_level_map(width, height, depth):
     for x in range(width):
         for y in range(height):
             unknown_terrain = terrain.Unknown()
-            unknown_terrain.replace_move(vector2d.Vector2D(x, y),
+            unknown_terrain.replace_move(geo.Vector2D(x, y),
                                          dungeon_level)
     return dungeon_level
 
@@ -49,7 +49,7 @@ def set_terrain_from_file(dungeon_level, file_name):
     for x in range(dungeon_level.width):
         for y in range(dungeon_level.height):
             terrain = char_to_terrain(dungeon[y][x])
-            terrain.replace_move(vector2d.Vector2D(x, y), dungeon_level)
+            terrain.replace_move(geo.Vector2D(x, y), dungeon_level)
 
 
 def char_to_terrain(c):
@@ -102,7 +102,7 @@ class DungeonLevel(object):
     def draw_everything(self, camera):
         for y in range(settings.WINDOW_HEIGHT):
             for x in range(settings.WINDOW_WIDTH):
-                position = vector2d.Vector2D(x, y)
+                position = geo.Vector2D(x, y)
                 tile_position = position + camera.camera_offset
                 tile = self.get_tile_or_unknown(tile_position)
                 tile.draw(position, True)
@@ -112,7 +112,7 @@ class DungeonLevel(object):
         the_player.update_fov()
         for y in range(constants.GAME_STATE_HEIGHT):
             for x in range(constants.GAME_STATE_WIDTH):
-                position = vector2d.Vector2D(x, y)
+                position = geo.Vector2D(x, y)
                 self._draw_tile(camera, position, the_player)
 
     def _draw_tile(self, camera, position, the_player):
@@ -221,5 +221,5 @@ class DungeonLevel(object):
             line = ""
             for x, tile in enumerate(row):
                 line += str(self.get_tile_or_unknown
-                            (vector2d.Vector2D(x, y)).symbol)
+                            (geo.Vector2D(x, y)).symbol)
             print line

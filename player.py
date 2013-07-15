@@ -9,7 +9,7 @@ import inventory
 import messenger
 import inputhandler
 import menu
-import vector2d
+import geometry as geo
 import settings
 import statestack
 import positionexaminer
@@ -129,11 +129,12 @@ class Player(entity.Entity):
         elif key == inputhandler.INVENTORY:
             if(not self.inventory.is_empty()):
                 inventory_position =\
-                    vector2d.Vector2D(settings.WINDOW_WIDTH - 24, 0)
-                inventory_menu = menu.InventoryMenu(inventory_position,
-                                                    settings.WINDOW_WIDTH,
-                                                    settings.WINDOW_HEIGHT,
-                                                    self)
+                    geo.Vector2D(settings.WINDOW_WIDTH - 24, 0)
+                inventory_menu =\
+                    menu.InventoryMenu(geo.Rect(inventory_position,
+                                                settings.WINDOW_WIDTH,
+                                                settings.WINDOW_HEIGHT),
+                                       self)
                 self._current_state_stack().push(inventory_menu)
 
         elif key == inputhandler.DESCEND:

@@ -10,6 +10,9 @@ class Vector2D:
     def copy(self):
         return Vector2D(self.x, self.y)
 
+    def as_tuple(self):
+        return (self.x, self.y)
+
     def __add__(self, val):
         return Point(self[0] + val[0], self[1] + val[1])
 
@@ -121,5 +124,72 @@ def project_onto(w, v):
     return v * dot(w, v) / length_sqrd(v)
 
 
-def zero():
+def zero2d():
     return Vector2D(0, 0)
+
+
+class Rect(object):
+    """A rectangle identified by two points.
+    The rectangle stores left, top, right, and bottom values."""
+
+    def __init__(self, position, width, height):
+        """Initialize a rectangle top left point position and width height."""
+        self.set_points(position, width, height)
+
+    def set_points(self, position, width, height):
+        """Reset the rectangle coordinates."""
+        x, y = position.as_tuple()
+        self.left = x
+        self.top = y
+        self.right = x + width
+        self.bottom = y + height
+
+    def contains(self, pt):
+        """Return true if a point is inside the rectangle."""
+        x, y = pt.as_tuple()
+        return (self.left <= x <= self.right and
+                self.top <= y <= self.bottom)
+
+    def overlaps(self, other):
+        """Return true if a rectangle overlaps this rectangle."""
+        return (self.right > other.left and self.left < other.right and
+                self.top < other.bottom and self.bottom > other.top)
+
+    @property
+    def width(self):
+        """Return the width of the rectangle."""
+        return self.right - self.left
+
+    @property
+    def height(self):
+        """Return the height of the rectangle."""
+        return self.bottom - self.top
+
+    @property
+    def top_left(self):
+        """Return the top-left corner as a Vector2D."""
+        return Vector2D(self.left, self.top)
+
+    @property
+    def bottom_right(self):
+        """Return the bottom-right corner as a Vector2D."""
+        return Vector2D(self.right, self.bottom)
+
+    def expanded_by(self, n):
+        """Return a rectangle with extended borders.
+
+        Create a new rectangle that is wider and taller than the
+        immediate one. All sides are extended by "n" Vector2D.
+        """
+        p1 = Vector2D(self.left - n, self.top - n)
+        p2 = Vector2D(self.right + n, self.bottom + n)
+        return Rect(p1, p2)
+
+    def __str__(self):
+        return "<Rect (%s, %s) - (%s, %s)>" % (self.left, self.top,
+                                               self.right, self.bottom)
+
+    def __repr__(self):
+        return "%s(%r, %r)" % (self.__class__.__name__,
+                               Vector2D(self.left, self.top),
+                               Vector2D(self.right, self.bottom))

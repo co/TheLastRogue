@@ -24,7 +24,7 @@ class StateStack(object):
 
     def get_game_state(self):
         return next(state for state in self._stack
-                    if isinstance(state, gamestate.GameState))
+                    if isinstance(state, gamestate.GameStateBase))
 
     def pop(self):
         state = self._stack.pop()
