@@ -1,4 +1,5 @@
 import gamestate
+import style
 import rectfactory
 import dungeoncreatorvisualizer
 import menu
@@ -10,10 +11,8 @@ import colors
 
 
 def main_menu(state_stack):
-    state_stack_panel =\
-        gui.StackPanelVertical(geo.zero2d(), settings.WINDOW_WIDTH,
-                               colors.INTERFACE_BG, vertical_space=1)
-    ui_state = state.UIState(state_stack_panel)
+    ui_elements = []
+    ui_state = state.UIState(gui.UIElementSet(ui_elements))
 
     start_test_game_function =\
         lambda: ui_state.current_stack.push(gamestate.TestGameState())
@@ -35,10 +34,17 @@ def main_menu(state_stack):
     menu_items = [start_test_game_option, start_game_option,
                   dungeon_creator_option, quit_option]
 
-    main_menu = menu.StaticMenu(geo.Rect(geo.zero2d(), 30, 10),
-                                menu_items, state_stack, vertical_space=1)
-    state_stack_panel.append(main_menu)
+    border = 4
+    height = 2 * len(menu_items) + border
+    width = max([len(option.text) for option in menu_items]) + border
+    main_menu_rect = rectfactory.ratio_of_screen_rect(width, height, 0.5, 0.8)
+    main_menu = menu.StaticMenu(main_menu_rect, menu_items, state_stack,
+                                margin=geo.Vector2D(2, 2), vertical_space=1)
 
+    background_rect = gui.StyledRectangle(main_menu_rect,
+                                          style.RectangleStyle3D())
+    ui_elements.append(background_rect)
+    ui_elements.append(main_menu)
     return ui_state
 
 
@@ -85,9 +91,10 @@ def context_menu(player, state_stack):
 
     context_menu_rect = rectfactory.center_of_screen_rect(30, 30)
     resulting_menu = menu.StaticMenu(context_menu_rect,
-                                     context_options, state_stack)
-    background_rect = gui.FilledRectangle(context_menu_rect,
-                                          colors.INTERFACE_BG)
+                                     context_options, state_stack,
+                                     margin=geo.Vector2D(2, 2))
+    background_rect = gui.StyledRectangle(context_menu_rect,
+                                          style.RectangleStyle3D())
     ui_elements = [background_rect, resulting_menu]
     ui_state = state.UIState(gui.UIElementSet(ui_elements))
     return ui_state

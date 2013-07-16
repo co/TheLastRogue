@@ -117,7 +117,7 @@ class Menu(gui.UIElement):
                                          len(self._menu_items) - 1)
 
     def draw(self, offset=geo.zero2d()):
-        self._item_stack_panel.draw(self.position + offset)
+        self._item_stack_panel.draw(self.position + offset + self.margin)
 
 
 class MenuOption(gui.UIElement):
@@ -134,7 +134,8 @@ class MenuOption(gui.UIElement):
 class StaticMenu(Menu):
     def __init__(self, rect, menu_items, state_stack,
                  margin=geo.zero2d(), vertical_space=1):
-        super(StaticMenu, self).__init__(rect, state_stack)
+        super(StaticMenu, self).__init__(rect, state_stack, margin=margin,
+                                         vertical_space=vertical_space)
         self._menu_items = menu_items
         self.try_set_index_to_valid_value()
 

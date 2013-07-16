@@ -60,7 +60,6 @@ class GameStateBase(state.State):
 
         self.player_status_bar =\
             gui.PlayerStatusBar(player_status_rect,
-                                colors.INTERFACE_BG,
                                 self.player,
                                 margin=geo.Vector2D(0, 1))
 
@@ -68,7 +67,6 @@ class GameStateBase(state.State):
             gui.EntityStatusList(geo.zero2d(),
                                  constants.MONSTER_STATUS_BAR_WIDTH,
                                  constants.MONSTER_STATUS_BAR_HEIGHT,
-                                 colors.INTERFACE_BG,
                                  margin=geo.Vector2D(0, 1),
                                  vertical_space=1)
 
@@ -79,8 +77,7 @@ class GameStateBase(state.State):
         self.message_bar =\
             gui.MessageDisplay(message_bar_position,
                                constants.MESSAGES_BAR_WIDTH,
-                               constants.MESSAGES_BAR_HEIGHT,
-                               colors.INTERFACE_BG)
+                               constants.MESSAGES_BAR_HEIGHT)
 
 
 class GameState(GameStateBase):
