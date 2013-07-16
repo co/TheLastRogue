@@ -138,6 +138,11 @@ class Player(entity.Entity):
                 dungeon_feature.player_actions[0].act(source_entity=self,
                                                       target_entity=self)
 
+        elif key == inputhandler.ENTER:
+                context_menu = menufactory.context_menu(self,
+                                                        self._state_stack())
+                self._state_stack().push(context_menu)
+
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)
         return self._memory_map[dungeon_level.depth]

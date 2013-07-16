@@ -1,6 +1,5 @@
 import inputhandler
 import geometry as geo
-import player
 import colors
 import gui
 
@@ -79,7 +78,8 @@ class Menu(gui.UIElement):
             self._item_stack_panel.append(menu_item)
 
     def can_activate(self):
-        return not self._selected_index is None
+        return (not self._selected_index is None and
+                self._menu_items[self._selected_index].can_activate)
 
     def activate(self):
         if(self.can_activate()):
@@ -89,6 +89,7 @@ class Menu(gui.UIElement):
     def index_increase(self):
         if(not any(item.can_activate for item in self._menu_items) or
            self._selected_index is None):
+            self._selected_index = None
             return
         self._offset_index(1)
         if(not self._menu_items[self._selected_index].can_activate):
@@ -97,6 +98,7 @@ class Menu(gui.UIElement):
     def index_decrease(self):
         if(not any(item.can_activate for item in self._menu_items) or
            self._selected_index is None):
+            self._selected_index = None
             return
         self._offset_index(-1)
         if(not self._menu_items[self._selected_index].can_activate):
@@ -134,13 +136,13 @@ class StaticMenu(Menu):
                  margin=geo.zero2d(), vertical_space=1):
         super(StaticMenu, self).__init__(rect, state_stack)
         self._menu_items = menu_items
+        self.try_set_index_to_valid_value()
 
 
 class InventoryMenu(Menu):
     def __init__(self, rect, player, state_stack):
         super(InventoryMenu, self).__init__(rect, state_stack)
         self._player = player
-        #self._update_menu_items()
         self.try_set_index_to_valid_value()
 
     def _update_menu_items(self):
@@ -148,14 +150,14 @@ class InventoryMenu(Menu):
                              self.parent.width, self.parent.height)
         self._menu_items =\
             [MenuOption(item.name,
-                        OpenItemActionMenu(self._state_stack,
-                                           item_rect, item,
-                                           self._player),
+                        OpenItemActionMenuAction(self._state_stack,
+                                                 item_rect, item,
+                                                 self._player),
                         (len(item.actions) >= 1))
              for item in self._player.inventory.items]
 
 
-class OpenItemActionMenu():
+class OpenItemActionMenuAction(object):
     def __init__(self, state_stack, rect, item, player):
         self.rect = rect
         self._item = item
@@ -181,35 +183,28 @@ class ItemActionsMenu(Menu):
         self._menu_items =\
             [MenuOption(action.name,
                         DelayedAction(self._state_stack, action,
-                                      self._player, self._player),
+                                      self._player, self._player,
+                                      states_to_pop=2, end_player_turn=True),
                         action.can_act(source_entity=self._player,
                                        target_entity=self._player))
              for action in self._actions]
 
 
 class DelayedAction(object):
-    def __init__(self, state_stack, action, source_entity, target_entity):
+    def __init__(self, state_stack, action, source_entity,
+                 target_entity, states_to_pop=0, end_player_turn=True):
         self.action = action
         self.source_entity = source_entity
         self.target_entity = target_entity
         self._state_stack = state_stack
+        self._states_to_pop = states_to_pop
+        self._end_player_turn = end_player_turn
 
     def __call__(self):
         self.action.act(source_entity=self.source_entity,
                         target_entity=self.target_entity,
                         game_state=self._state_stack.get_game_state())
-        if(isinstance(self.source_entity, player.Player)):
+        if(self._end_player_turn):
             self.source_entity.turn_over = True
-        self._state_stack.pop()
-        self._state_stack.pop()
-
-
-class ContextMenu(Menu):
-    def __init__(self, position, width, height, item, player):
-        super(ItemActionsMenu, self).__init__(position, width, height)
-        self._menu_items = [action.name for action in item.actions]
-        self._actions =\
-            sorted(item.actions, key=lambda action: action.display_order)
-        self._player = player
-        self._update_menu_items()
-        self.try_set_index_to_valid_value()
+        for _ in range(self._states_to_pop):
+            self._state_stack.pop()

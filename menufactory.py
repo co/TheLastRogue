@@ -1,4 +1,5 @@
 import gamestate
+import rectfactory
 import dungeoncreatorvisualizer
 import menu
 import gui
@@ -65,3 +66,43 @@ def inventory_menu(player, state_stack):
     ui_elements = [game_state_grayout_rectangle, menu_stack_panel]
     ui_state = state.UIState(gui.UIElementSet(ui_elements))
     return ui_state
+
+
+def context_menu(player, state_stack):
+    current_dungeon_feature =\
+        player.dungeon_level.get_tile(player.position).get_dungeon_feature()
+    context_options = []
+    if(not current_dungeon_feature is None):
+        context_options.extend(get_dungeon_feature_menu_options
+                               (current_dungeon_feature, state_stack, player))
+
+    open_inventory_option =\
+        menu.MenuOption("Inventory",
+                        lambda: context_menu_open_inventory(player,
+                                                            state_stack),
+                        not player.inventory.is_empty())
+    context_options.append(open_inventory_option)
+
+    context_menu_rect = rectfactory.center_of_screen_rect(30, 30)
+    resulting_menu = menu.StaticMenu(context_menu_rect,
+                                     context_options, state_stack)
+    background_rect = gui.FilledRectangle(context_menu_rect,
+                                          colors.INTERFACE_BG)
+    ui_elements = [background_rect, resulting_menu]
+    ui_state = state.UIState(gui.UIElementSet(ui_elements))
+    return ui_state
+
+
+def get_dungeon_feature_menu_options(dungeon_feature, state_stack, player):
+    feature_options = []
+    for action in dungeon_feature.player_actions:
+        function = menu.DelayedAction(state_stack, action, player,
+                                      player, states_to_pop=1)
+        feature_options.append(menu.MenuOption(action.name, function,
+                                               action.can_act()))
+    return feature_options
+
+
+def context_menu_open_inventory(player, state_stack):
+    menu = inventory_menu(player, state_stack)
+    state_stack.push(menu)
