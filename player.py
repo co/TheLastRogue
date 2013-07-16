@@ -8,9 +8,7 @@ import numpy
 import inventory
 import messenger
 import inputhandler
-import menu
-import geometry as geo
-import settings
+import menufactory
 import statestack
 import positionexaminer
 
@@ -28,7 +26,7 @@ class Player(entity.Entity):
         self._strength = 3
         self.game_state = game_state
 
-    def _current_state_stack(self):
+    def _state_stack(self):
         return self.game_state.current_stack
 
     @property
@@ -67,7 +65,7 @@ class Player(entity.Entity):
             self.turn_over = True
 
         elif key == inputhandler.EXAMINE:  # Rest
-            game_gamestate = self._current_state_stack().peek()
+            game_gamestate = self._state_stack().peek()
             choose_target_prompt = statestack.StateStack()
             destination_selector =\
                 positionexaminer.\
@@ -128,14 +126,9 @@ class Player(entity.Entity):
 
         elif key == inputhandler.INVENTORY:
             if(not self.inventory.is_empty()):
-                inventory_position =\
-                    geo.Vector2D(settings.WINDOW_WIDTH - 24, 0)
                 inventory_menu =\
-                    menu.InventoryMenu(geo.Rect(inventory_position,
-                                                settings.WINDOW_WIDTH,
-                                                settings.WINDOW_HEIGHT),
-                                       self)
-                self._current_state_stack().push(inventory_menu)
+                    menufactory.inventory_menu(self, self._state_stack())
+                self._state_stack().push(inventory_menu)
 
         elif key == inputhandler.DESCEND:
             dungeon_feature = self.dungeon_level.get_tile(self.position)\

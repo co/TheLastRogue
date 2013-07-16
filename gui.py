@@ -9,6 +9,7 @@ import turn
 class UIElement(object):
     def __init__(self, margin=geo.zero2d()):
         self.margin = margin
+        self.parent = None
 
     def draw(self, offset=geo.zero2d()):
         pass
@@ -86,6 +87,20 @@ class RectangleGray(FilledRectangle):
                                                         INACTIVE_GAME_FG)
 
 
+class UIElementSet(object):
+    def __init__(self, elements):
+        super(UIElementSet, self).__init__()
+        self.elements = elements
+
+    def draw(self, offset=geo.zero2d()):
+        for element in self.elements:
+            element.draw(offset)
+
+    def update(self):
+        for element in self.elements:
+            element.update()
+
+
 class StackPanelVertical(UIElement):
     def __init__(self, offset, width, color_bg,
                  margin=geo.zero2d(), vertical_space=0):
@@ -94,7 +109,16 @@ class StackPanelVertical(UIElement):
         self._width = width
         self.vertical_space = vertical_space
         self.color_bg = color_bg
-        self.elements = []
+        self._elements = []
+
+    def append(self, element):
+        element.parent = self
+        return self._elements.append(element)
+
+    def clear(self):
+        for element in self._elements:
+            element.parent = None
+        self._elements = []
 
     @property
     def offset(self):
@@ -107,17 +131,21 @@ class StackPanelVertical(UIElement):
     @property
     def height(self):
         return sum([element.total_height + self.vertical_space
-                    for element in self.elements])
+                    for element in self._elements])
 
     @property
     def rectangle(self):
         return geo.Rect(self.offset, self.width, self.height)
 
+    def update(self):
+        for element in self._elements:
+            element.update()
+
     def draw(self, offset=geo.zero2d()):
         position = offset + self.offset + self.margin
 
         element_position = position
-        for element in self.elements:
+        for element in self._elements:
             element_bg_rect = geo.Rect(element_position,
                                        self.width, self.height)
             rectangle_bg = FilledRectangle(element_bg_rect, self.color_bg)
@@ -147,9 +175,9 @@ class PlayerStatusBar(RectangularUIElement):
 
         self._rectangle_bg = FilledRectangle(rect, colors.INTERFACE_BG)
 
-        self._status_stack_panel.elements.append(name_text_box)
-        self._status_stack_panel.elements.append(description_text_box)
-        self._status_stack_panel.elements.append(hp_bar)
+        self._status_stack_panel.append(name_text_box)
+        self._status_stack_panel.append(description_text_box)
+        self._status_stack_panel.append(hp_bar)
 
     def update(self):
         self._status_stack_panel.update()
@@ -177,9 +205,9 @@ class EntityStatusList(StackPanelVertical):
 
     def update(self, entity):
         seen_entities = entity.get_seen_entities()
-        self.elements = [EntityStatus(seen_entity, geo.zero2d(),
-                                      self.width)
-                         for seen_entity in seen_entities]
+        self.clear()
+        for seen_entity in seen_entities:
+            self.append(EntityStatus(seen_entity, geo.zero2d(), self.width))
 
     def draw(self, offset=geo.zero2d()):
         position = offset + self.offset + self.margin
@@ -197,8 +225,8 @@ class EntityStatus(StackPanelVertical):
                                         colors.DB_BROWN, colors.DB_LOULOU,
                                         margin=geo.Vector2D(1, 0))
 
-        self.elements.append(monster_name_text_box)
-        self.elements.append(monster_health_bar)
+        self.append(monster_name_text_box)
+        self.append(monster_health_bar)
 
 
 class MessageDisplay(StackPanelVertical):
@@ -212,14 +240,14 @@ class MessageDisplay(StackPanelVertical):
 
     def update(self):
         messages = messenger.messenger.tail(self.height)
-        self.elements = []
+        self.clear()
         for message in messages:
             if(message.turn_created == turn.current_turn - 1):
                 color = colors.TEXT_NEW
             else:
                 color = colors.TEXT_OLD
-            self.elements.append(TextBox(str(message).ljust(self.width),
-                                         geo.zero2d(), color, geo.zero2d()))
+            self.append(TextBox(str(message).ljust(self.width),
+                                geo.zero2d(), color, geo.zero2d()))
 
 
 class CounterBar(UIElement):

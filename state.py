@@ -1,7 +1,6 @@
 class State(object):
     def __init__(self):
         self.current_stack = None
-        pass
 
     def update(self):
         pass
@@ -9,3 +8,14 @@ class State(object):
     def draw(self):
         pass
 
+
+class UIState(State):
+    def __init__(self, ui_element):
+        super(UIState, self).__init__()
+        self.ui_element = ui_element
+
+    def draw(self):
+        self.ui_element.draw()
+
+    def update(self):
+        self.ui_element.update()
