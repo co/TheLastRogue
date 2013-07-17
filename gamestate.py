@@ -7,7 +7,7 @@ import item
 import gui
 import camera
 import constants
-import colors
+import rectfactory
 import turn
 import messenger
 import state
@@ -50,34 +50,21 @@ class GameStateBase(state.State):
             self.current_stack.pop()
 
     def _init_gui(self):
-        status_bar_position =\
-            geo.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH +
-                         constants.GAME_STATE_WIDTH, 0)
-
-        player_status_rect =\
-            geo.Rect(status_bar_position, constants.STATUS_BAR_WIDTH,
-                     constants.STATUS_BAR_HEIGHT)
-
+        player_status_rect = rectfactory.player_status_rect()
         self.player_status_bar =\
             gui.PlayerStatusBar(player_status_rect,
-                                self.player,
-                                margin=geo.Vector2D(0, 1))
+                                self.player)
+
+        monster_status_rect = geo.Rect(geo.zero2d(),
+                                       constants.MONSTER_STATUS_BAR_WIDTH,
+                                       constants.MONSTER_STATUS_BAR_HEIGHT)
 
         self.monster_status_bar =\
-            gui.EntityStatusList(geo.zero2d(),
-                                 constants.MONSTER_STATUS_BAR_WIDTH,
-                                 constants.MONSTER_STATUS_BAR_HEIGHT,
-                                 margin=geo.Vector2D(0, 1),
+            gui.EntityStatusList(monster_status_rect,
                                  vertical_space=1)
 
-        message_bar_position =\
-            geo.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH,
-                         constants.GAME_STATE_HEIGHT)
-
         self.message_bar =\
-            gui.MessageDisplay(message_bar_position,
-                               constants.MESSAGES_BAR_WIDTH,
-                               constants.MESSAGES_BAR_HEIGHT)
+            gui.MessageDisplay(rectfactory.message_display_rect())
 
 
 class GameState(GameStateBase):

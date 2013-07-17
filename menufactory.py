@@ -1,5 +1,4 @@
 import gamestate
-import style
 import rectfactory
 import dungeoncreatorvisualizer
 import menu
@@ -39,37 +38,73 @@ def main_menu(state_stack):
     width = max([len(option.text) for option in menu_items]) + border
     main_menu_rect = rectfactory.ratio_of_screen_rect(width, height, 0.5, 0.8)
     main_menu = menu.StaticMenu(main_menu_rect, menu_items, state_stack,
-                                margin=geo.Vector2D(2, 2), vertical_space=1)
+                                margin=settings.menu_theme.margin,
+                                vertical_space=1)
 
     background_rect = gui.StyledRectangle(main_menu_rect,
-                                          style.RectangleStyle3D())
+                                          settings.menu_theme.rect_style)
     ui_elements.append(background_rect)
     ui_elements.append(main_menu)
     return ui_state
 
 
 def inventory_menu(player, state_stack):
-    inventory_menu_rect = geo.Rect(geo.zero2d(),
-                                   24,
-                                   settings.WINDOW_HEIGHT)
-    inventory_position = geo.Vector2D(settings.WINDOW_WIDTH - 24, 0)
-    menu_stack_panel = gui.StackPanelVertical(inventory_position,
-                                              inventory_menu_rect.width,
-                                              colors.INTERFACE_BG)
+    right_side_menu_rect = rectfactory.right_side_menu_rect()
+    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left,
+                                              right_side_menu_rect.width)
     heading = gui.TextBox("Inventory:", geo.zero2d(),
                           colors.INVENTORY_HEADING,
-                          margin=geo.Vector2D(0, 1))
+                          margin=settings.menu_theme.margin)
     menu_stack_panel.append(heading)
 
+    inventory_menu_rect = geo.Rect(geo.zero2d(),
+                                   right_side_menu_rect.width,
+                                   right_side_menu_rect.height)
     inventory_menu = menu.InventoryMenu(inventory_menu_rect,
-                                        player, state_stack)
+                                        player, state_stack,
+                                        margin=settings.menu_theme.margin)
     menu_stack_panel.append(inventory_menu)
 
-    game_state_grayout_rectangle =\
-        gui.RectangleGray(geo.Rect(geo.zero2d(), settings.WINDOW_WIDTH,
-                                   settings.WINDOW_HEIGHT), colors.DB_OPAL)
+    inventory_menu_bg =\
+        gui.StyledRectangle(right_side_menu_rect,
+                            settings.menu_theme.rect_style)
 
-    ui_elements = [game_state_grayout_rectangle, menu_stack_panel]
+    grayout_rectangle =\
+        gui.RectangleGray(rectfactory.full_screen_rect(), colors.DB_OPAL)
+
+    ui_elements = [grayout_rectangle, inventory_menu_bg,
+                   menu_stack_panel]
+    ui_state = state.UIState(gui.UIElementSet(ui_elements))
+    return ui_state
+
+
+def item_actions_menu(item, player, state_stack):
+    right_side_menu_rect = rectfactory.right_side_menu_rect()
+    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left,
+                                              right_side_menu_rect.width)
+    heading = gui.TextBox(item.name, geo.zero2d(),
+                          colors.INVENTORY_HEADING,
+                          margin=settings.menu_theme.margin)
+    menu_stack_panel.append(heading)
+
+    item_actions_menu_rect = geo.Rect(geo.zero2d(),
+                                      right_side_menu_rect.width,
+                                      right_side_menu_rect.height)
+    item_actions_menu =\
+        menu.ItemActionsMenu(item_actions_menu_rect,
+                             item, player, state_stack,
+                             margin=settings.menu_theme.margin)
+    menu_stack_panel.append(item_actions_menu)
+
+    inventory_menu_bg =\
+        gui.StyledRectangle(right_side_menu_rect,
+                            settings.menu_theme.rect_style)
+
+    grayout_rectangle =\
+        gui.RectangleGray(rectfactory.full_screen_rect(), colors.DB_OPAL)
+
+    ui_elements = [grayout_rectangle, inventory_menu_bg,
+                   menu_stack_panel]
     ui_state = state.UIState(gui.UIElementSet(ui_elements))
     return ui_state
 
@@ -92,10 +127,15 @@ def context_menu(player, state_stack):
     context_menu_rect = rectfactory.center_of_screen_rect(30, 30)
     resulting_menu = menu.StaticMenu(context_menu_rect,
                                      context_options, state_stack,
-                                     margin=geo.Vector2D(2, 2))
-    background_rect = gui.StyledRectangle(context_menu_rect,
-                                          style.RectangleStyle3D())
-    ui_elements = [background_rect, resulting_menu]
+                                     margin=settings.menu_theme.margin)
+    background_rect =\
+        gui.StyledRectangle(context_menu_rect,
+                            settings.menu_theme.rect_style)
+
+    grayout_rectangle =\
+        gui.RectangleGray(rectfactory.full_screen_rect(), colors.DB_OPAL)
+
+    ui_elements = [grayout_rectangle, background_rect, resulting_menu]
     ui_state = state.UIState(gui.UIElementSet(ui_elements))
     return ui_state
 

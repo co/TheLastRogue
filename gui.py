@@ -4,6 +4,7 @@ import math
 import colors
 import geometry as geo
 import turn
+import settings
 
 
 class UIElement(object):
@@ -104,7 +105,6 @@ class StyledRectangle(RectangularUIElement):
     def draw_char(x, y, char_visual):
         libtcod.console_set_char_foreground(0, x, y, char_visual.color_fg)
         libtcod.console_set_char_background(0, x, y, char_visual.color_bg)
-        #if it crashes look here XXX
         libtcod.console_set_char(0, x, y, char_visual.symbol)
 
 
@@ -114,7 +114,7 @@ class RectangleGray(FilledRectangle):
 
     def draw(self, offset=geo.zero2d()):
         position = offset + self.offset + self.margin
-        for y in range(position.y, self.height):
+        for y in range(position.y, self.height + position.y):
             for x in range(position.x, self.width + position.x):
                 libtcod.console_set_char_background(0, x, y,
                                                     self.color_bg,
@@ -195,8 +195,9 @@ class StackPanelVertical(UIElement):
 class PlayerStatusBar(RectangularUIElement):
     def __init__(self, rect, player, margin=geo.zero2d()):
         super(PlayerStatusBar, self).__init__(rect, margin)
-        self._status_stack_panel = StackPanelVertical(self.offset, self.width,
-                                                      margin=margin)
+        self._status_stack_panel =\
+            StackPanelVertical(rect.top_left, rect.width,
+                               margin=settings.interface_theme.margin)
 
         name_text_box = TextBox(player.name, geo.zero2d(),
                                 colors.DB_PANCHO,
@@ -206,10 +207,12 @@ class PlayerStatusBar(RectangularUIElement):
                                        colors.DB_PANCHO,
                                        geo.zero2d())
 
-        hp_bar = CounterBar(player.hp, self.width - 2,
+        element_width = (self.width - settings.interface_theme.margin.x * 2)
+        hp_bar = CounterBar(player.hp, element_width,
                             colors.DB_BROWN, colors.DB_LOULOU)
 
-        self._rectangle_bg = FilledRectangle(rect, colors.INTERFACE_BG)
+        self._rectangle_bg =\
+            StyledRectangle(rect, settings.interface_theme.rect_style)
 
         self._status_stack_panel.append(name_text_box)
         self._status_stack_panel.append(description_text_box)
@@ -219,76 +222,96 @@ class PlayerStatusBar(RectangularUIElement):
         self._status_stack_panel.update()
 
     def draw(self, offset=geo.zero2d()):
-        position = offset + self.offset + self.margin
+        position = offset + self.margin
         self._rectangle_bg.draw(position)
-        self._status_stack_panel.draw(offset)
+        self._status_stack_panel.draw(position)
 
 
-class EntityStatusList(StackPanelVertical):
-    def __init__(self, offset, width, height,
-                 margin=geo.zero2d(), vertical_space=0):
-        super(EntityStatusList, self).__init__(offset, width, margin=margin,
-                                               vertical_space=vertical_space)
-        self._height = height
-        element_bg_rect = geo.Rect(geo.zero2d(), width, height)
-        self.rectangle_bg =\
-            FilledRectangle(element_bg_rect, colors.INTERFACE_BG)
+class EntityStatusList(RectangularUIElement):
+    def __init__(self, rect, margin=geo.zero2d(), vertical_space=0):
+        super(EntityStatusList, self).__init__(rect, margin=margin)
+        self._entity_stack_panel =\
+            StackPanelVertical(rect.top_left, rect.width,
+                               margin=settings.interface_theme.margin,
+                               vertical_space=vertical_space)
 
-    @property
-    def height(self):
-        return self._height
+        self._rectangle_bg =\
+            StyledRectangle(rect, settings.interface_theme.rect_style)
 
     def update(self, entity):
         seen_entities = entity.get_seen_entities()
-        self.clear()
+        self._entity_stack_panel.clear()
+        entity_status_width = (self.width -
+                               settings.interface_theme.margin.x * 2)
         for seen_entity in seen_entities:
-            self.append(EntityStatus(seen_entity, geo.zero2d(), self.width))
+            entity_status = EntityStatus(seen_entity, geo.zero2d(),
+                                         entity_status_width)
+            self._entity_stack_panel.append(entity_status)
 
     def draw(self, offset=geo.zero2d()):
-        position = offset + self.offset + self.margin
-        self.rectangle_bg.draw(position)
-        super(EntityStatusList, self).draw(offset)
+        position = offset + self.margin
+        self._rectangle_bg.draw(position)
+        self._entity_stack_panel.draw(position)
 
 
-class EntityStatus(StackPanelVertical):
+class EntityStatus(UIElement):
     def __init__(self, entity, offset, width, margin=geo.zero2d()):
-        super(EntityStatus, self).__init__(offset, width, margin)
+        super(EntityStatus, self).__init__(margin)
         monster_name_text_box = TextBox(entity.name[:width], geo.zero2d(),
                                         colors.TEXT_ACTIVE)
-        monster_health_bar = CounterBar(entity.hp, self.width - 2,
-                                        colors.DB_BROWN, colors.DB_LOULOU,
-                                        margin=geo.Vector2D(1, 0))
-
-        self.append(monster_name_text_box)
-        self.append(monster_health_bar)
-
-
-class MessageDisplay(StackPanelVertical):
-    def __init__(self, offset, width, height):
-        super(MessageDisplay, self).__init__(offset, width)
-        self._height = height
+        monster_health_bar = CounterBar(entity.hp, width,
+                                        colors.DB_BROWN, colors.DB_LOULOU)
+        self._width = width
+        self.status_stack_panel = StackPanelVertical(offset, width, margin)
+        self.status_stack_panel.append(monster_name_text_box)
+        self.status_stack_panel.append(monster_health_bar)
 
     @property
     def height(self):
-        return self._height
+        return self.status_stack_panel.height
+
+    @property
+    def width(self):
+        return self._width
+
+    def draw(self, offset=geo.zero2d()):
+        self.status_stack_panel.draw(offset)
+
+
+class MessageDisplay(RectangularUIElement):
+    def __init__(self, rect, margin=geo.Vector2D(0, 0), vertical_space=0):
+        super(MessageDisplay, self).__init__(rect, margin=margin)
+        self._message_stack_panel =\
+            StackPanelVertical(rect.top_left, rect.width,
+                               margin=settings.interface_theme.margin,
+                               vertical_space=vertical_space)
+        self._rectangle_bg =\
+            StyledRectangle(rect, settings.interface_theme.rect_style)
 
     def update(self):
-        messages = messenger.messenger.tail(self.height)
-        self.clear()
+        messages_height = (self.height -
+                           settings.interface_theme.margin.y * 2)
+        messages = messenger.messenger.tail(messages_height)
+        self._message_stack_panel.clear()
         for message in messages:
             if(message.turn_created == turn.current_turn - 1):
                 color = colors.TEXT_NEW
             else:
                 color = colors.TEXT_OLD
-            self.append(TextBox(str(message).ljust(self.width),
-                                geo.zero2d(), color, geo.zero2d()))
+            message_width = (self.width -
+                             settings.interface_theme.margin.x * 2)
+            text_box = TextBox(str(message).ljust(message_width),
+                               geo.zero2d(), color, geo.zero2d())
+            self._message_stack_panel.append(text_box)
+
+    def draw(self, offset=geo.zero2d()):
+        self._rectangle_bg.draw(offset)
+        self._message_stack_panel.draw(offset)
 
 
 class CounterBar(UIElement):
-    def __init__(self, counter, width, active_color,
-                 inactive_color,
-                 margin=geo.Vector2D(1, 1),
-                 offset=geo.zero2d()):
+    def __init__(self, counter, width, active_color, inactive_color,
+                 margin=geo.Vector2D(0, 0), offset=geo.zero2d()):
         super(CounterBar, self).__init__(margin)
         self.offset = offset
         self.counter = counter
@@ -337,8 +360,7 @@ class TextBox(UIElement):
         lines = self.text.split("\n")
         return max([len(line) for line in lines])
 
-    def draw(self, position=geo.zero2d()):
-        position = position + self.offset + self.margin
+    def draw(self, offset=geo.zero2d()):
+        position = offset + self.offset + self.margin
         libtcod.console_set_default_foreground(None, self.text_color)
-        libtcod.console_print(None, position.x + self.margin.x,
-                              position.y + self.margin.y, self.text)
+        libtcod.console_print(None, position.x, position.y, self.text)

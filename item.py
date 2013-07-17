@@ -102,8 +102,8 @@ class Gun(RangedWeapon):
         self._name = "Gun"
         self._description =\
             "This was once a fine weapon, but age has torn it real bad.\n\
-            The wooden handle is dry and gray \
-            and you see rust eating into the iron pipe."
+            The wooden handle is dry and gray, \
+            you see rust eating into the iron pipe."
 
         self._damage_strength = 10
         self._damage_variance = 5

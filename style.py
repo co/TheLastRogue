@@ -1,4 +1,13 @@
 import colors
+import geometry as geo
+import libtcodpy as libtcod
+
+
+class MenuStyle(object):
+    def __init__(self, rect_style, inactive_text_color, margin):
+        self.rect_style = rect_style
+        self.inactive_text_color = inactive_text_color
+        self.margin = margin
 
 
 class CharacterVisual(object):
@@ -21,7 +30,7 @@ class RectangleStyle(object):
         self.bottom_right = None
 
 
-class RectangleStyle3D(object):
+class RectangleStyle3D(RectangleStyle):
     def __init__(self):
         light = colors.DB_TOPAZ
         medium = colors.DB_DIM_GRAY
@@ -37,3 +46,40 @@ class RectangleStyle3D(object):
         self.top_right = CharacterVisual(243, light, dark)
         self.bottom_left = CharacterVisual(243, light, dark)
         self.bottom_right = CharacterVisual('\\', dark, very_dark)
+
+
+class FinalFantasyClassicStyle(RectangleStyle):
+    def __init__(self):
+        white = colors.DB_WHITE
+        blue = colors.DB_VENICE_BLUE
+        self.center = CharacterVisual(' ', blue, blue)
+        self.top = CharacterVisual(libtcod.CHAR_HLINE, blue, white)
+        self.left = CharacterVisual(libtcod.CHAR_VLINE, blue, white)
+        self.bottom = self.top
+        self.right = self.left
+        self.top_left = CharacterVisual(libtcod.CHAR_DIAMOND, blue, white)
+        self.top_right = self.top_left
+        self.bottom_left = self.top_left
+        self.bottom_right = self.top_left
+
+
+class MinimalClassicStyle(RectangleStyle):
+    def __init__(self):
+        bg = colors.DB_VALHALLA
+        fg = colors.DB_HEATHER
+        self.center = CharacterVisual(' ', bg, bg)
+        self.top = CharacterVisual(libtcod.CHAR_DHLINE, bg, fg)
+        self.left = CharacterVisual(libtcod.CHAR_DVLINE, bg, fg)
+        self.bottom = self.top
+        self.right = self.left
+        self.top_left = CharacterVisual(libtcod.CHAR_DNW, bg, fg)
+        self.top_right = CharacterVisual(libtcod.CHAR_DNE, bg, fg)
+        self.bottom_left = CharacterVisual(libtcod.CHAR_DSW, bg, fg)
+        self.bottom_right = CharacterVisual(libtcod.CHAR_DSE, bg, fg)
+
+ff_blue_theme = MenuStyle(FinalFantasyClassicStyle(),
+                          colors.DB_TOPAZ, geo.Vector2D(2, 2))
+tlr_classic_3d_theme = MenuStyle(RectangleStyle3D(),
+                                 colors.DB_TOPAZ, geo.Vector2D(2, 2))
+rogue_classic_theme = MenuStyle(MinimalClassicStyle(),
+                                colors.DB_TOPAZ, geo.Vector2D(2, 2))

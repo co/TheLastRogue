@@ -2,6 +2,7 @@ import inputhandler
 import geometry as geo
 import colors
 import gui
+import menufactory
 
 
 def clamp(n, minn, maxn):
@@ -24,7 +25,7 @@ class Menu(gui.UIElement):
                                    vertical_space=vertical_space)
 
     @property
-    def position(self):
+    def offset(self):
         return self.rect.top_left
 
     @property
@@ -117,7 +118,7 @@ class Menu(gui.UIElement):
                                          len(self._menu_items) - 1)
 
     def draw(self, offset=geo.zero2d()):
-        self._item_stack_panel.draw(self.position + offset + self.margin)
+        self._item_stack_panel.draw(self.offset + offset + self.margin)
 
 
 class MenuOption(gui.UIElement):
@@ -141,8 +142,10 @@ class StaticMenu(Menu):
 
 
 class InventoryMenu(Menu):
-    def __init__(self, rect, player, state_stack):
-        super(InventoryMenu, self).__init__(rect, state_stack)
+    def __init__(self, rect, player, state_stack,
+                 margin=geo.zero2d(), vertical_space=1):
+        super(InventoryMenu, self).__init__(rect, state_stack, margin=margin,
+                                            vertical_space=vertical_space)
         self._player = player
         self.try_set_index_to_valid_value()
 
@@ -166,14 +169,18 @@ class OpenItemActionMenuAction(object):
         self._state_stack = state_stack
 
     def __call__(self):
-        item_actions_menu = ItemActionsMenu(self.rect, self._item,
-                                            self._player, self._state_stack)
+        item_actions_menu = menufactory.item_actions_menu(self._item,
+                                                          self._player,
+                                                          self._state_stack)
         self._state_stack.push(item_actions_menu)
 
 
 class ItemActionsMenu(Menu):
-    def __init__(self, rect, item, player, state_stack):
-        super(ItemActionsMenu, self).__init__(rect, state_stack)
+    def __init__(self, rect, item, player, state_stack,
+                 margin=geo.zero2d(), vertical_space=1):
+        super(ItemActionsMenu, self).__init__(rect, state_stack,
+                                              margin=margin,
+                                              vertical_space=vertical_space)
         self._actions =\
             sorted(item.actions, key=lambda action: action.display_order)
         self._player = player
