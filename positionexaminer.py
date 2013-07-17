@@ -30,14 +30,10 @@ class PositionExaminer(state.State):
         step_size = 1
         if inputhandler.is_special_key_pressed(inputhandler.KEY_SHIFT):
             step_size = 5
-        if key == inputhandler.UP:
-            self.offset_cursor_position((0, -step_size))
-        if key == inputhandler.DOWN:
-            self.offset_cursor_position((0, step_size))
-        if key == inputhandler.LEFT:
-            self.offset_cursor_position((-step_size, 0))
-        if key == inputhandler.RIGHT:
-            self.offset_cursor_position((step_size, 0))
+        if key in inputhandler.move_controls:
+            dx = inputhandler.move_controls[key].x * step_size
+            dy = inputhandler.move_controls[key].y * step_size
+            self.offset_cursor_position((dx, dy))
 
     def offset_cursor_position(self, offset):
         new_cursor_position = self.cursor_position + offset
@@ -97,10 +93,7 @@ class MissileDestinationSelector(PositionSelector):
                              background_state, max_distance)
         self.start_position = position.copy()
         self.entity = entity
-
-    @property
-    def selected_path(self):
-        return self._get_current_path()
+        self.selected_path = None
 
     def _get_current_path(self):
         result = []
@@ -118,6 +111,16 @@ class MissileDestinationSelector(PositionSelector):
         path = self._get_current_path()
         for point in path:
             self._draw_path_point(point)
+
+    def _handle_escape(self, key):
+        if key == inputhandler.ESCAPE:
+            self.selected_path = None
+            self.state_stack.pop()
+
+    def _handle_enter(self, key):
+        if key == inputhandler.ENTER:
+            self.selected_path = self._get_current_path()
+            self.state_stack.pop()
 
     def _draw_path_point(self, point):
         screen_position = self.camera.dungeon_to_screen_position(point)

@@ -20,7 +20,7 @@ class Item(gamepiece.GamePiece):
         self.inventory = None
         self.actions = []
         self.actions.append(action.DropAction(self))
-        self.actions.append(action.ThrowAction(self))
+        self.actions.append(action.PlayerThrowItemAction(self))
         self.weight = 5
 
     def throw_effect(self, dungeon_level, position):

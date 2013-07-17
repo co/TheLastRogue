@@ -1,4 +1,5 @@
 import counter
+import action
 import monsterspawner
 import colors
 import dungeonlevel
@@ -142,6 +143,16 @@ class Player(entity.Entity):
                 context_menu = menufactory.context_menu(self,
                                                         self._state_stack())
                 self._state_stack().push(context_menu)
+
+        elif key == inputhandler.FIRE:
+
+            game_state = self._state_stack().get_game_state()
+            rock_throwing = action.PlayerThrowRockAction()
+            if(rock_throwing.can_act(source_entity=self,
+                                     game_state=game_state)):
+                throw_succeded = rock_throwing.act(source_entity=self,
+                                                   game_state=game_state)
+                self.turn_over = throw_succeded
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)

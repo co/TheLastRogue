@@ -22,8 +22,8 @@ INVENTORY = 113
 EXAMINE = 114
 SHIFT = 115
 DESCEND = 116
-
 ZERO = 117
+FIRE = 118
 
 #Aliases:
 UP = NORTH
@@ -73,6 +73,8 @@ controls = {
 
     'w': SOUTHEAST,   # down, right
     libtcod.KEY_KP3: SOUTHEAST,  # down, right
+
+    'f': FIRE,
 
     libtcod.KEY_ENTER: ENTER,
     libtcod.KEY_ESCAPE: ESCAPE,
