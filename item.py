@@ -7,15 +7,28 @@ import entityeffect
 import entity
 
 
+class ItemTypes(object):
+    POTION = 0
+    WEAPON = 1
+    ARMOR = 2
+    JEWELLRY = 2
+    AMMO = 3
+
+    ALL = [POTION, WEAPON, ARMOR, AMMO]
+
+
 class Item(gamepiece.GamePiece):
     def __init__(self):
         super(Item, self).__init__()
 
         self.piece_type = gamepiece.GamePieceType.ITEM
         self.max_instances_in_single_tile = 1
+
         self.draw_order = 1
-        self._name = "XXX_UNNAMED_XXX"
-        self._description = "XXX_DESCRIPTION_XXX"
+        self._name = "XXX_UNNAMED_ITEM_XXX"
+        self._description = "XXX_DESCRIPTION_ITEM_XXX"
+        self.item_type = None
+
         self._color_bg = None
         self.inventory = None
         self.actions = []
@@ -31,9 +44,9 @@ class Item(gamepiece.GamePiece):
 
 
 class EquipableItem(Item):
-    def __init__(self, equipment_slot):
+    def __init__(self):
         super(EquipableItem, self).__init__()
-        self.equipment_slot = equipment_slot
+        self.equipment_type = None
 
     def equip_effect(self, entity):
         pass
@@ -45,10 +58,39 @@ class EquipableItem(Item):
         pass
 
 
-class RingOfInvisibility(EquipableItem):
+class WeaponItem(EquipableItem):
     def __init__(self):
-        super(RingOfInvisibility,
-              self).__init__(equipment.EquipmentSlots.LEFTRING)
+        super(EquipableItem, self).__init__()
+        self.item_type = ItemTypes.WEAPON
+
+
+class MeleeWeapon(WeaponItem):
+    def __init__(self):
+        super(EquipableItem, self).__init__()
+        self.equipment_type = equipment.EquipmentTypes.MELEE_WEAPON
+
+
+class RangedWeapon(WeaponItem):
+    def __init__(self):
+        super(EquipableItem, self).__init__()
+        self.equipment_type = equipment.EquipmentTypes.RANGED_WEAPON
+
+
+class JewellryItem(EquipableItem):
+    def __init__(self):
+        super(EquipableItem, self).__init__()
+        self.item_type = ItemTypes.JEWELLRY
+
+
+class RingItem(JewellryItem):
+    def __init__(self):
+        super(EquipableItem, self).__init__()
+        self.equipment_type = equipment.EquipmentTypes.RING
+
+
+class RingOfInvisibility(RingItem):
+    def __init__(self):
+        super(RingOfInvisibility, self).__init__()
         self._color_fg = colors.DB_GOLDEN_FIZZ
         self._symbol = ord('o')
         self._name = "Ring of Invisibility"
@@ -65,9 +107,9 @@ class RingOfInvisibility(EquipableItem):
         target_entity.add_entity_effect(invisibility_effect)
 
 
-class Gun(EquipableItem):
+class Gun(RangedWeapon):
     def __init__(self):
-        super(Gun, self).__init__(equipment.EquipmentSlots.MAINHAND)
+        super(Gun, self).__init__()
         self._color_fg = colors.DB_WHITE
         self._symbol = ord('(')
         self._name = "Gun"
