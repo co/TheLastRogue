@@ -71,6 +71,9 @@ class Equipment(object):
         }
         self.entity = entity
 
+    def get(self, equipment_slot):
+        return self._equipment[equipment_slot]
+
     def has_type(self, equipment_type):
         return (not self._equipment[EquipmentTypeAllowedInSlot[equipment_type]]
                 is None)

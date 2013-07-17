@@ -1,4 +1,5 @@
 import random
+import damage
 import numpy
 import geometry as geo
 import counter
@@ -147,12 +148,13 @@ class Entity(gamepiece.GamePiece):
         self.hit(entity)
         return True
 
+    def _unarmed_damage(self):
+        damage_types = [damage.DamageTypes.BLUNT, damage.DamageTypes.PHYSICAL]
+        return damage.Damage(self._strength, self._strength / 2, damage_types)
+
     def hit(self, target_entity):
-        damage = random.randrange(0, self._strength)
-        damage_types = [entityeffect.DamageTypes.PHYSICAL]
-        damage_effect = entityeffect.Damage(self, target_entity,
-                                            damage, damage_types=damage_types)
-        target_entity.add_entity_effect(damage_effect)
+        # implement melee weapon damage here.
+        self._unarmed_damage().damage_entity(self, target_entity)
 
     def add_entity_effect(self, effect):
         self.effect_queue.add(effect)

@@ -1,5 +1,6 @@
 import counter
-import action
+import equipment
+import missileaction
 import monsterspawner
 import colors
 import dungeonlevel
@@ -147,12 +148,23 @@ class Player(entity.Entity):
         elif key == inputhandler.FIRE:
 
             game_state = self._state_stack().get_game_state()
-            rock_throwing = action.PlayerThrowRockAction()
-            if(rock_throwing.can_act(source_entity=self,
-                                     game_state=game_state)):
-                throw_succeded = rock_throwing.act(source_entity=self,
-                                                   game_state=game_state)
-                self.turn_over = throw_succeded
+            if(self.equipment.slot_is_equiped
+               (equipment.EquipmentSlots.RANGED_WEAPON)):
+                weapon =\
+                    self.equipment.get(equipment.EquipmentSlots.RANGED_WEAPON)
+                shooting = missileaction.PlayerShootWeaponAction(weapon)
+                if(shooting.can_act(source_entity=self,
+                                    game_state=game_state)):
+                    shooting_succeded = shooting.act(source_entity=self,
+                                                     game_state=game_state)
+                    self.turn_over = shooting_succeded
+            else:
+                rock_throwing = missileaction.PlayerThrowRockAction()
+                if(rock_throwing.can_act(source_entity=self,
+                                         game_state=game_state)):
+                    throw_succeded = rock_throwing.act(source_entity=self,
+                                                       game_state=game_state)
+                    self.turn_over = throw_succeded
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)

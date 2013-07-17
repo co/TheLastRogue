@@ -1,4 +1,5 @@
 import messenger
+import damage
 import random
 import numpy
 
@@ -15,11 +16,6 @@ class EffectTypes(object):
 
     ALLTYPES = [STATUS_REMOVER, BLOCKER, STATUS_ADDER,
                 TELEPORT, HEAL, DAMAGE, EQUIPMENT]
-
-
-class DamageTypes(object):
-    PHYSICAL = 0
-    MAGIC = 1
 
 
 class EffectCause(object):
@@ -121,13 +117,14 @@ class Teleport(EntityEffect):
         self.tick()
 
 
-class Damage(EntityEffect):
+class DamageEntityEffect(EntityEffect):
     def __init__(self, source_entity, target_entity, damage,
-                 damage_types=[DamageTypes.PHYSICAL], time_to_live=1):
-        super(Damage, self).__init__(source_entity=source_entity,
-                                     target_entity=target_entity,
-                                     effect_type=EffectTypes.DAMAGE,
-                                     time_to_live=time_to_live)
+                 damage_types, time_to_live=1):
+        super(DamageEntityEffect,
+              self).__init__(source_entity=source_entity,
+                             target_entity=target_entity,
+                             effect_type=EffectTypes.DAMAGE,
+                             time_to_live=time_to_live)
         self.damage = damage
         self.damage_types = damage_types
 
