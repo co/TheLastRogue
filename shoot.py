@@ -1,16 +1,22 @@
 import statestack
+import geometry as geo
 import positionexaminer
 
 
-def player_select_missile_path(entity, max_throw_distance, game_gamestate):
+def player_select_missile_path(source_entity, max_throw_distance,
+                               game_gamestate):
     choose_target_prompt = statestack.StateStack()
-    init_target = entity.get_closest_seen_entity().position
-    if init_target is None:
-        init_target = entity.position
+    target_entity = source_entity.get_closest_seen_entity()
+    if(not target_entity is None and
+       geo.chess_distance(target_entity.position, source_entity.position)
+       <= max_throw_distance):
+        init_target = target_entity.position
+    else:
+        init_target = source_entity.position
     destination_selector = positionexaminer.\
         MissileDestinationSelector(choose_target_prompt,
-                                   entity.position.copy(),
-                                   entity,
+                                   source_entity.position.copy(),
+                                   source_entity,
                                    game_gamestate,
                                    max_throw_distance,
                                    init_target=init_target)
