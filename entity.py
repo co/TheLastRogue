@@ -123,6 +123,17 @@ class Entity(gamepiece.GamePiece):
                 seen_entities.append(entity)
         return [entity for entity in seen_entities if not entity is self]
 
+    def get_seen_entities_closest_first(self):
+        return sorted(self.get_seen_entities(),
+                      key=lambda entity: geo.chess_distance(self.position,
+                                                            entity.position))
+
+    def get_closest_seen_entity(self):
+        closest_seen_entities = self.get_seen_entities_closest_first()
+        if(len(closest_seen_entities) < 1):
+            return None
+        return closest_seen_entities[0]
+
     def can_see_point(self, point):
         return libtcod.map_is_in_fov(self.dungeon_map, point.x, point.y)
 
@@ -151,6 +162,9 @@ class Entity(gamepiece.GamePiece):
     def _unarmed_damage(self):
         damage_types = [damage.DamageTypes.BLUNT, damage.DamageTypes.PHYSICAL]
         return damage.Damage(self._strength, self._strength / 2, damage_types)
+
+    def rock_throwing_damage(self):
+        return self._unarmed_damage()
 
     def hit(self, target_entity):
         # implement melee weapon damage here.

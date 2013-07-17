@@ -87,13 +87,15 @@ class PositionSelector(PositionExaminer):
 
 class MissileDestinationSelector(PositionSelector):
     def __init__(self, state_stack, position, entity, background_state,
-                 max_distance=numpy.inf):
+                 max_distance=numpy.inf, init_target=None):
         super(MissileDestinationSelector,
               self).__init__(state_stack, position,
                              background_state, max_distance)
         self.start_position = position.copy()
         self.entity = entity
         self.selected_path = None
+        if not init_target is None:
+            self.cursor_position = init_target
 
     def _get_current_path(self):
         result = []

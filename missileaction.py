@@ -2,8 +2,6 @@ import action
 import shoot
 import animation
 import colors
-import random
-import entityeffect
 
 
 class PlayerMissileAction(action.Action):
@@ -71,14 +69,11 @@ class PlayerThrowRockAction(PlayerMissileAction):
         return True
 
     def hit_position(self, dungeon_level, position, source_entity):
-        entity = dungeon_level.get_tile(position).get_first_entity()
-        if(entity is None):
+        target_entity = dungeon_level.get_tile(position).get_first_entity()
+        if(target_entity is None):
             return
-        damage = random.randrange(0, source_entity._strength)
-        damage_types = [entityeffect.DamageTypes.PHYSICAL]
-        damage_effect = entityeffect.Damage(source_entity, entity, damage,
-                                            damage_types=damage_types)
-        entity.add_entity_effect(damage_effect)
+        source_entity.rock_throwing_damage().damage_entity(source_entity,
+                                                           target_entity)
 
     def max_throw_distance(self, **kwargs):
         source_entity = kwargs[action.SOURCE_ENTITY]

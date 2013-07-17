@@ -4,12 +4,16 @@ import positionexaminer
 
 def player_select_missile_path(entity, max_throw_distance, game_gamestate):
     choose_target_prompt = statestack.StateStack()
+    init_target = entity.get_closest_seen_entity().position
+    if init_target is None:
+        init_target = entity.position
     destination_selector = positionexaminer.\
         MissileDestinationSelector(choose_target_prompt,
                                    entity.position.copy(),
                                    entity,
                                    game_gamestate,
-                                   max_throw_distance)
+                                   max_throw_distance,
+                                   init_target=init_target)
     choose_target_prompt.push(destination_selector)
     choose_target_prompt.main_loop()
     return destination_selector.selected_path

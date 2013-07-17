@@ -69,13 +69,17 @@ class Player(entity.Entity):
         elif key == inputhandler.EXAMINE:  # Rest
             game_gamestate = self._state_stack().peek()
             choose_target_prompt = statestack.StateStack()
+            init_target = self.get_closest_seen_entity().position
+            if init_target is None:
+                init_target = self.position
             destination_selector =\
                 positionexaminer.\
                 MissileDestinationSelector(choose_target_prompt,
-                                           self.position.copy(),
+                                           self.position,
                                            self,
                                            game_gamestate,
-                                           self._sight_radius)
+                                           self._sight_radius,
+                                           init_target=init_target)
             choose_target_prompt.push(destination_selector)
             choose_target_prompt.main_loop()
 

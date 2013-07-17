@@ -66,7 +66,7 @@ class FinalFantasyClassicStyle(RectangleStyle):
 class MinimalClassicStyle(RectangleStyle):
     def __init__(self):
         bg = colors.DB_VALHALLA
-        fg = colors.DB_HEATHER
+        fg = colors.DB_VENICE_BLUE
         self.center = CharacterVisual(' ', bg, bg)
         self.top = CharacterVisual(libtcod.CHAR_DHLINE, bg, fg)
         self.left = CharacterVisual(libtcod.CHAR_DVLINE, bg, fg)
