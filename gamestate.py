@@ -36,18 +36,69 @@ class GameStateBase(state.State):
         self.monster_status_bar.draw()
 
     def update(self):
-        dungeon_level = self.player.dungeon_level
         if(self.player.turn_over):
             turn.current_turn += 1
         self.message_bar.update()
+
+        dungeon_level = self.player.dungeon_level
         dungeon_level.update()
-        self.monster_status_bar.update(self.player)
-        self.player_status_bar.update()
-        self.camera.update(self.player)
+
+        entities = dungeon_level.entities
+        self._update_entities(entities)
+
+        self._update_gui()
+
         if(self.player.is_dead()):
             self.current_stack.pop()
         if(self.has_won):
             self.current_stack.pop()
+
+    def _update_gui(self):
+        self.monster_status_bar.update(self.player)
+        self.player_status_bar.update()
+        self.camera.update(self.player)
+
+    def _update_entities(self, entities):
+        self._entities_calculate_fov(entities)
+        self._entities_act(entities)
+        self._entities_equipment_effects(entities)
+        self._entities_clear_status(entities)
+        self._entities_effects_update(entities)
+
+    def _entities_calculate_dungeon_map(self, entities):
+        for entity in entities:
+            entity.update_dungeon_map()
+        self._dungeon_map_timestamp = turn.current_turn
+
+    def _entities_calculate_fov(self, entities):
+        for entity in entities:
+            entity.update_fov()
+
+    def _entities_effects_update(self, entities):
+        for entity in entities:
+            entity.update_effect_queue()
+
+    def _entities_act(self, entities):
+        monsters = self._get_all_non_players(entities)
+        if(not player is None and not self.player.is_dead()):
+            self.player.update()
+        if(self.player.turn_over):
+            for current_monster in monsters:
+                if(not current_monster.is_dead()):
+                    current_monster.update(player)
+
+    def _get_all_non_players(self, entities):
+        return [entity for entity in entities
+                if(not isinstance(entity, player.Player))]
+
+    def _entities_equipment_effects(self, entities):
+        for entity in entities:
+            if(not entity.is_dead()):
+                entity.equipment.execute_equip_effects()
+
+    def _entities_clear_status(self, entities):
+        for entity in entities:
+            entity.clear_all_status()
 
     def _init_gui(self):
         player_status_rect = rectfactory.player_status_rect()

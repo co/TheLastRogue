@@ -108,7 +108,7 @@ class DungeonLevel(object):
                 tile.draw(position, True)
 
     def draw(self, camera):
-        the_player = self.get_player_if_available()
+        the_player = self._get_player_if_available()
         the_player.update_fov()
         for y in range(constants.GAME_STATE_HEIGHT):
             for x in range(constants.GAME_STATE_WIDTH):
@@ -127,6 +127,11 @@ class DungeonLevel(object):
             player_memory_of_map = the_player.get_memory_of_map(self)
             player_memory_of_map.get_tile_or_unknown(tile_position).\
                 draw(screen_position, False)
+
+    def _get_player_if_available(self):
+        return next((entity for entity in self.entities
+                     if(isinstance(entity, player.Player))),
+                    None)
 
     def add_dungeon_feature_if_not_present(self, new_dungeon_feature):
         if(not new_dungeon_feature in self.dungeon_features):
@@ -158,55 +163,7 @@ class DungeonLevel(object):
             return tile.get_unknown_tile()
 
     def update(self):
-        if(self._dungeon_map_timestamp <= self._terrain_changed_timestamp):
-            self._entities_calculate_dungeon_map()
-        self._entities_calculate_fov()
-        self._entities_act()
-        self._entities_equipment_effects()
-        self._entities_clear_status()
-        self._entities_effects_update()
         self._remove_dead_monsters()
-
-    def _entities_calculate_dungeon_map(self):
-        for entity in self.entities:
-            entity.update_dungeon_map()
-        self._dungeon_map_timestamp = turn.current_turn
-
-    def _entities_calculate_fov(self):
-        for entity in self.entities:
-            entity.update_fov()
-
-    def _entities_effects_update(self):
-        for entity in self.entities:
-            entity.update_effect_queue()
-
-    def get_player_if_available(self):
-        return next((entity for entity in self.entities
-                     if(isinstance(entity, player.Player))),
-                    None)
-
-    def get_all_non_players(self):
-        return [entity for entity in self.entities
-                if(not isinstance(entity, player.Player))]
-
-    def _entities_act(self):
-        monsters = self.get_all_non_players()
-        player = self.get_player_if_available()
-        if(not player is None and not player.is_dead()):
-            player.update()
-        if(player.turn_over):
-            for monster in monsters:
-                if(not monster.is_dead()):
-                    monster.update(player)
-
-    def _entities_equipment_effects(self):
-        for entity in self.entities:
-            if(not entity.is_dead()):
-                entity.equipment.execute_equip_effects()
-
-    def _entities_clear_status(self):
-        for entity in self.entities:
-            entity.clear_all_status()
 
     def _remove_dead_monsters(self):
         for entity in self.entities:
