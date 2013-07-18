@@ -1,4 +1,5 @@
 import random
+import gametime
 import damage
 import numpy
 import geometry as geo
@@ -41,9 +42,15 @@ class Entity(gamepiece.GamePiece):
         self.piece_type = gamepiece.GamePieceType.ENTITY
         self.max_instances_in_single_tile = 1
         self.draw_order = 3
+
         self.path = None
         self.__dungeon_level = None
         self._init_entity_effects()
+
+        self.energy = 0
+        self.energy_recovery = gametime.normal_energy_gain
+        self.movement_speed = gametime.single_turn
+        self.attack_speed = gametime.single_turn
 
     def _init_entity_effects(self):
         can_open_doors_flag = StatusFlags.CAN_OPEN_DOORS
@@ -68,7 +75,7 @@ class Entity(gamepiece.GamePiece):
     def _signal_new_dungeon_level(self):
         pass
 
-    def update(self, player):
+    def act(self):
         pass
 
     def step_random_direction(self):
@@ -147,9 +154,6 @@ class Entity(gamepiece.GamePiece):
 
     def is_dead(self):
         return self.hp.value == 0
-
-    def kill(self):
-        self.hp.set_min()
 
     def try_hit(self, position):
         entity = self.dungeon_level.get_tile(position).get_first_entity()

@@ -1,4 +1,5 @@
 import counter
+import gametime
 import colors
 import entity
 import player
@@ -11,7 +12,7 @@ class Monster(entity.Entity):
     def __init__(self):
         super(Monster, self).__init__()
 
-    def kill(self):
+    def kill_and_remove(self):
         self.hp.set_min()
         self.try_remove_from_dungeon()
         messenger.messenger.message(messenger.Message(self.death_message))
@@ -56,12 +57,21 @@ class RatMan(Monster):
         self._color_fg = colors.DB_TAHITI_GOLD
         self._symbol = 'r'
 
-    def update(self, player):
+    def act(self):
         self.step_looking_for_player()
         if(rng.coin_flip() and self.can_see_player()):
             message = "The rat-man looks at you."
             messenger.messenger.message(message)
-        return True
+        return gametime.single_turn
+
+
+class Jerico(RatMan):
+    def __init__(self):
+        super(Jerico, self).__init__()
+        self._name = "Jerico"
+        self.death_message = "The Jerico the quick is no more."
+        self._color_fg = colors.DB_GOLDEN_FIZZ
+        self.energy_recovery = gametime.double_energy_gain
 
 
 class StoneStatue(Monster):
@@ -74,8 +84,8 @@ class StoneStatue(Monster):
         self._color_fg = colors.DB_TOPAZ
         self._symbol = '&'
 
-    def update(self, player):
+    def act(self):
         if(rng.coin_flip() and self.can_see_player()):
             message = "The stone statue casts a long shadow on the floor."
             messenger.messenger.message(message)
-        return True
+        return gametime.single_turn

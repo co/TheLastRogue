@@ -13,6 +13,7 @@ import inputhandler
 import menufactory
 import statestack
 import positionexaminer
+import gametime
 
 
 class Player(entity.Entity):
@@ -24,7 +25,6 @@ class Player(entity.Entity):
         self.inventory = inventory.Inventory(self)
         self._name = "CO"
         self._description = "The Brave"
-        self.turn_over = False
         self._strength = 3
         self.game_state = game_state
 
@@ -48,8 +48,7 @@ class Player(entity.Entity):
     def _signal_new_dungeon_level(self):
         self.set_memory_map_if_not_set(self.dungeon_level)
 
-    def update(self):
-        self.turn_over = False
+    def act(self):
         key = inputhandler.get_keypress()
         position = self.position
         if key in inputhandler.move_controls:
@@ -57,14 +56,15 @@ class Player(entity.Entity):
             dy = inputhandler.move_controls[key].y
             new_position = position + (dx, dy)
             move_succeded = self.try_step_to(new_position)
-            self.turn_over = move_succeded
+            if(move_succeded):
+                return self.movement_speed
 
         elif key == inputhandler.ESCAPE:
-            self.kill()
-            self.turn_over = True
+            self.kill_and_remove()
+            return gametime.single_turn
 
         elif key == inputhandler.REST:  # Rest
-            self.turn_over = True
+            return gametime.single_turn
 
         elif key == inputhandler.EXAMINE:  # Rest
             game_gamestate = self._state_stack().peek()
@@ -91,7 +91,7 @@ class Player(entity.Entity):
                 if(pickup_succeded):
                     message = "Picked up: " + item.name
                     messenger.messenger.message(message)
-                    self.turn_over = True
+                    return gametime.single_turn
                 else:
                     message = "Could not pick up: " + item.name +\
                         ", the inventory is full."
@@ -108,7 +108,7 @@ class Player(entity.Entity):
                 Teleport(self, self,
                          time_to_live=1)
             self.add_entity_effect(effect)
-            self.turn_over = True
+            return gametime.single_turn
 
         elif key == inputhandler.FOUR:
             invisibile_flag = entity.StatusFlags.INVISIBILE
@@ -124,11 +124,11 @@ class Player(entity.Entity):
                                                     invisible_status,
                                                     time_to_live=1)
                 self.add_entity_effect(effect)
-            self.turn_over = True
+            return gametime.single_turn
 
         elif key == inputhandler.FIVE:
             monsterspawner.spawn_rat_man(self.dungeon_level)
-            self.turn_over = True
+            return gametime.single_turn
 
         elif key == inputhandler.INVENTORY:
             if(not self.inventory.is_empty()):
@@ -161,14 +161,20 @@ class Player(entity.Entity):
                                     game_state=game_state)):
                     shooting_succeded = shooting.act(source_entity=self,
                                                      game_state=game_state)
-                    self.turn_over = shooting_succeded
+                    if shooting_succeded:
+                        return gametime.single_turn
             else:
                 rock_throwing = missileaction.PlayerThrowRockAction()
                 if(rock_throwing.can_act(source_entity=self,
                                          game_state=game_state)):
                     throw_succeded = rock_throwing.act(source_entity=self,
                                                        game_state=game_state)
-                    self.turn_over = throw_succeded
+                    if throw_succeded:
+                        return gametime.single_turn
+        return 0
+
+    def kill_and_remove(self):
+        self.hp.set_min()
 
     def get_memory_of_map(self, dungeon_level):
         self.set_memory_map_if_not_set(dungeon_level)

@@ -1,5 +1,6 @@
 import terrain
 import dungeonfeature
+import entityscheduler
 import settings
 import tile
 import turn
@@ -79,7 +80,7 @@ class DungeonLevel(object):
         self.width = len(tile_matrix[0])
         self.tile_matrix = tile_matrix
         self.depth = depth
-        self.entities = []
+        self.entity_scheduler = entityscheduler.EntityScheduler()
         self.dungeon_features = []
         self.suspended_entity = None
         self.dungeon = None
@@ -88,6 +89,16 @@ class DungeonLevel(object):
         self._dungeon_map_timestamp = -1
 
         self.walkable_destinations = util.WalkableDestinatinationsPath()
+
+    @property
+    def entities(self):
+        return self.entity_scheduler.entities
+
+    def add_entity(self, entity):
+        return self.entity_scheduler.register(entity)
+
+    def remove_entity(self, entity):
+        return self.entity_scheduler.release(entity)
 
     @property
     def up_stairs(self):
@@ -143,11 +154,11 @@ class DungeonLevel(object):
 
     def add_entity_if_not_present(self, new_entity):
         if(not new_entity in self.entities):
-            self.entities.append(new_entity)
+            self.add_entity(new_entity)
 
     def remove_entity_if_present(self, entity_to_remove):
         if(entity_to_remove in self.entities):
-            self.entities.remove(entity_to_remove)
+            self.remove_entity(entity_to_remove)
 
     def has_tile(self, position):
         return (0 <= position.y < len(self.tile_matrix) and
@@ -163,12 +174,13 @@ class DungeonLevel(object):
             return tile.get_unknown_tile()
 
     def update(self):
+        self.entity_scheduler.update_entities()
         self._remove_dead_monsters()
 
     def _remove_dead_monsters(self):
         for entity in self.entities:
             if(entity.is_dead()):
-                entity.kill()
+                entity.kill_and_remove()
 
     def signal_terrain_changed(self):
         self._terrain_changed_timestamp = turn.current_turn
