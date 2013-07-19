@@ -1,5 +1,4 @@
 import libtcodpy as libtcod
-import geometry as geo
 import Queue
 import time
 from threading import Thread
@@ -99,7 +98,8 @@ controls = {
 
 class InputHandler(object):
     def __init__(self):
-        self._input_queue = Queue.Queue()
+        max_size = 3
+        self._input_queue = Queue.Queue(max_size)
 
     def get_keypress(self):
         if(not self._input_queue.empty()):
@@ -112,16 +112,13 @@ class InputHandler(object):
         thread.start()
 
     def _get_keypress_loop(self):
-# Oh God why is this needed?
-        time.sleep(1)
+        time.sleep(0.4)
         while True:
-            while(self._input_queue.empty()):
-                #key = libtcod.console_check_for_keypress()
-                key = libtcod.console_wait_for_keypress(True)
-                key_char = self._get_key_char(key)
-                if key_char in controls.keys() and key.pressed:
-                    self._input_queue.put(controls[key_char])
-                #time.sleep(0.01)
+            key = libtcod.console_wait_for_keypress(True)
+            key_char = self._get_key_char(key)
+            if key_char in controls.keys() and key.pressed:
+                self._input_queue.put(controls[key_char])
+            time.sleep(0)
 
     def _get_key_char(self, key):
         if key.vk == libtcod.KEY_CHAR:
