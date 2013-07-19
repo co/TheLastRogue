@@ -1,5 +1,6 @@
 import libtcodpy as libtcod
 import time
+from console import console
 
 
 class InstantAnimation(object):
@@ -27,5 +28,5 @@ class MissileAnimation(InstantAnimation):
 
     def print_missile_at_point(self, point):
         x, y = self.camera.dungeon_to_screen_position(point)
-        libtcod.console_set_char_foreground(0, x, y, self.color_fg)
-        libtcod.console_set_char(0, x, y, self.symbol)
+        console.set_color_fg((x, y), self.color_fg)
+        console.set_symbol((x, y), self.symbol)

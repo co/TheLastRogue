@@ -1,7 +1,7 @@
 import gamepiece
 import terrain
 import colors
-import libtcodpy as libtcod
+import console
 
 
 class Tile(object):
@@ -26,14 +26,13 @@ class Tile(object):
         color_fg = piece.color_fg
         if(color_fg is None):
             color_fg = self.get_terrain().color_fg
-        x, y = screen_position
-        libtcod.console_put_char_ex(0, x, y, piece.symbol, color_fg, color_bg)
+        console.console.set_colors_and_symbol(screen_position, color_fg,
+                                              color_bg, piece.symbol)
 
     def _draw_unseen(self, screen_position, piece):
-        color_fg = colors.UNSEEN_FG
-        color_bg = colors.UNSEEN_BG
-        x, y = screen_position
-        libtcod.console_put_char_ex(0, x, y, piece.symbol, color_fg, color_bg)
+        console.console.set_colors_and_symbol(screen_position,
+                                              colors.UNSEEN_FG,
+                                              colors.UNSEEN_BG, piece.symbol)
 
     def __non_empty_pieces_lists_sorted_on_draw_order(self):
         piece_lists = self.game_pieces.values()

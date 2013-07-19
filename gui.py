@@ -1,6 +1,7 @@
 import libtcodpy as libtcod
 import messenger
 import math
+from console import console
 import colors
 import geometry as geo
 import turn
@@ -62,8 +63,8 @@ class FilledRectangle(RectangularUIElement):
         px, py = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         for y in range(py, self.height + py):
             for x in range(px, self.width + px):
-                libtcod.console_set_char_background(0, x, y, self.color_bg)
-                libtcod.console_set_char(0, x, y, ' ')
+                console.set_color_bg((x, y), self.color_bg)
+                console.set_symbol((x, y), ' ')
 
 
 class StyledRectangle(RectangularUIElement):
@@ -104,8 +105,8 @@ class StyledRectangle(RectangularUIElement):
 
     @staticmethod
     def draw_char(x, y, char_visual):
-        libtcod.console_put_char_ex(0, x, y, char_visual.symbol,
-                                    char_visual.color_fg, char_visual.color_bg)
+        console.set_colors_and_symbol((x, y), char_visual.color_fg,
+                                      char_visual.color_bg, char_visual.symbol)
 
 
 class RectangleGray(FilledRectangle):
@@ -116,17 +117,13 @@ class RectangleGray(FilledRectangle):
         px, py = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         for y in range(py, self.height + py):
             for x in range(px, self.width + px):
-                libtcod.console_set_char_background(0, x, y, self.color_bg,
-                                                    libtcod.BKGND_DARKEN)
-                old_fg = 0
-                libtcod.console_get_char_foreground(old_fg, x, y)
+                console.set_color_bg((x, y), self.color_bg,
+                                     libtcod.BKGND_DARKEN)
+                old_fg = console.get_color_fg((x, y))
                 if(old_fg == colors.UNSEEN_FG):
-                    libtcod.console_set_char_foreground(0, x, y,
-                                                        colors.DB_SMOKEY_ASH)
+                    console.set_color_fg((x, y), colors.DB_SMOKEY_ASH)
                 else:
-                    libtcod.console_set_char_foreground(0, x, y,
-                                                        colors.
-                                                        INACTIVE_GAME_FG)
+                    console.set_color_fg((x, y), colors.INACTIVE_GAME_FG)
 
 
 class UIElementSet(object):
@@ -333,13 +330,11 @@ class CounterBar(UIElement):
                                      self.width))
         x, y = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         for i in range(tiles_active):
-            libtcod.console_set_char(0, x + i, y, ' ')
-            libtcod.console_set_char_background(0, x + i, y,
-                                                self.active_color)
+            console.set_symbol((x + i, y), ' ')
+            console.set_color_bg((x + i, y), self.active_color)
         for i in range(tiles_active, self.width):
-            libtcod.console_set_char(0, x + i, y, ' ')
-            libtcod.console_set_char_background(0, x + i, y,
-                                                self.inactive_color)
+            console.set_symbol((x + i, y), ' ')
+            console.set_color_bg((x + i, y), self.inactive_color)
 
 
 class TextBox(UIElement):
@@ -362,5 +357,5 @@ class TextBox(UIElement):
     def draw(self, offset=geo.zero2d()):
         x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
                                      self.margin))
-        libtcod.console_set_default_foreground(None, self.text_color)
-        libtcod.console_print(None, x, y, self.text)
+        console.set_default_color_fg(self.text_color)
+        console.print_text((x, y), self.text)

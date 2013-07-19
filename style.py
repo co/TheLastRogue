@@ -1,6 +1,13 @@
 import colors
-import geometry as geo
 import libtcodpy as libtcod
+
+
+class CharacterVisual(object):
+    def __init__(self, symbol=' ', color_bg=colors.DB_BLACK,
+                 color_fg=colors.DB_BLACK):
+        self.symbol = symbol
+        self.color_bg = color_bg
+        self.color_fg = color_fg
 
 
 class MenuStyle(object):
@@ -8,13 +15,6 @@ class MenuStyle(object):
         self.rect_style = rect_style
         self.inactive_text_color = inactive_text_color
         self.margin = margin
-
-
-class CharacterVisual(object):
-    def __init__(self, symbol, color_bg, color_fg):
-        self.symbol = symbol
-        self.color_bg = color_bg
-        self.color_fg = color_fg
 
 
 class RectangleStyle(object):

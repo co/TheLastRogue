@@ -1,4 +1,5 @@
 import geometry as geo
+from console import console
 import libtcodpy as libtcod
 import colors
 import inputhandler
@@ -54,9 +55,8 @@ class PositionExaminer(state.State):
 
     def _draw_cursor(self):
         position = self.camera.dungeon_to_screen_position(self.cursor_position)
-        x, y = position
-        libtcod.console_set_char(0, x, y, self.cursor_symbol)
-        libtcod.console_set_char_foreground(0, x, y, self.cursor_color)
+        console.set_symbol(position, self.cursor_symbol)
+        console.set_color_fg(position, self.cursor_color)
 
     def _exit(self):
         self._draw_background()
@@ -127,13 +127,12 @@ class MissileDestinationSelector(PositionSelector):
         screen_position = self.camera.dungeon_to_screen_position(point)
         terrain = self.entity.dungeon_level.\
             get_tile_or_unknown(point).get_terrain()
-        x, y = screen_position
         if(self.entity.can_see_point(point) and terrain.is_solid()):
-            libtcod.console_set_char(0, x, y, " ")
-            libtcod.console_set_char_background(0, x, y, colors.BLOCKED_PATH)
+            console.set_symbol(screen_position, ' ')
+            console.set_color_bg(screen_position, colors.BLOCKED_PATH)
         else:
-            libtcod.console_set_char_background(0, x, y, colors.PATH,
-                                                libtcod.BKGND_ADD)
+            console.set_color_bg(screen_position, colors.PATH,
+                                 libtcod.BKGND_ADD)
 
     def draw(self):
         self._draw_background()
