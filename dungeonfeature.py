@@ -8,7 +8,6 @@ class DungeonFeature(gamepiece.GamePiece):
         super(DungeonFeature, self).__init__()
         self.piece_type = gamepiece.GamePieceType.DUNGEON_FEATURE
         self.max_instances_in_single_tile = 1
-        self.draw_order = 2
         self.player_actions = []
         self._name = "XXX_UNNAMED_XXX"
         self._description = "XXX_DESCRIPTION_XXX"

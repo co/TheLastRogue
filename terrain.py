@@ -7,7 +7,6 @@ class Terrain(gamepiece.GamePiece):
 
     def __init__(self):
         super(Terrain, self).__init__()
-        self.draw_order = 0
         self.max_instances_in_single_tile = 1
         self.piece_type = gamepiece.GamePieceType.TERRAIN
 

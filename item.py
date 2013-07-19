@@ -26,7 +26,6 @@ class Item(gamepiece.GamePiece):
         self.piece_type = gamepiece.GamePieceType.ITEM
         self.max_instances_in_single_tile = 1
 
-        self.draw_order = 1
         self._name = "XXX_UNNAMED_ITEM_XXX"
         self._description = "XXX_DESCRIPTION_ITEM_XXX"
         self.item_type = None

@@ -41,7 +41,6 @@ class Entity(gamepiece.GamePiece):
 
         self.piece_type = gamepiece.GamePieceType.ENTITY
         self.max_instances_in_single_tile = 1
-        self.draw_order = 3
 
         self.path = None
         self.__dungeon_level = None
