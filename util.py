@@ -1,5 +1,6 @@
 import turn
 import constants
+import geometry as geo
 
 
 class WalkableDestinatinationsPath(object):
@@ -62,7 +63,7 @@ class WalkableDestinatinationsPath(object):
     def _get_walkable_neighbors(self, position, entity):
         result_positions = []
         for direction in constants.DIRECTIONS_LIST:
-            neighbor_position = position + direction
+            neighbor_position = geo.add_2d(position, direction)
             try:
                 neighbor = entity.dungeon_level.get_tile(neighbor_position)
                 if(entity._can_pass_terrain(neighbor.get_terrain())):

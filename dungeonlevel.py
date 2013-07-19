@@ -6,8 +6,8 @@ import tile
 import turn
 import player
 import util
-import constants
 import geometry as geo
+import constants
 import libtcodpy as libtcod
 
 
@@ -23,8 +23,7 @@ def unknown_level_map(width, height, depth):
     for x in range(width):
         for y in range(height):
             unknown_terrain = terrain.Unknown()
-            unknown_terrain.replace_move(geo.Vector2D(x, y),
-                                         dungeon_level)
+            unknown_terrain.replace_move((x, y), dungeon_level)
     return dungeon_level
 
 
@@ -50,7 +49,7 @@ def set_terrain_from_file(dungeon_level, file_name):
     for x in range(dungeon_level.width):
         for y in range(dungeon_level.height):
             terrain = char_to_terrain(dungeon[y][x])
-            terrain.replace_move(geo.Vector2D(x, y), dungeon_level)
+            terrain.replace_move((x, y), dungeon_level)
 
 
 def char_to_terrain(c):
@@ -113,8 +112,8 @@ class DungeonLevel(object):
     def draw_everything(self, camera):
         for y in range(settings.WINDOW_HEIGHT):
             for x in range(settings.WINDOW_WIDTH):
-                position = geo.Vector2D(x, y)
-                tile_position = position + camera.camera_offset
+                position = (x, y)
+                tile_position = geo.add_2d(position, camera.camera_offset)
                 tile = self.get_tile_or_unknown(tile_position)
                 tile.draw(position, True)
 
@@ -123,14 +122,14 @@ class DungeonLevel(object):
         the_player.update_fov()
         for y in range(constants.GAME_STATE_HEIGHT):
             for x in range(constants.GAME_STATE_WIDTH):
-                position = geo.Vector2D(x, y)
+                position = (x, y)
                 self._draw_tile(camera, position, the_player)
 
     def _draw_tile(self, camera, position, the_player):
-        tile_position = position + camera.camera_offset
-        screen_position = position + camera.screen_position
+        tile_position = geo.add_2d(position, camera.camera_offset)
+        screen_position = geo.add_2d(position, camera.screen_position)
         tile = self.get_tile_or_unknown(tile_position)
-        x, y = tile_position.x, tile_position.y
+        x, y = tile_position
         if(libtcod.map_is_in_fov(the_player.dungeon_map, x, y)):
             the_player.update_memory_of_tile(tile, tile_position, self.depth)
             tile.draw(screen_position, True)
@@ -161,15 +160,18 @@ class DungeonLevel(object):
             self.remove_entity(entity_to_remove)
 
     def has_tile(self, position):
-        return (0 <= position.y < len(self.tile_matrix) and
-                0 <= position.x < len(self.tile_matrix[0]))
+        x, y = position
+        return (0 <= y < len(self.tile_matrix) and
+                0 <= x < len(self.tile_matrix[0]))
 
     def get_tile(self, position):
-        return self.tile_matrix[position.y][position.x]
+        x, y = position
+        return self.tile_matrix[y][x]
 
     def get_tile_or_unknown(self, position):
         if(self.has_tile(position)):
-            return self.tile_matrix[position.y][position.x]
+            x, y = position
+            return self.tile_matrix[y][x]
         else:
             return tile.unknown_tile
 
@@ -189,6 +191,5 @@ class DungeonLevel(object):
         for y, row in enumerate(self.tile_matrix):
             line = ""
             for x, tile in enumerate(row):
-                line += str(self.get_tile_or_unknown
-                            (geo.Vector2D(x, y)).symbol)
+                line += str(self.get_tile_or_unknown((x, y)).symbol)
             print line

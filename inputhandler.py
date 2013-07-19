@@ -38,14 +38,14 @@ KEY_SHIFT = libtcod.KEY_SHIFT
 
 # TODO move to settings.
 move_controls = {
-    NORTH: geo.Vector2D(0, -1),
-    SOUTH: geo.Vector2D(0, 1),
-    WEST: geo.Vector2D(-1, 0),
-    EAST: geo.Vector2D(1, 0),
-    NORTHWEST: geo.Vector2D(-1, -1),
-    NORTHEAST: geo.Vector2D(1, -1),
-    SOUTHWEST: geo.Vector2D(-1, 1),
-    SOUTHEAST: geo.Vector2D(1, 1)
+    NORTH: (0, -1),
+    SOUTH: (0, 1),
+    WEST: (-1, 0),
+    EAST: (1, 0),
+    NORTHWEST: (-1, -1),
+    NORTHEAST: (1, -1),
+    SOUTHWEST: (-1, 1),
+    SOUTHEAST: (1, 1)
 }
 
 controls = {

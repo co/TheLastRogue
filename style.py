@@ -78,8 +78,8 @@ class MinimalClassicStyle(RectangleStyle):
         self.bottom_right = CharacterVisual(libtcod.CHAR_DSE, bg, fg)
 
 ff_blue_theme = MenuStyle(FinalFantasyClassicStyle(),
-                          colors.DB_TOPAZ, geo.Vector2D(2, 2))
+                          colors.DB_TOPAZ, (2, 2))
 tlr_classic_3d_theme = MenuStyle(RectangleStyle3D(),
-                                 colors.DB_TOPAZ, geo.Vector2D(2, 2))
+                                 colors.DB_TOPAZ, (2, 2))
 rogue_classic_theme = MenuStyle(MinimalClassicStyle(),
-                                colors.DB_TOPAZ, geo.Vector2D(2, 2))
+                                colors.DB_TOPAZ, (2, 2))

@@ -79,7 +79,7 @@ class Entity(gamepiece.GamePiece):
 
     def step_random_direction(self):
         direction = random.sample(list(constants.DIRECTIONS.values()), 1)
-        new_position = self.position + direction[0]
+        new_position = geo.add_2d(self.position, direction[0])
         self.try_step_to(new_position)
 
     def try_step_to(self, new_position):
@@ -142,7 +142,8 @@ class Entity(gamepiece.GamePiece):
         return closest_seen_entities[0]
 
     def can_see_point(self, point):
-        return libtcod.map_is_in_fov(self.dungeon_map, point.x, point.y)
+        x, y = point
+        return libtcod.map_is_in_fov(self.dungeon_map, x, y)
 
     def hurt(self, damage, entity=None):
         self.hp.decrease(damage)
@@ -181,9 +182,8 @@ class Entity(gamepiece.GamePiece):
         self.effect_queue.update()
 
     def update_fov(self):
-        libtcod.map_compute_fov(self.dungeon_map,
-                                self.position.x,
-                                self.position.y,
+        x, y = self.position
+        libtcod.map_compute_fov(self.dungeon_map, x, y,
                                 self._sight_radius, True)
 
     def has_path(self):
@@ -225,14 +225,15 @@ class Entity(gamepiece.GamePiece):
         if(not self.has_path()):
             return False
         x, y = libtcod.path_walk(self.path, True)
-        step_succeeded = self.try_step_to(geo.Vector2D(x, y))
+        step_succeeded = self.try_step_to((x, y))
         return step_succeeded
 
     def set_path_to_random_walkable_point(self):
         positions = self.get_walkable_positions_from_my_position()
         destination = random.sample(positions, 1)[0]
-        libtcod.path_compute(self.path, self.position.x, self.position.y,
-                             destination.x, destination.y)
+        sx, sy = self.position
+        dx, dy = destination
+        libtcod.path_compute(self.path, sx, sy, dx, dy)
 
     def has_status(self, status):
         return status in self._status_flags

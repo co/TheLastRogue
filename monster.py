@@ -36,8 +36,9 @@ class Monster(entity.Entity):
         player = self.get_player_if_seen()
         if(player is None):
             return False
-        libtcod.path_compute(self.path, self.position.x, self.position.y,
-                             player.position.x, player.position.y)
+        mx, my = self.position
+        px, py = player.position
+        libtcod.path_compute(self.path, mx, my, px, py)
         return True
 
     def step_looking_for_player(self):

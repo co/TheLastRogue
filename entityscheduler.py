@@ -1,12 +1,10 @@
 from collections import deque
 import turn
-import player
 
 
 class EntityScheduler(object):
     def __init__(self):
         self._entities = deque()
-        self.player_has_acted = True
 
     @property
     def entities(self):
@@ -27,8 +25,6 @@ class EntityScheduler(object):
             entity.energy += entity.energy_recovery
             while entity.energy > 0:
                 entity.energy -= entity.act()
-                if(isinstance(entity, player.Player)):
-                    self.player_has_acted = True
 
     def update_entities(self):
         self._entities_tick()

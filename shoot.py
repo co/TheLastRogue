@@ -15,7 +15,7 @@ def player_select_missile_path(source_entity, max_throw_distance,
         init_target = source_entity.position
     destination_selector = positionexaminer.\
         MissileDestinationSelector(choose_target_prompt,
-                                   source_entity.position.copy(),
+                                   source_entity.position,
                                    source_entity,
                                    game_gamestate,
                                    max_throw_distance,

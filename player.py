@@ -14,6 +14,7 @@ import menufactory
 import statestack
 import positionexaminer
 import gametime
+import geometry as geo
 
 
 class Player(entity.Entity):
@@ -51,20 +52,22 @@ class Player(entity.Entity):
     def act(self):
         key = inputhandler.handler.get_keypress()
         position = self.position
+        energy_spent = 0
+        if key is None:
+            return energy_spent
         if key in inputhandler.move_controls:
-            dx = inputhandler.move_controls[key].x
-            dy = inputhandler.move_controls[key].y
-            new_position = position + (dx, dy)
+            dx, dy = inputhandler.move_controls[key]
+            new_position = geo.add_2d(position, (dx, dy))
             move_succeded = self.try_step_to(new_position)
             if(move_succeded):
-                return self.movement_speed
+                energy_spent += self.movement_speed
 
         elif key == inputhandler.ESCAPE:
             self.kill_and_remove()
-            return gametime.single_turn
+            energy_spent += gametime.single_turn
 
         elif key == inputhandler.REST:  # Rest
-            return gametime.single_turn
+            energy_spent += gametime.single_turn
 
         elif key == inputhandler.EXAMINE:  # Rest
             game_gamestate = self._state_stack().peek()
@@ -93,7 +96,7 @@ class Player(entity.Entity):
                 if(pickup_succeded):
                     message = "Picked up: " + item.name
                     messenger.messenger.message(message)
-                    return gametime.single_turn
+                    energy_spent += gametime.single_turn
                 else:
                     message = "Could not pick up: " + item.name +\
                         ", the inventory is full."
@@ -110,7 +113,7 @@ class Player(entity.Entity):
                 Teleport(self, self,
                          time_to_live=1)
             self.add_entity_effect(effect)
-            return gametime.single_turn
+            energy_spent += gametime.single_turn
 
         elif key == inputhandler.FOUR:
             invisibile_flag = entity.StatusFlags.INVISIBILE
@@ -126,11 +129,11 @@ class Player(entity.Entity):
                                                     invisible_status,
                                                     time_to_live=1)
                 self.add_entity_effect(effect)
-            return gametime.single_turn
+            energy_spent += gametime.single_turn
 
         elif key == inputhandler.FIVE:
             monsterspawner.spawn_rat_man(self.dungeon_level)
-            return gametime.single_turn
+            energy_spent += gametime.single_turn
 
         elif key == inputhandler.INVENTORY:
             if(not self.inventory.is_empty()):
@@ -164,7 +167,7 @@ class Player(entity.Entity):
                     shooting_succeded = shooting.act(source_entity=self,
                                                      game_state=game_state)
                     if shooting_succeded:
-                        return gametime.single_turn
+                        energy_spent += gametime.single_turn
             else:
                 rock_throwing = missileaction.PlayerThrowRockAction()
                 if(rock_throwing.can_act(source_entity=self,
@@ -172,8 +175,9 @@ class Player(entity.Entity):
                     throw_succeded = rock_throwing.act(source_entity=self,
                                                        game_state=game_state)
                     if throw_succeded:
-                        return gametime.single_turn
-        return 0
+                        energy_spent += gametime.single_turn
+        self._state_stack().get_game_state().signal_should_redraw_screen()
+        return energy_spent
 
     def kill_and_remove(self):
         self.hp.set_min()
@@ -194,5 +198,5 @@ class Player(entity.Entity):
         if (tile.get_first_entity() is self):
             return  # No need to remember where you was, you are not there.
         self.set_memory_map_if_not_set(self.dungeon_level)
-        self._memory_map[depth].tile_matrix[position.y][position.x]\
-            = tile.copy()
+        x, y = position
+        self._memory_map[depth].tile_matrix[y][x] = tile.copy()

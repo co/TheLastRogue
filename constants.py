@@ -22,20 +22,20 @@ ITEMS_ALLOWED_PER_TILE = 1
 ENTITIES_ALLOWED_PER_TILE = 1
 
 AXIS_DIRECTIONS = {
-    "E": geo.Vector2D(1, 0),
-    "N": geo.Vector2D(0, 1),
-    "W": geo.Vector2D(-1, 0),
-    "S": geo.Vector2D(0, -1)
+    "E": (1, 0),
+    "N": (0, 1),
+    "W": (-1, 0),
+    "S": (0, -1)
 }
 
 DIAGONAL_DIRECTIONS = {
-    "NW": geo.Vector2D(-1, 1),
-    "NE": geo.Vector2D(1, 1),
-    "SW": geo.Vector2D(-1, -1),
-    "SE": geo.Vector2D(1, -1)
+    "NW": (-1, 1),
+    "NE": (1, 1),
+    "SW": (-1, -1),
+    "SE": (1, -1)
 }
 
-CENTER_DIRECTION = geo.Vector2D(0, 0)
+CENTER_DIRECTION = (0, 0)
 
 DIRECTIONS = dict(AXIS_DIRECTIONS.items() + DIAGONAL_DIRECTIONS.items())
 DIRECTIONS_LIST = DIRECTIONS.values()

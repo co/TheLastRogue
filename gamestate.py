@@ -24,20 +24,26 @@ class GameStateBase(state.State):
         reset_globals()
         self.player = player.Player(self)
         self._init_gui()
-        camera_position =\
-            geo.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH, 0)
+        camera_position = (constants.MONSTER_STATUS_BAR_WIDTH, 0)
         self.camera = camera.Camera(camera_position, geo.zero2d())
         self.has_won = False
         self.dungeon_level = None
+        self._should_draw = True
+
+    def signal_should_redraw_screen(self):
+        self._should_draw = True
 
     def draw(self):
-        if(self.dungeon_level.entity_scheduler.player_has_acted or
-           not settings.lazy_draw):
-            dungeon_level = self.player.dungeon_level
-            dungeon_level.draw(self.camera)
-            self.player_status_bar.draw()
-            self.message_bar.draw()
-            self.monster_status_bar.draw()
+        if(self._should_draw or not settings.lazy_draw):
+            self.force_draw()
+
+    def force_draw(self):
+        dungeon_level = self.player.dungeon_level
+        dungeon_level.draw(self.camera)
+        self.player_status_bar.draw()
+        self.message_bar.draw()
+        self.monster_status_bar.draw()
+        self._should_draw = False
 
     def update(self):
         self.message_bar.update()
@@ -102,24 +108,23 @@ class TestGameState(GameStateBase):
         self._init_monsters()
 
     def _init_player(self):
-        start_position = geo.Vector2D(20, 10)
+        start_position = (20, 10)
         player_move_success = self.player.try_move(start_position,
                                                    self.dungeon_level)
         if(not player_move_success):
-            self.player.try_move(geo.Vector2D(1, 1),
-                                 self.dungeon_level)
+            self.player.try_move((1, 1), self.dungeon_level)
 
     def _init_items(self):
         gun1 = item.Gun()
         gun2 = item.Gun()
-        gun1_position = geo.Vector2D(20, 20)
-        gun2_position = geo.Vector2D(22, 20)
+        gun1_position = (20, 20)
+        gun2_position = (22, 20)
 
         potion = item.HealthPotion()
-        potion_position = geo.Vector2D(24, 16)
+        potion_position = (24, 16)
 
         ring = item.RingOfInvisibility()
-        ring_position = geo.Vector2D(20, 13)
+        ring_position = (20, 13)
 
         gun1.try_move(gun1_position, self.dungeon_level)
         gun2.try_move(gun2_position, self.dungeon_level)
@@ -128,13 +133,13 @@ class TestGameState(GameStateBase):
 
     def _init_monsters(self):
         rat = monster.RatMan()
-        rat_pos = geo.Vector2D(15, 15)
+        rat_pos = (15, 15)
         rat.try_move(rat_pos, self.dungeon_level)
 
         rat2 = monster.Jerico()
-        rat2_pos = geo.Vector2D(15, 25)
+        rat2_pos = (15, 25)
         rat2.try_move(rat2_pos, self.dungeon_level)
 
         statue = monster.StoneStatue()
-        statue_pos = geo.Vector2D(25, 7)
+        statue_pos = (25, 7)
         statue.try_move(statue_pos, self.dungeon_level)

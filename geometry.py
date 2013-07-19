@@ -1,75 +1,14 @@
 import math
 
 
-class Vector2D:
-    'Represents a 2D vector2D.'
-    def __init__(self, x=0, y=0):
-        self.x = int(x)
-        self.y = int(y)
+def add_2d(point1, point2):
+    return (point1[0] + point2[0], point1[1] + point2[1])
 
-    def copy(self):
-        return Vector2D(self.x, self.y)
+def sub_2d(point1, point2):
+    return (point1[0] - point2[0], point1[1] - point2[1])
 
-    def as_tuple(self):
-        return (self.x, self.y)
-
-    def __add__(self, val):
-        return Point(self[0] + val[0], self[1] + val[1])
-
-    def __sub__(self, val):
-        return Point(self[0] - val[0], self[1] - val[1])
-
-    def __iadd__(self, val):
-        self.x = val[0] + self.x
-        self.y = val[1] + self.y
-        return self
-
-    def __isub__(self, val):
-        self.x = self.x - val[0]
-        self.y = self.y - val[1]
-        return self
-
-    def __div__(self, val):
-        return Point(self[0] / val, self[1] / val)
-
-    def __mul__(self, val):
-        return Point(self[0] * val, self[1] * val)
-
-    def __idiv__(self, val):
-        self[0] = self[0] / val
-        self[1] = self[1] / val
-        return self
-
-    def __imul__(self, val):
-        self[0] = self[0] * val
-        self[1] = self[1] * val
-        return self
-
-    def __getitem__(self, key):
-        if(key == 0):
-            return self.x
-        elif(key == 1):
-            return self.y
-        else:
-            raise Exception("Invalid key to Point")
-
-    def __setitem__(self, key, value):
-        if(key == 0):
-            self.x = value
-        elif(key == 1):
-            self.y = value
-        else:
-            raise Exception("Invalid key to Point")
-
-    def __hash__(self):
-        return ((51 + self.x) * (51 + self.y))
-
-    def __eq__(self, other):
-        return self.x == other.x and self.y == other.y
-
-    def __str__(self):
-        return "(" + str(self.x) + "," + str(self.y) + ")"
-Point = Vector2D
+def int_2d(point):
+    return (int(point[0]), int(point[1]))
 
 
 def distance_sqrd(point1, point2):
@@ -87,8 +26,8 @@ def distance(point1, point2):
 
 def chess_distance(point1, point2):
     'Returns the chess distance between two points'
-    return max(abs(point1.x - point2.x),
-               abs(point1.y - point2.y))
+    return max(abs(point1[0] - point2[0]),
+               abs(point1[1] - point2[1]))
 
 
 def length_sqrd(vec):
@@ -110,7 +49,7 @@ def normalize(vec):
     but has a length of one.
     '''
     if(vec[0] == 0. and vec[1] == 0.):
-        return Vector2D(0., 0.)
+        return (0., 0.)
     return vec / length(vec)
 
 
@@ -125,7 +64,7 @@ def project_onto(w, v):
 
 
 def zero2d():
-    return Vector2D(0, 0)
+    return (0, 0)
 
 
 class Rect(object):
@@ -138,7 +77,7 @@ class Rect(object):
 
     def set_points(self, position, width, height):
         """Reset the rectangle coordinates."""
-        x, y = position.as_tuple()
+        x, y = position
         self.left = x
         self.top = y
         self.right = x + width
@@ -146,7 +85,7 @@ class Rect(object):
 
     def contains(self, pt):
         """Return true if a point is inside the rectangle."""
-        x, y = pt.as_tuple()
+        x, y = pt
         return (self.left <= x <= self.right and
                 self.top <= y <= self.bottom)
 
@@ -167,22 +106,22 @@ class Rect(object):
 
     @property
     def top_left(self):
-        """Return the top-left corner as a Vector2D."""
-        return Vector2D(self.left, self.top)
+        """Return the top-left corner as a tuple."""
+        return (self.left, self.top)
 
     @property
     def bottom_right(self):
-        """Return the bottom-right corner as a Vector2D."""
-        return Vector2D(self.right, self.bottom)
+        """Return the bottom-right corner as a tuple."""
+        return (self.right, self.bottom)
 
     def expanded_by(self, n):
         """Return a rectangle with extended borders.
 
         Create a new rectangle that is wider and taller than the
-        immediate one. All sides are extended by "n" Vector2D.
+        immediate one. All sides are extended by "n" tuple.
         """
-        p1 = Vector2D(self.left - n, self.top - n)
-        p2 = Vector2D(self.right + n, self.bottom + n)
+        p1 = (self.left - n, self.top - n)
+        p2 = (self.right + n, self.bottom + n)
         return Rect(p1, p2)
 
     def __str__(self):
@@ -191,5 +130,5 @@ class Rect(object):
 
     def __repr__(self):
         return "%s(%r, %r)" % (self.__class__.__name__,
-                               Vector2D(self.left, self.top),
-                               Vector2D(self.right, self.bottom))
+                               (self.left, self.top),
+                               (self.right, self.bottom))

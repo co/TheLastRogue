@@ -28,11 +28,11 @@ class UIElement(object):
 
     @property
     def total_height(self):
-        return self.height + self.margin.y * 2
+        return self.height + self.margin[1] * 2
 
     @property
     def total_width(self):
-        return self.width + self.margin.x * 2
+        return self.width + self.margin[0] * 2
 
 
 class RectangularUIElement(UIElement):
@@ -42,15 +42,15 @@ class RectangularUIElement(UIElement):
 
     @property
     def height(self):
-        return self.rect.height
+        return int(self.rect.height)
 
     @property
     def width(self):
-        return self.rect.width
+        return int(self.rect.width)
 
     @property
     def offset(self):
-        return self.rect.top_left
+        return geo.int_2d(self.rect.top_left)
 
 
 class FilledRectangle(RectangularUIElement):
@@ -59,9 +59,9 @@ class FilledRectangle(RectangularUIElement):
         self.color_bg = color_bg
 
     def draw(self, offset=geo.zero2d()):
-        position = offset + self.offset + self.margin
-        for y in range(position.y, self.height + position.y):
-            for x in range(position.x, self.width + position.x):
+        px, py = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
+        for y in range(py, self.height + py):
+            for x in range(px, self.width + px):
                 libtcod.console_set_char_background(0, x, y, self.color_bg)
                 libtcod.console_set_char(0, x, y, ' ')
 
@@ -72,9 +72,10 @@ class StyledRectangle(RectangularUIElement):
         self.rect_style = rect_style
 
     def draw(self, offset=geo.zero2d()):
-        position = offset + self.offset + self.margin
-        for y in range(position.y, self.height + position.y):
-            for x in range(position.x, self.width + position.x):
+        px, py = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
+                                       self.margin))
+        for y in range(py, self.height + py):
+            for x in range(px, self.width + px):
                 char_visual = self.get_char_visual(x, y)
                 StyledRectangle.draw_char(x, y, char_visual)
 
@@ -112,11 +113,10 @@ class RectangleGray(FilledRectangle):
         super(RectangleGray, self).__init__(rect, color_bg, margin)
 
     def draw(self, offset=geo.zero2d()):
-        position = offset + self.offset + self.margin
-        for y in range(position.y, self.height + position.y):
-            for x in range(position.x, self.width + position.x):
-                libtcod.console_set_char_background(0, x, y,
-                                                    self.color_bg,
+        px, py = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
+        for y in range(py, self.height + py):
+            for x in range(px, self.width + px):
+                libtcod.console_set_char_background(0, x, y, self.color_bg,
                                                     libtcod.BKGND_DARKEN)
                 old_fg = 0
                 libtcod.console_get_char_foreground(old_fg, x, y)
@@ -182,13 +182,15 @@ class StackPanelVertical(UIElement):
             element.update()
 
     def draw(self, offset=geo.zero2d()):
-        position = offset + self.offset + self.margin
+        position = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
 
         element_position = position
         for element in self._elements:
             element.draw(element_position)
-            element_position = element_position + (0, element.total_height) +\
-                (0, self.vertical_space)
+            new_element_position = geo.add_2d(element_position,
+                                              (0, element.total_height +
+                                               self.vertical_space))
+            element_position = new_element_position
 
 
 class PlayerStatusBar(RectangularUIElement):
@@ -206,7 +208,7 @@ class PlayerStatusBar(RectangularUIElement):
                                        colors.DB_PANCHO,
                                        geo.zero2d())
 
-        element_width = (self.width - settings.interface_theme.margin.x * 2)
+        element_width = (self.width - settings.interface_theme.margin[0] * 2)
         hp_bar = CounterBar(player.hp, element_width,
                             colors.DB_BROWN, colors.DB_LOULOU)
 
@@ -221,7 +223,7 @@ class PlayerStatusBar(RectangularUIElement):
         self._status_stack_panel.update()
 
     def draw(self, offset=geo.zero2d()):
-        position = offset + self.margin
+        position = geo.add_2d(offset, self.margin)
         self._rectangle_bg.draw(position)
         self._status_stack_panel.draw(position)
 
@@ -241,14 +243,14 @@ class EntityStatusList(RectangularUIElement):
         seen_entities = entity.get_seen_entities()
         self._entity_stack_panel.clear()
         entity_status_width = (self.width -
-                               settings.interface_theme.margin.x * 2)
+                               settings.interface_theme.margin[0] * 2)
         for seen_entity in seen_entities:
             entity_status = EntityStatus(seen_entity, geo.zero2d(),
                                          entity_status_width)
             self._entity_stack_panel.append(entity_status)
 
     def draw(self, offset=geo.zero2d()):
-        position = offset + self.margin
+        position = geo.add_2d(offset, self.margin)
         self._rectangle_bg.draw(position)
         self._entity_stack_panel.draw(position)
 
@@ -278,7 +280,7 @@ class EntityStatus(UIElement):
 
 
 class MessageDisplay(RectangularUIElement):
-    def __init__(self, rect, margin=geo.Vector2D(0, 0), vertical_space=0):
+    def __init__(self, rect, margin=(0, 0), vertical_space=0):
         super(MessageDisplay, self).__init__(rect, margin=margin)
         self._message_stack_panel =\
             StackPanelVertical(rect.top_left, rect.width,
@@ -289,7 +291,7 @@ class MessageDisplay(RectangularUIElement):
 
     def update(self):
         messages_height = (self.height -
-                           settings.interface_theme.margin.y * 2)
+                           settings.interface_theme.margin[0] * 2)
         messages = messenger.messenger.tail(messages_height)
         self._message_stack_panel.clear()
         for message in messages:
@@ -298,7 +300,7 @@ class MessageDisplay(RectangularUIElement):
             else:
                 color = colors.TEXT_OLD
             message_width = (self.width -
-                             settings.interface_theme.margin.x * 2)
+                             settings.interface_theme.margin[0] * 2)
             text_box = TextBox(str(message).ljust(message_width),
                                geo.zero2d(), color, geo.zero2d())
             self._message_stack_panel.append(text_box)
@@ -310,7 +312,7 @@ class MessageDisplay(RectangularUIElement):
 
 class CounterBar(UIElement):
     def __init__(self, counter, width, active_color, inactive_color,
-                 margin=geo.Vector2D(0, 0), offset=geo.zero2d()):
+                 margin=(0, 0), offset=geo.zero2d()):
         super(CounterBar, self).__init__(margin)
         self.offset = offset
         self.counter = counter
@@ -329,9 +331,7 @@ class CounterBar(UIElement):
     def draw(self, offset=geo.zero2d()):
         tiles_active = int(math.ceil(self.counter.ratio_of_full() *
                                      self.width))
-        y = offset.y + self.offset.y + self.margin.y
-        x = offset.x + self.offset.x + self.margin.x
-
+        x, y = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         for i in range(tiles_active):
             libtcod.console_set_char(0, x + i, y, ' ')
             libtcod.console_set_char_background(0, x + i, y,
@@ -343,7 +343,7 @@ class CounterBar(UIElement):
 
 
 class TextBox(UIElement):
-    def __init__(self, text, offset, text_color, margin=geo.Vector2D(0, 0)):
+    def __init__(self, text, offset, text_color, margin=(0, 0)):
         super(TextBox, self).__init__(margin)
         self.offset = offset
         self.text = text
@@ -360,6 +360,7 @@ class TextBox(UIElement):
         return max([len(line) for line in lines])
 
     def draw(self, offset=geo.zero2d()):
-        position = offset + self.offset + self.margin
+        x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
+                                     self.margin))
         libtcod.console_set_default_foreground(None, self.text_color)
-        libtcod.console_print(None, position.x, position.y, self.text)
+        libtcod.console_print(None, x, y, self.text)

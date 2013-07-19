@@ -12,7 +12,7 @@ class GamePieceType(object):
 
 class GamePiece(object):
     def __init__(self):
-        self.__position = geo.Vector2D(-1, -1)
+        self.__position = (-1, -1)
         self.__dungeon_level = None
         self._name = "XXX_unnamed_entity_XXX"
         self._description = "XXX_no_description_XXX"

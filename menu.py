@@ -118,7 +118,9 @@ class Menu(gui.UIElement):
                                          len(self._menu_items) - 1)
 
     def draw(self, offset=geo.zero2d()):
-        self._item_stack_panel.draw(self.offset + offset + self.margin)
+        real_offset = geo.int_2d(geo.add_2d(geo.add_2d(self.offset, offset),
+                                            self.margin))
+        self._item_stack_panel.draw(real_offset)
 
 
 class MenuOption(gui.UIElement):

@@ -33,8 +33,7 @@ class DungeonCreatorVisualizer(state.State):
 
     def random_exlosion(self):
         dungeon_level = self.dungeon_level
-        center_position = geo.Vector2D(dungeon_level.width / 2,
-                                       dungeon_level.height / 2)
+        center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
         brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
         end_condition = dgen.CountDownCondition(dungeon_level.width *
                                                 dungeon_level.height * 0.2)
@@ -44,8 +43,7 @@ class DungeonCreatorVisualizer(state.State):
 
     def drunkard_walk(self):
         dungeon_level = self.dungeon_level
-        center_position = geo.Vector2D(dungeon_level.width / 2,
-                                       dungeon_level.height / 2)
+        center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
         brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
         end_condition = dgen.CountDownCondition(dungeon_level.width *
                                                 dungeon_level.height * 0.2)
@@ -59,8 +57,9 @@ class DungeonCreatorVisualizer(state.State):
     def handle_input(self):
         key = inputhandler.handler.get_keypress()
         if key in inputhandler.move_controls:
-            dx, dy = inputhandler.move_controls[key].as_tuple()
-            self.camera.camera_offset += geo.Vector2D(dx, dy)
+            delta = inputhandler.move_controls[key]
+            self.camera.camera_offset =\
+                geo.add_2d(delta, self.camera.camera_offset)
 
         elif key == inputhandler.ESCAPE:
             self.current_stack.pop()
