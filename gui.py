@@ -298,9 +298,22 @@ class MessageDisplay(RectangularUIElement):
                 color = colors.TEXT_OLD
             message_width = (self.width -
                              settings.interface_theme.margin[0] * 2)
-            text_box = TextBox(str(message).ljust(message_width),
-                               geo.zero2d(), color, geo.zero2d())
-            self._message_stack_panel.append(text_box)
+            words = str(message).split()
+            lines = []
+            line = words[0]
+            for word in words[1:]:
+                if len(line) + len(" " + word) > message_width:
+                    lines.append(line)
+                    line = word
+                else:
+                    line += (" " + word)
+
+            if(len(line) >= 1):
+                lines.append(line)
+            for line in lines:
+                text_box = TextBox(str(line).ljust(message_width),
+                                   geo.zero2d(), color, geo.zero2d())
+                self._message_stack_panel.append(text_box)
 
     def draw(self, offset=geo.zero2d()):
         self._rectangle_bg.draw(offset)

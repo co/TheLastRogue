@@ -50,14 +50,13 @@ class Player(entity.Entity):
         self.set_memory_map_if_not_set(self.dungeon_level)
 
     def act(self):
-        key = inputhandler.handler.get_keypress()
-        position = self.position
         energy_spent = 0
-        if key is None:
-            return energy_spent
+        key = None
+        while key is None:
+            key = inputhandler.handler.get_keypress()
         if key in inputhandler.move_controls:
             dx, dy = inputhandler.move_controls[key]
-            new_position = geo.add_2d(position, (dx, dy))
+            new_position = geo.add_2d(self.position, (dx, dy))
             move_succeded = self.try_step_to(new_position)
             if(move_succeded):
                 energy_spent += self.movement_speed

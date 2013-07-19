@@ -24,8 +24,8 @@ class Tile(object):
     def _draw_seen(self, screen_position, piece):
         color_bg = piece.color_bg
         color_fg = piece.color_fg
-        if(color_fg is None):
-            color_fg = self.get_terrain().color_fg
+        if(color_bg is None):
+            color_bg = self.get_terrain().color_bg
         console.console.set_colors_and_symbol(screen_position, color_fg,
                                               color_bg, piece.symbol)
 
