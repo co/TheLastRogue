@@ -1,4 +1,5 @@
 import dungeonlevel
+import libtcodpy as libtcod
 import settings
 import player
 import dungeon
@@ -44,6 +45,7 @@ class GameStateBase(state.State):
         self.message_bar.draw()
         self.monster_status_bar.draw()
         self._should_draw = False
+        libtcod.console_flush()
 
     def update(self):
         self.message_bar.update()

@@ -65,6 +65,7 @@ class PositionExaminer(state.State):
     def draw(self):
         self._draw_background()
         self._draw_cursor()
+        libtcod.console_flush()
 
 
 class PositionSelector(PositionExaminer):

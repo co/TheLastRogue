@@ -13,7 +13,6 @@ class StateStack(object):
             state = self.peek()
             state.update()
             state.draw()
-            libtcod.console_flush()
             frame.current_frame += 1
 
     def push(self, state):

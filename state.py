@@ -1,3 +1,6 @@
+import libtcodpy as libtcod
+
+
 class State(object):
     def __init__(self):
         self.current_stack = None
@@ -16,6 +19,7 @@ class UIState(State):
 
     def draw(self):
         self.ui_element.draw()
+        libtcod.console_flush()
 
     def update(self):
         self.ui_element.update()

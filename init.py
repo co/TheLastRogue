@@ -13,5 +13,5 @@ def init_libtcod():
                               settings.WINDOW_HEIGHT,
                               b'The Last Rogue',
                               False)
-    #fps = 0
-    #libtcod.sys_set_fps(fps)
+    fps = constants.FPS
+    libtcod.sys_set_fps(fps)

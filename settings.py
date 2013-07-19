@@ -1,8 +1,8 @@
 import style
 
 
-WINDOW_WIDTH = 60
-WINDOW_HEIGHT = 40
+WINDOW_WIDTH = 110
+WINDOW_HEIGHT = 60
 
 # only draw state if player has moved.
 lazy_draw = True
