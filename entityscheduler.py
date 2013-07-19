@@ -26,7 +26,6 @@ class EntityScheduler(object):
             self._entities.rotate()
             entity.energy += entity.energy_recovery
             while entity.energy > 0:
-                entity.update_fov()
                 entity.energy -= entity.act()
                 if(isinstance(entity, player.Player)):
                     self.player_has_acted = True

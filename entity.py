@@ -113,6 +113,7 @@ class Entity(gamepiece.GamePiece):
                (not old_dungeon_level is new_dungeon_level)):
                 old_dungeon_level.remove_entity_if_present(self)
             new_dungeon_level.add_entity_if_not_present(self)
+            self.update_fov()
         return move_succeded
 
     def try_remove_from_dungeon(self):

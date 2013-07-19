@@ -28,6 +28,7 @@ class GameStateBase(state.State):
             geo.Vector2D(constants.MONSTER_STATUS_BAR_WIDTH, 0)
         self.camera = camera.Camera(camera_position, geo.zero2d())
         self.has_won = False
+        self.dungeon_level = None
 
     def draw(self):
         if(self.dungeon_level.entity_scheduler.player_has_acted or
@@ -82,6 +83,7 @@ class GameState(GameStateBase):
 
     def _init_player_position(self):
         first_level = self.dungeon.get_dungeon_level(0)
+        self.dungeon_level = first_level
         for stairs in first_level.up_stairs:
             move_succeded = self.player.try_move(stairs.position, first_level)
             if(move_succeded):

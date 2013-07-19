@@ -103,9 +103,8 @@ class StyledRectangle(RectangularUIElement):
 
     @staticmethod
     def draw_char(x, y, char_visual):
-        libtcod.console_set_char_foreground(0, x, y, char_visual.color_fg)
-        libtcod.console_set_char_background(0, x, y, char_visual.color_bg)
-        libtcod.console_set_char(0, x, y, char_visual.symbol)
+        libtcod.console_put_char_ex(0, x, y, char_visual.symbol,
+                                    char_visual.color_fg, char_visual.color_bg)
 
 
 class RectangleGray(FilledRectangle):
