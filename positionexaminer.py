@@ -21,14 +21,14 @@ class PositionExaminer(state.State):
         self._background_state = background_state
 
     def update(self):
-        key = inputhandler.get_keypress()
+        key = inputhandler.handler.get_keypress()
         self._handle_directional_input(key)
         self._handle_escape(key)
         self._handle_enter(key)
 
     def _handle_directional_input(self, key):
         step_size = 1
-        if inputhandler.is_special_key_pressed(inputhandler.KEY_SHIFT):
+        if inputhandler.handler.is_special_key_pressed(inputhandler.KEY_SHIFT):
             step_size = 5
         if key in inputhandler.move_controls:
             dx = inputhandler.move_controls[key].x * step_size

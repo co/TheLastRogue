@@ -41,7 +41,7 @@ class Menu(gui.UIElement):
         if(not self.has_valid_option_selected()):
             self.try_set_index_to_valid_value()
 
-        key = inputhandler.get_keypress()
+        key = inputhandler.handler.get_keypress()
         if key == inputhandler.UP:
             self.index_decrease()
         if key == inputhandler.DOWN:

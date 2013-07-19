@@ -1,5 +1,8 @@
 import libtcodpy as libtcod
 import geometry as geo
+import Queue
+import time
+from threading import Thread
 
 NORTH = 0
 SOUTH = 1
@@ -94,36 +97,42 @@ controls = {
 }
 
 
-def wait_for_keypress():
-    key = libtcod.Key()
-    mouse = libtcod.Mouse()
+class InputHandler(object):
+    def __init__(self):
+        self._input_queue = Queue.Queue()
 
-    libtcod.sys_wait_for_event(libtcod.EVENT_KEY_PRESS,
-                               key, mouse, False)
-    key_char = get_key_char(key)
-    return key_char
+    def get_keypress(self):
+        if(not self._input_queue.empty()):
+            return self._input_queue.get()
+        return None
 
+    def start_listener_thread(self):
+        thread = Thread(target=self._get_keypress_loop)
+        thread.daemon = True
+        thread.start()
 
-def get_keypress():
-    key = libtcod.Key()
-    mouse = libtcod.Mouse()
+    def _get_keypress_loop(self):
+# Oh God why is this needed?
+        time.sleep(1)
+        while True:
+            while(self._input_queue.empty()):
+                #key = libtcod.console_check_for_keypress()
+                key = libtcod.console_wait_for_keypress(True)
+                key_char = self._get_key_char(key)
+                if key_char in controls.keys() and key.pressed:
+                    self._input_queue.put(controls[key_char])
+                #time.sleep(0.01)
 
-    libtcod.sys_check_for_event(libtcod.EVENT_KEY_PRESS,
-                                key, mouse)
-    key_char = get_key_char(key)
-    if key_char in controls.keys():
-        return controls[key_char]
-    return None
+    def _get_key_char(self, key):
+        if key.vk == libtcod.KEY_CHAR:
+            return chr(key.c).lower()  # Case insensetive
+        else:
+            return key.vk
 
+    def is_special_key_pressed(self, special_key):
+        if special_key in controls.keys():
+            return libtcod.console_is_key_pressed(special_key)
+        return False
 
-def get_key_char(key):
-    if key.vk == libtcod.KEY_CHAR:
-        return chr(key.c).lower()  # Case insensetive
-    else:
-        return key.vk
-
-
-def is_special_key_pressed(special_key):
-    if special_key in controls.keys():
-        return libtcod.console_is_key_pressed(special_key)
-    return False
+handler = InputHandler()
+handler.start_listener_thread()

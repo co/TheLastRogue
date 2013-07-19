@@ -57,7 +57,7 @@ class DungeonCreatorVisualizer(state.State):
         dgen.cellular_automata(self.dungeon_level)
 
     def handle_input(self):
-        key = inputhandler.get_keypress()
+        key = inputhandler.handler.get_keypress()
         if key in inputhandler.move_controls:
             dx, dy = inputhandler.move_controls[key].as_tuple()
             self.camera.camera_offset += geo.Vector2D(dx, dy)

@@ -49,7 +49,7 @@ class Player(entity.Entity):
         self.set_memory_map_if_not_set(self.dungeon_level)
 
     def act(self):
-        key = inputhandler.get_keypress()
+        key = inputhandler.handler.get_keypress()
         position = self.position
         if key in inputhandler.move_controls:
             dx = inputhandler.move_controls[key].x
@@ -69,9 +69,11 @@ class Player(entity.Entity):
         elif key == inputhandler.EXAMINE:  # Rest
             game_gamestate = self._state_stack().peek()
             choose_target_prompt = statestack.StateStack()
-            init_target = self.get_closest_seen_entity().position
+            init_target = self.get_closest_seen_entity()
             if init_target is None:
                 init_target = self.position
+            else:
+                init_target = init_target.position
             destination_selector =\
                 positionexaminer.\
                 MissileDestinationSelector(choose_target_prompt,
