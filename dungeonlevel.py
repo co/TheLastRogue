@@ -171,7 +171,7 @@ class DungeonLevel(object):
         if(self.has_tile(position)):
             return self.tile_matrix[position.y][position.x]
         else:
-            return tile.get_unknown_tile()
+            return tile.unknown_tile
 
     def update(self):
         self.entity_scheduler.update_entities()

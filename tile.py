@@ -1,14 +1,6 @@
 import gamepiece
 import terrain
 
-
-def get_unknown_tile():
-    result = Tile()
-    result.game_pieces[gamepiece.GamePieceType.TERRAIN]\
-        .append(terrain.Unknown())
-    return result
-
-
 class Tile(object):
     def __init__(self):
         self.game_pieces = {
@@ -21,17 +13,16 @@ class Tile(object):
     @property
     def symbol(self):
         symbol = " "
-        for piece_list in self.__pieces_lists_sorted_on_draw_order():
+        for piece_list in self.__non_empty_pieces_lists_sorted_on_draw_order():
             for piece in piece_list:
                 symbol = piece.symbol
         return symbol
 
     def draw(self, screen_position, is_seen):
-        for piece_list in self.__pieces_lists_sorted_on_draw_order():
-            for piece in piece_list:
-                piece.draw(is_seen, screen_position)
+        piece = self.__non_empty_pieces_lists_sorted_on_draw_order()[-1][0]
+        piece.draw(is_seen, screen_position)
 
-    def __pieces_lists_sorted_on_draw_order(self):
+    def __non_empty_pieces_lists_sorted_on_draw_order(self):
         piece_lists = self.game_pieces.values()
         non_empty_piece_lists = filter(lambda pl: pl != [], piece_lists)
         lists_sorted_on_draw_order = sorted(non_empty_piece_lists,
@@ -69,3 +60,8 @@ class Tile(object):
             copy.game_pieces[piece_type] =\
                 [piece.piece_copy() for piece in piece_list]
         return copy
+
+
+unknown_tile = Tile()
+unknown_tile.game_pieces[gamepiece.GamePieceType.TERRAIN]\
+    .append(terrain.Unknown())
