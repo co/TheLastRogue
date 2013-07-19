@@ -1,6 +1,5 @@
 import colors
 import geometry as geo
-import libtcodpy as libtcod
 
 
 class GamePieceType(object):
@@ -68,25 +67,6 @@ class GamePiece(object):
         copy.max_instances_in_single_tile = self.max_instances_in_single_tile
         copy.draw_order = self.draw_order
         return copy
-
-    def draw(self, is_seen, screen_position):
-        x, y = screen_position.x, screen_position.y
-        if(not self.color_fg is None):
-            if(is_seen):
-                fg_color = self.color_fg
-            else:
-                fg_color = colors.UNSEEN_FG
-            libtcod.console_set_char_foreground(0, x, y, fg_color)
-
-        if(not self.color_bg is None):
-            if(is_seen):
-                bg_color = self.color_bg
-            else:
-                bg_color = colors.UNSEEN_BG
-            libtcod.console_set_char_background(0, x, y, bg_color)
-        if(not (self.color_bg is None and
-                self.color_fg is None)):
-            libtcod.console_set_char(0, x, y, self.symbol)
 
     def can_move(self, new_position, new_dungeon_level=None):
         if(new_dungeon_level is None):
