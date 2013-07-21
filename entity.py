@@ -1,4 +1,5 @@
 import random
+import turn
 import gametime
 import damage
 import numpy
@@ -27,10 +28,10 @@ class StatusFlags(object):
 
 class Entity(gamepiece.GamePiece):
 
-    def __init__(self):
+    def __init__(self, game_state):
         super(Entity, self).__init__()
         self.hp = counter.Counter(1, 1)
-        self._sight_radius = 8
+        self._sight_radius = 6
         self._strength = 1
         self.equipment = equipment.Equipment(self)
 
@@ -39,6 +40,7 @@ class Entity(gamepiece.GamePiece):
         self._status_flags = set()
         self._status_flags.add(StatusFlags.CAN_OPEN_DOORS)
 
+        self.game_state = game_state
         self.piece_type = gamepiece.GamePieceType.ENTITY
         self.max_instances_in_single_tile = 1
 
@@ -46,10 +48,13 @@ class Entity(gamepiece.GamePiece):
         self.__dungeon_level = None
         self._init_entity_effects()
 
+        self.newly_spent_energy = 0
         self.energy = 0
         self.energy_recovery = gametime.normal_energy_gain
         self.movement_speed = gametime.single_turn
         self.attack_speed = gametime.single_turn
+
+        self.last_dungeon_map_update_timestamp = -1
 
     def _init_entity_effects(self):
         can_open_doors_flag = StatusFlags.CAN_OPEN_DOORS
@@ -71,6 +76,10 @@ class Entity(gamepiece.GamePiece):
             self.path = libtcod.path_new_using_map(self.dungeon_map, 1.0)
             self._signal_new_dungeon_level()
 
+    @property
+    def state_stack(self):
+        return self.game_state.current_stack
+
     def _signal_new_dungeon_level(self):
         pass
 
@@ -82,14 +91,13 @@ class Entity(gamepiece.GamePiece):
         new_position = geo.add_2d(self.position, direction[0])
         self.try_step_to(new_position)
 
-    def try_step_to(self, new_position):
-        terrain_to_step =\
-            self.dungeon_level.get_tile(new_position).get_terrain()
+    def try_step_to(self, position):
+        terrain_to_step = self.dungeon_level.get_tile(position).get_terrain()
         if(self.try_open_door(terrain_to_step)):
             return True
-        if(self.try_hit(new_position)):
+        if(self.try_hit(position)):
             return True
-        if(self.try_move(new_position)):
+        if(self.try_move(position)):
             return True
         return False
 
@@ -97,7 +105,7 @@ class Entity(gamepiece.GamePiece):
         if(isinstance(terrain_to_step, terrain.Door)):
             door = terrain_to_step
             if(not door.is_open):
-                door.is_open = True
+                door.open()
                 return True
         return False
 
@@ -258,6 +266,11 @@ class Entity(gamepiece.GamePiece):
         return self.dungeon_level.walkable_destinations.\
             get_walkable_positions_from_my_position(self, self.position)
 
+    def update_dungeon_map_if_its_old(self):
+        if(self.dungeon_level.terrain_changed_timestamp >
+           self.last_dungeon_map_update_timestamp):
+            self.update_dungeon_map()
+
     def update_dungeon_map(self):
         for y in range(self.dungeon_level.height):
             for x in range(self.dungeon_level.width):
@@ -265,4 +278,15 @@ class Entity(gamepiece.GamePiece):
                 libtcod.map_set_properties(self.dungeon_map, x, y,
                                            terrain.is_transparent(),
                                            self._can_pass_terrain(terrain))
+        self.last_dungeon_map_update_timestamp = turn.current_turn
         self.update_fov()
+
+    def piece_copy(self, copy=None):
+        if(copy is None):
+            copy = self.__class__(self.game_state)
+        copy._position = self._position
+        copy.dungeon_level = self.dungeon_level
+        copy.piece_type = self.piece_type
+        copy.max_instances_in_single_tile = self.max_instances_in_single_tile
+        copy.draw_order = self.draw_order
+        return copy

@@ -20,7 +20,7 @@ class PlayerMissileAction(action.Action):
         hit_detector = shoot.MissileHitDetection(False, False)
         path_taken = hit_detector.get_path_taken(path, dungeon_level)
         self.send_missile(dungeon_level, path_taken, game_state, source_entity)
-        return True
+        self.add_energy_spent_to_entity(source_entity)
 
     def max_throw_distance(self, **kwargs):
         pass
@@ -28,10 +28,9 @@ class PlayerMissileAction(action.Action):
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         pass
 
-    def animate_flight(self, game_state, path):
+    def animate_flight(self, game_state, path, symbol, color_fg):
         flight_animation =\
-            animation.MissileAnimation(game_state, self.SYMBOL,
-                                       self.COLOR_FG, path)
+            animation.MissileAnimation(game_state, symbol, color_fg, path)
         flight_animation.run_animation()
 
 
@@ -40,8 +39,6 @@ class PlayerThrowItemAction(action.ItemAction, PlayerMissileAction):
         super(PlayerThrowItemAction, self).__init__(source_item)
         self.name = "Throw"
         self.display_order = 95
-        self.SYMBOL = source_item.symbol
-        self.COLOR_FG = source_item.color_fg
 
     def max_throw_distance(self, **kwargs):
         source_entity = kwargs[action.SOURCE_ENTITY]
@@ -49,7 +46,9 @@ class PlayerThrowItemAction(action.ItemAction, PlayerMissileAction):
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         self.remove_from_inventory()
-        self.animate_flight(game_state, path)
+        print self.source_item
+        self.animate_flight(game_state, path, self.source_item.symbol,
+                            self.source_item.color_fg)
         self.source_item.throw_effect(dungeon_level, path[-1])
 
 
@@ -58,12 +57,13 @@ class PlayerThrowRockAction(PlayerMissileAction):
         super(PlayerThrowRockAction, self).__init__()
         self.name = "Throw Rock"
         self.display_order = 95
-        self.SYMBOL = 249
-        self.COLOR_FG = colors.DB_TOPAZ
+        self.symbol = 249
+        self.color_fg = colors.DB_TOPAZ
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
-        self.animate_flight(game_state, path)
-        self.hit_position(dungeon_level, path[-1], source_entity)
+        self.animate_flight(game_state, path, self.symbol, self.color_fg)
+        self.hit_position(dungeon_level, path[-1], source_entity,
+                          self.symbol, self.color_fg)
 
     def can_act(self, **kwargs):
         return True
@@ -85,11 +85,11 @@ class PlayerShootWeaponAction(action.ItemAction, PlayerMissileAction):
         super(PlayerShootWeaponAction, self).__init__(source_item)
         self.name = "Shoot"
         self.display_order = 85
-        self.SYMBOL = '.'
-        self.COLOR_FG = colors.DB_WHITE
+        self.symbol = '.'
+        self.color_fg = colors.DB_WHITE
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
-        self.animate_flight(game_state, path)
+        self.animate_flight(game_state, path, self.symbol, self.color_fg)
         self.hit_position(dungeon_level, path[-1], source_entity)
 
     def can_act(self, **kwargs):

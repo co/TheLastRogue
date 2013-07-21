@@ -1,4 +1,5 @@
 import counter
+import action
 import equipment
 import missileaction
 import monsterspawner
@@ -8,10 +9,8 @@ import entity
 import entityeffect
 import numpy
 import inventory
-import messenger
 import inputhandler
 import menufactory
-import statestack
 import positionexaminer
 import gametime
 import geometry as geo
@@ -19,7 +18,7 @@ import geometry as geo
 
 class Player(entity.Entity):
     def __init__(self, game_state):
-        super(Player, self).__init__()
+        super(Player, self).__init__(game_state)
         self.hp = counter.Counter(10, 10)
         self._memory_map = []
         self._faction = entity.Faction.PLAYER
@@ -27,10 +26,6 @@ class Player(entity.Entity):
         self._name = "CO"
         self._description = "The Brave"
         self._strength = 3
-        self.game_state = game_state
-
-    def _state_stack(self):
-        return self.game_state.current_stack
 
     @property
     def strength(self):
@@ -50,7 +45,7 @@ class Player(entity.Entity):
         self.set_memory_map_if_not_set(self.dungeon_level)
 
     def act(self):
-        energy_spent = 0
+        self.newly_spent_energy = 0
         key = None
         while key is None:
             key = inputhandler.handler.get_keypress()
@@ -59,18 +54,16 @@ class Player(entity.Entity):
             new_position = geo.add_2d(self.position, (dx, dy))
             move_succeded = self.try_step_to(new_position)
             if(move_succeded):
-                energy_spent += self.movement_speed
+                self.newly_spent_energy += self.movement_speed
 
         elif key == inputhandler.ESCAPE:
             self.kill_and_remove()
-            energy_spent += gametime.single_turn
+            self.newly_spent_energy += gametime.single_turn
 
         elif key == inputhandler.REST:  # Rest
-            energy_spent += gametime.single_turn
+            self.newly_spent_energy += gametime.single_turn
 
         elif key == inputhandler.EXAMINE:  # Rest
-            game_gamestate = self._state_stack().peek()
-            choose_target_prompt = statestack.StateStack()
             init_target = self.get_closest_seen_entity()
             if init_target is None:
                 init_target = self.position
@@ -78,28 +71,21 @@ class Player(entity.Entity):
                 init_target = init_target.position
             destination_selector =\
                 positionexaminer.\
-                MissileDestinationSelector(choose_target_prompt,
+                MissileDestinationSelector(self.game_state.menu_prompt_stack,
                                            self.position,
                                            self,
-                                           game_gamestate,
+                                           self.game_state,
                                            self._sight_radius,
                                            init_target=init_target)
-            choose_target_prompt.push(destination_selector)
-            choose_target_prompt.main_loop()
+            self.game_state.start_prompt(destination_selector)
 
         elif key == inputhandler.PICKUP:  # Pick up
-            item =\
-                self.dungeon_level.get_tile(self.position).get_first_item()
-            if(not item is None):
-                pickup_succeded = self.inventory.try_add(item)
-                if(pickup_succeded):
-                    message = "Picked up: " + item.name
-                    messenger.messenger.message(message)
-                    energy_spent += gametime.single_turn
-                else:
-                    message = "Could not pick up: " + item.name +\
-                        ", the inventory is full."
-                    messenger.messenger.message(message)
+            pick_up_action = action.PickUpItemAction()
+            if(pick_up_action.can_act(source_entity=self, target_entity=self)):
+                pick_up_action.act(source_entity=self, target_entity=self)
+            else:
+                pick_up_action.print_player_error(source_entity=self,
+                                                  target_entity=self)
 
         elif key == inputhandler.ONE:
             self.hurt(1)
@@ -112,7 +98,7 @@ class Player(entity.Entity):
                 Teleport(self, self,
                          time_to_live=1)
             self.add_entity_effect(effect)
-            energy_spent += gametime.single_turn
+            self.newly_spent_energy += gametime.single_turn
 
         elif key == inputhandler.FOUR:
             invisibile_flag = entity.StatusFlags.INVISIBILE
@@ -128,17 +114,18 @@ class Player(entity.Entity):
                                                     invisible_status,
                                                     time_to_live=1)
                 self.add_entity_effect(effect)
-            energy_spent += gametime.single_turn
+            self.newly_spent_energy += gametime.single_turn
 
         elif key == inputhandler.FIVE:
-            monsterspawner.spawn_rat_man(self.dungeon_level)
-            energy_spent += gametime.single_turn
+            monsterspawner.spawn_rat_man(self.dungeon_level, self.game_state)
+            self.newly_spent_energy += gametime.single_turn
 
         elif key == inputhandler.INVENTORY:
             if(not self.inventory.is_empty()):
-                inventory_menu =\
-                    menufactory.inventory_menu(self, self._state_stack())
-                self._state_stack().push(inventory_menu)
+                menu = menufactory.inventory_menu(self,
+                                                  self.game_state.
+                                                  menu_prompt_stack)
+                self.game_state.start_prompt(menu)
 
         elif key == inputhandler.DESCEND:
             dungeon_feature = self.dungeon_level.get_tile(self.position)\
@@ -149,13 +136,14 @@ class Player(entity.Entity):
                                                       target_entity=self)
 
         elif key == inputhandler.ENTER:
-                context_menu = menufactory.context_menu(self,
-                                                        self._state_stack())
-                self._state_stack().push(context_menu)
+            context_menu =\
+                menufactory.context_menu(self,
+                                         self.game_state.menu_prompt_stack)
+            self.game_state.start_prompt(context_menu)
 
         elif key == inputhandler.FIRE:
 
-            game_state = self._state_stack().get_game_state()
+            game_state = self.state_stack.get_game_state()
             if(self.equipment.slot_is_equiped
                (equipment.EquipmentSlots.RANGED_WEAPON)):
                 weapon =\
@@ -166,17 +154,14 @@ class Player(entity.Entity):
                     shooting_succeded = shooting.act(source_entity=self,
                                                      game_state=game_state)
                     if shooting_succeded:
-                        energy_spent += gametime.single_turn
+                        self.newly_spent_energy += gametime.single_turn
             else:
                 rock_throwing = missileaction.PlayerThrowRockAction()
                 if(rock_throwing.can_act(source_entity=self,
                                          game_state=game_state)):
-                    throw_succeded = rock_throwing.act(source_entity=self,
-                                                       game_state=game_state)
-                    if throw_succeded:
-                        energy_spent += gametime.single_turn
-        self._state_stack().get_game_state().signal_should_redraw_screen()
-        return energy_spent
+                    rock_throwing.act(source_entity=self,
+                                      game_state=game_state)
+        return self.newly_spent_energy
 
     def kill_and_remove(self):
         self.hp.set_min()

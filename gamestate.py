@@ -1,6 +1,6 @@
 import dungeonlevel
+import statestack
 import libtcodpy as libtcod
-import settings
 import player
 import dungeon
 import monster
@@ -30,22 +30,33 @@ class GameStateBase(state.State):
         self.has_won = False
         self.dungeon_level = None
         self._should_draw = True
+        self.menu_prompt_stack = statestack.GameMenuStateStack(self)
+
+    def start_prompt(self, prompt_state):
+        self.menu_prompt_stack.push(prompt_state)
+        self.menu_prompt_stack.main_loop()
 
     def signal_should_redraw_screen(self):
         self._should_draw = True
 
+    # most of the time the drawing is handled in EntityScheduler,
+    # right before the player acts.
+    # if a redraw is needed do a force_draw instead.
     def draw(self):
-        if(self._should_draw or not settings.lazy_draw):
-            self.force_draw()
+        pass
 
     def force_draw(self):
+        self.camera.update(self.player)
+        self.prepare_draw()
+        self._should_draw = False
+        libtcod.console_flush()
+
+    def prepare_draw(self):
         dungeon_level = self.player.dungeon_level
         dungeon_level.draw(self.camera)
         self.player_status_bar.draw()
         self.message_bar.draw()
         self.monster_status_bar.draw()
-        self._should_draw = False
-        libtcod.console_flush()
 
     def update(self):
         self.message_bar.update()
@@ -63,7 +74,6 @@ class GameStateBase(state.State):
     def _update_gui(self):
         self.monster_status_bar.update(self.player)
         self.player_status_bar.update()
-        self.camera.update(self.player)
 
     def _init_gui(self):
         player_status_rect = rectfactory.player_status_rect()
@@ -134,14 +144,14 @@ class TestGameState(GameStateBase):
         ring.try_move(ring_position, self.dungeon_level)
 
     def _init_monsters(self):
-        rat = monster.RatMan()
+        rat = monster.RatMan(self)
         rat_pos = (15, 15)
         rat.try_move(rat_pos, self.dungeon_level)
 
-        rat2 = monster.Jerico()
+        rat2 = monster.Jerico(self)
         rat2_pos = (15, 25)
         rat2.try_move(rat2_pos, self.dungeon_level)
 
-        statue = monster.StoneStatue()
+        statue = monster.StoneStatue(self)
         statue_pos = (25, 7)
         statue.try_move(statue_pos, self.dungeon_level)

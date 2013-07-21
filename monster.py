@@ -9,8 +9,8 @@ import libtcodpy as libtcod
 
 
 class Monster(entity.Entity):
-    def __init__(self):
-        super(Monster, self).__init__()
+    def __init__(self, game_state):
+        super(Monster, self).__init__(game_state)
 
     def kill_and_remove(self):
         self.hp.set_min()
@@ -50,8 +50,8 @@ class Monster(entity.Entity):
 
 
 class RatMan(Monster):
-    def __init__(self):
-        super(RatMan, self).__init__()
+    def __init__(self, game_state):
+        super(RatMan, self).__init__(game_state)
         self.hp = counter.Counter(10, 10)
         self._name = "Rat-Man"
         self.death_message = "The Rat-Man is beaten to a pulp."
@@ -67,17 +67,17 @@ class RatMan(Monster):
 
 
 class Jerico(RatMan):
-    def __init__(self):
-        super(Jerico, self).__init__()
+    def __init__(self, game_state):
+        super(Jerico, self).__init__(game_state)
         self._name = "Jerico"
-        self.death_message = "The Jerico the quick is no more."
+        self.death_message = "Jerico the quick is no more."
         self._color_fg = colors.DB_GOLDEN_FIZZ
         self.energy_recovery = gametime.double_energy_gain
 
 
 class StoneStatue(Monster):
-    def __init__(self):
-        super(StoneStatue, self).__init__()
+    def __init__(self, game_state):
+        super(StoneStatue, self).__init__(game_state)
         self.hp = counter.Counter(30, 30)
         self._name = "stone statue"
         self.death_message = "The stone statue shatters pieces, "\

@@ -11,7 +11,7 @@ import colors
 
 def main_menu(state_stack):
     ui_elements = []
-    ui_state = state.UIState(gui.UIElementSet(ui_elements))
+    ui_state = state.UIState(gui.UIElementList(ui_elements))
 
     start_test_game_function =\
         lambda: ui_state.current_stack.push(gamestate.TestGameState())
@@ -69,12 +69,8 @@ def inventory_menu(player, state_stack):
         gui.StyledRectangle(right_side_menu_rect,
                             settings.menu_theme.rect_style)
 
-    grayout_rectangle =\
-        gui.RectangleGray(rectfactory.full_screen_rect(), colors.DB_OPAL)
-
-    ui_elements = [grayout_rectangle, inventory_menu_bg,
-                   menu_stack_panel]
-    ui_state = state.UIState(gui.UIElementSet(ui_elements))
+    ui_elements = [inventory_menu_bg, menu_stack_panel]
+    ui_state = state.UIState(gui.UIElementList(ui_elements))
     return ui_state
 
 
@@ -100,12 +96,8 @@ def item_actions_menu(item, player, state_stack):
         gui.StyledRectangle(right_side_menu_rect,
                             settings.menu_theme.rect_style)
 
-    grayout_rectangle =\
-        gui.RectangleGray(rectfactory.full_screen_rect(), colors.DB_OPAL)
-
-    ui_elements = [grayout_rectangle, inventory_menu_bg,
-                   menu_stack_panel]
-    ui_state = state.UIState(gui.UIElementSet(ui_elements))
+    ui_elements = [inventory_menu_bg, menu_stack_panel]
+    ui_state = state.UIState(gui.UIElementList(ui_elements))
     return ui_state
 
 
@@ -132,11 +124,8 @@ def context_menu(player, state_stack):
         gui.StyledRectangle(context_menu_rect,
                             settings.menu_theme.rect_style)
 
-    grayout_rectangle =\
-        gui.RectangleGray(rectfactory.full_screen_rect(), colors.DB_OPAL)
-
-    ui_elements = [grayout_rectangle, background_rect, resulting_menu]
-    ui_state = state.UIState(gui.UIElementSet(ui_elements))
+    ui_elements = [background_rect, resulting_menu]
+    ui_state = state.UIState(gui.UIElementList(ui_elements))
     return ui_state
 
 

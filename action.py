@@ -1,4 +1,6 @@
 import random
+import messenger
+import gametime
 import entityeffect
 
 #  Arguments:
@@ -11,12 +13,16 @@ class Action(object):
     def __init__(self):
         self.name = "XXX_Action_Name_XX"
         self.display_order = 100
+        self.energy_cost = gametime.single_turn
 
     def act(self, **kwargs):
         pass
 
     def can_act(self, **kwargs):
         return True
+
+    def add_energy_spent_to_entity(self, entity):
+        entity.newly_spent_energy += self.energy_cost
 
 
 class ItemAction(Action):
@@ -37,7 +43,9 @@ class EquipAction(ItemAction):
 
     def act(self, **kwargs):
         target_entity = kwargs[TARGET_ENTITY]
+        source_entity = kwargs[SOURCE_ENTITY]
         self.equip(target_entity)
+        self.add_energy_spent_to_entity(source_entity)
 
     def can_act(self, **kwargs):
         target_entity = kwargs[TARGET_ENTITY]
@@ -58,9 +66,10 @@ class DrinkAction(ItemAction):
 
     def act(self, **kwargs):
         target_entity = kwargs[TARGET_ENTITY]
+        source_entity = kwargs[SOURCE_ENTITY]
         self.drink(target_entity)
         self.remove_from_inventory()
-        return True
+        self.add_energy_spent_to_entity(source_entity)
 
     def drink(self):
         pass
@@ -85,11 +94,13 @@ class DropAction(ItemAction):
         self.display_order = 110
 
     def act(self, **kwargs):
+        source_entity = kwargs[SOURCE_ENTITY]
         if(not self.source_item.inventory is None):
             drop_successful =\
                 self.source_item.inventory.try_drop_item(self.source_item)
-            return drop_successful
-        return False
+            if(drop_successful):
+                self.add_energy_spent_to_entity(source_entity)
+        return
 
 
 class DescendStairsAction(Action):
@@ -100,6 +111,7 @@ class DescendStairsAction(Action):
 
     def act(self, **kwargs):
         target_entity = kwargs[TARGET_ENTITY]
+        source_entity = kwargs[SOURCE_ENTITY]
         current_dungeon_level = target_entity.dungeon_level
         next_dungeon_level = current_dungeon_level.\
             dungeon.get_dungeon_level(current_dungeon_level.depth + 1)
@@ -107,3 +119,40 @@ class DescendStairsAction(Action):
             return False
         destination_position = next_dungeon_level.up_stairs[0].position
         target_entity.try_move(destination_position, next_dungeon_level)
+        self.add_energy_spent_to_entity(source_entity)
+
+
+class PickUpItemAction(Action):
+    def __init__(self):
+        super(PickUpItemAction, self).__init__()
+        self.name = "Pick Up"
+        self.display_order = 70
+
+    def can_act(self, **kwargs):
+        source_entity = kwargs[SOURCE_ENTITY]
+        item = self._get_item_on_floor(source_entity)
+        print item
+        return (not item is None and
+                source_entity.inventory.has_room_for_item(item))
+
+    def act(self, **kwargs):
+        source_entity = kwargs[SOURCE_ENTITY]
+        item = self._get_item_on_floor(source_entity)
+        print "the item is: ", item
+        pickup_succeded = source_entity.inventory.try_add(item)
+        if(pickup_succeded):
+            message = "Picked up: " + item.name
+            messenger.messenger.message(message)
+            source_entity.newly_spent_energy += gametime.single_turn
+
+    def _get_item_on_floor(self, entity):
+        return entity.dungeon_level.get_tile(entity.position).get_first_item()
+
+    def print_player_error(self, **kwargs):
+        source_entity = kwargs[SOURCE_ENTITY]
+        item = self._get_item_on_floor(source_entity)
+        if(item is None and
+           not source_entity.inventory.has_room_for_item(item)):
+            message = "Could not pick up: " + item.name +\
+                ", the inventory is full."
+            messenger.messenger.message(message)

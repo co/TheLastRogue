@@ -63,7 +63,7 @@ class ConsoleVisual(object):
            not effect == libtcod.BKGND_SET):
             x, y = position
             self._visual_char_matrix[y][x].color_bg = color
-            libtcod.console_set_char_background(0, x, y, color)
+            libtcod.console_set_char_background(0, x, y, color, effect)
 
     def print_text(self, position, text):
         for idx, char in enumerate(text):

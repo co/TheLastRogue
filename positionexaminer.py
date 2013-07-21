@@ -51,7 +51,7 @@ class PositionExaminer(state.State):
 
     def _draw_background(self):
         if(not self._background_state is None):
-            self._background_state.force_draw()
+            self._background_state.prepare_draw()
 
     def _draw_cursor(self):
         position = self.camera.dungeon_to_screen_position(self.cursor_position)
@@ -139,3 +139,4 @@ class MissileDestinationSelector(PositionSelector):
         self._draw_background()
         self._draw_path()
         self._draw_cursor()
+        libtcod.console_flush()

@@ -40,6 +40,7 @@ class Menu(gui.UIElement):
         self._recreate_option_list()
         if(not self.has_valid_option_selected()):
             self.try_set_index_to_valid_value()
+        self._recreate_option_list()
 
         key = inputhandler.handler.get_keypress()
         if key == inputhandler.UP:
@@ -213,7 +214,8 @@ class DelayedAction(object):
     def __call__(self):
         self.action.act(source_entity=self.source_entity,
                         target_entity=self.target_entity,
-                        game_state=self._state_stack.get_game_state())
+                        game_state=self.source_entity.state_stack.
+                        get_game_state())
         if(self._end_player_turn):
             self.source_entity.turn_over = True
         for _ in range(self._states_to_pop):

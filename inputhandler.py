@@ -98,7 +98,7 @@ controls = {
 
 class InputHandler(object):
     def __init__(self):
-        max_size = 3
+        max_size = 1
         self._input_queue = Queue.Queue(max_size)
 
     def get_keypress(self):
@@ -112,7 +112,7 @@ class InputHandler(object):
         thread.start()
 
     def _get_keypress_loop(self):
-        time.sleep(0.4)
+        time.sleep(0.7)
         while True:
             key = libtcod.console_wait_for_keypress(True)
             key_char = self._get_key_char(key)

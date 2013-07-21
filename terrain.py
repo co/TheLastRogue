@@ -4,7 +4,6 @@ import libtcodpy as libtcod
 
 
 class Terrain(gamepiece.GamePiece):
-
     def __init__(self):
         super(Terrain, self).__init__()
         self.max_instances_in_single_tile = 1
@@ -20,7 +19,6 @@ class Terrain(gamepiece.GamePiece):
 
 
 class Wall(Terrain):
-
     def __init__(self):
         super(Wall, self).__init__()
         self._color_fg = colors.WALL_FG
@@ -36,7 +34,6 @@ class Wall(Terrain):
 
 
 class Floor(Terrain):
-
     def __init__(self):
         super(Floor, self).__init__()
         self._color_fg = colors.DB_STINGER
@@ -45,7 +42,6 @@ class Floor(Terrain):
 
 
 class Water(Terrain):
-
     def __init__(self):
         super(Water, self).__init__()
         self._color_fg = colors.DB_CORNFLOWER
@@ -54,7 +50,6 @@ class Water(Terrain):
 
 
 class Door(Terrain):
-
     def __init__(self, is_open=True):
         super(Door, self).__init__()
         self.__is_open = is_open
@@ -70,8 +65,6 @@ class Door(Terrain):
 
     @is_open.setter
     def is_open(self, value):
-        if(self.__is_open == value):
-            return
         self.__is_open = value
         self.dungeon_level.signal_terrain_changed()
 
@@ -83,10 +76,7 @@ class Door(Terrain):
             return "+"
 
     def is_transparent(self):
-        if self.is_open:
-            return True
-        else:
-            return False
+        return self.is_open
 
     def close(self):
         self.is_open = False
@@ -101,7 +91,6 @@ class Door(Terrain):
 
 
 class GlassWall(Wall):
-
     def __init__(self):
         super(GlassWall, self).__init__()
         self._color_fg = colors.DB_LIGHT_STEEL_BLUE
@@ -114,7 +103,6 @@ class GlassWall(Wall):
 
 
 class Unknown(Terrain):
-
     def __init__(self):
         super(Unknown, self).__init__()
         self._color_fg = colors.DB_BLACK

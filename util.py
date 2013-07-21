@@ -36,7 +36,7 @@ class WalkableDestinatinationsPath(object):
         self._time_stamps[entity.__class__] = turn.current_turn
 
     def get_walkable_positions_from_my_position(self, entity, position):
-        time_stamp = entity.dungeon_level._terrain_changed_timestamp
+        time_stamp = entity.dungeon_level.terrain_changed_timestamp
         if(not self._has_destinations_newer_than(entity, position,
                                                  time_stamp)):
             self._calculate_walkable_positions_from_entity_position(entity,

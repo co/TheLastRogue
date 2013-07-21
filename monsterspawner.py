@@ -16,8 +16,8 @@ def place_piece_on_random_tile(piece, dungeon_level):
     return False
 
 
-def spawn_rat_man(dungeon_level):
-    rat = monster.RatMan()
+def spawn_rat_man(dungeon_level, game_state):
+    rat = monster.RatMan(game_state)
     spawn_succeded = place_piece_on_random_tile(rat, dungeon_level)
     if(not spawn_succeded):
         logging.info("could not spawn rat-man")

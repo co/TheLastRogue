@@ -1,5 +1,4 @@
 import colors
-import geometry as geo
 
 
 class GamePieceType(object):
@@ -12,8 +11,8 @@ class GamePieceType(object):
 
 class GamePiece(object):
     def __init__(self):
-        self.__position = (-1, -1)
-        self.__dungeon_level = None
+        self._position = (-1, -1)
+        self._dungeon_level = None
         self._name = "XXX_unnamed_entity_XXX"
         self._description = "XXX_no_description_XXX"
 
@@ -28,15 +27,15 @@ class GamePiece(object):
 
     @property
     def position(self):
-        return self.__position
+        return self._position
 
     @property
     def dungeon_level(self):
-        return self.__dungeon_level
+        return self._dungeon_level
 
     @dungeon_level.setter
     def dungeon_level(self, value):
-        self.__dungeon_level = value
+        self._dungeon_level = value
 
     @property
     def color_fg(self):
@@ -61,7 +60,7 @@ class GamePiece(object):
     def piece_copy(self, copy=None):
         if(copy is None):
             copy = self.__class__()
-        copy.__position = self.__position
+        copy._position = self._position
         copy.dungeon_level = self.dungeon_level
         copy.piece_type = self.piece_type
         copy.max_instances_in_single_tile = self.max_instances_in_single_tile
@@ -98,7 +97,7 @@ class GamePiece(object):
             new_place.append(self)
         else:
             new_place[0] = self
-        self.__position = new_position
+        self._position = new_position
         self.dungeon_level = new_dungeon_level
 
     def __can_pass_tile(self, tile):
@@ -116,7 +115,7 @@ class GamePiece(object):
         self.__try_remove_from_dungeon()
         new_tile = dungeon_level.get_tile(new_position)
         new_tile.game_pieces[self.piece_type].append(self)
-        self.__position = new_position
+        self._position = new_position
         self.dungeon_level = dungeon_level
 
     def try_remove_from_dungeon(self):

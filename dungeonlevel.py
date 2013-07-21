@@ -84,8 +84,7 @@ class DungeonLevel(object):
         self.suspended_entity = None
         self.dungeon = None
 
-        self._terrain_changed_timestamp = 0
-        self._dungeon_map_timestamp = -1
+        self.terrain_changed_timestamp = 0
 
         self.walkable_destinations = util.WalkableDestinatinationsPath()
 
@@ -185,7 +184,7 @@ class DungeonLevel(object):
                 entity.kill_and_remove()
 
     def signal_terrain_changed(self):
-        self._terrain_changed_timestamp = turn.current_turn
+        self.terrain_changed_timestamp = turn.current_turn
 
     def print_dungeon(self):
         for y, row in enumerate(self.tile_matrix):

@@ -126,9 +126,9 @@ class RectangleGray(FilledRectangle):
                     console.set_color_fg((x, y), colors.INACTIVE_GAME_FG)
 
 
-class UIElementSet(object):
+class UIElementList(object):
     def __init__(self, elements):
-        super(UIElementSet, self).__init__()
+        super(UIElementList, self).__init__()
         self.elements = elements
 
     def draw(self, offset=geo.zero2d()):
