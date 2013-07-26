@@ -100,16 +100,16 @@ class Equipment(object):
         succeded = self.entity.inventory.try_add(equipment)
         return succeded
 
-    def _get_slots_of_type(self, equipment_type):
+    def get_slots_of_type(self, equipment_type):
         return [slot for slot in EquipmentSlots.ALL
                 if slot.equipment_type == equipment_type]
 
-    def _get_open_slots_of_type(self, equipment_type):
-        return [slot for slot in self._get_slots_of_type(equipment_type)
+    def get_open_slots_of_type(self, equipment_type):
+        return [slot for slot in self.get_slots_of_type(equipment_type)
                 if self._equipment[slot] is None]
 
     def _all_slots_of_type_are_used(self, equipment_type):
-        return len(self._get_open_slots_of_type(equipment_type)) < 1
+        return len(self.get_open_slots_of_type(equipment_type)) < 1
 
     def can_equip(self, equipment):
         if(self._all_slots_of_type_are_used(equipment.equipment_type)):
@@ -123,7 +123,7 @@ class Equipment(object):
         return False
 
     def _equip(self, equipment):
-        open_slots = self._get_open_slots_of_type(equipment.equipment_type)
+        open_slots = self.get_open_slots_of_type(equipment.equipment_type)
         self._equip_into_slot(equipment, open_slots[0])
 
     def _equip_into_slot(self, equipment, slot):

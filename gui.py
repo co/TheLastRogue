@@ -202,7 +202,6 @@ class StackPanelVertical(StackPanel):
 
     @property
     def width(self):
-        print self._elements
         if(len(self._elements) < 1):
             return 0
         return max([element.total_width for element in self._elements])

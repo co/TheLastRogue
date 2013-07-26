@@ -55,7 +55,7 @@ class StackAbleItem(Item):
 class EquipableItem(Item):
     def __init__(self):
         super(EquipableItem, self).__init__()
-        self.actions.append(action.EquipAction(self))
+        self.actions.append(action.ReEquipAction(self))
 
     def equip_effect(self, entity):
         pass

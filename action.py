@@ -65,7 +65,6 @@ class EquipAction(ItemAction):
         equip_effect = entityeffect.Equip(target_entity,
                                           target_entity, self.source_item)
         target_entity.add_entity_effect(equip_effect)
-        target_entity.inventory.remove_item(self.source_item)
 
 
 class UnEquipAction(ItemAction):
@@ -78,10 +77,9 @@ class UnEquipAction(ItemAction):
         target_entity = kwargs[TARGET_ENTITY]
         source_entity = kwargs[SOURCE_ENTITY]
         equipment_slot = kwargs[EQUIPMENT_SLOT]
-        if(source_entity.equipment.get(equipment_slot) is None):
-            return
-        self.unequip(target_entity, equipment_slot)
-        self.add_energy_spent_to_entity(source_entity)
+        if(not self.source_item is None):
+            self.unequip(target_entity, equipment_slot)
+            self.add_energy_spent_to_entity(source_entity)
 
     def can_act(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
@@ -100,19 +98,42 @@ class UnEquipAction(ItemAction):
 class ReEquipAction(EquipAction):
     def __init__(self, source_item):
         super(ReEquipAction, self).__init__(source_item)
-        self.name = "ReEquip"
+        self.name = "Equip"
         self.display_order = 90
 
     def act(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
-        equipment_slot = kwargs[EQUIPMENT_SLOT]
+        if(EQUIPMENT_SLOT in kwargs):
+            equipment_slot = kwargs[EQUIPMENT_SLOT]
+        else:
+            equipment_slot = self.get_equipment_slot(source_entity)
         old_item = None
         if(source_entity.equipment.slot_is_equiped(equipment_slot)):
             old_item = source_entity.equipment.unequip(equipment_slot)
-        self.equip(source_entity)
+        self.re_equip(source_entity, equipment_slot)
         if(not old_item is None):
             source_entity.inventory.try_add(old_item)
         self.add_energy_spent_to_entity(source_entity)
+
+    def get_equipment_slot(self, source_entity):
+        open_slots = (source_entity.equipment.get_open_slots_of_type
+                      (self.source_item.equipment_type))
+        if(len(open_slots) > 0):
+            return open_slots[0]
+        else:
+            return (source_entity.equipment.get_slots_of_type
+                    (self.source_item.equipment_type))[0]
+
+    def can_act(self, **kwargs):
+        return True
+
+    def re_equip(self, target_entity, equipment_slot):
+        re_equip_effect = entityeffect.ReEquip(target_entity,
+                                               target_entity,
+                                               equipment_slot,
+                                               self.source_item)
+        target_entity.add_entity_effect(re_equip_effect)
+        target_entity.inventory.remove_item(self.source_item)
 
 
 class DrinkAction(ItemAction):

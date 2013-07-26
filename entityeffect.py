@@ -175,6 +175,8 @@ class Equip(EntityEffect):
         equip_succeded = equipment.try_equip(self.item)
         if(equip_succeded):
             self.message()
+            if(self.source_entity.inventory.has_item(self.item)):
+                self.source_entity.inventory.remove_item(self.item)
         self.tick()
 
 
@@ -198,4 +200,35 @@ class UnEquip(EntityEffect):
                 equipment.unequip_to_inventory(self.equipment_slot)
             if(unequip_succeded):
                 self.message()
+        self.tick()
+
+
+class ReEquip(EntityEffect):
+    def __init__(self, source_entity, target_entity, equipment_slot, item):
+        super(ReEquip, self).__init__(source_entity=source_entity,
+                                      target_entity=target_entity,
+                                      effect_type=EffectTypes.EQUIPMENT,
+                                      time_to_live=1)
+        self.equipment_slot = equipment_slot
+        self.item = item
+
+    def message(self):
+        message = "%s equips %s." % (self.source_entity.name, self.item.name)
+        messenger.messenger.message(message)
+
+    def update(self):
+        old_item = None
+        if(self.source_entity.equipment.slot_is_equiped(self.equipment_slot)):
+            old_item =\
+                self.source_entity.equipment.unequip(self.equipment_slot)
+
+        equipment = self.target_entity.equipment
+        equip_succeded = equipment.try_equip(self.item)
+        if(equip_succeded):
+            self.message()
+            if(self.source_entity.inventory.has_item(self.item)):
+                self.source_entity.inventory.remove_item(self.item)
+
+        if(not old_item is None):
+            self.source_entity.inventory.try_add(old_item)
         self.tick()
