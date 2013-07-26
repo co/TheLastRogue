@@ -46,12 +46,11 @@ class GameMenuStateStack(StateStack):
         self._game_state = gamestate
 
     def main_loop(self):
-        self._game_state.prepare_draw()
-        self._grayout_rectangle.draw()
+        self._draw_background()
         while len(self._stack) > 0:
             state = self.peek()
-            state.update()
             state.draw()
+            state.update()
             frame.current_frame += 1
         self._game_state.force_draw()
 
@@ -60,12 +59,18 @@ class GameMenuStateStack(StateStack):
 
     def push(self, state):
         state.current_stack = self
+        self._draw_background()
         self._stack.append(state)
 
     def pop(self):
         state = self._stack.pop()
+        self._draw_background()
         state.current_stack = None
         return state
+
+    def _draw_background(self):
+        self._game_state.prepare_draw()
+        self._grayout_rectangle.draw()
 
     def peek(self):
         return self._stack[-1]

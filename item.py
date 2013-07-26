@@ -1,4 +1,5 @@
 import colors
+import libtcodpy as libtcod
 import damage
 import messenger
 import action
@@ -36,6 +37,7 @@ class Item(gamepiece.GamePiece):
         self.actions.append(action.DropAction(self))
         self.actions.append(missileaction.PlayerThrowItemAction(self))
         self.weight = 5
+        self.equipment_type = None
 
     def throw_effect(self, dungeon_level, position):
         self.try_move(position, dungeon_level)
@@ -53,7 +55,6 @@ class StackAbleItem(Item):
 class EquipableItem(Item):
     def __init__(self):
         super(EquipableItem, self).__init__()
-        self.equipment_type = None
         self.actions.append(action.EquipAction(self))
 
     def equip_effect(self, entity):
@@ -122,13 +123,13 @@ class RingItem(JewellryItem):
     def __init__(self):
         super(RingItem, self).__init__()
         self.equipment_type = equipment.EquipmentTypes.RING
+        self._symbol = libtcod.CHAR_GRADE
 
 
 class RingOfInvisibility(RingItem):
     def __init__(self):
         super(RingOfInvisibility, self).__init__()
         self._color_fg = colors.DB_GOLDEN_FIZZ
-        self._symbol = ord('o')
         self._name = "Ring of Invisibility"
         self._description =\
             "The metal is warm to your skin,\

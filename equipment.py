@@ -1,21 +1,17 @@
-class EquipmentSlots(object):
-    #  Armor
-    HEADGEAR = 0
-    ARMOR = 1
-    GLOVES = 2
-    BOOTS = 3
+import libtcodpy as libtcod
 
-    #  Jewelry
-    RIGHT_RING = 4
-    LEFT_RING = 5
-    AMULET = 6
 
-    #  Weapons
-    MELEE_WEAPON = 7
-    RANGED_WEAPON = 8
+class EquipmentSlot(object):
+    def __init__(self, name, equipment_type, symbol):
+        self.name = name
+        self.equipment_type = equipment_type
+        self.symbol = symbol
 
-    ALL = [HEADGEAR, ARMOR, GLOVES, BOOTS, RIGHT_RING,
-           LEFT_RING, AMULET, MELEE_WEAPON, RANGED_WEAPON]
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other):
+        return self.name == other.name
 
 
 class EquipmentTypes(object):
@@ -37,21 +33,28 @@ class EquipmentTypes(object):
            RING, AMULET, MELEE_WEAPON, RANGED_WEAPON]
 
 
-EquipmentTypeAllowedInSlot = {
-    EquipmentSlots.HEADGEAR: EquipmentTypes.HEADGEAR,
-    EquipmentSlots.ARMOR: EquipmentTypes.ARMOR,
-    EquipmentSlots.GLOVES: EquipmentTypes.GLOVES,
-    EquipmentSlots.BOOTS: EquipmentTypes.BOOTS,
+class EquipmentSlots(object):
+    #  Weapons
+    MELEE_WEAPON = EquipmentSlot("Melee Weapon", EquipmentTypes.HEADGEAR, ")")
+    RANGED_WEAPON = EquipmentSlot("Ranged Weapon",
+                                  EquipmentTypes.RANGED_WEAPON, "(")
+
+    #  Armor
+    HEADGEAR = EquipmentSlot("Headgear", EquipmentTypes.HEADGEAR, "^")
+    ARMOR = EquipmentSlot("Armor", EquipmentTypes.ARMOR, "[")
+    GLOVES = EquipmentSlot("Gloves", EquipmentTypes.GLOVES, "'")
+    BOOTS = EquipmentSlot("Boots", EquipmentTypes.BOOTS, "_")
 
     #  Jewelry
-    EquipmentSlots.RIGHT_RING: EquipmentTypes.RING,
-    EquipmentSlots.LEFT_RING: EquipmentTypes.RING,
-    EquipmentSlots.AMULET: EquipmentTypes.AMULET,
+    RIGHT_RING = EquipmentSlot("Right Ring", EquipmentTypes.RING,
+                               libtcod.CHAR_GRADE)
+    LEFT_RING = EquipmentSlot("Left Ring", EquipmentTypes.RING,
+                              libtcod.CHAR_GRADE)
+    AMULET = EquipmentSlot("Amulet", EquipmentTypes.AMULET,
+                           libtcod.CHAR_FEMALE)
 
-    #  Weapons
-    EquipmentSlots.MELEE_WEAPON: EquipmentTypes.MELEE_WEAPON,
-    EquipmentSlots.RANGED_WEAPON: EquipmentTypes.RANGED_WEAPON
-}
+    ALL = [MELEE_WEAPON, RANGED_WEAPON, HEADGEAR, ARMOR, GLOVES,
+           BOOTS, RIGHT_RING, LEFT_RING, AMULET]
 
 
 class Equipment(object):
@@ -75,8 +78,9 @@ class Equipment(object):
         return self._equipment[equipment_slot]
 
     def has_type(self, equipment_type):
-        return (not self._equipment[EquipmentTypeAllowedInSlot[equipment_type]]
-                is None)
+        slots = [slot for slot in EquipmentSlots.ALL
+                 if slot.equipment_type == equipment_type]
+        return not len(slots) < 0
 
     def slot_is_equiped(self, equipment_slot):
         return not self._equipment[equipment_slot] is None
@@ -87,10 +91,18 @@ class Equipment(object):
         self._equipment[equipment_slot] = None
         return equipment
 
+    def can_unequip_to_inventory(self, equipment_slot):
+        return (self.entity.inventory.has_room_for_item() and
+                self.slot_is_equiped(equipment_slot))
+
+    def unequip_to_inventory(self, equipment_slot):
+        equipment = self.unequip(equipment_slot)
+        succeded = self.entity.inventory.try_add(equipment)
+        return succeded
+
     def _get_slots_of_type(self, equipment_type):
-        return [e_slot for e_slot, e_type in
-                EquipmentTypeAllowedInSlot.iteritems()
-                if e_type == equipment_type]
+        return [slot for slot in EquipmentSlots.ALL
+                if slot.equipment_type == equipment_type]
 
     def _get_open_slots_of_type(self, equipment_type):
         return [slot for slot in self._get_slots_of_type(equipment_type)
@@ -122,3 +134,9 @@ class Equipment(object):
         for equipment_slot in EquipmentSlots.ALL:
             if(self.slot_is_equiped(equipment_slot)):
                 self._equipment[equipment_slot].equiped_effect(self.entity)
+
+    def print_equipment(self):
+        print "###############################"
+        for slot, content in self._equipment.iteritems():
+            print slot, content
+        print "###############################"

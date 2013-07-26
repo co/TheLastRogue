@@ -1,5 +1,4 @@
 import messenger
-import damage
 import random
 import numpy
 
@@ -176,4 +175,27 @@ class Equip(EntityEffect):
         equip_succeded = equipment.try_equip(self.item)
         if(equip_succeded):
             self.message()
+        self.tick()
+
+
+class UnEquip(EntityEffect):
+    def __init__(self, source_entity, target_entity, equipment_slot):
+        super(UnEquip, self).__init__(source_entity=source_entity,
+                                      target_entity=target_entity,
+                                      effect_type=EffectTypes.EQUIPMENT,
+                                      time_to_live=1)
+        self.item = source_entity.equipment.get(equipment_slot)
+        self.equipment_slot = equipment_slot
+
+    def message(self):
+        message = "%s unequips %s." % (self.source_entity.name, self.item.name)
+        messenger.messenger.message(message)
+
+    def update(self):
+        equipment = self.target_entity.equipment
+        if(equipment.can_unequip_to_inventory(self.equipment_slot)):
+            unequip_succeded =\
+                equipment.unequip_to_inventory(self.equipment_slot)
+            if(unequip_succeded):
+                self.message()
         self.tick()

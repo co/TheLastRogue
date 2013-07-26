@@ -51,6 +51,9 @@ class PlayerThrowItemAction(action.ItemAction, PlayerMissileAction):
                             self.source_item.color_fg)
         self.source_item.throw_effect(dungeon_level, path[-1])
 
+    def copy(self):
+        return self.__class__(self.source_item)
+
 
 class PlayerThrowRockAction(PlayerMissileAction):
     def __init__(self):
@@ -62,8 +65,7 @@ class PlayerThrowRockAction(PlayerMissileAction):
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         self.animate_flight(game_state, path, self.symbol, self.color_fg)
-        self.hit_position(dungeon_level, path[-1], source_entity,
-                          self.symbol, self.color_fg)
+        self.hit_position(dungeon_level, path[-1], source_entity)
 
     def can_act(self, **kwargs):
         return True

@@ -140,13 +140,10 @@ class UIElementList(object):
             element.update()
 
 
-class StackPanelVertical(UIElement):
-    def __init__(self, offset, width, margin=geo.zero2d(), vertical_space=0):
-        super(StackPanelVertical, self).__init__(margin=margin)
+class StackPanel(UIElement):
+    def __init__(self, offset, margin=geo.zero2d()):
+        super(StackPanel, self).__init__(margin=margin)
         self._offset = offset
-        self._width = width
-        self.vertical_space = vertical_space
-        self._elements = []
 
     def append(self, element):
         element.parent = self
@@ -162,6 +159,50 @@ class StackPanelVertical(UIElement):
         return self._offset
 
     @property
+    def rectangle(self):
+        return geo.Rect(self.offset, self.width, self.height)
+
+    def update(self):
+        for element in self._elements:
+            element.update()
+
+
+class StackPanelHorizontal(StackPanel):
+    def __init__(self, offset, height,
+                 margin=geo.zero2d(), horizontal_space=0):
+        super(StackPanelHorizontal, self).__init__(offset, margin=margin)
+        self._height = height
+        self.horizontal_space = horizontal_space
+        self._elements = []
+
+    @property
+    def height(self):
+        return self._height
+
+    @property
+    def width(self):
+        return sum([element.total_width + self.horizontal_space
+                    for element in self._elements])
+
+    def draw(self, offset=geo.zero2d()):
+        position = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
+        element_position = position
+        for element in self._elements:
+            element.draw(element_position)
+            element_position = geo.add_2d(element_position,
+                                          (element.total_width +
+                                           self.horizontal_space, 0))
+
+
+class StackPanelVertical(StackPanel):
+    def __init__(self, offset, width,
+                 margin=geo.zero2d(), vertical_space=0):
+        super(StackPanelVertical, self).__init__(offset, margin=margin)
+        self._width = width
+        self.vertical_space = vertical_space
+        self._elements = []
+
+    @property
     def width(self):
         return self._width
 
@@ -170,24 +211,14 @@ class StackPanelVertical(UIElement):
         return sum([element.total_height + self.vertical_space
                     for element in self._elements])
 
-    @property
-    def rectangle(self):
-        return geo.Rect(self.offset, self.width, self.height)
-
-    def update(self):
-        for element in self._elements:
-            element.update()
-
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
-
         element_position = position
         for element in self._elements:
             element.draw(element_position)
-            new_element_position = geo.add_2d(element_position,
-                                              (0, element.total_height +
-                                               self.vertical_space))
-            element_position = new_element_position
+            element_position = geo.add_2d(element_position,
+                                          (0, element.total_height +
+                                           self.vertical_space))
 
 
 class PlayerStatusBar(RectangularUIElement):
@@ -351,11 +382,12 @@ class CounterBar(UIElement):
 
 
 class TextBox(UIElement):
-    def __init__(self, text, offset, text_color, margin=(0, 0)):
+    def __init__(self, text, offset, color_fg, margin=(0, 0),
+                 cut_off_length=0):
         super(TextBox, self).__init__(margin)
         self.offset = offset
         self.text = text
-        self.text_color = text_color
+        self.color_fg = color_fg
 
     @property
     def height(self):
@@ -370,5 +402,35 @@ class TextBox(UIElement):
     def draw(self, offset=geo.zero2d()):
         x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
                                      self.margin))
-        console.set_default_color_fg(self.text_color)
-        console.print_text((x, y), self.text)
+        if(x > settings.WINDOW_WIDTH):
+            return
+        if(x + len(self.text) > settings.WINDOW_WIDTH):
+            max_width = settings.WINDOW_WIDTH - x
+            show_text = self.text[:max_width - 3] + "..."
+        else:
+            show_text = self.text
+
+        console.set_default_color_fg(self.color_fg)
+        console.print_text((x, y), show_text)
+
+
+class SymbolUIElement(UIElement):
+    def __init__(self, offset, symbol, color_fg, margin=(0, 0)):
+        super(SymbolUIElement, self).__init__(margin)
+        self.offset = offset
+        self.color_fg = color_fg
+        self.symbol = symbol
+
+    @property
+    def height(self):
+        return 1
+
+    @property
+    def width(self):
+        return 1
+
+    def draw(self, offset=geo.zero2d()):
+        x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
+                                     self.margin))
+        console.set_color_fg((x, y), self.color_fg)
+        console.set_symbol((x, y), self.symbol)

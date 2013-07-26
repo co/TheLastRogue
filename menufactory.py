@@ -1,4 +1,5 @@
 import gamestate
+import equipment
 import rectfactory
 import dungeoncreatorvisualizer
 import menu
@@ -7,6 +8,7 @@ import settings
 import state
 import geometry as geo
 import colors
+import action
 
 
 def main_menu(state_stack):
@@ -101,6 +103,94 @@ def item_actions_menu(item, player, state_stack):
     return ui_state
 
 
+def equipment_menu(player, state_stack):
+    right_side_menu_rect = rectfactory.right_side_menu_rect()
+    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left,
+                                              right_side_menu_rect.width)
+    heading = gui.TextBox("Equipment:", geo.zero2d(),
+                          colors.INVENTORY_HEADING,
+                          margin=settings.menu_theme.margin)
+    menu_stack_panel.append(heading)
+
+    equipment_menu_rect = geo.Rect(geo.zero2d(),
+                                   right_side_menu_rect.width,
+                                   right_side_menu_rect.height)
+
+    equipment_menu_bg =\
+        gui.StyledRectangle(right_side_menu_rect,
+                            settings.menu_theme.rect_style)
+
+    equipment_options = []
+    for slot in equipment.EquipmentSlots.ALL:
+        slot_menu = equipment_slot_menu(player, slot, state_stack)
+        option_func = DelayedStatePush(state_stack, slot_menu)
+        item_in_slot = player.equipment.get(slot)
+        if(item_in_slot is None):
+            item_name = "-"
+        else:
+            item_name = item_in_slot.name
+        equipment_options.append(menu.MenuOptionWithSymbols(item_name,
+                                                            slot.symbol,
+                                                            slot.symbol,
+                                                            option_func))
+
+    resulting_menu = menu.StaticMenu(equipment_menu_rect,
+                                     equipment_options, state_stack,
+                                     margin=settings.menu_theme.margin)
+    menu_stack_panel.append(resulting_menu)
+
+    ui_elements = [equipment_menu_bg, menu_stack_panel]
+    ui_state = state.UIState(gui.UIElementList(ui_elements))
+    return ui_state
+
+
+def equipment_slot_menu(player, equipment_slot, state_stack):
+    right_side_menu_rect = rectfactory.right_side_menu_rect()
+    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left,
+                                              right_side_menu_rect.width)
+
+    heading = gui.TextBox("Change : " + equipment_slot.name, geo.zero2d(),
+                          colors.INVENTORY_HEADING,
+                          margin=settings.menu_theme.margin)
+    menu_stack_panel.append(heading)
+
+    equipment_menu_rect = geo.Rect(geo.zero2d(),
+                                   right_side_menu_rect.width,
+                                   right_side_menu_rect.height)
+    items =\
+        player.inventory.items_of_equipment_type(equipment_slot.equipment_type)
+    re_equip_options = []
+    for item in items:
+        function =\
+            (lambda:
+             action.ReEquipAction(item).act(source_entity=player,
+                                            equipment_slot=equipment_slot))
+        re_equip_function =\
+            menu.DelayedFunctionCall(state_stack, function, states_to_pop=3)
+        re_equip_options.append(menu.MenuOption(item.name, re_equip_function))
+
+    function =\
+        (lambda: action.UnEquipAction(player.equipment.get(equipment_slot))
+            .act(source_entity=player, target_entity=player,
+                 equipment_slot=equipment_slot))
+    unequip_function =\
+        menu.DelayedFunctionCall(state_stack, function, states_to_pop=3)
+    re_equip_options.append(menu.MenuOption("- None -", unequip_function))
+
+    resulting_menu = menu.StaticMenu(equipment_menu_rect,
+                                     re_equip_options, state_stack,
+                                     margin=settings.menu_theme.margin)
+    menu_stack_panel.append(resulting_menu)
+
+    equipment_menu_bg =\
+        gui.StyledRectangle(right_side_menu_rect,
+                            settings.menu_theme.rect_style)
+
+    ui_elements = [equipment_menu_bg, menu_stack_panel]
+    ui_state = state.UIState(gui.UIElementList(ui_elements))
+    return ui_state
+
+
 def context_menu(player, state_stack):
     current_dungeon_feature =\
         player.dungeon_level.get_tile(player.position).get_dungeon_feature()
@@ -109,11 +199,17 @@ def context_menu(player, state_stack):
         context_options.extend(get_dungeon_feature_menu_options
                                (current_dungeon_feature, state_stack, player))
 
+    inventory_menu_opt = inventory_menu(player, state_stack)
     open_inventory_option =\
         menu.MenuOption("Inventory",
-                        lambda: context_menu_open_inventory(player,
-                                                            state_stack),
+                        lambda: state_stack.push(inventory_menu_opt),
                         not player.inventory.is_empty())
+    context_options.append(open_inventory_option)
+
+    equipment_menu_opt = equipment_menu(player, state_stack)
+    open_inventory_option =\
+        menu.MenuOption("Equipment",
+                        lambda: state_stack.push(equipment_menu_opt))
     context_options.append(open_inventory_option)
 
     context_menu_rect = rectfactory.center_of_screen_rect(30, 30)
@@ -131,14 +227,22 @@ def context_menu(player, state_stack):
 
 def get_dungeon_feature_menu_options(dungeon_feature, state_stack, player):
     feature_options = []
-    for action in dungeon_feature.player_actions:
-        function = menu.DelayedAction(state_stack, action, player,
-                                      player, states_to_pop=1)
+    for feature_action in dungeon_feature.player_actions:
+        action = feat_function.copy()
+        feat_function =\
+            (lambda:
+             action(source_entity=player, target_entity=player))
+        function =\
+            menu.DelayedFunctionCall(state_stack, feat_function, states_to_pop=1)
         feature_options.append(menu.MenuOption(action.name, function,
                                                action.can_act()))
     return feature_options
 
 
-def context_menu_open_inventory(player, state_stack):
-    menu = inventory_menu(player, state_stack)
-    state_stack.push(menu)
+class DelayedStatePush(object):
+    def __init__(self, state_stack, state):
+        self.state_stack = state_stack
+        self.state = state
+
+    def __call__(self):
+        self.state_stack.push(self.state)

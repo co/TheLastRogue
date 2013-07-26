@@ -12,7 +12,7 @@ class Inventory(object):
         return self._items
 
     def try_add(self, item):
-        if(not self.has_room_for_item(item)):
+        if(not self.has_room_for_item()):
             return False
         else:
             item.try_remove_from_dungeon()
@@ -20,7 +20,7 @@ class Inventory(object):
             item.inventory = self
             return True
 
-    def has_room_for_item(self, item):
+    def has_room_for_item(self):
         return len(self._items) + 1 <= self._item_capacity
 
     def can_drop_item(self, item):
@@ -43,3 +43,6 @@ class Inventory(object):
 
     def is_empty(self):
         return len(self._items) <= 0
+
+    def items_of_equipment_type(self, type_):
+        return [item for item in self._items if item.equipment_type == type_]

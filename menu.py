@@ -1,4 +1,5 @@
 import inputhandler
+import action
 import geometry as geo
 import colors
 import gui
@@ -71,12 +72,11 @@ class Menu(gui.UIElement):
         self._item_stack_panel.clear()
         for index, item in enumerate(self._menu_items):
             if(index == self._selected_index):
-                color = colors.TEXT_SELECTED
+                menu_item = item.selected_ui_representation()
             elif(item.can_activate):
-                color = colors.TEXT_UNSELECTED
+                menu_item = item.unselected_ui_representation()
             else:
-                color = colors.TEXT_INACTIVE
-            menu_item = gui.TextBox(item.text, geo.zero2d(), color)
+                menu_item = item.inactive_ui_representation()
             self._item_stack_panel.append(menu_item)
 
     def can_activate(self):
@@ -133,6 +133,54 @@ class MenuOption(gui.UIElement):
 
     def activate(self):
         return self._activate_function()
+
+    def selected_ui_representation(self):
+        return gui.TextBox(self.text, geo.zero2d(), colors.TEXT_SELECTED)
+
+    def unselected_ui_representation(self):
+        return gui.TextBox(self.text, geo.zero2d(), colors.TEXT_UNSELECTED)
+
+    def inactive_ui_representation(self):
+        return gui.TextBox(self.text, geo.zero2d(), colors.TEXT_INACTIVE)
+
+
+class MenuOptionWithSymbols(MenuOption):
+    def __init__(self, text, selected_symbol, unselected_symbol,
+                 activate_function, can_activate=True):
+        super(MenuOptionWithSymbols, self).__init__(text, activate_function,
+                                                    can_activate)
+        self.selected_symbol = selected_symbol
+        self.unselected_symbol = unselected_symbol
+
+    def selected_ui_representation(self):
+        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), 1,
+                                                    horizontal_space=1)
+        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(),
+                                                    self.selected_symbol,
+                                                    colors.TEXT_SELECTED))
+        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(),
+                                            colors.TEXT_SELECTED))
+        return horizontal_stack
+
+    def unselected_ui_representation(self):
+        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), 1,
+                                                    horizontal_space=1)
+        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(),
+                                                    self.unselected_symbol,
+                                                    colors.TEXT_UNSELECTED))
+        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(),
+                                            colors.TEXT_UNSELECTED))
+        return horizontal_stack
+
+    def inactive_ui_representation(self):
+        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), 1,
+                                                    horizontal_space=1)
+        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(),
+                                                    self.unselected_symbol,
+                                                    colors.TEXT_INACTIVE))
+        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(),
+                                            colors.TEXT_INACTIVE))
+        return horizontal_stack
 
 
 class StaticMenu(Menu):
@@ -191,32 +239,30 @@ class ItemActionsMenu(Menu):
         self.try_set_index_to_valid_value()
 
     def _update_menu_items(self):
-        self._menu_items =\
-            [MenuOption(action.name,
-                        DelayedAction(self._state_stack, action,
-                                      self._player, self._player,
-                                      states_to_pop=2, end_player_turn=True),
-                        action.can_act(source_entity=self._player,
-                                       target_entity=self._player))
-             for action in self._actions]
+        game_state = self._state_stack.get_game_state()
+        self._menu_items = []
+        for item_action in self._actions:
+            action_function =\
+                action.DelayedActionCall(action=item_action,
+                                         source_entity=self._player,
+                                         target_entity=self._player,
+                                         game_state=game_state)
+            function = DelayedFunctionCall(self._state_stack, action_function,
+                                           states_to_pop=2)
+            option =\
+                MenuOption(item_action.name, function,
+                           item_action.can_act(source_entity=self._player,
+                                               target_entity=self._player))
+            self._menu_items.append(option)
 
 
-class DelayedAction(object):
-    def __init__(self, state_stack, action, source_entity,
-                 target_entity, states_to_pop=0, end_player_turn=True):
-        self.action = action
-        self.source_entity = source_entity
-        self.target_entity = target_entity
+class DelayedFunctionCall(object):
+    def __init__(self, state_stack, function, states_to_pop=0):
+        self.function = function
         self._state_stack = state_stack
         self._states_to_pop = states_to_pop
-        self._end_player_turn = end_player_turn
 
     def __call__(self):
-        self.action.act(source_entity=self.source_entity,
-                        target_entity=self.target_entity,
-                        game_state=self.source_entity.state_stack.
-                        get_game_state())
-        if(self._end_player_turn):
-            self.source_entity.turn_over = True
+        self.function()
         for _ in range(self._states_to_pop):
             self._state_stack.pop()

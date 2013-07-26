@@ -7,6 +7,8 @@ import entityeffect
 SOURCE_ENTITY = "source_entity"
 TARGET_ENTITY = "target_entity"
 GAME_STATE = "game_state"
+EQUIPMENT_SLOT = "equipment_slot"
+ACTION = "action"
 
 
 class Action(object):
@@ -24,6 +26,10 @@ class Action(object):
     def add_energy_spent_to_entity(self, entity):
         entity.newly_spent_energy += self.energy_cost
 
+    def copy(self):
+        result = self.__class__()
+        return result
+
 
 class ItemAction(Action):
     def __init__(self, source_item):
@@ -33,6 +39,10 @@ class ItemAction(Action):
 
     def remove_from_inventory(self):
         self.source_item.inventory.remove_item(self.source_item)
+
+    def copy(self):
+        result = self.__class__(self.source_item)
+        return result
 
 
 class EquipAction(ItemAction):
@@ -55,7 +65,52 @@ class EquipAction(ItemAction):
         equip_effect = entityeffect.Equip(target_entity,
                                           target_entity, self.source_item)
         target_entity.add_entity_effect(equip_effect)
-        self.remove_from_inventory()
+        target_entity.inventory.remove_item(self.source_item)
+
+
+class UnEquipAction(ItemAction):
+    def __init__(self, source_item):
+        super(UnEquipAction, self).__init__(source_item)
+        self.name = "UnEquip"
+        self.display_order = 90
+
+    def act(self, **kwargs):
+        target_entity = kwargs[TARGET_ENTITY]
+        source_entity = kwargs[SOURCE_ENTITY]
+        equipment_slot = kwargs[EQUIPMENT_SLOT]
+        self.unequip(target_entity, equipment_slot)
+        self.add_energy_spent_to_entity(source_entity)
+
+    def can_act(self, **kwargs):
+        source_entity = kwargs[SOURCE_ENTITY]
+        equipment_slot = kwargs[EQUIPMENT_SLOT]
+        return (source_entity.inventory.has_room_for_item() and
+                source_entity.equipment.slot_is_equiped(equipment_slot))
+
+    def unequip(self, target_entity, equipment_slot):
+        if(not target_entity.equipment.slot_is_equiped(equipment_slot)):
+            return
+        unequip_effect = entityeffect.UnEquip(target_entity,
+                                              target_entity, equipment_slot)
+        target_entity.add_entity_effect(unequip_effect)
+
+
+class ReEquipAction(EquipAction):
+    def __init__(self, source_item):
+        super(ReEquipAction, self).__init__(source_item)
+        self.name = "ReEquip"
+        self.display_order = 90
+
+    def act(self, **kwargs):
+        source_entity = kwargs[SOURCE_ENTITY]
+        equipment_slot = kwargs[EQUIPMENT_SLOT]
+        old_item = None
+        if(source_entity.equipment.slot_is_equiped(equipment_slot)):
+            old_item = source_entity.equipment.unequip(equipment_slot)
+        self.equip(source_entity)
+        if(not old_item is None):
+            source_entity.inventory.try_add(old_item)
+        self.add_energy_spent_to_entity(source_entity)
 
 
 class DrinkAction(ItemAction):
@@ -131,14 +186,12 @@ class PickUpItemAction(Action):
     def can_act(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
         item = self._get_item_on_floor(source_entity)
-        print item
         return (not item is None and
-                source_entity.inventory.has_room_for_item(item))
+                source_entity.inventory.has_room_for_item())
 
     def act(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
         item = self._get_item_on_floor(source_entity)
-        print "the item is: ", item
         pickup_succeded = source_entity.inventory.try_add(item)
         if(pickup_succeded):
             message = "Picked up: " + item.name
@@ -152,7 +205,16 @@ class PickUpItemAction(Action):
         source_entity = kwargs[SOURCE_ENTITY]
         item = self._get_item_on_floor(source_entity)
         if(item is None and
-           not source_entity.inventory.has_room_for_item(item)):
+           not source_entity.inventory.has_room_for_item()):
             message = "Could not pick up: " + item.name +\
                 ", the inventory is full."
             messenger.messenger.message(message)
+
+
+class DelayedActionCall(object):
+    def __init__(self, **kwargs):
+        self.action = kwargs[ACTION]
+        self.args = kwargs
+
+    def __call__(self):
+        self.action.act(**self.args)
