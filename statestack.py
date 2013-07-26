@@ -36,6 +36,11 @@ class StateStack(object):
             self._current_game_state_cache is None
         return state
 
+    def pop_to_game_state(self):
+        while(len(self._stack) > 0 and
+              not isinstance(self.peek(), gamestate.GameStateBase)):
+            self.pop()
+
 
 class GameMenuStateStack(StateStack):
     def __init__(self, gamestate):

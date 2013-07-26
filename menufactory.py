@@ -24,24 +24,33 @@ def main_menu(state_stack):
         lambda: ui_state.current_stack.push(dungeoncreatorvisualizer.
                                             DungeonCreatorVisualizer())
 
-    start_test_game_option = menu.MenuOption("Start Test Dungeon",
-                                             start_test_game_function)
-    start_game_option = menu.MenuOption("Start Dungeon",
-                                        start_game_function)
-    dungeon_creator_option = menu.MenuOption("Dungeon Creator",
-                                             dungeon_visualizer_function)
-    quit_option = menu.MenuOption("Quit", quit_game_function)
+    start_test_game_option =\
+        menu.MenuOptionWithSymbols("Start Test Dungeon",
+                                   "(", " ",
+                                   start_test_game_function)
+    start_game_option = menu.MenuOptionWithSymbols("Start Dungeon",
+                                                   "(", " ",
+                                                   start_game_function)
+    dungeon_creator_option =\
+        menu.MenuOptionWithSymbols("Dungeon Creator",
+                                   "(", " ",
+                                   dungeon_visualizer_function)
+    quit_option =\
+        menu.MenuOptionWithSymbols("Quit", "(", " ", quit_game_function)
 
     menu_items = [start_test_game_option, start_game_option,
                   dungeon_creator_option, quit_option]
 
     border = 4
-    height = 2 * len(menu_items) + border
-    width = max([len(option.text) for option in menu_items]) + border
-    main_menu_rect = rectfactory.ratio_of_screen_rect(width, height, 0.5, 0.8)
-    main_menu = menu.StaticMenu(main_menu_rect, menu_items, state_stack,
+    temp_position = (-1, -1)
+    main_menu = menu.StaticMenu(temp_position,
+                                menu_items, state_stack,
                                 margin=settings.menu_theme.margin,
                                 vertical_space=1)
+    main_menu_rect =\
+        rectfactory.ratio_of_screen_rect(main_menu.width + border,
+                                         main_menu.height + border, 0.5, 0.8)
+    main_menu.offset = main_menu_rect.top_left
 
     background_rect = gui.StyledRectangle(main_menu_rect,
                                           settings.menu_theme.rect_style)
@@ -52,8 +61,7 @@ def main_menu(state_stack):
 
 def inventory_menu(player, state_stack):
     right_side_menu_rect = rectfactory.right_side_menu_rect()
-    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left,
-                                              right_side_menu_rect.width)
+    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left)
     heading = gui.TextBox("Inventory:", geo.zero2d(),
                           colors.INVENTORY_HEADING,
                           margin=settings.menu_theme.margin)
@@ -62,7 +70,7 @@ def inventory_menu(player, state_stack):
     inventory_menu_rect = geo.Rect(geo.zero2d(),
                                    right_side_menu_rect.width,
                                    right_side_menu_rect.height)
-    inventory_menu = menu.InventoryMenu(inventory_menu_rect,
+    inventory_menu = menu.InventoryMenu(inventory_menu_rect.top_left,
                                         player, state_stack,
                                         margin=settings.menu_theme.margin)
     menu_stack_panel.append(inventory_menu)
@@ -78,8 +86,7 @@ def inventory_menu(player, state_stack):
 
 def item_actions_menu(item, player, state_stack):
     right_side_menu_rect = rectfactory.right_side_menu_rect()
-    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left,
-                                              right_side_menu_rect.width)
+    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left)
     heading = gui.TextBox(item.name, geo.zero2d(),
                           colors.INVENTORY_HEADING,
                           margin=settings.menu_theme.margin)
@@ -89,7 +96,7 @@ def item_actions_menu(item, player, state_stack):
                                       right_side_menu_rect.width,
                                       right_side_menu_rect.height)
     item_actions_menu =\
-        menu.ItemActionsMenu(item_actions_menu_rect,
+        menu.ItemActionsMenu(item_actions_menu_rect.top_left,
                              item, player, state_stack,
                              margin=settings.menu_theme.margin)
     menu_stack_panel.append(item_actions_menu)
@@ -105,8 +112,7 @@ def item_actions_menu(item, player, state_stack):
 
 def equipment_menu(player, state_stack):
     right_side_menu_rect = rectfactory.right_side_menu_rect()
-    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left,
-                                              right_side_menu_rect.width)
+    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left)
     heading = gui.TextBox("Equipment:", geo.zero2d(),
                           colors.INVENTORY_HEADING,
                           margin=settings.menu_theme.margin)
@@ -134,7 +140,7 @@ def equipment_menu(player, state_stack):
                                                             slot.symbol,
                                                             option_func))
 
-    resulting_menu = menu.StaticMenu(equipment_menu_rect,
+    resulting_menu = menu.StaticMenu(equipment_menu_rect.top_left,
                                      equipment_options, state_stack,
                                      margin=settings.menu_theme.margin)
     menu_stack_panel.append(resulting_menu)
@@ -146,8 +152,7 @@ def equipment_menu(player, state_stack):
 
 def equipment_slot_menu(player, equipment_slot, state_stack):
     right_side_menu_rect = rectfactory.right_side_menu_rect()
-    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left,
-                                              right_side_menu_rect.width)
+    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left)
 
     heading = gui.TextBox("Change : " + equipment_slot.name, geo.zero2d(),
                           colors.INVENTORY_HEADING,
@@ -177,7 +182,7 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
         menu.DelayedFunctionCall(state_stack, function, states_to_pop=3)
     re_equip_options.append(menu.MenuOption("- None -", unequip_function))
 
-    resulting_menu = menu.StaticMenu(equipment_menu_rect,
+    resulting_menu = menu.StaticMenu(equipment_menu_rect.top_left,
                                      re_equip_options, state_stack,
                                      margin=settings.menu_theme.margin)
     menu_stack_panel.append(resulting_menu)
@@ -213,7 +218,7 @@ def context_menu(player, state_stack):
     context_options.append(open_inventory_option)
 
     context_menu_rect = rectfactory.center_of_screen_rect(30, 30)
-    resulting_menu = menu.StaticMenu(context_menu_rect,
+    resulting_menu = menu.StaticMenu(context_menu_rect.top_left,
                                      context_options, state_stack,
                                      margin=settings.menu_theme.margin)
     background_rect =\
@@ -227,13 +232,15 @@ def context_menu(player, state_stack):
 
 def get_dungeon_feature_menu_options(dungeon_feature, state_stack, player):
     feature_options = []
+    game_state = player.state_stack.get_game_state()
     for feature_action in dungeon_feature.player_actions:
-        action = feat_function.copy()
-        feat_function =\
-            (lambda:
-             action(source_entity=player, target_entity=player))
+        feat_function = action.DelayedActionCall(action=feature_action,
+                                                 source_entity=player,
+                                                 target_entity=player,
+                                                 game_state=game_state)
         function =\
-            menu.DelayedFunctionCall(state_stack, feat_function, states_to_pop=1)
+            menu.DelayedFunctionCall(state_stack, feat_function,
+                                     states_to_pop=1)
         feature_options.append(menu.MenuOption(action.name, function,
                                                action.can_act()))
     return feature_options

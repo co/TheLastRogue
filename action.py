@@ -78,6 +78,8 @@ class UnEquipAction(ItemAction):
         target_entity = kwargs[TARGET_ENTITY]
         source_entity = kwargs[SOURCE_ENTITY]
         equipment_slot = kwargs[EQUIPMENT_SLOT]
+        if(source_entity.equipment.get(equipment_slot) is None):
+            return
         self.unequip(target_entity, equipment_slot)
         self.add_energy_spent_to_entity(source_entity)
 

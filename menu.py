@@ -11,31 +11,30 @@ def clamp(n, minn, maxn):
 
 
 class Menu(gui.UIElement):
-    def __init__(self, rect, state_stack,
+    def __init__(self, offset, state_stack,
                  margin=geo.zero2d(), vertical_space=1):
         super(Menu, self).__init__(margin)
         self._menu_items = []
         self._state_stack = state_stack
         self._selected_index = 0
+        self.offset = offset
         self._wrap = True
-        self.rect = rect
         self.may_escape = True
         self._item_stack_panel =\
-            gui.StackPanelVertical(geo.zero2d(), self.width,
-                                   colors.INTERFACE_BG,
+            gui.StackPanelVertical(geo.zero2d(), colors.INTERFACE_BG,
                                    vertical_space=vertical_space)
 
     @property
-    def offset(self):
-        return self.rect.top_left
+    def rect(self):
+        return geo.Rect(self.offset, self.width, self.height)
 
     @property
     def width(self):
-        return self.rect.width
+        return self._item_stack_panel.width
 
     @property
     def height(self):
-        return self.rect.height
+        return self._item_stack_panel.height
 
     def update(self):
         self._recreate_option_list()
@@ -153,7 +152,7 @@ class MenuOptionWithSymbols(MenuOption):
         self.unselected_symbol = unselected_symbol
 
     def selected_ui_representation(self):
-        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), 1,
+        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(),
                                                     horizontal_space=1)
         horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(),
                                                     self.selected_symbol,
@@ -163,7 +162,7 @@ class MenuOptionWithSymbols(MenuOption):
         return horizontal_stack
 
     def unselected_ui_representation(self):
-        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), 1,
+        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(),
                                                     horizontal_space=1)
         horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(),
                                                     self.unselected_symbol,
@@ -173,7 +172,7 @@ class MenuOptionWithSymbols(MenuOption):
         return horizontal_stack
 
     def inactive_ui_representation(self):
-        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), 1,
+        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(),
                                                     horizontal_space=1)
         horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(),
                                                     self.unselected_symbol,
@@ -184,18 +183,19 @@ class MenuOptionWithSymbols(MenuOption):
 
 
 class StaticMenu(Menu):
-    def __init__(self, rect, menu_items, state_stack,
+    def __init__(self, offset, menu_items, state_stack,
                  margin=geo.zero2d(), vertical_space=1):
-        super(StaticMenu, self).__init__(rect, state_stack, margin=margin,
+        super(StaticMenu, self).__init__(offset, state_stack, margin=margin,
                                          vertical_space=vertical_space)
         self._menu_items = menu_items
         self.try_set_index_to_valid_value()
+        self._recreate_option_list()
 
 
 class InventoryMenu(Menu):
-    def __init__(self, rect, player, state_stack,
+    def __init__(self, offset, player, state_stack,
                  margin=geo.zero2d(), vertical_space=1):
-        super(InventoryMenu, self).__init__(rect, state_stack, margin=margin,
+        super(InventoryMenu, self).__init__(offset, state_stack, margin=margin,
                                             vertical_space=vertical_space)
         self._player = player
         self.try_set_index_to_valid_value()
@@ -227,9 +227,9 @@ class OpenItemActionMenuAction(object):
 
 
 class ItemActionsMenu(Menu):
-    def __init__(self, rect, item, player, state_stack,
+    def __init__(self, offset, item, player, state_stack,
                  margin=geo.zero2d(), vertical_space=1):
-        super(ItemActionsMenu, self).__init__(rect, state_stack,
+        super(ItemActionsMenu, self).__init__(offset, state_stack,
                                               margin=margin,
                                               vertical_space=vertical_space)
         self._actions =\
@@ -247,8 +247,8 @@ class ItemActionsMenu(Menu):
                                          source_entity=self._player,
                                          target_entity=self._player,
                                          game_state=game_state)
-            function = DelayedFunctionCall(self._state_stack, action_function,
-                                           states_to_pop=2)
+            function = DelayedFunctionCallAndPopToGame(self._state_stack,
+                                                       action_function)
             option =\
                 MenuOption(item_action.name, function,
                            item_action.can_act(source_entity=self._player,
@@ -266,3 +266,13 @@ class DelayedFunctionCall(object):
         self.function()
         for _ in range(self._states_to_pop):
             self._state_stack.pop()
+
+
+class DelayedFunctionCallAndPopToGame(object):
+    def __init__(self, state_stack, function):
+        self.function = function
+        self._state_stack = state_stack
+
+    def __call__(self):
+        self.function()
+        self._state_stack.pop_to_game_state()

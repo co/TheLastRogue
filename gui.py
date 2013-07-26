@@ -168,16 +168,16 @@ class StackPanel(UIElement):
 
 
 class StackPanelHorizontal(StackPanel):
-    def __init__(self, offset, height,
-                 margin=geo.zero2d(), horizontal_space=0):
+    def __init__(self, offset, margin=geo.zero2d(), horizontal_space=0):
         super(StackPanelHorizontal, self).__init__(offset, margin=margin)
-        self._height = height
         self.horizontal_space = horizontal_space
         self._elements = []
 
     @property
     def height(self):
-        return self._height
+        if(len(self._elements) < 1):
+            return 0
+        return max([element.total_height for element in self._elements])
 
     @property
     def width(self):
@@ -195,16 +195,17 @@ class StackPanelHorizontal(StackPanel):
 
 
 class StackPanelVertical(StackPanel):
-    def __init__(self, offset, width,
-                 margin=geo.zero2d(), vertical_space=0):
+    def __init__(self, offset, margin=geo.zero2d(), vertical_space=0):
         super(StackPanelVertical, self).__init__(offset, margin=margin)
-        self._width = width
         self.vertical_space = vertical_space
         self._elements = []
 
     @property
     def width(self):
-        return self._width
+        print self._elements
+        if(len(self._elements) < 1):
+            return 0
+        return max([element.total_width for element in self._elements])
 
     @property
     def height(self):
@@ -225,7 +226,7 @@ class PlayerStatusBar(RectangularUIElement):
     def __init__(self, rect, player, margin=geo.zero2d()):
         super(PlayerStatusBar, self).__init__(rect, margin)
         self._status_stack_panel =\
-            StackPanelVertical(rect.top_left, rect.width,
+            StackPanelVertical(rect.top_left,
                                margin=settings.interface_theme.margin)
 
         name_text_box = TextBox(player.name, geo.zero2d(),
@@ -260,7 +261,7 @@ class EntityStatusList(RectangularUIElement):
     def __init__(self, rect, margin=geo.zero2d(), vertical_space=0):
         super(EntityStatusList, self).__init__(rect, margin=margin)
         self._entity_stack_panel =\
-            StackPanelVertical(rect.top_left, rect.width,
+            StackPanelVertical(rect.top_left,
                                margin=settings.interface_theme.margin,
                                vertical_space=vertical_space)
 
@@ -291,7 +292,7 @@ class EntityStatus(UIElement):
         monster_health_bar = CounterBar(entity.hp, width,
                                         colors.DB_BROWN, colors.DB_LOULOU)
         self._width = width
-        self.status_stack_panel = StackPanelVertical(offset, width, margin)
+        self.status_stack_panel = StackPanelVertical(offset, margin)
         self.status_stack_panel.append(monster_name_text_box)
         self.status_stack_panel.append(monster_health_bar)
 
@@ -311,7 +312,7 @@ class MessageDisplay(RectangularUIElement):
     def __init__(self, rect, margin=(0, 0), vertical_space=0):
         super(MessageDisplay, self).__init__(rect, margin=margin)
         self._message_stack_panel =\
-            StackPanelVertical(rect.top_left, rect.width,
+            StackPanelVertical(rect.top_left,
                                margin=settings.interface_theme.margin,
                                vertical_space=vertical_space)
         self._rectangle_bg =\
