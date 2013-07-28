@@ -1,4 +1,5 @@
 import terrain
+import direction
 import dungeonlevel
 import dungeonfeature
 import geometry as geo
@@ -19,11 +20,11 @@ def generate_terrain_dungeon_level(depth):
     center_position = (dungeon_level.width / 2,
                        dungeon_level.height / 2)
     brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
-    end_condition = CountDownCondition(dungeon_level.width *
-                                       dungeon_level.height * 0.4)
+    end_condition_func = CountDownCondition(dungeon_level.width *
+                                            dungeon_level.height * 0.4)
     move_list = list(constants.DIRECTIONS.values())
     drunkard_walk(center_position, dungeon_level, brush,
-                  end_condition, move_list)
+                  end_condition_func, move_list)
     #cellular_automata(dungeon_level)
     return dungeon_level
 
@@ -33,14 +34,14 @@ def place_up_down_stairs(dungeon_level):
               dungeon_level.height / 2)
     next_to_center = geo.add_2d(center, (0, 1))
     _place_feature_replace_terrain_with_floor(dungeonfeature.StairsDown(),
-                                              center, dungeon_level)
+                                              dungeon_level, center)
     _place_feature_replace_terrain_with_floor(dungeonfeature.StairsUp(),
-                                              next_to_center, dungeon_level)
+                                              dungeon_level, next_to_center)
     return True
 
 
-def _place_feature_replace_terrain_with_floor(feature, position,
-                                              dungeon_level):
+def _place_feature_replace_terrain_with_floor(feature, dungeon_level,
+                                              position):
     feature.try_move(position, dungeon_level)
     terrain.Floor().replace_move(position, dungeon_level)
 
@@ -81,18 +82,18 @@ def is_solid_ratio(dungeon_level):
     return result
 
 
-def drunkard_walk(start_pos, dungeon_level, tile_brush, end_condition,
+def drunkard_walk(dungeon_level, start_pos, tile_brush, end_condition_func,
                   move_list=None):
     if move_list is None:
-        move_list = constants.DIRECTIONS_LIST
+        move_list = direction.DIRECTIONS
     position = start_pos
     visited = set()
     unvisited_positions = set()
-    while not end_condition():
-        tile_brush.apply_brush(position, dungeon_level)
+    while not end_condition_func():
+        tile_brush.apply_brush(dungeon_level, position)
         visited.add(position)
-        neighbors = set([geo.add_2d(position, direction)
-                         for direction in move_list])
+        neighbors = set([geo.add_2d(position, _direction)
+                         for _direction in move_list])
         unvisited_neighbors = neighbors - visited
         unvisited_positions = unvisited_positions | unvisited_neighbors
         if(len(unvisited_neighbors) >= 1):
@@ -103,18 +104,18 @@ def drunkard_walk(start_pos, dungeon_level, tile_brush, end_condition,
             position = random.sample(unvisited_positions, 1)[0]
 
 
-def random_exlosion(start_pos, dungeon_level, tile_brush,
-                    end_condition, move_list=None):
+def random_exlosion(dungeon_level, start_pos, tile_brush,
+                    end_condition_func, move_list=None):
     if move_list is None:
-        move_list = constants.DIRECTIONS_LIST
+        move_list = direction.DIRECTIONS
     position = start_pos
     visited = set()
     unvisited_positions = set()
-    while not end_condition():
-        tile_brush.apply_brush(position, dungeon_level)
+    while not end_condition_func():
+        tile_brush.apply_brush(dungeon_level, position)
         visited.add(position)
-        neighbors = set([geo.add_2d(position, direction)
-                         for direction in move_list])
+        neighbors = set([geo.add_2d(position, _direction)
+                         for _direction in move_list])
         unvisited_neighbors = neighbors - visited
         unvisited_positions = unvisited_positions | unvisited_neighbors
         if(len(unvisited_positions) >= 1):
@@ -123,23 +124,43 @@ def random_exlosion(start_pos, dungeon_level, tile_brush,
             break
 
 
+def tunnler(dungeon_level, start_position, min_length, max_length,
+            tile_brush, end_condition_func, direction_list=None):
+    position = start_position
+    direction_ = random.sample(direction_list, 1)[0]
+    while not end_condition_func():
+        direction_ = direction.turn_left_or_right(direction_)
+        length = random.randint(min_length, max_length)
+        tile_brush.apply_brush(dungeon_level, position)
+        for _ in range(length):
+            position = geo.add_2d(position, direction_)
+            tile_brush.apply_brush(dungeon_level, position)
+
+
+def dig_out_rect(rect, dungeon_level):
+    dig_out_brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
+    for x in range(rect.left, rect.width):
+        for y in range(rect.top, rect.height):
+            dig_out_brush.apply_brush(dungeon_level, (x, y))
+
+
 def cellular_automata(dungeon_level):
     for y in range(dungeon_level.height):
         for x in range(dungeon_level.width):
             position = (x, y)
-            neighbors = [geo.add_2d(position, direction)
-                         for direction in constants.DIRECTIONS_LIST]
+            neighbors = [geo.add_2d(position, direction_)
+                         for direction_ in direction.DIRECTIONS]
 
             solid_neighbors = 0
             for point in neighbors:
                 if(not dungeon_level.has_tile(point) or
                    dungeon_level.get_tile(point).get_terrain().is_solid()):
                     solid_neighbors += 1
-            _apply_cellular_automata_rule_on_tile(position, dungeon_level,
+            _apply_cellular_automata_rule_on_tile(dungeon_level, position,
                                                   solid_neighbors)
 
 
-def _apply_cellular_automata_rule_on_tile(position, dungeon_level,
+def _apply_cellular_automata_rule_on_tile(dungeon_level, position,
                                           number_of_solid_neighbors):
     this_terrain = dungeon_level.get_tile(position).get_terrain()
     solid_neighborhood_size =\
@@ -154,7 +175,7 @@ class TileBrush(object):
     def __init__(self, tile_modifier):
         self.tile_modifier = tile_modifier
 
-    def apply_brush(self, position, dungeon_level):
+    def apply_brush(self, dungeon_level, position):
         pass
 
 
@@ -163,7 +184,7 @@ class SingleShapeBrush(TileBrush):
         super(SingleShapeBrush, self).__init__(tile_modifier)
         self.shape = shape
 
-    def apply_brush(self, position, dungeon_level):
+    def apply_brush(self, dungeon_level, position):
         for point in self.shape:
             dungeon_position = geo.add_2d(point, position)
             self.tile_modifier.modify(dungeon_position, dungeon_level)
@@ -175,7 +196,7 @@ class RandomShapeBrush(TileBrush):
         self.shapes = shapes
         self.tile_modifier = tile_modifier
 
-    def apply_brush(self, position, dungeon_level):
+    def apply_brush(self, dungeon_level, position):
         shape = random.sample(self.shapes, 1)[0]
         for point in shape:
             dungeon_position = point + position

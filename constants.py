@@ -1,5 +1,4 @@
 import settings
-import geometry as geo
 
 FPS = 60
 
@@ -20,22 +19,3 @@ MONSTER_STATUS_BAR_HEIGHT = settings.WINDOW_HEIGHT
 
 ITEMS_ALLOWED_PER_TILE = 1
 ENTITIES_ALLOWED_PER_TILE = 1
-
-AXIS_DIRECTIONS = {
-    "E": (1, 0),
-    "N": (0, 1),
-    "W": (-1, 0),
-    "S": (0, -1)
-}
-
-DIAGONAL_DIRECTIONS = {
-    "NW": (-1, 1),
-    "NE": (1, 1),
-    "SW": (-1, -1),
-    "SE": (1, -1)
-}
-
-CENTER_DIRECTION = (0, 0)
-
-DIRECTIONS = dict(AXIS_DIRECTIONS.items() + DIAGONAL_DIRECTIONS.items())
-DIRECTIONS_LIST = DIRECTIONS.values()

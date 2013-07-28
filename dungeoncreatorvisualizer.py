@@ -3,7 +3,7 @@ import geometry as geo
 import camera
 import libtcodpy as libtcod
 import turn
-import constants
+import direction
 import messenger
 import inputhandler
 import state
@@ -39,8 +39,8 @@ class DungeonCreatorVisualizer(state.State):
         brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
         end_condition = dgen.CountDownCondition(dungeon_level.width *
                                                 dungeon_level.height * 0.2)
-        move_list = list(constants.DIRECTIONS.values())
-        dgen.random_exlosion(center_position, dungeon_level, brush,
+        move_list = list(direction.DIRECTIONS)
+        dgen.random_exlosion(dungeon_level, center_position, brush,
                              end_condition, move_list)
 
     def drunkard_walk(self):
@@ -49,9 +49,18 @@ class DungeonCreatorVisualizer(state.State):
         brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
         end_condition = dgen.CountDownCondition(dungeon_level.width *
                                                 dungeon_level.height * 0.2)
-        move_list = list(constants.DIRECTIONS.values())
-        dgen.drunkard_walk(center_position, dungeon_level, brush,
+        move_list = list(direction.DIRECTIONS)
+        dgen.drunkard_walk(dungeon_level, center_position, brush,
                            end_condition, move_list)
+
+    def tunnler(self):
+        dungeon_level = self.dungeon_level
+        center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
+        brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
+        end_condition = dgen.CountDownCondition(17)
+        move_list = list(direction.DIAGONAL_DIRECTIONS)
+        dgen.tunnler(dungeon_level, center_position, 3, 7, brush,
+                     end_condition, move_list)
 
     def cellular_cave(self):
         dgen.cellular_automata(self.dungeon_level)
@@ -74,6 +83,9 @@ class DungeonCreatorVisualizer(state.State):
 
         elif key == inputhandler.THREE:
             self.random_exlosion()
+
+        elif key == inputhandler.FOUR:
+            self.tunnler()
 
         elif key == inputhandler.ZERO:
             self.fill_dungeon()
