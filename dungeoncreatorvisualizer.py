@@ -34,7 +34,9 @@ class DungeonCreatorVisualizer(state.State):
         self.handle_input()
 
     def generate_dungeon_level(self):
-        self.dungeon_level = dgen.generate_dungeon_cave_floor()
+        size = 1200
+        depth = 1
+        self.dungeon_level = dgen.generate_dungeon_cave_floor(size, depth)
 
     def random_exlosion(self):
         dungeon_level = self.dungeon_level
@@ -74,7 +76,7 @@ class DungeonCreatorVisualizer(state.State):
         end_condition = dgen.CountDownCondition(17)
         move_list = list(direction.AXIS_DIRECTIONS)
         dgen.dfs_tunnler(dungeon_level, center_position, 4, 12, brush,
-                     end_condition, move_list)
+                         end_condition, move_list)
 
     def place_random_room(dungeon_level, position, min_width, max_width,
                           min_height, max_height):

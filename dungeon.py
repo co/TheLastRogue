@@ -20,6 +20,8 @@ class Dungeon(object):
         return self._dungeon_levels[depth]
 
     def _generate_dungeon_level(self, depth):
-        dungeon_level = dungeongenerator.generate_dungeon_level(depth)
+        size = 1200
+        dungeon_level = dungeongenerator.generate_dungeon_cave_floor(size,
+                                                                     depth)
         dungeon_level.dungeon = self
         return dungeon_level

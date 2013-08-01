@@ -10,7 +10,7 @@ import tile
 
 def generate_dungeon_level(depth):
     dungeon_level = generate_terrain_dungeon_level(depth)
-    while(not place_up_down_stairs(dungeon_level)):
+    while(not place_up_down_stairs_at_center(dungeon_level)):
         dungeon_level = generate_terrain_dungeon_level(depth)
     return dungeon_level
 
@@ -29,15 +29,19 @@ def generate_terrain_dungeon_level(depth):
     return dungeon_level
 
 
-def place_up_down_stairs(dungeon_level):
+def place_up_down_stairs_at_center(dungeon_level):
     center = (dungeon_level.width / 2,
               dungeon_level.height / 2)
     next_to_center = geo.add_2d(center, (0, 1))
-    _place_feature_replace_terrain_with_floor(dungeonfeature.StairsDown(),
-                                              dungeon_level, center)
-    _place_feature_replace_terrain_with_floor(dungeonfeature.StairsUp(),
-                                              dungeon_level, next_to_center)
+    place_up_down_stairs(dungeon_level, center, next_to_center)
     return True
+
+
+def place_up_down_stairs(dungeon_level, up_position, down_position):
+    _place_feature_replace_terrain_with_floor(dungeonfeature.StairsDown(),
+                                              dungeon_level, down_position)
+    _place_feature_replace_terrain_with_floor(dungeonfeature.StairsUp(),
+                                              dungeon_level, up_position)
 
 
 def _place_feature_replace_terrain_with_floor(feature, dungeon_level,
@@ -171,30 +175,38 @@ def _apply_cellular_automata_rule_on_tile(dungeon_level, position,
         terrain.Floor().replace_move(position, dungeon_level)
 
 
-def generate_dungeon_cave_floor():
+def generate_dungeon_cave_floor(size, depth):
+    corridor_room_area_ratio = 0.25
+    corridor_area = size * corridor_room_area_ratio
+    corridors_directions = direction.AXIS_DIRECTIONS
     corridors_shape =\
-        shapegenerator.dfs_tunnler_with_random_stop((0, 0), 10, 16, 300,
-                                                    direction.AXIS_DIRECTIONS)
+        shapegenerator.dfs_tunnler_with_random_restart((0, 0), 10, 16,
+                                                       corridor_area,
+                                                       corridors_directions)
 
     rooms = random.randrange(4, 8)
     room_positions = random.sample(corridors_shape, rooms)
     open_points = corridors_shape
+    total_room_area = size * (1 - corridor_room_area_ratio)
     for position in room_positions:
         room_points =\
-            shapegenerator.random_exlosion(position, 1200 / rooms,
+            shapegenerator.random_exlosion(position, total_room_area / rooms,
                                            direction.AXIS_DIRECTIONS)
         open_points = open_points | room_points
 
     level_shape = shapegenerator.Shape(open_points)
     frame = 2
     dungeon_rect = level_shape.calc_rect().expanded_by(frame)
-    depth = 1
     dungeon_level = get_full_wall_dungeon(dungeon_rect.width,
                                           dungeon_rect.height, depth)
 
     normalized_open_points = level_shape.calc_normalized_points(frame / 2)
     brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
     apply_brush_to_points(dungeon_level, normalized_open_points, brush)
+
+    stair_positions = random.sample(normalized_open_points, 2)
+    place_up_down_stairs(dungeon_level, stair_positions[0], stair_positions[1])
+
     return dungeon_level
 
 

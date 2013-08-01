@@ -40,6 +40,24 @@ def dfs_tunnler_with_random_stop(start_position, min_length, max_length,
     return visited
 
 
+def dfs_tunnler_with_random_restart(start_position, min_length, max_length,
+                                    size, direction_list):
+    position = start_position
+    direction_ = random.sample(direction_list, 1)[0]
+    visited = set()
+    while len(visited) < size:
+        direction_ = direction.turn_left_or_right(direction_)
+        length = random.randint(min_length, max_length)
+        visited.add(position)
+        for _ in range(length):
+            if(len(visited) >= size):
+                break
+            position = geo.add_2d(position, direction_)
+            visited.add(position)
+        if(rng.coin_flip()):
+            position = start_position
+    return visited
+
 def random_exlosion(start_pos, size, move_list=None):
     if move_list is None:
         move_list = direction.DIRECTIONS
