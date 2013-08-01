@@ -4,8 +4,10 @@ import math
 def add_2d(point1, point2):
     return (point1[0] + point2[0], point1[1] + point2[1])
 
+
 def sub_2d(point1, point2):
     return (point1[0] - point2[0], point1[1] - point2[1])
+
 
 def int_2d(point):
     return (int(point[0]), int(point[1]))
@@ -122,7 +124,24 @@ class Rect(object):
         """
         p1 = (self.left - n, self.top - n)
         p2 = (self.right + n, self.bottom + n)
-        return Rect(p1, p2)
+        return Rect(p1, p2[0] - p1[0], p2[1] - p1[1])
+
+    def containing_points(self):
+        result = []
+        for x in range(self.left, self.right + 1):
+            for y in range(self.top, self.bottom + 1):
+                result.append((x, y))
+        return result
+
+    def border_points(self):
+        result = set()
+        for x in range(self.left, self.right + 1):
+            result.add((x, self.top))
+            result.add((x, self.bottom))
+        for y in range(self.top, self.bottom + 1):
+            result.add((self.left, y))
+            result.add((self.right, y))
+        return list(result)
 
     def __str__(self):
         return "<Rect (%s, %s) - (%s, %s)>" % (self.left, self.top,

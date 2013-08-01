@@ -33,13 +33,16 @@ class DungeonCreatorVisualizer(state.State):
     def update(self):
         self.handle_input()
 
+    def generate_dungeon_level(self):
+        self.dungeon_level = dgen.generate_dungeon_cave_floor()
+
     def random_exlosion(self):
         dungeon_level = self.dungeon_level
         center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
         brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
         end_condition = dgen.CountDownCondition(dungeon_level.width *
-                                                dungeon_level.height * 0.2)
-        move_list = list(direction.DIRECTIONS)
+                                                dungeon_level.height * 0.1)
+        move_list = list(direction.AXIS_DIRECTIONS)
         dgen.random_exlosion(dungeon_level, center_position, brush,
                              end_condition, move_list)
 
@@ -53,14 +56,32 @@ class DungeonCreatorVisualizer(state.State):
         dgen.drunkard_walk(dungeon_level, center_position, brush,
                            end_condition, move_list)
 
+    def drunkard_walk2(self):
+        dungeon_level = self.dungeon_level
+        center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
+        brush =\
+            dgen.RandomTriShapedBrush(dgen.ReplaceTerrain(terrain.Floor))
+        end_condition = dgen.CountDownCondition(dungeon_level.width *
+                                                dungeon_level.height * 0.2)
+        move_list = list(direction.DIAGONAL_DIRECTIONS)
+        dgen.drunkard_walk(dungeon_level, center_position, brush,
+                           end_condition, move_list)
+
     def tunnler(self):
         dungeon_level = self.dungeon_level
         center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
         brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
         end_condition = dgen.CountDownCondition(17)
-        move_list = list(direction.DIAGONAL_DIRECTIONS)
-        dgen.tunnler(dungeon_level, center_position, 3, 7, brush,
+        move_list = list(direction.AXIS_DIRECTIONS)
+        dgen.dfs_tunnler(dungeon_level, center_position, 4, 12, brush,
                      end_condition, move_list)
+
+    def place_random_room(dungeon_level, position, min_width, max_width,
+                          min_height, max_height):
+        pass
+
+    def place_room(dungeon_level, rect):
+        pass
 
     def cellular_cave(self):
         dgen.cellular_automata(self.dungeon_level)
@@ -86,6 +107,12 @@ class DungeonCreatorVisualizer(state.State):
 
         elif key == inputhandler.FOUR:
             self.tunnler()
+
+        elif key == inputhandler.FIVE:
+            self.drunkard_walk2()
+
+        elif key == inputhandler.SIX:
+            self.generate_dungeon_level()
 
         elif key == inputhandler.ZERO:
             self.fill_dungeon()

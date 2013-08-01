@@ -2,9 +2,9 @@ import terrain
 import direction
 import dungeonlevel
 import dungeonfeature
+import shapegenerator
 import geometry as geo
 import random
-import constants
 import tile
 
 
@@ -22,7 +22,7 @@ def generate_terrain_dungeon_level(depth):
     brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
     end_condition_func = CountDownCondition(dungeon_level.width *
                                             dungeon_level.height * 0.4)
-    move_list = list(constants.DIRECTIONS.values())
+    move_list = list(direction.DIRECTIONS)
     drunkard_walk(center_position, dungeon_level, brush,
                   end_condition_func, move_list)
     #cellular_automata(dungeon_level)
@@ -124,8 +124,8 @@ def random_exlosion(dungeon_level, start_pos, tile_brush,
             break
 
 
-def tunnler(dungeon_level, start_position, min_length, max_length,
-            tile_brush, end_condition_func, direction_list=None):
+def dfs_tunnler(dungeon_level, start_position, min_length, max_length,
+                tile_brush, end_condition_func, direction_list=None):
     position = start_position
     direction_ = random.sample(direction_list, 1)[0]
     while not end_condition_func():
@@ -171,6 +171,38 @@ def _apply_cellular_automata_rule_on_tile(dungeon_level, position,
         terrain.Floor().replace_move(position, dungeon_level)
 
 
+def generate_dungeon_cave_floor():
+    corridors_shape =\
+        shapegenerator.dfs_tunnler_with_random_stop((0, 0), 10, 16, 300,
+                                                    direction.AXIS_DIRECTIONS)
+
+    rooms = random.randrange(4, 8)
+    room_positions = random.sample(corridors_shape, rooms)
+    open_points = corridors_shape
+    for position in room_positions:
+        room_points =\
+            shapegenerator.random_exlosion(position, 1200 / rooms,
+                                           direction.AXIS_DIRECTIONS)
+        open_points = open_points | room_points
+
+    level_shape = shapegenerator.Shape(open_points)
+    frame = 2
+    dungeon_rect = level_shape.calc_rect().expanded_by(frame)
+    depth = 1
+    dungeon_level = get_full_wall_dungeon(dungeon_rect.width,
+                                          dungeon_rect.height, depth)
+
+    normalized_open_points = level_shape.calc_normalized_points(frame / 2)
+    brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
+    apply_brush_to_points(dungeon_level, normalized_open_points, brush)
+    return dungeon_level
+
+
+def apply_brush_to_points(dungeon_level, points, brush):
+    for point in points:
+        brush.apply_brush(dungeon_level, point)
+
+
 class TileBrush(object):
     def __init__(self, tile_modifier):
         self.tile_modifier = tile_modifier
@@ -187,7 +219,7 @@ class SingleShapeBrush(TileBrush):
     def apply_brush(self, dungeon_level, position):
         for point in self.shape:
             dungeon_position = geo.add_2d(point, position)
-            self.tile_modifier.modify(dungeon_position, dungeon_level)
+            self.tile_modifier.modify(dungeon_level, dungeon_position)
 
 
 class RandomShapeBrush(TileBrush):
@@ -199,19 +231,24 @@ class RandomShapeBrush(TileBrush):
     def apply_brush(self, dungeon_level, position):
         shape = random.sample(self.shapes, 1)[0]
         for point in shape:
-            dungeon_position = point + position
-            self.tile_modifier.modify(dungeon_position, dungeon_level)
+            dungeon_position = geo.add_2d(point, position)
+            self.tile_modifier.modify(dungeon_level, dungeon_position)
 
 
 class RandomTriShapedBrush(RandomShapeBrush):
     def __init__(self, tile_modifier):
-        face = constants.DIRECTIONS
-        center = (0, 0)
-        shapes = [[center, face["N"], face["W"]],
-                  [center, face["N"], face["E"]],
-                  [center, face["S"], face["W"]],
-                  [center, face["S"], face["E"]]]
+        shapes = [[direction.CENTER, direction.UP, direction.LEFT],
+                  [direction.CENTER, direction.UP, direction.RIGHT],
+                  [direction.CENTER, direction.DOWN, direction.LEFT],
+                  [direction.CENTER, direction.DOWN, direction.RIGHT]]
         super(RandomTriShapedBrush, self).__init__(shapes, tile_modifier)
+
+
+class RandomTriLineShapedBrush(RandomShapeBrush):
+    def __init__(self, tile_modifier):
+        shapes = [[direction.CENTER, direction.UP, direction.DOWN],
+                  [direction.CENTER, direction.LEFT, direction.RIGHT]]
+        super(RandomTriLineShapedBrush, self).__init__(shapes, tile_modifier)
 
 
 class SinglePointBrush(SingleShapeBrush):
@@ -230,7 +267,7 @@ class TileModifier(object):
     def __init__(self):
         pass
 
-    def modify(self, tile):
+    def modify(self, position, dungeon_level):
         pass
 
 
@@ -238,7 +275,7 @@ class ReplaceTerrain(TileModifier):
     def __init__(self, terrain_class):
         self.terrain_class = terrain_class
 
-    def modify(self, position, dungeon_level):
+    def modify(self, dungeon_level, position):
         terrain_to_modify = self.terrain_class()
         terrain_to_modify.replace_move(position, dungeon_level)
 

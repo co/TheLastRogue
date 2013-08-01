@@ -18,14 +18,18 @@ TWO = 107
 THREE = 108
 FOUR = 109
 FIVE = 110
-ESCAPE = 111
-PICKUP = 112
-INVENTORY = 113
-EXAMINE = 114
-SHIFT = 115
-DESCEND = 116
-ZERO = 117
-FIRE = 118
+SIX = 111
+SEVEN = 112
+EIGHT = 113
+NINE = 114
+ESCAPE = 115
+PICKUP = 116
+INVENTORY = 117
+EXAMINE = 118
+SHIFT = 119
+DESCEND = 120
+ZERO = 121
+FIRE = 122
 
 #Aliases:
 UP = NORTH
@@ -93,6 +97,10 @@ controls = {
     libtcod.KEY_3: THREE,
     libtcod.KEY_4: FOUR,
     libtcod.KEY_5: FIVE,
+    libtcod.KEY_6: SIX,
+    libtcod.KEY_7: SEVEN,
+    libtcod.KEY_8: EIGHT,
+    libtcod.KEY_9: NINE,
 }
 
 
