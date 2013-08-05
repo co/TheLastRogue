@@ -1,4 +1,6 @@
 import terrain
+import math
+import graph
 import direction
 import dungeonlevel
 import dungeonfeature
@@ -175,6 +177,49 @@ def _apply_cellular_automata_rule_on_tile(dungeon_level, position,
         terrain.Floor().replace_move(position, dungeon_level)
 
 
+def generate_dungeon_exploded_rooms(open_area, depth):
+    rooms = random.randrange(4, 8)
+    room_area = open_area / rooms
+    aprox_room_radius = math.sqrt(room_area)
+
+    room_distance = aprox_room_radius * 1.2
+
+    grid_side = int(max(rooms / 2 + 1, math.sqrt(rooms + 1) + 1))
+    triangle_points = shapegenerator.triangle_points(room_distance,
+                                                     grid_side, grid_side)
+
+    room_positions = random.sample(triangle_points, rooms)
+    room_graph = graph.Graph()
+    corridors_points = set()
+    for room_position in room_positions:
+        room_graph.add_point(room_position)
+    while not room_graph.is_connected():
+        edge = random.sample(room_positions, 2)
+        while(room_graph.has_edge(edge[0], edge[1])):
+            edge = random.sample(room_positions, 2)
+        room_graph.add_edge(edge[0], edge[1])
+        corridors_points.update(shapegenerator.manhattan_walker(edge[0],
+                                                                edge[1]))
+
+    open_points = corridors_points
+    for position in room_positions:
+        room_points =\
+            shapegenerator.random_exlosion(position, room_area,
+                                           direction.AXIS_DIRECTIONS)
+        open_points.update(room_points)
+
+    level_shape = shapegenerator.Shape(open_points)
+    frame = 2
+    dungeon_rect = level_shape.calc_rect().expanded_by(frame)
+
+    dungeon_level = get_full_wall_dungeon(dungeon_rect.width,
+                                          dungeon_rect.height, depth)
+    brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
+    normalized_open_points = level_shape.calc_normalized_points(frame / 2)
+    apply_brush_to_points(dungeon_level, normalized_open_points, brush)
+    return dungeon_level
+
+
 def generate_dungeon_cave_floor(size, depth):
     corridor_room_area_ratio = 0.25
     corridor_area = size * corridor_room_area_ratio
@@ -192,11 +237,12 @@ def generate_dungeon_cave_floor(size, depth):
         room_points =\
             shapegenerator.random_exlosion(position, total_room_area / rooms,
                                            direction.AXIS_DIRECTIONS)
-        open_points = open_points | room_points
+        open_points.update(room_points)
 
-    level_shape = shapegenerator.Shape(open_points)
     frame = 2
+    level_shape = shapegenerator.Shape(open_points)
     dungeon_rect = level_shape.calc_rect().expanded_by(frame)
+
     dungeon_level = get_full_wall_dungeon(dungeon_rect.width,
                                           dungeon_rect.height, depth)
 
