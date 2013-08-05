@@ -51,6 +51,11 @@ class StackAbleItem(Item):
         super(StackAbleItem, self).__init__()
         self.quantity = 1
 
+    def _can_pass_terrain(self, terrain_to_pass):
+        if(terrain_to_pass is None):
+            return False
+        return not terrain_to_pass.is_solid()
+
 
 class EquipableItem(Item):
     def __init__(self):

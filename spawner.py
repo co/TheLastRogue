@@ -1,6 +1,5 @@
 import random
 import monster
-import geometry as geo
 import logging
 
 

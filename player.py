@@ -2,7 +2,7 @@ import counter
 import action
 import equipment
 import missileaction
-import monsterspawner
+import spawner
 import colors
 import dungeonlevel
 import entity
@@ -117,7 +117,7 @@ class Player(entity.Entity):
             self.newly_spent_energy += gametime.single_turn
 
         elif key == inputhandler.FIVE:
-            monsterspawner.spawn_rat_man(self.dungeon_level, self.game_state)
+            spawner.spawn_rat_man(self.dungeon_level, self.game_state)
             self.newly_spent_energy += gametime.single_turn
 
         elif key == inputhandler.INVENTORY:

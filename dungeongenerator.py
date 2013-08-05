@@ -217,6 +217,10 @@ def generate_dungeon_exploded_rooms(open_area, depth):
     brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
     normalized_open_points = level_shape.calc_normalized_points(frame / 2)
     apply_brush_to_points(dungeon_level, normalized_open_points, brush)
+
+    stair_positions = random.sample(normalized_open_points, 2)
+    place_up_down_stairs(dungeon_level, stair_positions[0], stair_positions[1])
+
     return dungeon_level
 
 
