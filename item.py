@@ -10,7 +10,10 @@ import entityeffect
 import entity
 
 
-class ItemTypes(object):
+class ItemType(object):
+    """
+    Enumerator class denoting different item types.
+    """
     POTION = 0
     WEAPON = 1
     ARMOR = 2
@@ -21,6 +24,24 @@ class ItemTypes(object):
 
 
 class Item(gamepiece.GamePiece):
+    """
+    Abstract class representing an item in the game.
+
+    piece_type (GamePieceType): Denotes that Item and all its
+                                subclasses is of type ITEM.
+    max_instances_in_single_tile: The number of allowed pieces of this types
+                                  on a tile.
+    item_type (ItemType): Denotes the type of item it is, should be provided
+                          by the subclasses.
+
+    inventory (Inventory): If this item is in an entities inventory this
+                           field should be point to that inventory
+                           otherwise it shall be None.
+    actions (list of Action): A list of player actions the player
+                              can do with this item.
+
+    weight (int): The Weight of the item.
+    """
     def __init__(self):
         super(Item, self).__init__()
 
@@ -37,9 +58,14 @@ class Item(gamepiece.GamePiece):
         self.actions.append(action.DropAction(self))
         self.actions.append(missileaction.PlayerThrowItemAction(self))
         self.weight = 5
-        self.equipment_type = None
 
     def throw_effect(self, dungeon_level, position):
+        """
+        The effect of throwing this item.
+
+        dungeon_level: The DungeonLevel the throw was performed on.
+        position: The point at which the item hits the ground.
+        """
         self.try_move(position, dungeon_level)
         message = "The " + self.name.lower() +\
             " hits the ground with a thud."
@@ -61,6 +87,7 @@ class EquipableItem(Item):
     def __init__(self):
         super(EquipableItem, self).__init__()
         self.actions.append(action.ReEquipAction(self))
+        self.equipment_type = None
 
     def equip_effect(self, entity):
         pass
@@ -75,7 +102,7 @@ class EquipableItem(Item):
 class WeaponItem(EquipableItem):
     def __init__(self):
         super(WeaponItem, self).__init__()
-        self.item_type = ItemTypes.WEAPON
+        self.item_type = ItemType.WEAPON
         self._damage_strength = 0
         self._damage_variance = 0
         self._damage_types = []
@@ -121,7 +148,7 @@ class Gun(RangedWeapon):
 class JewellryItem(EquipableItem):
     def __init__(self):
         super(JewellryItem, self).__init__()
-        self.item_type = ItemTypes.JEWELLRY
+        self.item_type = ItemType.JEWELLRY
 
 
 class RingItem(JewellryItem):
