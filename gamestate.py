@@ -148,9 +148,9 @@ class TestGameState(GameStateBase):
         rat_pos = (15, 15)
         rat.try_move(rat_pos, self.dungeon_level)
 
-        rat2 = monster.Jerico(self)
-        rat2_pos = (15, 25)
-        rat2.try_move(rat2_pos, self.dungeon_level)
+        slime = monster.Slime(self)
+        slime_pos = (15, 25)
+        slime.try_move(slime_pos, self.dungeon_level)
 
         statue = monster.StoneStatue(self)
         statue_pos = (25, 7)

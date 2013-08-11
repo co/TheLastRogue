@@ -38,12 +38,14 @@ class Monster(entity.Entity):
             return False
         mx, my = self.position
         px, py = player.position
+        print "path set to player pos", px, py
         libtcod.path_compute(self.path, mx, my, px, py)
         return True
 
     def step_looking_for_player(self):
         self.set_path_to_player_if_seen()
         if(not self.has_path()):
+            print "time to walk randomly"
             self.set_path_to_random_walkable_point()
         step_succeeded = self.try_step_path()
         return step_succeeded
@@ -73,6 +75,57 @@ class Jerico(RatMan):
         self.death_message = "Jerico the quick is no more."
         self._color_fg = colors.DB_GOLDEN_FIZZ
         self.energy_recovery = gametime.double_energy_gain
+
+
+class Slime(Monster):
+    """
+    Slime monsters, can swallow the player.
+    They fight by entering the tile of another entity.
+    """
+    def __init__(self, game_state):
+        super(Slime, self).__init__(game_state)
+        self._name = "Slime"
+        self.death_message = "The slime melts away."
+        self._color_fg = colors.DB_ATLANTIS
+        self._symbol = libtcod.CHAR_DIAMOND
+
+        self.hp = counter.Counter(20, 20)
+        self.energy_recovery = gametime.half_energy_gain
+
+    def _can_fit_on_tile(self, tile):
+        """
+        Slime monsters fight by entering the tile of another entity.
+        Therefore it must override '_can_fit_on_tile' so it doesn't think
+        A tile with an entity is too crowded.
+        """
+        entities_on_tile = tile.game_pieces[self.piece_type]
+        if(len(entities_on_tile) == 0):
+            return True
+        elif(len(entities_on_tile) > 1):
+            return False
+        else:
+            return (not isinstance(entities_on_tile[0], Slime))
+
+    def act(self):
+        """
+        Slime monsters pursues the player.
+        """
+        player = self.get_player_if_seen()
+        if(not player is None and (player.position == self.position)):
+            pass  # eat player.
+        else:
+            self.step_looking_for_player()
+
+        if(rng.coin_flip() and self.can_see_player()):
+            message = "The slime seems to wobble with happiness."
+            messenger.messenger.message(message)
+        return gametime.single_turn
+
+    def try_hit(self, position):
+        """
+        Slime monsters never "hit" anything, they move into something.
+        """
+        return False
 
 
 class StoneStatue(Monster):
