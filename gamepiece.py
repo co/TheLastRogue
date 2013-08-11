@@ -73,9 +73,8 @@ class GamePiece(object):
         if(not new_dungeon_level.has_tile(new_position)):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
-        if(not self.__can_pass_tile(new_tile)):
-            return False
-        return True
+        return (self._can_fit_on_tile(new_tile) and
+                self._can_pass_terrain(new_tile.get_terrain()))
 
     def try_move(self, new_position, new_dungeon_level=None):
         if(new_dungeon_level is None):
@@ -91,7 +90,7 @@ class GamePiece(object):
         if(not new_dungeon_level.has_tile(new_position)):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
-        self.__try_remove_from_dungeon()
+        self._try_remove_from_dungeon()
         new_place = new_tile.game_pieces[self.piece_type]
         if(len(new_place) < 1):
             new_place.append(self)
@@ -100,28 +99,24 @@ class GamePiece(object):
         self._position = new_position
         self.dungeon_level = new_dungeon_level
 
-    def __can_pass_tile(self, tile):
-        is_too_many = (len(tile.game_pieces[self.piece_type]) >=
-                       self.max_instances_in_single_tile)
-        if((not is_too_many) and
-           self._can_pass_terrain(tile.get_terrain())):
-            return True
-        return False
+    def _can_fit_on_tile(self, tile):
+        return (len(tile.game_pieces[self.piece_type]) <
+                self.max_instances_in_single_tile)
 
     def _can_pass_terrain(self, terrain):
         return True
 
     def __move(self, new_position, dungeon_level):
-        self.__try_remove_from_dungeon()
+        self._try_remove_from_dungeon()
         new_tile = dungeon_level.get_tile(new_position)
         new_tile.game_pieces[self.piece_type].append(self)
         self._position = new_position
         self.dungeon_level = dungeon_level
 
     def try_remove_from_dungeon(self):
-        return self.__try_remove_from_dungeon()
+        return self._try_remove_from_dungeon()
 
-    def __try_remove_from_dungeon(self):
+    def _try_remove_from_dungeon(self):
         if(self.dungeon_level is None):
             return True
         tile_i_might_be_on = self.dungeon_level.get_tile(self.position)
