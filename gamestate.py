@@ -1,6 +1,6 @@
 import dungeonlevel
 import statestack
-import libtcodpy as libtcod
+import console
 import player
 import dungeon
 import monster
@@ -49,7 +49,7 @@ class GameStateBase(state.State):
         self.camera.update(self.player)
         self.prepare_draw()
         self._should_draw = False
-        libtcod.console_flush()
+        console.console.flush()
 
     def prepare_draw(self):
         dungeon_level = self.player.dungeon_level

@@ -1,4 +1,5 @@
 import gamepiece
+import frame
 import terrain
 import colors
 import console
@@ -14,12 +15,21 @@ class Tile(object):
         }
 
     def draw(self, screen_position, is_seen):
-        piece = next(list for list in self.game_pieces.values()
-                     if len(list) > 0)[0]
+        piece = self.get_piece_to_draw()
         if(is_seen):
             self._draw_seen(screen_position, piece)
         else:
             self._draw_unseen(screen_position, piece)
+
+    def get_piece_to_draw(self):
+        pieces = next(list for list in self.game_pieces.values()
+                      if len(list) > 0)
+        if (pieces[0].piece_type == gamepiece.GamePieceType.ENTITY):
+            animation_length = 7
+            cycle_length = len(pieces) * animation_length
+            current_animation_frame = frame.current_frame % cycle_length
+            return pieces[int(current_animation_frame / animation_length)]
+        return pieces[0]
 
     def _draw_seen(self, screen_position, piece):
         color_bg = piece.color_bg

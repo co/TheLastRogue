@@ -56,7 +56,6 @@ class GameMenuStateStack(StateStack):
             state = self.peek()
             state.draw()
             state.update()
-            frame.current_frame += 1
         self._game_state.force_draw()
 
     def get_game_state(self):

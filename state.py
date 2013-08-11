@@ -1,4 +1,4 @@
-import libtcodpy as libtcod
+import console
 
 
 class State(object):
@@ -19,7 +19,7 @@ class UIState(State):
 
     def draw(self):
         self.ui_element.draw()
-        libtcod.console_flush()
+        console.console.flush()
 
     def update(self):
         self.ui_element.update()

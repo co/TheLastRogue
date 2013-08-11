@@ -1,4 +1,5 @@
 import colors
+import frame
 import settings
 import libtcodpy as libtcod
 
@@ -82,5 +83,9 @@ class ConsoleVisual(object):
             self._visual_char_matrix[y][x].color_fg = color_fg
             self._visual_char_matrix[y][x].color_bg = color_bg
             libtcod.console_put_char_ex(0, x, y, symbol, color_fg, color_bg)
+
+    def flush(self):
+        libtcod.console_flush()
+        frame.current_frame += 1
 
 console = ConsoleVisual(settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT)

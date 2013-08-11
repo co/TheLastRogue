@@ -1,7 +1,7 @@
 import dungeongenerator as dgen
 import geometry as geo
 import camera
-import libtcodpy as libtcod
+from console import console
 import turn
 import direction
 import messenger
@@ -28,7 +28,7 @@ class DungeonCreatorVisualizer(state.State):
 
     def draw(self):
         self.dungeon_level.draw_everything(self.camera)
-        libtcod.console_flush()
+        console.flush()
 
     def update(self):
         self.handle_input()

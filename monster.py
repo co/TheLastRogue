@@ -38,14 +38,12 @@ class Monster(entity.Entity):
             return False
         mx, my = self.position
         px, py = player.position
-        print "path set to player pos", px, py
         libtcod.path_compute(self.path, mx, my, px, py)
         return True
 
     def step_looking_for_player(self):
         self.set_path_to_player_if_seen()
         if(not self.has_path()):
-            print "time to walk randomly"
             self.set_path_to_random_walkable_point()
         step_succeeded = self.try_step_path()
         return step_succeeded

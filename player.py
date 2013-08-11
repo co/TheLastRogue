@@ -46,9 +46,9 @@ class Player(entity.Entity):
 
     def act(self):
         self.newly_spent_energy = 0
-        key = None
-        while key is None:
-            key = inputhandler.handler.get_keypress()
+        key = inputhandler.handler.get_keypress()
+        if(key is None):
+            return 0
         if key in inputhandler.move_controls:
             dx, dy = inputhandler.move_controls[key]
             new_position = geo.add_2d(self.position, (dx, dy))

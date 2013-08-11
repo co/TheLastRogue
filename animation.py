@@ -1,4 +1,3 @@
-import libtcodpy as libtcod
 import time
 from console import console
 
@@ -23,7 +22,7 @@ class MissileAnimation(InstantAnimation):
         for point in self.path:
             self.game_state.force_draw()
             self.print_missile_at_point(point)
-            libtcod.console_flush()
+            console.flush()
             time.sleep(0.02)
 
     def print_missile_at_point(self, point):

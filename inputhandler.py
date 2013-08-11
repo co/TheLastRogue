@@ -87,6 +87,7 @@ controls = {
     libtcod.KEY_SHIFT: SHIFT,  # shift
 
     "r": REST,
+    ".": REST,
     "p": PICKUP,
     "i": INVENTORY,
     "x": EXAMINE,
