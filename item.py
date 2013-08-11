@@ -51,6 +51,7 @@ class Item(gamepiece.GamePiece):
         self._name = "XXX_UNNAMED_ITEM_XXX"
         self._description = "XXX_DESCRIPTION_ITEM_XXX"
         self.item_type = None
+        self.equipment_type = None
 
         self._color_bg = None
         self.inventory = None
@@ -71,35 +72,55 @@ class Item(gamepiece.GamePiece):
             " hits the ground with a thud."
         messenger.messenger.message(message)
 
-
-class StackAbleItem(Item):
-    def __init__(self):
-        super(StackAbleItem, self).__init__()
-        self.quantity = 1
-
     def _can_pass_terrain(self, terrain_to_pass):
         if(terrain_to_pass is None):
             return False
         return not terrain_to_pass.is_solid()
 
 
+class StackAbleItem(Item):
+    """
+    Abstract class, subclasses of this class is stackaple in entity inventory.
+    """
+    def __init__(self):
+        super(StackAbleItem, self).__init__()
+        self.quantity = 1
+
+
 class EquipableItem(Item):
+    """
+    Abstract class, subclasses of this class is equipable.
+    """
     def __init__(self):
         super(EquipableItem, self).__init__()
         self.actions.append(action.ReEquipAction(self))
-        self.equipment_type = None
 
+    """
+    Effect that will happen the entity that equips this item.
+    Will be called on equip.
+    """
     def equip_effect(self, entity):
         pass
 
+    """
+    Effect that will happen the entity that un-equips this item.
+    Will be called on un-equip.
+    """
     def unequip_effect(self, entity):
         pass
 
+    """
+    Effect that will happen while this item is equiped.
+    Will be called each tick this item is equiped.
+    """
     def equiped_effect(self, entity):
         pass
 
 
 class WeaponItem(EquipableItem):
+    """
+    Abstract class, subclasses of this class are of ItemType WEAPON.
+    """
     def __init__(self):
         super(WeaponItem, self).__init__()
         self.item_type = ItemType.WEAPON
@@ -114,12 +135,22 @@ class WeaponItem(EquipableItem):
 
 
 class MeleeWeapon(WeaponItem):
+    """
+    Abstract class, subclasses of this class are melee weapons
+    and fits in the melee weapon equipment slot.
+    """
     def __init__(self):
         super(MeleeWeapon, self).__init__()
         self.equipment_type = equipment.EquipmentTypes.MELEE_WEAPON
 
 
 class RangedWeapon(WeaponItem):
+    """
+    Abstract class, subclasses of this class are ranged weapons
+    and fits in the ranged weapon equipment slot.
+
+    weapon_range (int): Distance the weapon can fire.
+    """
     def __init__(self):
         super(RangedWeapon, self).__init__()
         self.equipment_type = equipment.EquipmentTypes.RANGED_WEAPON
@@ -127,6 +158,9 @@ class RangedWeapon(WeaponItem):
 
 
 class Gun(RangedWeapon):
+    """
+    Non-abstract ranged weapon item class.
+    """
     def __init__(self):
         super(Gun, self).__init__()
         self._color_fg = colors.DB_WHITE
@@ -146,12 +180,19 @@ class Gun(RangedWeapon):
 
 
 class JewellryItem(EquipableItem):
+    """
+    Abstract class, subclasses of this class are of ItemType JEWELLRY.
+    """
     def __init__(self):
         super(JewellryItem, self).__init__()
         self.item_type = ItemType.JEWELLRY
 
 
 class RingItem(JewellryItem):
+    """
+    Abstract class, subclasses of this class are rings
+    and fits in the ring equipment slots.
+    """
     def __init__(self):
         super(RingItem, self).__init__()
         self.equipment_type = equipment.EquipmentTypes.RING
@@ -159,6 +200,10 @@ class RingItem(JewellryItem):
 
 
 class RingOfInvisibility(RingItem):
+    """
+    Non-abstract ranged ring item class,
+    instance items will make the user entity invisible.
+    """
     def __init__(self):
         super(RingOfInvisibility, self).__init__()
         self._color_fg = colors.DB_GOLDEN_FIZZ
@@ -168,6 +213,9 @@ class RingOfInvisibility(RingItem):
             this ring will make you invisible"
 
     def equiped_effect(self, target_entity):
+        """
+        Causes the entity that equips this item to become invisible.
+        """
         invisibile_flag = entity.StatusFlags.INVISIBILE
         invisibility_effect = entityeffect.\
             StatusAdder(target_entity, target_entity,
@@ -177,6 +225,9 @@ class RingOfInvisibility(RingItem):
 
 class Potion(StackAbleItem):
     def __init__(self):
+        """
+        Abstract class, subclasses of this class are potions,
+        """
         super(Potion, self).__init__()
         self._symbol = ord('?')
         self._name = "XXX_Potion_XXX"
@@ -190,6 +241,9 @@ class Potion(StackAbleItem):
 
 
 class HealthPotion(Potion):
+    """
+    Health Potions are potion that heals entities.
+    """
     def __init__(self):
         super(Potion, self).__init__()
         self._color_fg = colors.DB_PLUM
@@ -200,6 +254,9 @@ class HealthPotion(Potion):
 
 
 class Ammo(StackAbleItem):
+    """
+    Gun bullets, are needed to fire guns.
+    """
     def __init__(self):
         super(Ammo, self).__init__()
         self._color_fg = colors.DB_TOPAZ
