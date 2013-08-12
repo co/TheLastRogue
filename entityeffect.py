@@ -17,11 +17,6 @@ class EffectTypes(object):
                 TELEPORT, HEAL, DAMAGE, EQUIPMENT]
 
 
-class EffectCause(object):
-    ITEM = 0
-    MAGIC = 1
-
-
 class EffectQueue(object):
     def __init__(self):
         self._effect_queue = [None for x in range(len(EffectTypes.ALLTYPES))]
@@ -92,7 +87,7 @@ class StatusAdder(EntityEffect):
         self.status_flag = status_flag
 
     def update(self):
-        self.target_entity.add_status(self.status_flag)
+        self.target_entity.add_temporary_status(self.status_flag)
         self.tick()
 
 

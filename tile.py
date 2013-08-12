@@ -58,6 +58,9 @@ class Tile(object):
     def get_first_entity(self):
         return self.get_first_piece_of_type(gamepiece.GamePieceType.ENTITY)
 
+    def get_entities(self):
+        return self.game_pieces[gamepiece.GamePieceType.ENTITY]
+
     def get_terrain(self):
         return self.get_first_piece_of_type(gamepiece.GamePieceType.TERRAIN)
 

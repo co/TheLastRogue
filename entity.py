@@ -1,4 +1,5 @@
 import random
+import rng
 import turn
 import gametime
 import damage
@@ -24,6 +25,7 @@ class StatusFlags(object):
     FLYING = 2
     HAS_MIND = 3
     CAN_OPEN_DOORS = 4
+    SWALLOWED_BY_SLIME = 5
 
 
 class Entity(gamepiece.GamePiece):
@@ -37,8 +39,9 @@ class Entity(gamepiece.GamePiece):
 
         self._faction = Faction.MONSTER
         self.effect_queue = entityeffect.EffectQueue()
-        self._status_flags = set()
-        self._status_flags.add(StatusFlags.CAN_OPEN_DOORS)
+        self._temporary_status_flags = set()
+        self._permanent_status_flags = set()
+        self._permanent_status_flags.add(StatusFlags.CAN_OPEN_DOORS)
 
         self.game_state = game_state
         self.piece_type = gamepiece.GamePieceType.ENTITY
@@ -92,6 +95,10 @@ class Entity(gamepiece.GamePiece):
         self.try_step_to(new_position)
 
     def try_step_to(self, position):
+        if(self.has_status(StatusFlags.SWALLOWED_BY_SLIME)):
+            escape_successful = self.try_to_escape_slime(position)
+            if(not escape_successful):
+                return True
         terrain_to_step = self.dungeon_level.get_tile(position).get_terrain()
         if(self.try_open_door(terrain_to_step)):
             return True
@@ -102,6 +109,9 @@ class Entity(gamepiece.GamePiece):
         return False
 
     def try_open_door(self, terrain_to_step):
+        """
+        Will try to open the door, if the door is already open return False.
+        """
         if(isinstance(terrain_to_step, terrain.Door)):
             door = terrain_to_step
             if(not door.is_open):
@@ -109,7 +119,38 @@ class Entity(gamepiece.GamePiece):
                 return True
         return False
 
+    def get_entity_sharing_my_position(self):
+        """
+        Sometimes two entities can share a tile this method
+        returns the other entity if this is case.
+        If the number of entities of this tile is neither 1 or 2
+        raise an exception as this is an invalid state.
+        """
+        entities_on_my_tile =\
+            self.dungeon_level.get_tile(self.position).get_entities()
+        if(len(entities_on_my_tile) == 1):
+            return None
+        if(len(entities_on_my_tile) != 2):
+            raise
+        return next(entity for entity in entities_on_my_tile
+                    if not entity is self)
+
+    def try_to_escape_slime(self, position):
+        """
+        Assumes the entity is trapped by a slime,
+        if escape is successful return true otherwise false.
+        """
+        slime = self.get_entity_sharing_my_position()
+        if not slime is None:
+            self.hit(slime)
+        escape_successful = rng.coin_flip() and rng.coin_flip()
+        return escape_successful
+
     def try_move(self, new_position, new_dungeon_level=None):
+        """
+        Will attempt to move the entity to a new dungeon_level/position.
+        If the move is successful return true otherwise false.
+        """
         if(new_dungeon_level is None):
             new_dungeon_level = self.dungeon_level
         old_dungeon_level = self.dungeon_level
@@ -124,6 +165,10 @@ class Entity(gamepiece.GamePiece):
         return move_succeded
 
     def try_remove_from_dungeon(self):
+        """
+        Will attempt to remove the entity from the dungeon_level/position.
+        If the remove is successful return true otherwise false.
+        """
         old_dungeon_level = self.dungeon_level
         remove_succeded = super(Entity, self).\
             try_remove_from_dungeon()
@@ -244,13 +289,20 @@ class Entity(gamepiece.GamePiece):
         libtcod.path_compute(self.path, sx, sy, dx, dy)
 
     def has_status(self, status):
-        return status in self._status_flags
+        return status in (self._temporary_status_flags |
+                          self._permanent_status_flags)
 
     def add_status(self, status):
-        return self._status_flags.add(status)
+        return self._temporary_status_flags.add(status)
 
-    def clear_all_status(self):
-        self._status_flags = set()
+    def add_temporary_status(self, status):
+        return self._temporary_status_flags.add(status)
+
+    def add_permanent_status(self, status):
+        return self._permanent_status_flags.add(status)
+
+    def clear_all_temporary_status_flags(self):
+        self._temporary_status_flags = set()
 
     def _can_pass_terrain(self, terrain_to_pass):
         if(terrain_to_pass is None):

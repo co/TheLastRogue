@@ -1,4 +1,5 @@
 import counter
+import entityeffect
 import gametime
 import colors
 import entity
@@ -86,6 +87,7 @@ class Slime(Monster):
         self.death_message = "The slime melts away."
         self._color_fg = colors.DB_ATLANTIS
         self._symbol = libtcod.CHAR_DIAMOND
+        self._permanent_status_flags = set()  # The slime cannot open doors.
 
         self.hp = counter.Counter(20, 20)
         self.energy_recovery = gametime.half_energy_gain
@@ -107,6 +109,8 @@ class Slime(Monster):
     def act(self):
         """
         Slime monsters pursues the player.
+        Slime monsters may stay at the same tile as other entities
+        and will hurt them in the process.
         """
         player = self.get_player_if_seen()
         if(not player is None and (player.position == self.position)):
@@ -114,9 +118,17 @@ class Slime(Monster):
         else:
             self.step_looking_for_player()
 
+        if(not player is None and (player.position == self.position)):
+            slime_status = entity.StatusFlags.SWALLOWED_BY_SLIME
+            slime_status_adder = entityeffect.StatusAdder(self, player,
+                                                          slime_status, 2)
+            player.add_entity_effect(slime_status_adder)
+            self.hit(player)
+
         if(rng.coin_flip() and self.can_see_player()):
             message = "The slime seems to wobble with happiness."
             messenger.messenger.message(message)
+
         return gametime.single_turn
 
     def try_hit(self, position):
