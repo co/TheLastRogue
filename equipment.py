@@ -1,4 +1,4 @@
-import libtcodpy as libtcod
+import symbol
 
 
 class EquipmentSlot(object):
@@ -18,42 +18,41 @@ class EquipmentTypes(object):
     #  Armor
     HEADGEAR = 0
     ARMOR = 1
-    GLOVES = 2
-    BOOTS = 3
+    BOOTS = 2
 
     #  Jewelry
-    RING = 4
-    AMULET = 5
+    RING = 3
+    AMULET = 4
 
     #  Weapons
-    MELEE_WEAPON = 6
-    RANGED_WEAPON = 7
+    MELEE_WEAPON = 5
+    RANGED_WEAPON = 6
 
-    ALL = [HEADGEAR, ARMOR, GLOVES, BOOTS,
+    ALL = [HEADGEAR, ARMOR, BOOTS,
            RING, AMULET, MELEE_WEAPON, RANGED_WEAPON]
 
 
 class EquipmentSlots(object):
     #  Weapons
-    MELEE_WEAPON = EquipmentSlot("Melee Weapon", EquipmentTypes.HEADGEAR, ")")
+    MELEE_WEAPON = EquipmentSlot("Melee Weapon", EquipmentTypes.MELEE_WEAPON,
+	symbol.SWORD)
     RANGED_WEAPON = EquipmentSlot("Ranged Weapon",
-                                  EquipmentTypes.RANGED_WEAPON, "(")
+                                  EquipmentTypes.RANGED_WEAPON, symbol.GUN)
 
     #  Armor
-    HEADGEAR = EquipmentSlot("Headgear", EquipmentTypes.HEADGEAR, "^")
-    ARMOR = EquipmentSlot("Armor", EquipmentTypes.ARMOR, "[")
-    GLOVES = EquipmentSlot("Gloves", EquipmentTypes.GLOVES, "'")
-    BOOTS = EquipmentSlot("Boots", EquipmentTypes.BOOTS, "_")
+    HEADGEAR = EquipmentSlot("Headgear", EquipmentTypes.HEADGEAR, symbol.HELM)
+    ARMOR = EquipmentSlot("Armor", EquipmentTypes.ARMOR, symbol.ARMOR)
+    BOOTS = EquipmentSlot("Boots", EquipmentTypes.BOOTS, symbol.BOOTS)
 
     #  Jewelry
     RIGHT_RING = EquipmentSlot("Right Ring", EquipmentTypes.RING,
-                               libtcod.CHAR_GRADE)
+                               symbol.RING)
     LEFT_RING = EquipmentSlot("Left Ring", EquipmentTypes.RING,
-                              libtcod.CHAR_GRADE)
+                              symbol.RING)
     AMULET = EquipmentSlot("Amulet", EquipmentTypes.AMULET,
-                           libtcod.CHAR_FEMALE)
+                           symbol.AMULET)
 
-    ALL = [MELEE_WEAPON, RANGED_WEAPON, HEADGEAR, ARMOR, GLOVES,
+    ALL = [MELEE_WEAPON, RANGED_WEAPON, HEADGEAR, ARMOR,
            BOOTS, RIGHT_RING, LEFT_RING, AMULET]
 
 
@@ -62,7 +61,6 @@ class Equipment(object):
         self._equipment = {
             EquipmentSlots.HEADGEAR: None,
             EquipmentSlots.ARMOR: None,
-            EquipmentSlots.GLOVES: None,
             EquipmentSlots.BOOTS: None,
 
             EquipmentSlots.RIGHT_RING: None,

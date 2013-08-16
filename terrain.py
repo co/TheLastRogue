@@ -1,6 +1,6 @@
 import colors
+import symbol
 import gamepiece
-import libtcodpy as libtcod
 
 
 class Terrain(gamepiece.GamePiece):
@@ -23,7 +23,7 @@ class Wall(Terrain):
         super(Wall, self).__init__()
         self._color_fg = colors.WALL_FG
         self._color_bg = colors.WALL_BG
-        self._symbol = '#'
+        self._symbol = symbol.DUNGEON_WALLS_ROW
 
     @staticmethod
     def is_solid():
@@ -38,7 +38,7 @@ class Floor(Terrain):
         super(Floor, self).__init__()
         self._color_fg = colors.DB_STINGER
         self._color_bg = colors.DB_LOULOU
-        self._symbol = '.'
+        self._symbol = symbol.CENTER_DOT
 
 
 class Water(Terrain):
@@ -46,7 +46,7 @@ class Water(Terrain):
         super(Water, self).__init__()
         self._color_fg = colors.DB_CORNFLOWER
         self._color_bg = colors.DB_VENICE_BLUE
-        self._symbol = '~'
+        self._symbol = symbol.WATER
 
 
 class Door(Terrain):
@@ -54,7 +54,8 @@ class Door(Terrain):
         super(Door, self).__init__()
         self.__is_open = is_open
         self._color_fg = colors.DB_ROPE
-        self._color_bg = colors.DB_OILED_CEDAR
+        #self._color_bg = colors.DB_OILED_CEDAR
+        self._color_bg = colors.DB_LOULOU
 
     def is_solid(self):
         return not self.is_open
@@ -71,9 +72,9 @@ class Door(Terrain):
     @property
     def symbol(self):
         if(self.is_open):
-            return "'"
+            return symbol.DOOR_OPEN
         else:
-            return "+"
+            return symbol.DOOR
 
     def is_transparent(self):
         return self.is_open
@@ -95,7 +96,7 @@ class GlassWall(Wall):
         super(GlassWall, self).__init__()
         self._color_fg = colors.DB_LIGHT_STEEL_BLUE
         self._color_bg = colors.DB_HEATHER
-        self._symbol = libtcod.CHAR_DIAMOND
+        self._symbol = symbol.CAVE_WALLS_ROW
 
     @staticmethod
     def is_transparent():

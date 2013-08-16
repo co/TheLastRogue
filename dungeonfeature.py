@@ -1,4 +1,5 @@
 import gamepiece
+import symbol
 import action
 import colors
 
@@ -44,7 +45,7 @@ class Stairs(DungeonFeature):
 class StairsDown(Stairs):
     def __init__(self):
         super(StairsDown, self).__init__()
-        self._symbol = ord('>')
+        self._symbol = symbol.STAIRS_DOWN
         self._name = "Stairs Down"
         self._description =\
             "A dark passway downward. Oh, what horrors awaits there?"
@@ -54,7 +55,7 @@ class StairsDown(Stairs):
 class StairsUp(Stairs):
     def __init__(self):
         super(StairsUp, self).__init__()
-        self._symbol = ord('<')
+        self._symbol = symbol.STAIRS_UP
         self._name = "Stairs Up"
         self._description =\
             "A way back, when the nightmare becomes too real."

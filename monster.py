@@ -1,4 +1,5 @@
 import counter
+import symbol
 import entityeffect
 import gametime
 import colors
@@ -57,7 +58,7 @@ class RatMan(Monster):
         self._name = "Rat-Man"
         self.death_message = "The Rat-Man is beaten to a pulp."
         self._color_fg = colors.DB_TAHITI_GOLD
-        self._symbol = 'r'
+        self._symbol = symbol.RATMAN
 
     def act(self):
         self.step_looking_for_player()
@@ -86,7 +87,7 @@ class Slime(Monster):
         self._name = "Slime"
         self.death_message = "The slime melts away."
         self._color_fg = colors.DB_ATLANTIS
-        self._symbol = libtcod.CHAR_DIAMOND
+        self._symbol = symbol.SLIME
         self._permanent_status_flags = set()  # The slime cannot open doors.
 
         self.hp = counter.Counter(20, 20)
@@ -146,7 +147,7 @@ class StoneStatue(Monster):
         self.death_message = "The stone statue shatters pieces, "\
             "sharp rocks covers the ground."
         self._color_fg = colors.DB_TOPAZ
-        self._symbol = '&'
+        self._symbol = symbol.GOLEM
 
     def act(self):
         if(rng.coin_flip() and self.can_see_player()):

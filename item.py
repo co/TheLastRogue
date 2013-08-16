@@ -1,4 +1,5 @@
 import colors
+import symbol
 import libtcodpy as libtcod
 import damage
 import messenger
@@ -164,7 +165,7 @@ class Gun(RangedWeapon):
     def __init__(self):
         super(Gun, self).__init__()
         self._color_fg = colors.DB_WHITE
-        self._symbol = ord('(')
+        self._symbol = symbol.GUN
         self._name = "Gun"
         self._description =\
             "This was once a fine weapon, but age has torn it real bad.\n\
@@ -196,7 +197,7 @@ class RingItem(JewellryItem):
     def __init__(self):
         super(RingItem, self).__init__()
         self.equipment_type = equipment.EquipmentTypes.RING
-        self._symbol = libtcod.CHAR_GRADE
+        self._symbol = symbol.RING
 
 
 class RingOfInvisibility(RingItem):
@@ -229,7 +230,7 @@ class Potion(StackAbleItem):
         Abstract class, subclasses of this class are potions,
         """
         super(Potion, self).__init__()
-        self._symbol = ord('?')
+        self._symbol = symbol.POTION
         self._name = "XXX_Potion_XXX"
         self._description =\
             "An unusual liquid contained in a glass flask."
@@ -245,7 +246,7 @@ class HealthPotion(Potion):
     Health Potions are potion that heals entities.
     """
     def __init__(self):
-        super(Potion, self).__init__()
+        super(HealthPotion, self).__init__()
         self._color_fg = colors.DB_PLUM
         self._name = "Health Potion"
         self._description =\
@@ -260,7 +261,7 @@ class Ammo(StackAbleItem):
     def __init__(self):
         super(Ammo, self).__init__()
         self._color_fg = colors.DB_TOPAZ
-        self._symbol = ord(':')
+        self._symbol = NOT_IMPLEMENTED
         self._name = "Ammunition"
         self._description =\
             "Rounds for a gun."

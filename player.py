@@ -1,4 +1,5 @@
 import counter
+import symbol
 import action
 import equipment
 import missileaction
@@ -39,7 +40,7 @@ class Player(entity.Entity):
 
     @property
     def symbol(self):
-        return ord('@')
+        return symbol.GUNSLINGER_THIN
 
     def _signal_new_dungeon_level(self):
         self.set_memory_map_if_not_set(self.dungeon_level)
