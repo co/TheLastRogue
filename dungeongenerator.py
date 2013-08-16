@@ -1,4 +1,5 @@
 import terrain
+import rng
 import math
 import graph
 import direction
@@ -218,8 +219,12 @@ def generate_dungeon_exploded_rooms(open_area, depth):
     normalized_open_points = level_shape.calc_normalized_points(frame / 2)
     apply_brush_to_points(dungeon_level, normalized_open_points, brush)
 
-    stair_positions = random.sample(normalized_open_points, 2)
-    place_up_down_stairs(dungeon_level, stair_positions[0], stair_positions[1])
+    feature_positions = random.sample(normalized_open_points, 3)
+    place_up_down_stairs(dungeon_level, feature_positions[0], feature_positions[1])
+    drinks = 1 if rng.coin_flip() else 0
+    _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(drinks),
+                                              dungeon_level,
+                                              feature_positions[2])
 
     return dungeon_level
 
@@ -254,8 +259,14 @@ def generate_dungeon_cave_floor(size, depth):
     brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
     apply_brush_to_points(dungeon_level, normalized_open_points, brush)
 
-    stair_positions = random.sample(normalized_open_points, 2)
-    place_up_down_stairs(dungeon_level, stair_positions[0], stair_positions[1])
+    feature_positions = random.sample(normalized_open_points, 2)
+    place_up_down_stairs(dungeon_level, feature_positions[0], feature_positions[1])
+
+    drinks = 1 if rng.coin_flip() else 0
+    _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(drinks),
+                                              dungeon_level,
+                                              feature_positions[2])
+
 
     return dungeon_level
 

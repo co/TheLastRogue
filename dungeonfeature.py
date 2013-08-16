@@ -59,3 +59,36 @@ class StairsUp(Stairs):
         self._name = "Stairs Up"
         self._description =\
             "A way back, when the nightmare becomes too real."
+
+
+class Fountain(DungeonFeature):
+    def __init__(self, drinks_left):
+        super(Fountain, self).__init__()
+        self._drinks_left = drinks_left
+        self._name = "Fountain"
+        self._description_full =\
+                "A Fountain full of clean water, surely you will become more healthy by drinking this."
+        self._description_empty =\
+                "Once there was clean water here, but it has since dried up."
+
+    @property
+    def symbol(self):
+        if self._drinks_left > 0:
+            return symbol.FOUNTAIN_FULL
+        else:
+            return symbol.FOUNTAIN_EMPTY
+
+    @property
+    def color_fg(self):
+        if self._drinks_left > 0:
+            return colors.DB_VIKING
+        else:
+            return colors.DB_HEATHER
+
+
+    @property
+    def description(self):
+        if self._drinks_left > 0:
+            return symbol.FOUNTAIN_FULL
+        else:
+            return symbol.FOUNTAIN_EMPTY
