@@ -118,3 +118,6 @@ class DungeonCreatorVisualizer(state.State):
 
         elif key == inputhandler.ZERO:
             self.fill_dungeon()
+
+        elif key == inputhandler.PRINTSCREEN:
+            console.print_screen()

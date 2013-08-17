@@ -30,6 +30,7 @@ SHIFT = 119
 DESCEND = 120
 ZERO = 121
 FIRE = 122
+PRINTSCREEN = 123
 
 #Aliases:
 UP = NORTH
@@ -81,6 +82,7 @@ controls = {
     libtcod.KEY_KP3: SOUTHEAST,  # down, right
 
     'f': FIRE,
+    '@': PRINTSCREEN,
 
     libtcod.KEY_ENTER: ENTER,
     libtcod.KEY_ESCAPE: ESCAPE,

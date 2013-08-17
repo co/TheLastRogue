@@ -88,4 +88,8 @@ class ConsoleVisual(object):
         libtcod.console_flush()
         frame.current_frame += 1
 
+    def print_screen(self):
+        libtcod.sys_save_screenshot()
+
+
 console = ConsoleVisual(settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT)

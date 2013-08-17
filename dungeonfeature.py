@@ -62,7 +62,7 @@ class StairsUp(Stairs):
 
 
 class Fountain(DungeonFeature):
-    def __init__(self, drinks_left):
+    def __init__(self, drinks_left=1):
         super(Fountain, self).__init__()
         self._drinks_left = drinks_left
         self._name = "Fountain"
@@ -92,3 +92,8 @@ class Fountain(DungeonFeature):
             return symbol.FOUNTAIN_FULL
         else:
             return symbol.FOUNTAIN_EMPTY
+
+    def piece_copy(self, copy=None):
+        if(copy is None):
+            copy = Fountain(self._drinks_left)
+        return super(Fountain, self).piece_copy(copy)

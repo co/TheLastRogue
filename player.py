@@ -1,4 +1,5 @@
 import counter
+import console
 import symbol
 import action
 import equipment
@@ -162,6 +163,8 @@ class Player(entity.Entity):
                                          game_state=game_state)):
                     rock_throwing.act(source_entity=self,
                                       game_state=game_state)
+        elif key == inputhandler.PRINTSCREEN:
+            console.console.print_screen()
         return self.newly_spent_energy
 
     def kill_and_remove(self):

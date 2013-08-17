@@ -241,8 +241,8 @@ def get_dungeon_feature_menu_options(dungeon_feature, state_stack, player):
         function =\
             menu.DelayedFunctionCall(state_stack, feat_function,
                                      states_to_pop=1)
-        feature_options.append(menu.MenuOption(action.name, function,
-                                               action.can_act()))
+        feature_options.append(menu.MenuOption(feature_action.name, function,
+                                               feature_action.can_act()))
     return feature_options
 
 
