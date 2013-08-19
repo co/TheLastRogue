@@ -1,7 +1,4 @@
 import libtcodpy as libtcod
-import Queue
-import time
-from threading import Thread
 
 NORTH = 0
 SOUTH = 1
@@ -109,27 +106,14 @@ controls = {
 
 class InputHandler(object):
     def __init__(self):
-        max_size = 1
-        self._input_queue = Queue.Queue(max_size)
+        pass
 
     def get_keypress(self):
-        if(not self._input_queue.empty()):
-            return self._input_queue.get()
+        key = libtcod.console_check_for_keypress(True)
+        key_char = self._get_key_char(key)
+        if key_char in controls.keys() and key.pressed:
+            return controls[key_char]
         return None
-
-    def start_listener_thread(self):
-        thread = Thread(target=self._get_keypress_loop)
-        thread.daemon = True
-        thread.start()
-
-    def _get_keypress_loop(self):
-        time.sleep(0.7)
-        while True:
-            key = libtcod.console_wait_for_keypress(True)
-            key_char = self._get_key_char(key)
-            if key_char in controls.keys() and key.pressed:
-                self._input_queue.put(controls[key_char])
-            time.sleep(0)
 
     def _get_key_char(self, key):
         if key.vk == libtcod.KEY_CHAR:
@@ -143,4 +127,3 @@ class InputHandler(object):
         return False
 
 handler = InputHandler()
-handler.start_listener_thread()
