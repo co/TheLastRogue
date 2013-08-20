@@ -3,7 +3,6 @@ import rng
 import turn
 import gametime
 import damage
-import numpy
 import geometry as geo
 import counter
 import constants
@@ -63,7 +62,7 @@ class Entity(gamepiece.GamePiece):
         can_open_doors_flag = StatusFlags.CAN_OPEN_DOORS
         effect = entityeffect.StatusAdder(self, self,
                                           can_open_doors_flag,
-                                          time_to_live=numpy.inf)
+                                          time_to_live=float("inf"))
         self.add_entity_effect(effect)
 
     @property

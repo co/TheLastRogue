@@ -3,13 +3,12 @@ from console import console
 import libtcodpy as libtcod
 import colors
 import inputhandler
-import numpy
 import state
 
 
 class PositionExaminer(state.State):
     def __init__(self, state_stack, position, background_state,
-                 max_distance=numpy.inf):
+                 max_distance=float("inf")):
         super(PositionExaminer, self).__init__()
         self._state_stack = state_stack
         self.cursor_position = position
@@ -70,7 +69,7 @@ class PositionExaminer(state.State):
 
 class PositionSelector(PositionExaminer):
     def __init__(self, state_stack, position, background_state,
-                 max_distance=numpy.inf):
+                 max_distance=float("inf")):
         super(PositionSelector, self).__init__(state_stack, position,
                                                background_state, max_distance)
         self._return_position = None
@@ -87,7 +86,7 @@ class PositionSelector(PositionExaminer):
 
 class MissileDestinationSelector(PositionSelector):
     def __init__(self, state_stack, position, entity, background_state,
-                 max_distance=numpy.inf, init_target=None):
+                 max_distance=float("inf"), init_target=None):
         super(MissileDestinationSelector,
               self).__init__(state_stack, position,
                              background_state, max_distance)

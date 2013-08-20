@@ -1,6 +1,5 @@
 import messenger
 import random
-import numpy
 
 
 # Effect types in execution order
@@ -53,8 +52,6 @@ class EntityEffect(object):
         pass
 
     def tick(self):
-        if(self.time_to_live is numpy.inf):
-            return
         self.time_to_live = self.time_to_live - 1
         if(self.time_to_live < 1):
             self.target_entity.effect_queue.remove(self)

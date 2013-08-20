@@ -9,7 +9,6 @@ import colors
 import dungeonlevel
 import entity
 import entityeffect
-import numpy
 import inventory
 import inputhandler
 import menufactory
@@ -108,7 +107,7 @@ class Player(entity.Entity):
                 effect = entityeffect.\
                     StatusAdder(self, self,
                                 invisibile_flag,
-                                time_to_live=numpy.inf)
+                                time_to_live=float("inf"))
                 self.add_entity_effect(effect)
             else:
                 invisible_status = entity.StatusFlags.INVISIBILE
