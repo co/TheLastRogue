@@ -1,4 +1,6 @@
 import colors
+import geometry as geo
+import direction
 import symbol
 import gamepiece
 
@@ -18,19 +20,34 @@ class Terrain(gamepiece.GamePiece):
         return True
 
 
-class Wall(Terrain):
+class Wall (Terrain):
     def __init__(self):
         super(Wall, self).__init__()
         self._color_fg = colors.WALL_FG
-        self._color_bg = colors.WALL_BG
+        self._color_bg = colors.DB_LOULOU
         self._symbol = symbol.DUNGEON_WALLS_ROW
 
     @staticmethod
     def is_solid():
         return True
 
+    @property
+    def symbol(self):
+        neighbours_mask = 0
+        for index, neighbour in enumerate(self._get_neighbour_terrains()):
+            if(isinstance(neighbour, Wall) or isinstance(neighbour, Door)):
+                neighbours_mask |= 2 ** index
+        return self._symbol + neighbours_mask
+
     def is_transparent(self):
         return False
+
+    def _get_neighbour_terrains(self):
+        tiles =\
+            [self.dungeon_level.
+             get_tile_or_unknown(geo.add_2d(offset, self.position))
+             for offset in direction.AXIS_DIRECTIONS]
+        return [tile.get_terrain() for tile in tiles]
 
 
 class Floor(Terrain):

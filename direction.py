@@ -2,8 +2,8 @@ import rng
 
 CENTER = (0, 0)
 
-UP = (0, 1)
-DOWN = (0, -1)
+UP = (0, -1)
+DOWN = (0, 1)
 RIGHT = (1, 0)
 LEFT = (-1, 0)
 
@@ -22,9 +22,9 @@ DIRECTIONS = [UP,
               UP_LEFT]
 
 AXIS_DIRECTIONS = [UP,
-                   RIGHT,
                    DOWN,
-                   LEFT]
+                   LEFT,
+                   RIGHT]
 
 DIAGONAL_DIRECTIONS = [UP_RIGHT,
                        DOWN_RIGHT,
