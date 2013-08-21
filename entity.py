@@ -230,8 +230,8 @@ class Entity(gamepiece.GamePiece):
     def add_entity_effect(self, effect):
         self.effect_queue.add(effect)
 
-    def update_effect_queue(self):
-        self.effect_queue.update()
+    def update_effect_queue(self, time_spent):
+        self.effect_queue.update(time_spent)
 
     def update_fov(self):
         x, y = self.position

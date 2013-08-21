@@ -33,10 +33,10 @@ class EffectQueue(object):
             if(effect.status_flag == status_to_remove):
                 self._effect_queue[EffectTypes.STATUS_ADDER].remove(effect)
 
-    def update(self):
+    def update(self, time_spent):
         for effect_type_queue in EffectTypes.ALLTYPES:
             for effect in self._effect_queue[effect_type_queue]:
-                effect.update()
+                effect.update(time_spent)
 
 
 class EntityEffect(object):
@@ -48,11 +48,11 @@ class EntityEffect(object):
         self.effect_type = effect_type
         self.is_blocked = False
 
-    def update(self):
+    def update(self, time_spent):
         pass
 
-    def tick(self):
-        self.time_to_live = self.time_to_live - 1
+    def tick(self, time_spent):
+        self.time_to_live = self.time_to_live - time_spent
         if(self.time_to_live < 1):
             self.target_entity.effect_queue.remove(self)
 
@@ -67,10 +67,10 @@ class StatusRemover(EntityEffect):
                              EffectTypes.STATUS_REMOVER)
         self.status_type_to_remove = status_type_to_remove
 
-    def update(self):
+    def update(self, time_spent):
         effect_queue = self.target_entity.effect_queue
         effect_queue.remove_status_adder_of_status(self.status_type_to_remove)
-        self.tick()
+        self.tick(time_spent)
 
 
 class StatusAdder(EntityEffect):
@@ -83,9 +83,9 @@ class StatusAdder(EntityEffect):
                              EffectTypes.STATUS_ADDER)
         self.status_flag = status_flag
 
-    def update(self):
+    def update(self, time_spent):
         self.target_entity.add_temporary_status(self.status_flag)
-        self.tick()
+        self.tick(time_spent)
 
 
 class Teleport(EntityEffect):
@@ -97,7 +97,7 @@ class Teleport(EntityEffect):
                              time_to_live,
                              EffectTypes.TELEPORT)
 
-    def update(self):
+    def update(self, time_spent):
         positions =\
             self.target_entity.get_walkable_positions_from_my_position()
         random_positions = random.sample(positions, len(positions))
@@ -105,7 +105,7 @@ class Teleport(EntityEffect):
             teleport_successful = self.target_entity.try_move(position)
             if teleport_successful:
                 break
-        self.tick()
+        self.tick(time_spent)
 
 
 class DamageEntityEffect(EntityEffect):
@@ -124,10 +124,10 @@ class DamageEntityEffect(EntityEffect):
             (self.source_entity.name, self.target_entity.name, self.damage)
         messenger.messenger.message(message)
 
-    def update(self):
+    def update(self, time_spent):
         self.target_entity.hurt(self.damage)
         self.message()
-        self.tick()
+        self.tick(time_spent)
 
 
 class Heal(EntityEffect):
@@ -144,10 +144,10 @@ class Heal(EntityEffect):
             (self.source_entity.name, self.target_entity.name, self.health)
         messenger.messenger.message(message)
 
-    def update(self):
+    def update(self, time_spent):
         self.target_entity.heal(self.health)
         self.message()
-        self.tick()
+        self.tick(time_spent)
 
 
 class Equip(EntityEffect):
@@ -162,14 +162,14 @@ class Equip(EntityEffect):
         message = "%s equips %s." % (self.source_entity.name, self.item.name)
         messenger.messenger.message(message)
 
-    def update(self):
+    def update(self, time_spent):
         equipment = self.target_entity.equipment
         equip_succeded = equipment.try_equip(self.item)
         if(equip_succeded):
             self.message()
             if(self.source_entity.inventory.has_item(self.item)):
                 self.source_entity.inventory.remove_item(self.item)
-        self.tick()
+        self.tick(time_spent)
 
 
 class UnEquip(EntityEffect):
@@ -185,14 +185,14 @@ class UnEquip(EntityEffect):
         message = "%s unequips %s." % (self.source_entity.name, self.item.name)
         messenger.messenger.message(message)
 
-    def update(self):
+    def update(self, time_spent):
         equipment = self.target_entity.equipment
         if(equipment.can_unequip_to_inventory(self.equipment_slot)):
             unequip_succeded =\
                 equipment.unequip_to_inventory(self.equipment_slot)
             if(unequip_succeded):
                 self.message()
-        self.tick()
+        self.tick(time_spent)
 
 
 class ReEquip(EntityEffect):
@@ -208,7 +208,7 @@ class ReEquip(EntityEffect):
         message = "%s equips %s." % (self.source_entity.name, self.item.name)
         messenger.messenger.message(message)
 
-    def update(self):
+    def update(self, time_spent):
         old_item = None
         if(self.source_entity.equipment.slot_is_equiped(self.equipment_slot)):
             old_item =\
@@ -223,4 +223,4 @@ class ReEquip(EntityEffect):
 
         if(not old_item is None):
             self.source_entity.inventory.try_add(old_item)
-        self.tick()
+        self.tick(time_spent)
