@@ -1,6 +1,4 @@
 import colors
-import geometry as geo
-import direction
 import symbol
 import gamepiece
 
@@ -44,9 +42,7 @@ class Wall (Terrain):
 
     def _get_neighbour_terrains(self):
         tiles =\
-            [self.dungeon_level.
-             get_tile_or_unknown(geo.add_2d(offset, self.position))
-             for offset in direction.AXIS_DIRECTIONS]
+            self.dungeon_level.get_tiles_surrounding_position(self.position)
         return [tile.get_terrain() for tile in tiles]
 
 

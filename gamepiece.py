@@ -4,9 +4,10 @@ import colors
 class GamePieceType(object):
     UNDEFINED = 0
     ENTITY = 1
-    ITEM = 2
-    DUNGEON_FEATURE = 3
-    TERRAIN = 4
+    CLOUD = 2
+    ITEM = 3
+    DUNGEON_FEATURE = 4
+    TERRAIN = 5
 
 
 class GamePiece(object):
@@ -19,7 +20,6 @@ class GamePiece(object):
         #  These fields should both be set by subclasses.
         self.piece_type = GamePieceType.UNDEFINED
         self.max_instances_in_single_tile = -1
-        self.draw_order = -1
 
         self._color_fg = colors.DB_TAHITI_GOLD
         self._color_bg = None
@@ -64,7 +64,6 @@ class GamePiece(object):
         copy.dungeon_level = self.dungeon_level
         copy.piece_type = self.piece_type
         copy.max_instances_in_single_tile = self.max_instances_in_single_tile
-        copy.draw_order = self.draw_order
         return copy
 
     def can_move(self, new_position, new_dungeon_level=None):

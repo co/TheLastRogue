@@ -1,4 +1,5 @@
 import terrain
+import direction
 import dungeonfeature
 import actionscheduler
 import settings
@@ -81,7 +82,6 @@ class DungeonLevel(object):
         self.depth = depth
         self.actor_scheduler = actionscheduler.ActionScheduler()
         self.dungeon_features = []
-        self.suspended_entity = None
         self.dungeon = None
 
         self.terrain_changed_timestamp = 0
@@ -92,11 +92,15 @@ class DungeonLevel(object):
     def entities(self):
         return self.actor_scheduler.entities
 
-    def add_entity(self, entity):
-        return self.actor_scheduler.register(entity)
+    @property
+    def actors(self):
+        return self.actor_scheduler.actors
 
-    def remove_entity(self, entity):
-        return self.actor_scheduler.release(entity)
+    def add_actor(self, actor):
+        return self.actor_scheduler.register(actor)
+
+    def remove_actor(self, actor):
+        return self.actor_scheduler.release(actor)
 
     @property
     def up_stairs(self):
@@ -150,13 +154,13 @@ class DungeonLevel(object):
         if(dungeon_feature_to_remove in self.dungeon_features):
             self.dungeon_features.remove(dungeon_feature_to_remove)
 
-    def add_entity_if_not_present(self, new_entity):
-        if(not new_entity in self.entities):
-            self.add_entity(new_entity)
+    def add_actor_if_not_present(self, new_actor):
+        if(not new_actor in self.actors):
+            self.add_actor(new_actor)
 
-    def remove_entity_if_present(self, entity_to_remove):
-        if(entity_to_remove in self.entities):
-            self.remove_entity(entity_to_remove)
+    def remove_actor_if_present(self, actor_to_remove):
+        if(actor_to_remove in self.actors):
+            self.remove_actor(actor_to_remove)
 
     def has_tile(self, position):
         x, y = position
@@ -173,6 +177,10 @@ class DungeonLevel(object):
             return self.tile_matrix[y][x]
         else:
             return tile.unknown_tile
+
+    def get_tiles_surrounding_position(self, position):
+        return [self.get_tile_or_unknown(geo.add_2d(offset, position))
+                for offset in direction.AXIS_DIRECTIONS]
 
     def update(self):
         self.actor_scheduler.tick()

@@ -1,4 +1,5 @@
 import random
+import actor
 import rng
 import turn
 import gametime
@@ -27,8 +28,7 @@ class StatusFlags(object):
     SWALLOWED_BY_SLIME = 5
 
 
-class Entity(gamepiece.GamePiece):
-
+class Entity(actor.Actor):
     def __init__(self, game_state):
         super(Entity, self).__init__()
         self.hp = counter.Counter(1, 1)
@@ -50,9 +50,6 @@ class Entity(gamepiece.GamePiece):
         self.__dungeon_level = None
         self._init_entity_effects()
 
-        self.newly_spent_energy = 0
-        self.energy = 0
-        self.energy_recovery = gametime.normal_energy_gain
         self.movement_speed = gametime.single_turn
         self.attack_speed = gametime.single_turn
 
@@ -144,36 +141,6 @@ class Entity(gamepiece.GamePiece):
             self.hit(slime)
         escape_successful = rng.coin_flip() and rng.coin_flip()
         return escape_successful
-
-    def try_move(self, new_position, new_dungeon_level=None):
-        """
-        Will attempt to move the entity to a new dungeon_level/position.
-        If the move is successful return true otherwise false.
-        """
-        if(new_dungeon_level is None):
-            new_dungeon_level = self.dungeon_level
-        old_dungeon_level = self.dungeon_level
-        move_succeded = super(Entity, self).\
-            try_move(new_position, new_dungeon_level)
-        if(move_succeded):
-            if(not old_dungeon_level is None and
-               (not old_dungeon_level is new_dungeon_level)):
-                old_dungeon_level.remove_entity_if_present(self)
-            new_dungeon_level.add_entity_if_not_present(self)
-            self.update_fov()
-        return move_succeded
-
-    def try_remove_from_dungeon(self):
-        """
-        Will attempt to remove the entity from the dungeon_level/position.
-        If the remove is successful return true otherwise false.
-        """
-        old_dungeon_level = self.dungeon_level
-        remove_succeded = super(Entity, self).\
-            try_remove_from_dungeon()
-        if(remove_succeded and (not old_dungeon_level is None)):
-            old_dungeon_level.remove_entity_if_present(self)
-        return remove_succeded
 
     def get_seen_entities(self):
         seen_entities = []
@@ -339,5 +306,10 @@ class Entity(gamepiece.GamePiece):
         copy.dungeon_level = self.dungeon_level
         copy.piece_type = self.piece_type
         copy.max_instances_in_single_tile = self.max_instances_in_single_tile
-        copy.draw_order = self.draw_order
         return copy
+
+    def _update_once_a_tick(self, time_spent):
+        self.equipment.execute_equip_effects()
+        self.clear_all_temporary_status_flags()
+        self.update_effect_queue(time_spent)
+        self.update_dungeon_map_if_its_old()

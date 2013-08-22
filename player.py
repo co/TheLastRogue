@@ -1,4 +1,5 @@
 import counter
+import cloud
 import console
 import symbol
 import action
@@ -46,6 +47,9 @@ class Player(entity.Entity):
         self.set_memory_map_if_not_set(self.dungeon_level)
 
     def act(self):
+        #If the player is about to act, the latest state should be shown.
+        self.game_state.force_draw()
+
         self.newly_spent_energy = 0
         key = inputhandler.handler.get_keypress()
         if(key is None):
@@ -89,7 +93,8 @@ class Player(entity.Entity):
                                                   target_entity=self)
 
         elif key == inputhandler.ONE:
-            self.hurt(1)
+            steam_cloud = cloud.Steam(50)
+            steam_cloud.try_move(self.position, self.dungeon_level)
 
         elif key == inputhandler.TWO:
             self.heal(1)

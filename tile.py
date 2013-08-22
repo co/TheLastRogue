@@ -9,6 +9,7 @@ class Tile(object):
     def __init__(self):
         self.game_pieces = {
             gamepiece.GamePieceType.ENTITY: [],
+            gamepiece.GamePieceType.CLOUD: [],
             gamepiece.GamePieceType.ITEM: [],
             gamepiece.GamePieceType.DUNGEON_FEATURE: [],
             gamepiece.GamePieceType.TERRAIN: []
@@ -44,19 +45,14 @@ class Tile(object):
                                               colors.UNSEEN_FG,
                                               colors.UNSEEN_BG, piece.symbol)
 
-    def __non_empty_pieces_lists_sorted_on_draw_order(self):
-        piece_lists = self.game_pieces.values()
-        non_empty_piece_lists = filter(lambda pl: pl != [], piece_lists)
-        lists_sorted_on_draw_order = sorted(non_empty_piece_lists,
-                                            key=lambda piece_list:
-                                            piece_list[0].draw_order)
-        return lists_sorted_on_draw_order
-
     def get_first_item(self):
         return self.get_first_piece_of_type(gamepiece.GamePieceType.ITEM)
 
     def get_first_entity(self):
         return self.get_first_piece_of_type(gamepiece.GamePieceType.ENTITY)
+
+    def get_first_cloud(self):
+        return self.get_first_piece_of_type(gamepiece.GamePieceType.CLOUD)
 
     def get_entities(self):
         return self.game_pieces[gamepiece.GamePieceType.ENTITY]
