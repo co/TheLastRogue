@@ -1,6 +1,6 @@
 import terrain
 import dungeonfeature
-import entityscheduler
+import actionscheduler
 import settings
 import tile
 import turn
@@ -79,7 +79,7 @@ class DungeonLevel(object):
         self.width = len(tile_matrix[0])
         self.tile_matrix = tile_matrix
         self.depth = depth
-        self.entity_scheduler = entityscheduler.EntityScheduler()
+        self.actor_scheduler = actionscheduler.ActionScheduler()
         self.dungeon_features = []
         self.suspended_entity = None
         self.dungeon = None
@@ -90,13 +90,13 @@ class DungeonLevel(object):
 
     @property
     def entities(self):
-        return self.entity_scheduler.entities
+        return self.actor_scheduler.entities
 
     def add_entity(self, entity):
-        return self.entity_scheduler.register(entity)
+        return self.actor_scheduler.register(entity)
 
     def remove_entity(self, entity):
-        return self.entity_scheduler.release(entity)
+        return self.actor_scheduler.release(entity)
 
     @property
     def up_stairs(self):
@@ -175,7 +175,7 @@ class DungeonLevel(object):
             return tile.unknown_tile
 
     def update(self):
-        self.entity_scheduler.update_entities()
+        self.actor_scheduler.tick()
         self._remove_dead_monsters()
 
     def _remove_dead_monsters(self):
