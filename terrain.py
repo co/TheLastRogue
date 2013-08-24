@@ -22,7 +22,7 @@ class Wall (Terrain):
     def __init__(self):
         super(Wall, self).__init__()
         self._color_fg = colors.WALL_FG
-        self._color_bg = colors.DB_LOULOU
+        self._color_bg = colors.FLOOR_BG
         self._symbol = symbol.DUNGEON_WALLS_ROW
 
     @staticmethod
@@ -49,16 +49,16 @@ class Wall (Terrain):
 class Floor(Terrain):
     def __init__(self):
         super(Floor, self).__init__()
-        self._color_fg = colors.DB_STINGER
-        self._color_bg = colors.DB_LOULOU
+        self._color_fg = colors.FLOOR_FG
+        self._color_bg = colors.FLOOR_BG
         self._symbol = symbol.CENTER_DOT
 
 
 class Water(Terrain):
     def __init__(self):
         super(Water, self).__init__()
-        self._color_fg = colors.DB_CORNFLOWER
-        self._color_bg = colors.DB_VENICE_BLUE
+        self._color_fg = colors.BLUE_D
+        self._color_bg = colors.CYAN_D
         self._symbol = symbol.WATER
 
 
@@ -66,9 +66,8 @@ class Door(Terrain):
     def __init__(self, is_open=True):
         super(Door, self).__init__()
         self.__is_open = is_open
-        self._color_fg = colors.DB_ROPE
-        #self._color_bg = colors.DB_OILED_CEDAR
-        self._color_bg = colors.DB_LOULOU
+        self._color_fg = colors.ORANGE_D
+        self._color_bg = colors.FLOOR_BG
 
     def is_solid(self):
         return not self.is_open
@@ -107,8 +106,7 @@ class Door(Terrain):
 class GlassWall(Wall):
     def __init__(self):
         super(GlassWall, self).__init__()
-        self._color_fg = colors.DB_LIGHT_STEEL_BLUE
-        self._color_bg = colors.DB_HEATHER
+        self._color_fg = colors.WHITE
         self._symbol = symbol.CAVE_WALLS_ROW
 
     @staticmethod
@@ -119,8 +117,8 @@ class GlassWall(Wall):
 class Unknown(Terrain):
     def __init__(self):
         super(Unknown, self).__init__()
-        self._color_fg = colors.DB_BLACK
-        self._color_bg = colors.DB_BLACK
+        self._color_fg = colors.BLACK
+        self._color_bg = colors.BLACK
 
     @property
     def symbol(self):

@@ -46,7 +46,7 @@ class GameMenuStateStack(StateStack):
     def __init__(self, gamestate):
         super(GameMenuStateStack, self).__init__()
         self._grayout_rectangle =\
-            gui.RectangleGray(rectfactory.full_screen_rect(), colors.DB_OPAL)
+            gui.RectangleGray(rectfactory.full_screen_rect(), colors.GRAY_D)
         self._stack = []
         self._game_state = gamestate
 

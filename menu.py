@@ -21,8 +21,7 @@ class Menu(gui.UIElement):
         self._wrap = True
         self.may_escape = True
         self._item_stack_panel =\
-            gui.StackPanelVertical(geo.zero2d(), colors.INTERFACE_BG,
-                                   vertical_space=vertical_space)
+            gui.StackPanelVertical(geo.zero2d(), vertical_space=vertical_space)
 
     @property
     def rect(self):

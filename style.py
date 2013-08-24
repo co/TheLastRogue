@@ -3,8 +3,8 @@ import libtcodpy as libtcod
 
 
 class CharacterVisual(object):
-    def __init__(self, symbol=' ', color_bg=colors.DB_BLACK,
-                 color_fg=colors.DB_BLACK):
+    def __init__(self, symbol=' ', color_bg=colors.BLACK,
+                 color_fg=colors.BLACK):
         self.symbol = symbol
         self.color_bg = color_bg
         self.color_fg = color_fg
@@ -32,11 +32,11 @@ class RectangleStyle(object):
 
 class RectangleStyle3D(RectangleStyle):
     def __init__(self):
-        light = colors.DB_TOPAZ
-        medium = colors.DB_DIM_GRAY
-        dark = colors.DB_SMOKEY_ASH
-        very_dark = colors.DB_VALHALLA
-        very_light = colors.DB_HEATHER
+        light = colors.GRAY
+        medium = colors.GRAY_D
+        dark = colors.DARK_BLUE
+        very_dark = colors.BLACK
+        very_light = colors.WHITE
         self.center = CharacterVisual(' ', medium, medium)
         self.top = CharacterVisual(' ', light, light)
         self.left = self.top
@@ -50,8 +50,8 @@ class RectangleStyle3D(RectangleStyle):
 
 class FinalFantasyClassicStyle(RectangleStyle):
     def __init__(self):
-        white = colors.DB_WHITE
-        blue = colors.DB_VENICE_BLUE
+        white = colors.WHITE
+        blue = colors.BLUE_D
         self.center = CharacterVisual(' ', blue, blue)
         self.top = CharacterVisual(libtcod.CHAR_HLINE, blue, white)
         self.left = CharacterVisual(libtcod.CHAR_VLINE, blue, white)
@@ -65,8 +65,8 @@ class FinalFantasyClassicStyle(RectangleStyle):
 
 class MinimalClassicStyle(RectangleStyle):
     def __init__(self):
-        bg = colors.DB_VALHALLA
-        fg = colors.DB_VENICE_BLUE
+        bg = colors.INTERFACE_BG
+        fg = colors.INTERFACE_FG
         self.center = CharacterVisual(' ', bg, bg)
         self.top = CharacterVisual(libtcod.CHAR_DHLINE, bg, fg)
         self.left = CharacterVisual(libtcod.CHAR_DVLINE, bg, fg)
@@ -78,8 +78,8 @@ class MinimalClassicStyle(RectangleStyle):
         self.bottom_right = CharacterVisual(libtcod.CHAR_DSE, bg, fg)
 
 ff_blue_theme = MenuStyle(FinalFantasyClassicStyle(),
-                          colors.DB_TOPAZ, (2, 2))
+                          colors.GRAY, (2, 2))
 tlr_classic_3d_theme = MenuStyle(RectangleStyle3D(),
-                                 colors.DB_TOPAZ, (2, 2))
+                                 colors.GRAY, (2, 2))
 rogue_classic_theme = MenuStyle(MinimalClassicStyle(),
-                                colors.DB_TOPAZ, (2, 2))
+                                colors.GRAY, (2, 2))

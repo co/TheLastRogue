@@ -50,6 +50,7 @@ def main_menu(state_stack):
     main_menu_rect =\
         rectfactory.ratio_of_screen_rect(main_menu.width + border,
                                          main_menu.height + border, 0.5, 0.8)
+    print main_menu_rect
     main_menu.offset = main_menu_rect.top_left
 
     background_rect = gui.StyledRectangle(main_menu_rect,

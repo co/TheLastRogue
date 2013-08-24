@@ -36,8 +36,8 @@ class Player(entity.Entity):
     @property
     def color_fg(self):
         if(self.has_status(entity.StatusFlags.INVISIBILE)):
-            return colors.DB_VIKING
-        return colors.DB_WHITE
+            return colors.LIGHT_BLUE
+        return colors.WHITE
 
     @property
     def symbol(self):

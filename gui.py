@@ -121,7 +121,7 @@ class RectangleGray(FilledRectangle):
                                      libtcod.BKGND_DARKEN)
                 old_fg = console.get_color_fg((x, y))
                 if(old_fg == colors.UNSEEN_FG):
-                    console.set_color_fg((x, y), colors.DB_SMOKEY_ASH)
+                    console.set_color_fg((x, y), colors.GRAY_D)
                 else:
                     console.set_color_fg((x, y), colors.INACTIVE_GAME_FG)
 
@@ -229,16 +229,16 @@ class PlayerStatusBar(RectangularUIElement):
                                margin=settings.interface_theme.margin)
 
         name_text_box = TextBox(player.name, geo.zero2d(),
-                                colors.DB_PANCHO,
+                                colors.YELLOW,
                                 geo.zero2d())
 
         description_text_box = TextBox(player.description, geo.zero2d(),
-                                       colors.DB_PANCHO,
+                                       colors.YELLOW,
                                        geo.zero2d())
 
         element_width = (self.width - settings.interface_theme.margin[0] * 2)
         hp_bar = CounterBar(player.hp, element_width,
-                            colors.DB_BROWN, colors.DB_LOULOU)
+                            colors.HP_BAR_FULL, colors.HP_BAR_EMPTY)
 
         self._rectangle_bg =\
             StyledRectangle(rect, settings.interface_theme.rect_style)
@@ -289,7 +289,8 @@ class EntityStatus(UIElement):
         monster_name_text_box = TextBox(entity.name[:width], geo.zero2d(),
                                         colors.TEXT_ACTIVE)
         monster_health_bar = CounterBar(entity.hp, width,
-                                        colors.DB_BROWN, colors.DB_LOULOU)
+                                        colors.HP_BAR_FULL,
+                                        colors.HP_BAR_EMPTY)
         self._width = width
         self.status_stack_panel = StackPanelVertical(offset, margin)
         self.status_stack_panel.append(monster_name_text_box)

@@ -39,7 +39,7 @@ class DungeonFeature(gamepiece.GamePiece):
 class Stairs(DungeonFeature):
     def __init__(self):
         super(Stairs, self).__init__()
-        self._color_fg = colors.DB_WHITE
+        self._color_fg = colors.WHITE
 
 
 class StairsDown(Stairs):
@@ -81,9 +81,9 @@ class Fountain(DungeonFeature):
     @property
     def color_fg(self):
         if self._drinks_left > 0:
-            return colors.DB_VIKING
+            return colors.CYAN
         else:
-            return colors.DB_HEATHER
+            return colors.GRAY_D
 
 
     @property

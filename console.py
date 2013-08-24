@@ -5,8 +5,8 @@ import libtcodpy as libtcod
 
 
 class CharacterVisual(object):
-    def __init__(self, symbol=' ', color_bg=colors.DB_BLACK,
-                 color_fg=colors.DB_BLACK):
+    def __init__(self, symbol=' ', color_bg=colors.BLACK,
+                 color_fg=colors.BLACK):
         self.symbol = symbol
         self.color_bg = color_bg
         self.color_fg = color_fg
@@ -16,8 +16,8 @@ class ConsoleVisual(object):
     def __init__(self, width, height):
         self._visual_char_matrix =\
             [[CharacterVisual() for _ in range(width)] for _ in range(height)]
-        self._default_color_fg = colors.DB_BLACK
-        self._default_color_bg = colors.DB_BLACK
+        self._default_color_fg = colors.BLACK
+        self._default_color_bg = colors.BLACK
 
     def get_color_fg(self, position):
         x, y = position

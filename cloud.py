@@ -25,7 +25,7 @@ class Cloud(actor.Actor):
 
     @property
     def color_fg(self):
-        return colors.DB_WHITE
+        return colors.WHITE
 
     def piece_copy(self, copy=None):
         if(copy is None):

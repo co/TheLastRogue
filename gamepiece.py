@@ -21,7 +21,7 @@ class GamePiece(object):
         self.piece_type = GamePieceType.UNDEFINED
         self.max_instances_in_single_tile = -1
 
-        self._color_fg = colors.DB_TAHITI_GOLD
+        self._color_fg = colors.ORANGE
         self._color_bg = None
         self._symbol = ord('?')
 

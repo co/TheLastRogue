@@ -61,7 +61,7 @@ class PlayerThrowRockAction(PlayerMissileAction):
         self.name = "Throw Rock"
         self.display_order = 95
         self.symbol = 249
-        self.color_fg = colors.DB_TOPAZ
+        self.color_fg = colors.GRAY
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         self.animate_flight(game_state, path, self.symbol, self.color_fg)
@@ -88,7 +88,7 @@ class PlayerShootWeaponAction(action.ItemAction, PlayerMissileAction):
         self.name = "Shoot"
         self.display_order = 85
         self.symbol = '.'
-        self.color_fg = colors.DB_WHITE
+        self.color_fg = colors.WHITE
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         self.animate_flight(game_state, path, self.symbol, self.color_fg)

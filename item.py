@@ -164,7 +164,7 @@ class Gun(RangedWeapon):
     """
     def __init__(self):
         super(Gun, self).__init__()
-        self._color_fg = colors.DB_WHITE
+        self._color_fg = colors.WHITE
         self._symbol = symbol.GUN
         self._name = "Gun"
         self._description =\
@@ -207,7 +207,7 @@ class RingOfInvisibility(RingItem):
     """
     def __init__(self):
         super(RingOfInvisibility, self).__init__()
-        self._color_fg = colors.DB_GOLDEN_FIZZ
+        self._color_fg = colors.YELLOW
         self._name = "Ring of Invisibility"
         self._description =\
             "The metal is warm to your skin,\
@@ -247,7 +247,7 @@ class HealthPotion(Potion):
     """
     def __init__(self):
         super(HealthPotion, self).__init__()
-        self._color_fg = colors.DB_PLUM
+        self._color_fg = colors.PINK
         self._name = "Health Potion"
         self._description =\
             "An unusual liquid contained in a glass flask."
@@ -260,7 +260,7 @@ class Ammo(StackAbleItem):
     """
     def __init__(self):
         super(Ammo, self).__init__()
-        self._color_fg = colors.DB_TOPAZ
+        self._color_fg = colors.GRAY
         self._symbol = NOT_IMPLEMENTED
         self._name = "Ammunition"
         self._description =\
