@@ -1,4 +1,5 @@
 import counter
+import spawner
 import symbol
 import entityeffect
 import gametime
@@ -16,6 +17,9 @@ class Monster(entity.Entity):
 
     def kill_and_remove(self):
         self.hp.set_min()
+        self.on_death()
+        if(self.has_status(entity.StatusFlags.LEAVES_CORPSE)):
+            spawner.spawn_corpse_of_entity(self)
         self.try_remove_from_dungeon()
         messenger.messenger.message(messenger.Message(self.death_message))
 
@@ -88,7 +92,8 @@ class Slime(Monster):
         self.death_message = "The slime melts away."
         self._color_fg = colors.GREEN
         self._symbol = symbol.SLIME
-        self._permanent_status_flags = set()  # The slime cannot open doors.
+        # The slime cannot open doors and does not leave a corpse.
+        self._permanent_status_flags = set()
 
         self.hp = counter.Counter(20, 20)
         self.energy_recovery = gametime.half_energy_gain
@@ -147,6 +152,7 @@ class StoneStatue(Monster):
         self.death_message = "The stone statue shatters pieces, "\
             "sharp rocks covers the ground."
         self._color_fg = colors.GRAY
+        self._permanent_status_flags = set()
         self._symbol = symbol.GOLEM
 
     def act(self):

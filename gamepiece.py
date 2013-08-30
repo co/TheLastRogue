@@ -7,7 +7,8 @@ class GamePieceType(object):
     CLOUD = 2
     ITEM = 3
     DUNGEON_FEATURE = 4
-    TERRAIN = 5
+    DUNGEON_TRASH = 5
+    TERRAIN = 6
 
 
 class GamePiece(object):

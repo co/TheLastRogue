@@ -26,6 +26,7 @@ class StatusFlags(object):
     HAS_MIND = 3
     CAN_OPEN_DOORS = 4
     SWALLOWED_BY_SLIME = 5
+    LEAVES_CORPSE = 6
 
 
 class Entity(actor.Actor):
@@ -41,6 +42,7 @@ class Entity(actor.Actor):
         self._temporary_status_flags = set()
         self._permanent_status_flags = set()
         self._permanent_status_flags.add(StatusFlags.CAN_OPEN_DOORS)
+        self._permanent_status_flags.add(StatusFlags.LEAVES_CORPSE)
 
         self.game_state = game_state
         self.piece_type = gamepiece.GamePieceType.ENTITY
@@ -283,6 +285,9 @@ class Entity(actor.Actor):
     def get_walkable_positions_from_my_position(self):
         return self.dungeon_level.walkable_destinations.\
             get_walkable_positions_from_my_position(self, self.position)
+
+    def on_death(self):
+        return
 
     def update_dungeon_map_if_its_old(self):
         if(self.dungeon_level.terrain_changed_timestamp >

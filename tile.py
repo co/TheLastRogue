@@ -12,6 +12,7 @@ class Tile(object):
             gamepiece.GamePieceType.CLOUD: [],
             gamepiece.GamePieceType.ITEM: [],
             gamepiece.GamePieceType.DUNGEON_FEATURE: [],
+            gamepiece.GamePieceType.DUNGEON_TRASH: [],
             gamepiece.GamePieceType.TERRAIN: []
         }
 
