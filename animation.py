@@ -23,7 +23,6 @@ class MissileAnimation(InstantAnimation):
             self.game_state.force_draw()
             self.print_missile_at_point(point)
             console.flush()
-            time.sleep(0.02)
 
     def print_missile_at_point(self, point):
         x, y = self.camera.dungeon_to_screen_position(point)

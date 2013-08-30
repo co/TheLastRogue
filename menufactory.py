@@ -9,6 +9,7 @@ import state
 import geometry as geo
 import colors
 import action
+import symbol
 
 
 def main_menu(state_stack):
@@ -26,17 +27,17 @@ def main_menu(state_stack):
 
     start_test_game_option =\
         menu.MenuOptionWithSymbols("Start Test Dungeon",
-                                   "(", " ",
+                                   symbol.GUN, " ",
                                    start_test_game_function)
     start_game_option = menu.MenuOptionWithSymbols("Start Dungeon",
-                                                   "(", " ",
+                                                   symbol.GUN, " ",
                                                    start_game_function)
     dungeon_creator_option =\
         menu.MenuOptionWithSymbols("Dungeon Creator",
-                                   "(", " ",
+                                   symbol.GUN, " ",
                                    dungeon_visualizer_function)
     quit_option =\
-        menu.MenuOptionWithSymbols("Quit", "(", " ", quit_game_function)
+        menu.MenuOptionWithSymbols("Quit", symbol.GUN, " ", quit_game_function)
 
     menu_items = [start_test_game_option, start_game_option,
                   dungeon_creator_option, quit_option]
