@@ -1,8 +1,6 @@
 import gamepiece
 import frame
 import terrain
-import colors
-import console
 
 
 class Tile(object):
@@ -35,16 +33,12 @@ class Tile(object):
 
     def _draw_seen(self, screen_position, piece):
         color_bg = piece.color_bg
-        color_fg = piece.color_fg
         if(color_bg is None):
-            color_bg = self.get_terrain().color_bg
-        console.console.set_colors_and_symbol(screen_position, color_fg,
-                                              color_bg, piece.symbol)
+            self.get_terrain().draw(screen_position)
+        piece.draw(screen_position)
 
     def _draw_unseen(self, screen_position, piece):
-        console.console.set_colors_and_symbol(screen_position,
-                                              colors.UNSEEN_FG,
-                                              colors.UNSEEN_BG, piece.symbol)
+        piece.draw_unseen(screen_position)
 
     def get_first_item(self):
         return self.get_first_piece_of_type(gamepiece.GamePieceType.ITEM)

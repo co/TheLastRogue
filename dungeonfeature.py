@@ -39,13 +39,13 @@ class DungeonFeature(gamepiece.GamePiece):
 class Stairs(DungeonFeature):
     def __init__(self):
         super(Stairs, self).__init__()
-        self._color_fg = colors.WHITE
+        self.gfx_char.color_fg = colors.WHITE
 
 
 class StairsDown(Stairs):
     def __init__(self):
         super(StairsDown, self).__init__()
-        self._symbol = symbol.STAIRS_DOWN
+        self.gfx_char.symbol = symbol.STAIRS_DOWN
         self._name = "Stairs Down"
         self._description =\
             "A dark passway downward. Oh, what horrors awaits there?"
@@ -55,7 +55,7 @@ class StairsDown(Stairs):
 class StairsUp(Stairs):
     def __init__(self):
         super(StairsUp, self).__init__()
-        self._symbol = symbol.STAIRS_UP
+        self.gfx_char.symbol = symbol.STAIRS_UP
         self._name = "Stairs Up"
         self._description =\
             "A way back, when the nightmare becomes too real."
@@ -66,32 +66,22 @@ class Fountain(DungeonFeature):
         super(Fountain, self).__init__()
         self._drinks_left = drinks_left
         self._name = "Fountain"
-        self._description_full =\
-                "A Fountain full of clean water, surely you will become more healthy by drinking this."
-        self._description_empty =\
-                "Once there was clean water here, but it has since dried up."
+        self._description_full = """A Fountain full of clean water,
+                                    surely you will become more
+                                    healthy by drinking this."""
+        self._description_empty = """Once there was clean water here,
+                                     but it has since dried up."""
 
-    @property
-    def symbol(self):
+    def on_draw(self):
+        self.update_appearance()
+
+    def update_appearance(self):
         if self._drinks_left > 0:
-            return symbol.FOUNTAIN_FULL
+            self.gfx_char.symbol = symbol.FOUNTAIN_FULL
+            self.gfx_char.color_fg = colors.CYAN
         else:
-            return symbol.FOUNTAIN_EMPTY
-
-    @property
-    def color_fg(self):
-        if self._drinks_left > 0:
-            return colors.CYAN
-        else:
-            return colors.GRAY_D
-
-
-    @property
-    def description(self):
-        if self._drinks_left > 0:
-            return symbol.FOUNTAIN_FULL
-        else:
-            return symbol.FOUNTAIN_EMPTY
+            self.gfx_char.symbol = symbol.FOUNTAIN_EMPTY
+            self.gfx_char.color_fg = colors.GRAY_D
 
     def piece_copy(self, copy=None):
         if(copy is None):

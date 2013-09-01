@@ -1,4 +1,5 @@
 import random
+import colors
 import actor
 import rng
 import turn
@@ -168,6 +169,7 @@ class Entity(actor.Actor):
 
     def hurt(self, damage, entity=None):
         self.hp.decrease(damage)
+        self.gfx_char.set_fg_blink_colors([colors.LIGHT_PINK, colors.RED])
         if(self.is_dead):
             self.killer = entity
 

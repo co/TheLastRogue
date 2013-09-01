@@ -28,20 +28,12 @@ class Player(entity.Entity):
         self._name = "CO"
         self._description = "The Brave"
         self._strength = 3
+        self.gfx_char.color_fg = colors.WHITE
+        self.gfx_char.symbol = symbol.GUNSLINGER_THIN
 
     @property
     def strength(self):
         return self._strength
-
-    @property
-    def color_fg(self):
-        if(self.has_status(entity.StatusFlags.INVISIBILE)):
-            return colors.LIGHT_BLUE
-        return colors.WHITE
-
-    @property
-    def symbol(self):
-        return symbol.GUNSLINGER_THIN
 
     def _signal_new_dungeon_level(self):
         self.set_memory_map_if_not_set(self.dungeon_level)

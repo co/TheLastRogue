@@ -1,14 +1,14 @@
 import colors
+import console
 
 
 class GamePieceType(object):
-    UNDEFINED = 0
-    ENTITY = 1
-    CLOUD = 2
-    ITEM = 3
-    DUNGEON_FEATURE = 4
-    DUNGEON_TRASH = 5
-    TERRAIN = 6
+    ENTITY = 0
+    CLOUD = 1
+    ITEM = 2
+    DUNGEON_FEATURE = 3
+    DUNGEON_TRASH = 4
+    TERRAIN = 5
 
 
 class GamePiece(object):
@@ -19,12 +19,10 @@ class GamePiece(object):
         self._description = "XXX_no_description_XXX"
 
         #  These fields should both be set by subclasses.
-        self.piece_type = GamePieceType.UNDEFINED
+        self.piece_type = None
         self.max_instances_in_single_tile = -1
 
-        self._color_fg = colors.ORANGE
-        self._color_bg = None
-        self._symbol = ord('?')
+        self.gfx_char = console.GFXChar(ord('?'), None, colors.PINK)
 
     @property
     def position(self):
@@ -40,15 +38,15 @@ class GamePiece(object):
 
     @property
     def color_fg(self):
-        return self._color_fg
+        return self.gfx_char.color_fg
 
     @property
     def color_bg(self):
-        return self._color_bg
+        return self.gfx_char.color_bg
 
     @property
     def symbol(self):
-        return self._symbol
+        return self.gfx_char.symbol
 
     @property
     def name(self):
@@ -57,6 +55,21 @@ class GamePiece(object):
     @property
     def description(self):
         return self._description
+
+    def draw(self, screen_position):
+        self.on_draw()
+        return self.gfx_char.draw(screen_position)
+
+    def draw_no_effect(self, screen_position):
+        self.on_draw()
+        return self.gfx_char.draw_no_effect(screen_position)
+
+    def draw_unseen(self, screen_position):
+        self.on_draw()
+        return self.gfx_char.draw_unseen(screen_position)
+
+    def on_draw(self):
+        return
 
     def piece_copy(self, copy=None):
         if(copy is None):

@@ -19,7 +19,6 @@ class DungeonTrash(gamepiece.GamePiece):
         self.max_instances_in_single_tile = 1
         self._name = "XXX_UNNAMED_XXX"
         self._description = "XXX_DESCRIPTION_XXX"
-        self._color_bg = None
 
 
 class Corpse(DungeonTrash):
@@ -29,7 +28,7 @@ class Corpse(DungeonTrash):
     """
     def __init__(self):
         super(Corpse, self).__init__()
-        self._color_fg = colors.WHITE
-        self._symbol = symbol.CORPSE
+        self.gfx_char.color_fg = colors.WHITE
+        self.gfx_char.symbol = symbol.CORPSE
         self._name = "A rottening corpse."
         self._description = "A rottening corpse."

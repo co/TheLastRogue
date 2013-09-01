@@ -15,17 +15,11 @@ class Cloud(actor.Actor):
         self.piece_type = gamepiece.GamePieceType.CLOUD
         self.max_instances_in_single_tile = 1
         self.density = density
+        self.gfx_char.symbol = 178
+        self.gfx_char.color_fg = colors.WHITE
 
     def act(self):
         return 0
-
-    @property
-    def symbol(self):
-        return 178
-
-    @property
-    def color_fg(self):
-        return colors.WHITE
 
     def piece_copy(self, copy=None):
         if(copy is None):

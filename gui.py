@@ -5,6 +5,7 @@ from console import console
 import colors
 import geometry as geo
 import turn
+import style
 import settings
 
 
@@ -226,7 +227,7 @@ class PlayerStatusBar(RectangularUIElement):
         super(PlayerStatusBar, self).__init__(rect, margin)
         self._status_stack_panel =\
             StackPanelVertical(rect.top_left,
-                               margin=settings.interface_theme.margin)
+                               margin=style.interface_theme.margin)
 
         name_text_box = TextBox(player.name, geo.zero2d(),
                                 colors.YELLOW,
@@ -236,12 +237,12 @@ class PlayerStatusBar(RectangularUIElement):
                                        colors.YELLOW,
                                        geo.zero2d())
 
-        element_width = (self.width - settings.interface_theme.margin[0] * 2)
+        element_width = (self.width - style.interface_theme.margin[0] * 2)
         hp_bar = CounterBar(player.hp, element_width,
                             colors.HP_BAR_FULL, colors.HP_BAR_EMPTY)
 
         self._rectangle_bg =\
-            StyledRectangle(rect, settings.interface_theme.rect_style)
+            StyledRectangle(rect, style.interface_theme.rect_style)
 
         self._status_stack_panel.append(name_text_box)
         self._status_stack_panel.append(description_text_box)
@@ -261,17 +262,17 @@ class EntityStatusList(RectangularUIElement):
         super(EntityStatusList, self).__init__(rect, margin=margin)
         self._entity_stack_panel =\
             StackPanelVertical(rect.top_left,
-                               margin=settings.interface_theme.margin,
+                               margin=style.interface_theme.margin,
                                vertical_space=vertical_space)
 
         self._rectangle_bg =\
-            StyledRectangle(rect, settings.interface_theme.rect_style)
+            StyledRectangle(rect, style.interface_theme.rect_style)
 
     def update(self, entity):
         seen_entities = entity.get_seen_entities()
         self._entity_stack_panel.clear()
         entity_status_width = (self.width -
-                               settings.interface_theme.margin[0] * 2)
+                               style.interface_theme.margin[0] * 2)
         for seen_entity in seen_entities:
             entity_status = EntityStatus(seen_entity, geo.zero2d(),
                                          entity_status_width)
@@ -313,14 +314,14 @@ class MessageDisplay(RectangularUIElement):
         super(MessageDisplay, self).__init__(rect, margin=margin)
         self._message_stack_panel =\
             StackPanelVertical(rect.top_left,
-                               margin=settings.interface_theme.margin,
+                               margin=style.interface_theme.margin,
                                vertical_space=vertical_space)
         self._rectangle_bg =\
-            StyledRectangle(rect, settings.interface_theme.rect_style)
+            StyledRectangle(rect, style.interface_theme.rect_style)
 
     def update(self):
         messages_height = (self.height -
-                           settings.interface_theme.margin[0] * 2)
+                           style.interface_theme.margin[0] * 2)
         messages = messenger.messenger.tail(messages_height)
         self._message_stack_panel.clear()
         for message in messages:
@@ -329,7 +330,7 @@ class MessageDisplay(RectangularUIElement):
             else:
                 color = colors.TEXT_OLD
             message_width = (self.width -
-                             settings.interface_theme.margin[0] * 2)
+                             style.interface_theme.margin[0] * 2)
             words = str(message).split()
             lines = []
             line = words[0]

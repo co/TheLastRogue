@@ -1,13 +1,7 @@
 import colors
 import libtcodpy as libtcod
-
-
-class CharacterVisual(object):
-    def __init__(self, symbol=' ', color_bg=colors.BLACK,
-                 color_fg=colors.BLACK):
-        self.symbol = symbol
-        self.color_bg = color_bg
-        self.color_fg = color_fg
+from console import GFXChar
+import settings
 
 
 class MenuStyle(object):
@@ -37,27 +31,27 @@ class RectangleStyle3D(RectangleStyle):
         dark = colors.DARK_BLUE
         very_dark = colors.BLACK
         very_light = colors.WHITE
-        self.center = CharacterVisual(' ', medium, medium)
-        self.top = CharacterVisual(' ', light, light)
+        self.center = GFXChar(' ', medium, medium)
+        self.top = GFXChar(' ', light, light)
         self.left = self.top
-        self.bottom = CharacterVisual(' ', dark, dark)
+        self.bottom = GFXChar(' ', dark, dark)
         self.right = self.bottom
-        self.top_left = CharacterVisual('\\', light, very_light)
-        self.top_right = CharacterVisual(243, light, dark)
-        self.bottom_left = CharacterVisual(243, light, dark)
-        self.bottom_right = CharacterVisual('\\', dark, very_dark)
+        self.top_left = GFXChar('\\', light, very_light)
+        self.top_right = GFXChar(243, light, dark)
+        self.bottom_left = GFXChar(243, light, dark)
+        self.bottom_right = GFXChar('\\', dark, very_dark)
 
 
 class FinalFantasyClassicStyle(RectangleStyle):
     def __init__(self):
         white = colors.WHITE
         blue = colors.BLUE_D
-        self.center = CharacterVisual(' ', blue, blue)
-        self.top = CharacterVisual(libtcod.CHAR_HLINE, blue, white)
-        self.left = CharacterVisual(libtcod.CHAR_VLINE, blue, white)
+        self.center = GFXChar(' ', blue, blue)
+        self.top = GFXChar(libtcod.CHAR_HLINE, blue, white)
+        self.left = GFXChar(libtcod.CHAR_VLINE, blue, white)
         self.bottom = self.top
         self.right = self.left
-        self.top_left = CharacterVisual(libtcod.CHAR_DIAMOND, blue, white)
+        self.top_left = GFXChar(libtcod.CHAR_DIAMOND, blue, white)
         self.top_right = self.top_left
         self.bottom_left = self.top_left
         self.bottom_right = self.top_left
@@ -67,15 +61,15 @@ class MinimalClassicStyle(RectangleStyle):
     def __init__(self):
         bg = colors.INTERFACE_BG
         fg = colors.INTERFACE_FG
-        self.center = CharacterVisual(' ', bg, bg)
-        self.top = CharacterVisual(libtcod.CHAR_DHLINE, bg, fg)
-        self.left = CharacterVisual(libtcod.CHAR_DVLINE, bg, fg)
+        self.center = GFXChar(' ', bg, bg)
+        self.top = GFXChar(libtcod.CHAR_DHLINE, bg, fg)
+        self.left = GFXChar(libtcod.CHAR_DVLINE, bg, fg)
         self.bottom = self.top
         self.right = self.left
-        self.top_left = CharacterVisual(libtcod.CHAR_DNW, bg, fg)
-        self.top_right = CharacterVisual(libtcod.CHAR_DNE, bg, fg)
-        self.bottom_left = CharacterVisual(libtcod.CHAR_DSW, bg, fg)
-        self.bottom_right = CharacterVisual(libtcod.CHAR_DSE, bg, fg)
+        self.top_left = GFXChar(libtcod.CHAR_DNW, bg, fg)
+        self.top_right = GFXChar(libtcod.CHAR_DNE, bg, fg)
+        self.bottom_left = GFXChar(libtcod.CHAR_DSW, bg, fg)
+        self.bottom_right = GFXChar(libtcod.CHAR_DSE, bg, fg)
 
 ff_blue_theme = MenuStyle(FinalFantasyClassicStyle(),
                           colors.GRAY, (2, 2))
@@ -83,3 +77,10 @@ tlr_classic_3d_theme = MenuStyle(RectangleStyle3D(),
                                  colors.GRAY, (2, 2))
 rogue_classic_theme = MenuStyle(MinimalClassicStyle(),
                                 colors.GRAY, (2, 2))
+
+themes = {"ff_blue_theme": ff_blue_theme,
+          "rogue_classic_theme": rogue_classic_theme,
+          "tlr_classic_3d_theme": tlr_classic_3d_theme}
+
+menu_theme = themes[settings.menu_theme]
+interface_theme = themes[settings.interface_theme]

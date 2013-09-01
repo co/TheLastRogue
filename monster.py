@@ -61,8 +61,8 @@ class RatMan(Monster):
         self.hp = counter.Counter(10, 10)
         self._name = "Rat-Man"
         self.death_message = "The Rat-Man is beaten to a pulp."
-        self._color_fg = colors.ORANGE
-        self._symbol = symbol.RATMAN
+        self.gfx_char.color_fg = colors.ORANGE
+        self.gfx_char.symbol = symbol.RATMAN
 
     def act(self):
         self.step_looking_for_player()
@@ -77,7 +77,7 @@ class Jerico(RatMan):
         super(Jerico, self).__init__(game_state)
         self._name = "Jerico"
         self.death_message = "Jerico the quick is no more."
-        self._color_fg = colors.YELLOW
+        self.gfx_char.color_fg = colors.YELLOW
         self.energy_recovery = gametime.double_energy_gain
 
 
@@ -90,8 +90,8 @@ class Slime(Monster):
         super(Slime, self).__init__(game_state)
         self._name = "Slime"
         self.death_message = "The slime melts away."
-        self._color_fg = colors.GREEN
-        self._symbol = symbol.SLIME
+        self.gfx_char.color_fg = colors.GREEN
+        self.gfx_char.symbol = symbol.SLIME
         # The slime cannot open doors and does not leave a corpse.
         self._permanent_status_flags = set()
 
@@ -151,9 +151,9 @@ class StoneStatue(Monster):
         self._name = "stone statue"
         self.death_message = "The stone statue shatters pieces, "\
             "sharp rocks covers the ground."
-        self._color_fg = colors.GRAY
+        self.gfx_char.color_fg = colors.GRAY
         self._permanent_status_flags = set()
-        self._symbol = symbol.GOLEM
+        self.gfx_char.symbol = symbol.GOLEM
 
     def act(self):
         if(rng.coin_flip() and self.can_see_player()):

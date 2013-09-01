@@ -1,6 +1,5 @@
 import colors
 import symbol
-import libtcodpy as libtcod
 import damage
 import messenger
 import action
@@ -164,8 +163,8 @@ class Gun(RangedWeapon):
     """
     def __init__(self):
         super(Gun, self).__init__()
-        self._color_fg = colors.WHITE
-        self._symbol = symbol.GUN
+        self.gfx_char.color_fg = colors.WHITE
+        self.gfx_char.symbol = symbol.GUN
         self._name = "Gun"
         self._description =\
             "This was once a fine weapon, but age has torn it real bad.\n\
@@ -197,7 +196,7 @@ class RingItem(JewellryItem):
     def __init__(self):
         super(RingItem, self).__init__()
         self.equipment_type = equipment.EquipmentTypes.RING
-        self._symbol = symbol.RING
+        self.gfx_char.symbol = symbol.RING
 
 
 class RingOfInvisibility(RingItem):
@@ -207,7 +206,7 @@ class RingOfInvisibility(RingItem):
     """
     def __init__(self):
         super(RingOfInvisibility, self).__init__()
-        self._color_fg = colors.YELLOW
+        self.gfx_char.color_fg = colors.YELLOW
         self._name = "Ring of Invisibility"
         self._description =\
             "The metal is warm to your skin,\
@@ -230,7 +229,7 @@ class Potion(StackAbleItem):
         Abstract class, subclasses of this class are potions,
         """
         super(Potion, self).__init__()
-        self._symbol = symbol.POTION
+        self.gfx_char.symbol = symbol.POTION
         self._name = "XXX_Potion_XXX"
         self._description =\
             "An unusual liquid contained in a glass flask."
@@ -247,7 +246,7 @@ class HealthPotion(Potion):
     """
     def __init__(self):
         super(HealthPotion, self).__init__()
-        self._color_fg = colors.PINK
+        self.gfx_char.color_fg = colors.PINK
         self._name = "Health Potion"
         self._description =\
             "An unusual liquid contained in a glass flask."
@@ -260,8 +259,8 @@ class Ammo(StackAbleItem):
     """
     def __init__(self):
         super(Ammo, self).__init__()
-        self._color_fg = colors.GRAY
-        self._symbol = NOT_IMPLEMENTED
+        self.gfx_char.color_fg = colors.GRAY
+        self.gfx_char.symbol = ":"
         self._name = "Ammunition"
         self._description =\
             "Rounds for a gun."
