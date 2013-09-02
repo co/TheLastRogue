@@ -79,7 +79,7 @@ class PlayerThrowRockAction(PlayerMissileAction):
 
     def max_throw_distance(self, **kwargs):
         source_entity = kwargs[action.SOURCE_ENTITY]
-        return source_entity._strength + 1
+        return source_entity.strength + 1
 
 
 class PlayerShootWeaponAction(action.ItemAction, PlayerMissileAction):

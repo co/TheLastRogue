@@ -27,13 +27,9 @@ class Player(entity.Entity):
         self.inventory = inventory.Inventory(self)
         self._name = "CO"
         self._description = "The Brave"
-        self._strength = 3
+        self.strength = 3
         self.gfx_char.color_fg = colors.WHITE
         self.gfx_char.symbol = symbol.GUNSLINGER_THIN
-
-    @property
-    def strength(self):
-        return self._strength
 
     def _signal_new_dungeon_level(self):
         self.set_memory_map_if_not_set(self.dungeon_level)
@@ -49,7 +45,7 @@ class Player(entity.Entity):
         if key in inputhandler.move_controls:
             dx, dy = inputhandler.move_controls[key]
             new_position = geo.add_2d(self.position, (dx, dy))
-            move_succeded = self.try_step_to(new_position)
+            move_succeded = self.try_move_to(new_position)
             if(move_succeded):
                 self.newly_spent_energy += self.movement_speed
 

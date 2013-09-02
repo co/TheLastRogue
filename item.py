@@ -27,20 +27,21 @@ class Item(gamepiece.GamePiece):
     """
     Abstract class representing an item in the game.
 
-    piece_type (GamePieceType): Denotes that Item and all its
-                                subclasses is of type ITEM.
-    max_instances_in_single_tile: The number of allowed pieces of this types
-                                  on a tile.
-    item_type (ItemType): Denotes the type of item it is, should be provided
-                          by the subclasses.
+    Attributes:
+        piece_type (GamePieceType): Denotes that Item and all its
+                                    subclasses are of type ITEM.
+        max_instances_in_single_tile: The number of allowed pieces of this
+                                      types on a tile.
+        item_type (ItemType): Denotes the type of item it is, should be
+                              provided by the subclasses.
 
-    inventory (Inventory): If this item is in an entities inventory this
-                           field should be point to that inventory
-                           otherwise it shall be None.
-    actions (list of Action): A list of player actions the player
-                              can do with this item.
+        inventory (Inventory): If this item is in an entities inventory this
+                            field should be point to that inventory
+                            otherwise it shall be None.
+        actions (list of Action): A list of player actions the player
+                                can do with this item.
 
-    weight (int): The Weight of the item.
+        weight (int): The Weight of the item.
     """
     def __init__(self):
         super(Item, self).__init__()

@@ -78,13 +78,6 @@ class DungeonCreatorVisualizer(state.State):
         dgen.dfs_tunnler(dungeon_level, center_position, 4, 12, brush,
                          end_condition, move_list)
 
-    def place_random_room(dungeon_level, position, min_width, max_width,
-                          min_height, max_height):
-        pass
-
-    def place_room(dungeon_level, rect):
-        pass
-
     def cellular_cave(self):
         dgen.cellular_automata(self.dungeon_level)
 

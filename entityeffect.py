@@ -54,7 +54,7 @@ class EntityEffect(object):
     def tick(self, time_spent):
         self.time_to_live = self.time_to_live - time_spent
         if(self.time_to_live < 1):
-            self.target_entity.effect_queue.remove(self)
+            self.target_entity.remove_entity_effect(self)
 
 
 class StatusRemover(EntityEffect):

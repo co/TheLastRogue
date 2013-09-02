@@ -47,6 +47,9 @@ class Actor(gamepiece.GamePiece):
             self.energy -= self.act()
         turn.current_turn += 1
 
+    def act(self):
+        pass
+
     def _update_once_a_tick(self, time_spent):
         pass
 
