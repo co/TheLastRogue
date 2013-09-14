@@ -294,12 +294,30 @@ class Entity(actor.Actor):
         self._unarmed_damage().damage_entity(self, target_entity)
 
     def add_entity_effect(self, effect):
+        """
+        Adds an entity effect to the effect queue of this entity.
+
+        Args:
+            effect (EntityEffect): The effect that is to be added to the queue.
+        """
         self._effect_queue.add(effect)
 
     def remove_entity_effect(self, effect):
+        """
+        Removes an entity effect from the effect queue of this entity.
+
+        Args:
+            effect (EntityEffect): The effect that will be removed.
+        """
         self._effect_queue.remove(effect)
 
     def update_effect_queue(self, time_spent):
+        """
+        Applies all the effects in the effect queue to this entity.
+
+        Args:
+            time_spent: The game time between each call of this method.
+        """
         self._effect_queue.update(time_spent)
 
     def update_fov(self):
