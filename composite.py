@@ -1,5 +1,5 @@
 import counter
-import entity
+import terrain
 import colors
 import symbol
 import console
@@ -20,11 +20,31 @@ class Component(object):
         self.parent = None
         pass
 
-    def update(self):
+    def precondition(self, *args, **kw):
+        """
+        A method hook for checking if it's valid to update all components.
+        """
+        return True
+
+    def update(self, *args, **kw):
         """
         A method hook for updating the component tree.
         """
         pass
+
+    def get_sibling(self, component_type):
+        """
+        Gets the first child of the parent which is of the given type.
+        """
+        return self.parent.get_child(component_type)
+
+    def has_sibling(self, component_type):
+        """
+        Returns true if this components parent has a child of the given type.
+
+        False otherwise.
+        """
+        return self.parent.has_child(component_type)
 
 
 class Leaf(Component):
@@ -35,7 +55,6 @@ class Leaf(Component):
     """
     def __init__(self, *args, **kw):
         super(Leaf, self).__init__(*args, **kw)
-        pass
 
 
 class Composite(Component):
@@ -82,8 +101,20 @@ class Composite(Component):
         """
         Gets the first child which is of the given type.
         """
-        return next(child for child in self.children
-                    if isinstance(child, component_type))
+        if self.has_child(component_type):
+            return next(child for child in self.children
+                        if isinstance(child, component_type))
+        else:
+            return None
+
+    def has_child(self, component_type):
+        """
+        Returns true if this component has a child of the given type.
+
+        False otherwise.
+        """
+        return any(isinstance(child, component_type)
+                   for child in self.children)
 
 
 class Player(Composite):
@@ -92,31 +123,223 @@ class Player(Composite):
     """
     def __init__(self):
         super(Player, self).__init__()
-        self.add_child(DungeonPosition())
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
         self.add_child(Description())
         self.add_child(GraphicChar(symbol.GUNSLINGER_THIN,
                                    None, colors.WHITE))
 
         self.add_child(Health(10))
-        self.add_child(EntityStats(3, entity.Faction.Player))
-### Speed
-### Equipment
-### Inventory
-### EffectQueue
+        self.add_child(Faction(Faction.Player))
+        self.add_child(SightRadius(6))
+        self.add_child(StatusFlags(6))
+        #self.add_child(inventory.Inventory(6))
+        #self.add_child(equipment.Equipment(6))
+
+### EffectQueue # Use Clausen style stuff.
 ### StatusFlags
 ### GameState???
 ### GamePiece
 ### DungeonMap
 
 
-class DungeonPosition(Leaf):
+class Actor(Leaf):
+    """
+    An abstract component, enteties with this component can act.
+    """
+    def __init__(self):
+        super(Actor, self).__init__()
+
+    def act(self):
+        """
+        The action the parent component should do. And return energy spent.
+
+        Subclasses should override this method.
+        """
+        pass
+
+
+class Mover(Leaf):
+    """
+    Component for moving and checking if a move is legal.
+    """
+
+    def can_move(self, new_position, new_dungeon_level=None):
+        """
+        Checks if parent comoponent can move to new position.
+        """
+        if(new_dungeon_level is None):
+            new_dungeon_level = self.get_sibling(DungeonLevel).dungeon_level
+        if(not new_dungeon_level.has_tile(new_position)):
+            return False
+        new_tile = new_dungeon_level.get_tile(new_position)
+        return (self._can_fit_on_tile(new_tile) and
+                self._can_pass_terrain(new_tile.get_terrain()))
+
+    def try_move(self, new_position, new_dungeon_level=None):
+        """
+        Tries to move parent to new position.
+
+        Returns true if it is successful, false otherwise.
+        """
+        if(new_dungeon_level is None):
+            new_dungeon_level = self.get_sibling(DungeonLevel).dungeon_level
+        if(self.can_move(new_position, new_dungeon_level)):
+            self._move(new_position, new_dungeon_level)
+            return True
+        return False
+
+    def replace_move(self, new_position, new_dungeon_level=None):
+        """
+        Moves parent to new position and replaces what was already there.
+        """
+        if(new_dungeon_level is None):
+            new_dungeon_level = self.get_sibling(DungeonLevel).dungeon_level
+        if(not new_dungeon_level.has_tile(new_position)):
+            return False
+        new_tile = new_dungeon_level.get_tile(new_position)
+        self.try_remove_from_dungeon()
+        piece_type = self.get_sibling(GamePieceType).value
+        new_place = new_tile.game_pieces[piece_type]
+        if(len(new_place) < 1):
+            new_place.append(self)
+        else:
+            new_place[0] = self
+        self._position = new_position
+        self.dungeon_level = new_dungeon_level
+
+    def _can_fit_on_tile(self, tile):
+        """
+        Checks if the parent can fit on the tile.
+        """
+        piece_type = self.get_sibling(GamePieceType)
+        return (len(tile.game_pieces[piece_type.value]) <
+                piece_type.max_instances_in_tile)
+
+    def _can_pass_terrain(self, terrain_to_pass):
+        """
+        Checks if the parent can move through a terrain.
+        """
+        if(terrain_to_pass is None):
+            return False
+        if(not terrain_to_pass.is_solid()):
+            return True
+        status_flags = self.get_sibling(StatusFlags)
+        if(not status_flags is None and
+           status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
+           isinstance(terrain_to_pass, terrain.Door)):
+            return True
+        return False
+
+    def _move(self, new_position, dungeon_level):
+        """
+        Moves parent to new position, assumes that it fits there.
+        """
+        self.try_remove_from_dungeon()
+        new_tile = dungeon_level.get_tile(new_position)
+        piece_type = self.get_sibling(GamePieceType).value
+        new_tile.game_pieces[piece_type].append(self)
+        self._position = new_position
+        self.dungeon_level = dungeon_level
+
+    def try_remove_from_dungeon(self):
+        """
+        Tries to remove parent from dungeon.
+        """
+        if(not self.has_sibling(DungeonLevel)):
+            return True
+        position = self.get_sibling(Position).position
+        tile_i_might_be_on = (self.get_sibling(DungeonLevel).
+                              dungeon_level.get_tile(position))
+
+        print tile_i_might_be_on.game_pieces
+        piece_type = self.get_sibling(GamePieceType).value
+        pieces_i_might_be_among = \
+            tile_i_might_be_on.game_pieces[piece_type]
+
+        if(any(self is piece for piece in pieces_i_might_be_among)):
+            pieces_i_might_be_among.remove(self)
+            self.parent.remove_child(DungeonLevel)
+            return True
+        return False
+
+
+class GamePieceType(Leaf):
+    ENTITY = 0
+    CLOUD = 1
+    ITEM = 2
+    DUNGEON_FEATURE = 3
+    DUNGEON_TRASH = 4
+    TERRAIN = 5
+
+    _MAX_INSTANCES_OF_PIECE_TYPE_ON_TILE = {ENTITY: 1,
+                                            CLOUD: 1,
+                                            ITEM: 1,
+                                            DUNGEON_FEATURE: 1,
+                                            DUNGEON_TRASH: 1,
+                                            TERRAIN: 1}
+
+    def __init__(self, piece_type=None):
+        super(GamePieceType, self).__init__()
+        self.value = piece_type
+
+    @property
+    def max_instances_in_tile(self):
+        return self.__class__.\
+            _MAX_INSTANCES_OF_PIECE_TYPE_ON_TILE[self.value]
+
+
+class KeyboardEventMover(Leaf):
+    """
+    Composites holding this has a position in the dungeon.
+    """
+
+    def __init__(self):
+        super(KeyboardEventMover, self).__init__()
+        self._status_flags = set()
+
+    def has_status(self, status):
+        return status in self._status_flags
+
+
+class StatusFlags(Leaf):
+    """
+    Composites holding this has status flags, describing their behaviour.
+    """
+    INVISIBILE = 0
+    SEE_INVISIBILITY = 1
+    FLYING = 2
+    HAS_MIND = 3
+    CAN_OPEN_DOORS = 4
+    SWALLOWED_BY_SLIME = 5
+    LEAVES_CORPSE = 6
+
+    def __init__(self):
+        super(StatusFlags, self).__init__()
+        self._status_flags = set()
+
+    def has_status(self, status):
+        return status in self._status_flags
+
+    def add_status(self, status):
+        return self._status_flags.add(status)
+
+
+class Position(Leaf):
     """
     Composites holding this has a position in the dungeon.
     """
     def __init__(self):
-        super(DungeonPosition, self).__init__()
+        super(Position, self).__init__()
         self.position = (-1, -1)
-        self.depth = -1
+
+
+class DungeonLevel(Leaf):
+    """
+    Composites holding this has a position in the dungeon.
+    """
+    def __init__(self):
+        super(DungeonLevel, self).__init__()
         self.dungeon_level = None
 
 
@@ -125,20 +348,60 @@ class MemmoryMap(Leaf):
     Composites holding this has a position in the dungeon.
     """
     def __init__(self):
-        super(DungeonPosition, self).__init__()
+        super(MemmoryMap, self).__init__()
         self.position = (-1, -1)
         self.depth = -1
 
 
-class EntityStats(Leaf):
+class Strength(Leaf):
     """
-    Composites holding this has a position in the dungeon.
+    Composites holding this has the strength attribute.
     """
-    def __init__(self, strength, faction, sight_radius):
-        super(EntityStats, self).__init__()
+    def __init__(self, strength):
+        super(Strength, self).__init__()
         self.strength = strength
-        self.faction = faction
+
+
+class AttackSpeed(Leaf):
+    """
+    Composites holding this has the attack_speed attribute.
+    """
+    def __init__(self, attack_speed):
+        super(AttackSpeed, self).__init__()
+        self.attack_speed = attack_speed
+
+
+class MovementSpeed(Leaf):
+    """
+    Composites holding this has the attack_speed attribute.
+    """
+    def __init__(self, attack_speed):
+        super(MovementSpeed, self).__init__()
+        self.attack_speed = attack_speed
+
+
+class SightRadius(Leaf):
+    """
+    Composites holding this has the sight_radius attribute.
+    """
+    def __init__(self, sight_radius):
+        super(SightRadius, self).__init__()
         self.sight_radius = sight_radius
+
+
+class Faction(Leaf):
+    """
+    The faction attribute keeps track of the faction.
+
+    All other factions are concidered hostile.
+    """
+
+    PLAYER = 0
+    MONSTER = 1
+
+    def __init__(self, faction):
+        super(Faction, self).__init__()
+        self.faction = faction
 
 
 class GraphicChar(Leaf):
@@ -208,19 +471,19 @@ class Health(Leaf):
     Health Component. Composites holding this has health points.
 
     Attributes:
-        health_counter (Counter): Holds the min, max and current health.
+        _health_counter (Counter): Holds the min, max and current health.
     """
     def __init__(self, max_hp):
-        self.health_counter = counter.Counter(max_hp, max_hp)
+        self._health_counter = counter.Counter(max_hp, max_hp)
 
     """
     Increases the health by an amount.
     """
     def Heal(self, heal_ammount):
-        self.health_counter.increase(heal_ammount)
+        self._health_counter.increase(heal_ammount)
 
     """
     Decreases the health by an amount.
     """
     def Damage(self, damage_ammount):
-        self.health_counter(damage_ammount)
+        self._health_counter(damage_ammount)
