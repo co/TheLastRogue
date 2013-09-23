@@ -109,6 +109,7 @@ class Entity(actor.Actor):
     def try_move_to(self, position):
         """
         Tries to move the entity to a position.
+
         If there is a unfriendly entity in the way hit it instead.
         If there is a door in the way try to open it.
         If an action is taken return True otherwise return False.
@@ -116,6 +117,7 @@ class Entity(actor.Actor):
         Args:
             position (int, int): The position the entity tries to move to.
         """
+
         if(self.has_status(StatusFlags.SWALLOWED_BY_SLIME)):
             escape_successful = self.try_to_escape_slime(position)
             if(not escape_successful):
