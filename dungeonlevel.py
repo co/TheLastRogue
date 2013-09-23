@@ -28,29 +28,30 @@ def unknown_level_map(width, height, depth):
     return dungeon_level
 
 
-def dungeon_level_from_file(file_name):
-    terrain_matrix = terrain_matrix_from_file(file_name)
+def dungeon_level_from_lines(lines):
+    terrain_matrix = terrain_matrix_from_lines(lines)
     dungeon_level = DungeonLevel(terrain_matrix, 1)
-    set_terrain_from_file(dungeon_level, file_name)
+    set_terrain_from_lines(dungeon_level, lines)
     return dungeon_level
 
 
-def terrain_matrix_from_file(file_name):
-    dungeon = read_file(file_name)
-    width = len(dungeon[0])
-    height = len(dungeon)
+def dungeon_level_from_file(file_name):
+    lines = read_file(file_name)
+    return dungeon_level_from_lines(lines)
 
+
+def terrain_matrix_from_lines(lines):
+    width = len(lines[0])
+    height = len(lines)
     terrain_matrix = get_empty_tile_matrix(width, height)
     return terrain_matrix
 
 
-def set_terrain_from_file(dungeon_level, file_name):
-    dungeon = read_file(file_name)
-
-    for x in range(dungeon_level.width):
-        for y in range(dungeon_level.height):
-            terrain = char_to_terrain(dungeon[y][x])
-            terrain.replace_move((x, y), dungeon_level)
+def set_terrain_from_lines(dungeon_level, lines):
+        for x in range(dungeon_level.width):
+            for y in range(dungeon_level.height):
+                terrain = char_to_terrain(lines[y][x])
+                terrain.replace_move((x, y), dungeon_level)
 
 
 def char_to_terrain(c):
@@ -182,7 +183,7 @@ class DungeonLevel(object):
         return [self.get_tile_or_unknown(geo.add_2d(offset, position))
                 for offset in direction.AXIS_DIRECTIONS]
 
-    def update(self):
+    def tick(self):
         self.actor_scheduler.tick()
         self._remove_dead_monsters()
 

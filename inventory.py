@@ -2,7 +2,11 @@ ITEM_CAPACITY = 16
 
 
 class Inventory(object):
+    """
+    Holds the Items an entity is carrying.
+    """
     def __init__(self, entity):
+        super(Inventory, self).__init__()
         self._items = []
         self._entity = entity
         self._item_capacity = ITEM_CAPACITY

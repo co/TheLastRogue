@@ -1,4 +1,5 @@
-import symbol
+import icon
+import composite
 
 
 class EquipmentSlot(object):
@@ -35,28 +36,28 @@ class EquipmentTypes(object):
 class EquipmentSlots(object):
     #  Weapons
     MELEE_WEAPON = EquipmentSlot("Melee Weapon", EquipmentTypes.MELEE_WEAPON,
-	symbol.SWORD)
+                                 icon.SWORD)
     RANGED_WEAPON = EquipmentSlot("Ranged Weapon",
-                                  EquipmentTypes.RANGED_WEAPON, symbol.GUN)
+                                  EquipmentTypes.RANGED_WEAPON, icon.GUN)
 
     #  Armor
-    HEADGEAR = EquipmentSlot("Headgear", EquipmentTypes.HEADGEAR, symbol.HELM)
-    ARMOR = EquipmentSlot("Armor", EquipmentTypes.ARMOR, symbol.ARMOR)
-    BOOTS = EquipmentSlot("Boots", EquipmentTypes.BOOTS, symbol.BOOTS)
+    HEADGEAR = EquipmentSlot("Headgear", EquipmentTypes.HEADGEAR, icon.HELM)
+    ARMOR = EquipmentSlot("Armor", EquipmentTypes.ARMOR, icon.ARMOR)
+    BOOTS = EquipmentSlot("Boots", EquipmentTypes.BOOTS, icon.BOOTS)
 
     #  Jewelry
     RIGHT_RING = EquipmentSlot("Right Ring", EquipmentTypes.RING,
-                               symbol.RING)
+                               icon.RING)
     LEFT_RING = EquipmentSlot("Left Ring", EquipmentTypes.RING,
-                              symbol.RING)
+                              icon.RING)
     AMULET = EquipmentSlot("Amulet", EquipmentTypes.AMULET,
-                           symbol.AMULET)
+                           icon.AMULET)
 
     ALL = [MELEE_WEAPON, RANGED_WEAPON, HEADGEAR, ARMOR,
            BOOTS, RIGHT_RING, LEFT_RING, AMULET]
 
 
-class Equipment(object):
+class Equipment(composite.Leaf):
     def __init__(self, entity):
         self._equipment = {
             EquipmentSlots.HEADGEAR: None,

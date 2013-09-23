@@ -1,5 +1,5 @@
 import colors
-import symbol
+import icon
 import gamepiece
 
 
@@ -23,7 +23,7 @@ class Wall (Terrain):
         super(Wall, self).__init__()
         self.gfx_char.color_fg = colors.WALL_FG
         self.gfx_char.color_bg = colors.FLOOR_BG
-        self._wall_symbol_row = symbol.DUNGEON_WALLS_ROW
+        self._wall_symbol_row = icon.DUNGEON_WALLS_ROW
 
     @staticmethod
     def is_solid():
@@ -53,7 +53,7 @@ class Floor(Terrain):
         super(Floor, self).__init__()
         self.gfx_char.color_fg = colors.FLOOR_FG
         self.gfx_char.color_bg = colors.FLOOR_BG
-        self.gfx_char.symbol = symbol.CENTER_DOT
+        self.gfx_char.symbol = icon.CENTER_DOT
 
 
 class Water(Terrain):
@@ -61,7 +61,7 @@ class Water(Terrain):
         super(Water, self).__init__()
         self.gfx_char.color_fg = colors.BLUE_D
         self.gfx_char.color_bg = colors.CYAN_D
-        self.gfx_char.symbol = symbol.WATER
+        self.gfx_char.symbol = icon.WATER
 
 
 class Door(Terrain):
@@ -82,18 +82,18 @@ class Door(Terrain):
     def is_open(self, value):
         self.__is_open = value
         if(self.__is_open):
-            self.gfx_char.symbol = symbol.DOOR_OPEN
+            self.gfx_char.symbol = icon.DOOR_OPEN
         else:
-            self.gfx_char.symbol = symbol.DOOR
+            self.gfx_char.symbol = icon.DOOR
         if(not self.dungeon_level is None):
             self.dungeon_level.signal_terrain_changed()
 
     @property
     def symbol(self):
         if(self.is_open):
-            return symbol.DOOR_OPEN
+            return icon.DOOR_OPEN
         else:
-            return symbol.DOOR
+            return icon.DOOR
 
     def is_transparent(self):
         return self.is_open
@@ -114,7 +114,7 @@ class GlassWall(Wall):
     def __init__(self):
         super(GlassWall, self).__init__()
         self.gfx_char.color_fg = colors.WHITE
-        self.gfx_char.symbol = symbol.CAVE_WALLS_ROW
+        self.gfx_char.symbol = icon.CAVE_WALLS_ROW
 
     @staticmethod
     def is_transparent():

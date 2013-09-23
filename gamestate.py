@@ -13,11 +13,19 @@ import rectfactory
 import turn
 import messenger
 import state
+#import compsite
 
 
 def reset_globals():
     turn.current_turn = 0
     messenger.messenger = messenger.Messenger()
+
+
+class ComponentGameState(state.State):
+    def __init__(self):
+        #hero = compsite.Player()
+        self.dungeon_level =\
+            dungeonlevel.dungeon_level_from_file("test.level")
 
 
 class GameStateBase(state.State):

@@ -15,21 +15,6 @@ import terrain
 import libtcodpy as libtcod
 
 
-class Faction(object):
-    PLAYER = 0
-    MONSTER = 1
-
-
-class StatusFlags(object):
-    INVISIBILE = 0
-    SEE_INVISIBILITY = 1
-    FLYING = 2
-    HAS_MIND = 3
-    CAN_OPEN_DOORS = 4
-    SWALLOWED_BY_SLIME = 5
-    LEAVES_CORPSE = 6
-
-
 class Entity(actor.Actor):
     """
     Abstract class representing an being/entity in the game.
