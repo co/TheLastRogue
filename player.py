@@ -18,6 +18,7 @@ import gametime
 import geometry as geo
 
 
+# got data for all fields
 class Player(entity.Entity):
     def __init__(self, game_state):
         super(Player, self).__init__(game_state)

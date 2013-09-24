@@ -1,5 +1,7 @@
 import counter
-import terrain
+import turn
+import libtcodpy as libtcod
+import gametime
 import colors
 import symbol
 import console
@@ -131,10 +133,13 @@ class Player(Composite):
                                    None, colors.WHITE))
 
         self.add_child(Health(10))
+        self.add_child(Strength(10))
+        self.add_child(MovementSpeed(gametime.single_turn))
+        self.add_child(AttackSpeed(gametime.single_turn))
         self.add_child(Faction(Faction.Player))
         self.add_child(SightRadius(6))
         self.add_child(StatusFlags(6))
-        #self.add_child(inventory.Inventory(6))
+        self.add_child(Inventory(6))
         #self.add_child(equipment.Equipment(6))
 
 ### EffectQueue # Use Clausen style stuff.
@@ -158,113 +163,6 @@ class Actor(Leaf):
         Subclasses should override this method.
         """
         pass
-
-
-class Mover(Leaf):
-    """
-    Component for moving and checking if a move is legal.
-    """
-
-    def can_move(self, new_position, new_dungeon_level=None):
-        """
-        Checks if parent comoponent can move to new position.
-        """
-        if(new_dungeon_level is None):
-            new_dungeon_level =\
-                self.get_sibling_of_type(DungeonLevel).dungeon_level
-        if(not new_dungeon_level.has_tile(new_position)):
-            return False
-        new_tile = new_dungeon_level.get_tile(new_position)
-        return (self._can_fit_on_tile(new_tile) and
-                self._can_pass_terrain(new_tile.get_terrain()))
-
-    def try_move(self, new_position, new_dungeon_level=None):
-        """
-        Tries to move parent to new position.
-
-        Returns true if it is successful, false otherwise.
-        """
-        if(new_dungeon_level is None):
-            new_dungeon_level =\
-                self.get_sibling_of_type(DungeonLevel).dungeon_level
-        if(self.can_move(new_position, new_dungeon_level)):
-            self._move(new_position, new_dungeon_level)
-            return True
-        return False
-
-    def _move(self, new_position, dungeon_level):
-        """
-        Moves parent to new position, assumes that it fits there.
-        """
-        self.try_remove_from_dungeon()
-        new_tile = dungeon_level.get_tile(new_position)
-        piece_type = self.get_sibling_of_type(GamePieceType).value
-        new_tile.game_pieces[piece_type].append(self.parent)
-        print new_tile.game_pieces
-        self.get_sibling_of_type(Position).position = new_position
-        dungeon_level_module = DungeonLevel()
-        dungeon_level_module.dungeon_level = dungeon_level
-        self.parent.add_child(dungeon_level_module)
-
-    def replace_move(self, new_position, new_dungeon_level=None):
-        """
-        Moves parent to new position and replaces what was already there.
-        """
-        if(new_dungeon_level is None):
-            new_dungeon_level =\
-                self.get_sibling_of_type(DungeonLevel).dungeon_level
-        if(not new_dungeon_level.has_tile(new_position)):
-            return False
-        new_tile = new_dungeon_level.get_tile(new_position)
-        self.try_remove_from_dungeon()
-        piece_type = self.get_sibling_of_type(GamePieceType).value
-        new_place = new_tile.game_pieces[piece_type]
-        for piece in new_place:
-            piece.get_child_of_type(Mover).try_remove_from_dungeon()
-        self.try_move(new_position, new_dungeon_level)
-
-    def _can_fit_on_tile(self, tile):
-        """
-        Checks if the parent can fit on the tile.
-        """
-        piece_type = self.get_sibling_of_type(GamePieceType)
-        return (len(tile.game_pieces[piece_type.value]) <
-                piece_type.max_instances_in_tile)
-
-    def _can_pass_terrain(self, terrain_to_pass):
-        """
-        Checks if the parent can move through a terrain.
-        """
-        if(terrain_to_pass is None):
-            return False
-        if(not terrain_to_pass.is_solid()):
-            return True
-        status_flags = self.get_sibling_of_type(StatusFlags)
-        if(not status_flags is None and
-           status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
-           isinstance(terrain_to_pass, terrain.Door)):
-            return True
-        return False
-
-    def try_remove_from_dungeon(self):
-        """
-        Tries to remove parent from dungeon.
-        """
-        if(not self.has_sibling(DungeonLevel)):
-            return True
-        position = self.get_sibling_of_type(Position).position
-        tile_i_might_be_on = (self.get_sibling_of_type(DungeonLevel).
-                              dungeon_level.get_tile(position))
-
-        piece_type = self.get_sibling_of_type(GamePieceType).value
-        pieces_i_might_be_among = \
-            tile_i_might_be_on.game_pieces[piece_type]
-        if self.has_sibling(DungeonLevel):
-            self.parent.remove_child_of_type(DungeonLevel)
-        if(any(self.parent is piece for piece in pieces_i_might_be_among)):
-            pieces_i_might_be_among.remove(self.parent)
-            return True
-        return False
 
 
 class GamePieceType(Leaf):
@@ -343,7 +241,31 @@ class DungeonLevel(Leaf):
     """
     def __init__(self):
         super(DungeonLevel, self).__init__()
-        self.dungeon_level = None
+        self._dungeon_level = None
+
+    @property
+    def dungeon_level(self):
+        """
+        Gets the dungeon_level the entity is currently in.
+        """
+        return self._dungeon_level
+
+    @dungeon_level.setter
+    def dungeon_level(self, value):
+        """
+        Sets current dungeon_level of the entity.
+        Also updates the visibility/solidity of the dungeon_level tiles.
+        """
+        if((not self.dungeon_level is value) and (not value is None)):
+            self._dungeon_level = value
+            dungeon_mask_module = self.get_sibling_of_type(DungeonMask)
+            dungeon_mask_module.dungeon_map = libtcod.map_new(value.width,
+                                                              value.height)
+            dungeon_mask_module.update_dungeon_map()
+            self.path = libtcod.path_new_using_map(self.dungeon_map, 1.0)
+            if(self.has_sibling(MemmoryMap)):
+                self.get_sibling_of_type(MemmoryMap).\
+                    set_memory_map_if_not_set(self.dungeon_level)
 
 
 class MemmoryMap(Leaf):
@@ -490,3 +412,210 @@ class Health(Leaf):
     """
     def Damage(self, damage_ammount):
         self._health_counter(damage_ammount)
+
+
+class MemoryMap(Leaf):
+    """
+    A representation of the dungeon as seen by an entity.
+    """
+    def __init__(self, max_hp):
+        super(MemmoryMap, self).__init__()
+        self._memory_map = []
+
+    def get_memory_of_map(self, dungeon_level):
+        self.set_memory_map_if_not_set(dungeon_level)
+        return self._memory_map[dungeon_level.depth]
+
+    def set_memory_map_if_not_set(self, dungeon_level):
+        """
+        Lazily initiates unknown dungeon to the depth needed.
+        """
+        depth = dungeon_level.depth
+        while(len(self._memory_map) <= depth):
+            self._memory_map.append(None)
+            if(self._memory_map[depth] is None):
+                self._memory_map[depth] =\
+                    dungeon_level.unknown_level_map(dungeon_level.width,
+                                                    dungeon_level.height,
+                                                    dungeon_level.depth)
+
+    def update_memory_of_tile(self, tile, position, depth):
+        """
+        Writes the entity memory of a tile, to the memory map.
+        """
+        if (tile.get_first_entity() is self):
+            return  # No need to remember where you was, you are not there.
+        self.set_memory_map_if_not_set(self.dungeon_level)
+        x, y = position
+        self._memory_map[depth].tile_matrix[y][x] = tile.copy()
+
+
+class DungeonMask(Leaf):
+    """
+    Holds the visibility mask and solidity mask of the entity
+    """
+    def __init__(self, arg):
+        super(DungeonMask, self).__init__()
+        self.dungeon_map
+        self.last_dungeon_map_update_timestamp = -1
+
+    def can_see_point(self, point):
+        """
+        Checks if a particular point is visible to this entity.
+
+        Args:
+            point (int, int): The point to check.
+        """
+        x, y = point
+        return libtcod.map_is_in_fov(self.dungeon_map, x, y)
+
+    def update_fov(self):
+        """
+        Calculates the Field of Visuon from the dungeon_map.
+        """
+        x, y = self.position
+        sight_radius = self.get_sibling_of_type(SightRadius).sight_radius
+        libtcod.map_compute_fov(self.dungeon_map, x, y,
+                                sight_radius, True)
+
+    def print_walkable_map(self):
+        """
+        Prints a map of where this entity is allowed to walk.
+        """
+        for y in range(libtcod.map_get_height(self.dungeon_map)):
+            line = ""
+            for x in range(libtcod.map_get_width(self.dungeon_map)):
+                if(libtcod.map_is_walkable(self.dungeon_map, x, y)):
+                    line += " "
+                else:
+                    line += "#"
+            print(line)
+
+    def print_is_transparent_map(self):
+        """
+        Prints a map of what this entity can see through.
+        """
+        for y in range(libtcod.map_get_height(self.dungeon_map)):
+            line = ""
+            for x in range(libtcod.map_get_width(self.dungeon_map)):
+                if(libtcod.map_is_transparent(self.dungeon_map, x, y)):
+                    line += " "
+                else:
+                    line += "#"
+            print(line)
+
+    def print_visible_map(self):
+        """
+        Prints a map of what this entity sees right now.
+        """
+        for y in range(libtcod.map_get_height(self.dungeon_map)):
+            line = ""
+            for x in range(libtcod.map_get_width(self.dungeon_map)):
+                if(libtcod.map_is_in_fov(self.dungeon_map, x, y)):
+                    line += " "
+                else:
+                    line += "#"
+            print(line)
+
+    def update_dungeon_map_if_its_old(self):
+        """
+        Updates the dungeon map it is older than the latest change.
+        """
+        if(self.dungeon_level.terrain_changed_timestamp >
+           self.last_dungeon_map_update_timestamp):
+            self.update_dungeon_map()
+
+    def update_dungeon_map(self):
+        """
+        Updates the dungeon map.
+        """
+        for y in range(self.dungeon_level.height):
+            for x in range(self.dungeon_level.width):
+                terrain = self.dungeon_level.tile_matrix[y][x].get_terrain()
+                libtcod.map_set_properties(self.dungeon_map, x, y,
+                                           terrain.is_transparent(),
+                                           self._can_pass_terrain(terrain))
+        self.last_dungeon_map_update_timestamp = turn.current_turn
+        self.update_fov()
+
+
+ITEM_CAPACITY = 16
+
+
+class Inventory(Leaf):
+    """
+    Holds the Items an entity is carrying.
+    """
+    def __init__(self, entity):
+        super(Inventory, self).__init__()
+        self._items = []
+        self._entity = entity
+        self._item_capacity = ITEM_CAPACITY
+
+    @property
+    def items(self):
+        return self._items
+
+    def try_add(self, item):
+        """
+        Tries to add an item to the inventory.
+
+        Returns True on success otherwise False.
+        """
+        if(not self.has_room_for_item()):
+            return False
+        else:
+            item.try_remove_from_dungeon()
+            self._items.append(item)
+            item.inventory = self
+            return True
+
+    def has_room_for_item(self):
+        """
+        Returns true if the inventory has room for another item.
+        """
+        return len(self._items) + 1 <= self._item_capacity
+
+    def can_drop_item(self, item):
+        """
+        Returns true if it is a legal action to drop the item.
+        """
+        return item.can_move(self._entity.position,
+                             self._entity.dungeon_level)
+
+    def try_drop_item(self, item):
+        """
+        Tries to drop an item to the ground.
+
+        Returns True on success otherwise False.
+        """
+        drop_successful = item.try_move(self._entity.position,
+                                        self._entity.dungeon_level)
+        if drop_successful:
+            self.remove_item(item)
+        return drop_successful
+
+    def remove_item(self, item):
+        """
+        Removes item from the inventory.
+        """
+        self._items.remove(item)
+        item.inventory = None
+
+    def has_item(self, item):
+        """
+        Returns true if the item instance is in the inventory, false otherwise.
+        """
+        return item in self._items
+
+    def is_empty(self):
+        """
+        Returns true the inventory is empty, false otherwise.
+        """
+        return len(self._items) <= 0
+
+    def items_of_equipment_type(self, type_):
+        """
+        Returns a list of all items in the inventory of the given type.
+        """
+        return [item for item in self._items if item.equipment_type == type_]

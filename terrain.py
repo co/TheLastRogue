@@ -1,13 +1,13 @@
 import colors
 import icon
-import gamepiece
+from gamepiece import GamePiece, GamePieceType
 
 
-class Terrain(gamepiece.GamePiece):
+class Terrain(GamePiece):
     def __init__(self):
         super(Terrain, self).__init__()
         self.max_instances_in_single_tile = 1
-        self.piece_type = gamepiece.GamePieceType.TERRAIN
+        self.piece_type = GamePieceType.TERRAIN
 
     @staticmethod
     def is_solid():

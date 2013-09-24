@@ -1,5 +1,4 @@
 import colors
-import composite
 import frame
 import settings
 import libtcodpy as libtcod
