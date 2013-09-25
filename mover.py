@@ -1,4 +1,8 @@
-from composite import Leaf, DungeonLevel, GamePieceType, Position, StatusFlags
+from compositecore import Leaf
+from position import Position
+from dungeonlevelcomposite import DungeonLevel
+from statusflags import StatusFlags
+from gamepiecetype import GamePieceType
 from terrain import Door
 
 

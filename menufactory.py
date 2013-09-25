@@ -1,4 +1,5 @@
 import gamestate
+import compositegamestate
 import equipment
 import rectfactory
 import dungeoncreatorvisualizer
@@ -16,6 +17,9 @@ def main_menu(state_stack):
     ui_elements = []
     ui_state = state.UIState(gui.UIElementList(ui_elements))
 
+    start_composite_game_function =\
+        lambda: ui_state.current_stack.push(compositegamestate
+                                            .ComponentGameState())
     start_test_game_function =\
         lambda: ui_state.current_stack.push(gamestate.TestGameState())
     start_game_function =\
@@ -25,6 +29,10 @@ def main_menu(state_stack):
         lambda: ui_state.current_stack.push(dungeoncreatorvisualizer.
                                             DungeonCreatorVisualizer())
 
+    start_composite_game_option =\
+        menu.MenuOptionWithSymbols("Start Composite Dungeon",
+                                   symbol.GUN, " ",
+                                   start_composite_game_function)
     start_test_game_option =\
         menu.MenuOptionWithSymbols("Start Test Dungeon",
                                    symbol.GUN, " ",
@@ -39,8 +47,8 @@ def main_menu(state_stack):
     quit_option =\
         menu.MenuOptionWithSymbols("Quit", symbol.GUN, " ", quit_game_function)
 
-    menu_items = [start_test_game_option, start_game_option,
-                  dungeon_creator_option, quit_option]
+    menu_items = [start_composite_game_option, start_test_game_option,
+                  start_game_option, dungeon_creator_option, quit_option]
 
     border = 4
     temp_position = (-1, -1)

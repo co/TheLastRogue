@@ -13,7 +13,6 @@ import rectfactory
 import turn
 import messenger
 import state
-#import compsite
 
 
 def reset_globals():
@@ -26,6 +25,7 @@ class ComponentGameState(state.State):
         #hero = compsite.Player()
         self.dungeon_level =\
             dungeonlevel.dungeon_level_from_file("test.level")
+        self.player = compsite.Player(self)
 
 
 class GameStateBase(state.State):
