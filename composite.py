@@ -1,6 +1,5 @@
 import counter
 import random
-import turn
 import libtcodpy as libtcod
 import gametime
 import colors
@@ -10,7 +9,11 @@ from mover import Mover
 from position import Position
 from dungeonlevelcomposite import DungeonLevel
 from statusflags import StatusFlags
-from compositecore import Leaf, Composite
+from compositecore import Leaf, Composite, CompositeMessage
+from sightradius import SightRadius
+from dungeonmask import DungeonMask
+from gamepiecetype import GamePieceType
+from memorymap import MemoryMap
 
 
 class Player(Composite):
@@ -29,10 +32,14 @@ class Player(Composite):
         self.add_child(Strength(10))
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(AttackSpeed(gametime.single_turn))
-        self.add_child(Faction(Faction.Player))
+        self.add_child(Faction(Faction.PLAYER))
         self.add_child(SightRadius(6))
-        self.add_child(StatusFlags(6))
-        self.add_child(Inventory(6))
+        self.add_child(StatusFlags())
+        self.add_child(DungeonMask())
+        self.add_child(MemoryMap())
+        self.add_child(Inventory())
+        self.add_child(Mover())
+        self.add_child(GamePieceType(GamePieceType.ENTITY))
         #self.add_child(equipment.Equipment(6))
 
 ### EffectQueue # Use Clausen style stuff.
@@ -69,16 +76,6 @@ class KeyboardEventMover(Leaf):
 
     def has_status(self, status):
         return status in self._status_flags
-
-
-class MemmoryMap(Leaf):
-    """
-    Composites holding this has a position in the dungeon.
-    """
-    def __init__(self):
-        super(MemmoryMap, self).__init__()
-        self.position = (-1, -1)
-        self.depth = -1
 
 
 class Strength(Leaf):
@@ -197,7 +194,8 @@ class Path(Leaf):
         """
         Iniates the path using the dungeon map, from the DungeonMask module.
         """
-        self.path = self.get_sibling_of_type(DungeonMask).dungeon_map
+        dungeon_map = self.get_sibling_of_type(DungeonMask).dungeon_map
+        self.path = libtcod.path_new_using_map(dungeon_map, 1.0)
 
     def has_path(self):
         """
@@ -230,6 +228,10 @@ class Path(Leaf):
         return dungeon_level.walkable_destinations.\
             get_walkable_positions_from_my_position(self.parent, position)
 
+    def message(self, message):
+        if(message == CompositeMessage.DUNGEON_LEVEL_CHANGED):
+            self.init_path()
+
 
 class Health(Leaf):
     """
@@ -239,6 +241,7 @@ class Health(Leaf):
         _health_counter (Counter): Holds the min, max and current health.
     """
     def __init__(self, max_hp):
+        super(Health, self).__init__()
         self.hp = counter.Counter(max_hp, max_hp)
         self.killer = None
 
@@ -279,10 +282,10 @@ class Inventory(Leaf):
     """
     Holds the Items an entity is carrying.
     """
-    def __init__(self, entity):
+    def __init__(self):
         super(Inventory, self).__init__()
         self._items = []
-        self._entity = entity
+        self._entity = self.parent
         self._item_capacity = ITEM_CAPACITY
 
     @property

@@ -1,15 +1,17 @@
 import terrain
+import composite
 import direction
 import dungeonfeature
 import actionscheduler
 import settings
 import tile
 import turn
-import player
 import util
 import geometry as geo
 import constants
 import libtcodpy as libtcod
+from memorymap import MemoryMap
+from dungeonmask import DungeonMask
 
 
 def get_empty_tile_matrix(width, height):
@@ -123,7 +125,9 @@ class DungeonLevel(object):
 
     def draw(self, camera):
         the_player = self._get_player_if_available()
-        the_player.update_fov()
+        print "player:", the_player
+        dungeon_mask = the_player.get_child_of_type(DungeonMask)
+        dungeon_mask.update_fov()
         for y in range(constants.GAME_STATE_HEIGHT):
             for x in range(constants.GAME_STATE_WIDTH):
                 position = (x, y)
@@ -134,18 +138,20 @@ class DungeonLevel(object):
         screen_position = geo.add_2d(position, camera.screen_position)
         tile = self.get_tile_or_unknown(tile_position)
         x, y = tile_position
-        if(libtcod.map_is_in_fov(the_player.dungeon_map, x, y)):
-            the_player.update_memory_of_tile(tile, tile_position, self.depth)
+        dungeon_map = the_player.get_child_of_type(DungeonMask).dungeon_map
+        memory_map = the_player.get_child_of_type(MemoryMap)
+        if(libtcod.map_is_in_fov(dungeon_map, x, y)):
+            memory_map.update_memory_of_tile(tile, tile_position, self.depth)
             tile.draw(screen_position, True)
         else:
-            player_memory_of_map = the_player.get_memory_of_map(self)
+            player_memory_of_map = memory_map.get_memory_of_map(self)
             player_memory_of_map.get_tile_or_unknown(tile_position).\
                 draw(screen_position, False)
 
     def _get_player_if_available(self):
+        print "lets see...", self.entities
         return next((entity for entity in self.entities
-                     if(isinstance(entity, player.Player))),
-                    None)
+                     if(isinstance(entity, composite.Player))), None)
 
     def add_dungeon_feature_if_not_present(self, new_dungeon_feature):
         if(not new_dungeon_feature in self.dungeon_features):
@@ -156,8 +162,10 @@ class DungeonLevel(object):
             self.dungeon_features.remove(dungeon_feature_to_remove)
 
     def add_actor_if_not_present(self, new_actor):
+        print "I made it this far"
         if(not new_actor in self.actors):
             self.add_actor(new_actor)
+            print "added"
 
     def remove_actor_if_present(self, actor_to_remove):
         if(actor_to_remove in self.actors):

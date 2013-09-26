@@ -1,4 +1,3 @@
-
 class Component(object):
     """
     Abstract base class of composite design pattern.
@@ -11,8 +10,24 @@ class Component(object):
         Is None if this is a root component.
     """
     def __init__(self, *args, **kw):
-        self.parent = None
+        self._parent = None
         pass
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, value):
+        self._parent = value
+        self.on_parent_changed()
+
+    def on_parent_changed(self):
+        """
+        A method hook called when the parent changes.
+        """
+        pass
+
 
     def precondition(self, *args, **kw):
         """
@@ -23,6 +38,12 @@ class Component(object):
     def update(self, *args, **kw):
         """
         A method hook for updating the component tree.
+        """
+        pass
+
+    def message(self, message):
+        """
+        A method hook for broadcasting a message down the component tree.
         """
         pass
 
@@ -38,6 +59,11 @@ class Component(object):
 
         False otherwise.
         """
+        if(self.parent is None):
+            print "ERROR: Tries to find sibling {0} "\
+                "of component {1} but it "\
+                "has no parent!".format(str(component_type), str(self))
+            raise
         return self.parent.has_child(component_type)
 
 
@@ -69,12 +95,12 @@ class Composite(Component):
         """
         self.children.append(child)
         if(not child.parent is None):
-            print """Component {0} tried ta add_child
-                     component: {1} to its children.
-                     But it already
-                     had parent: {2}.""".format(str(self),
-                                                str(child),
-                                                str(child.parent))
+            print "Component {0} tried ta add_child"\
+                "component: {1} to its children."\
+                "But it already"\
+                "had parent: {2}.".format(str(self),
+                                          str(child),
+                                          str(child.parent))
             raise
         child.parent = self
 
@@ -91,6 +117,12 @@ class Composite(Component):
         Runs update on all child components.
         """
         map(lambda x: x.update(), self.children)
+
+    def message(self, message):
+        """
+        Sends message to all child components.
+        """
+        map(lambda x: x.message(message), self.children)
 
     def get_child_of_type(self, component_type):
         """
@@ -112,3 +144,15 @@ class Composite(Component):
                    for child in self.children)
 
 
+class CompositeMessage(object):
+    """
+    Enumerator defining class. Defines all messages that may be sent.
+    """
+    DUNGEON_LEVEL_CHANGED = 0
+    POSITION_CHANGED = 1
+
+    def __init__(self):
+        """
+        Should not be initiated.
+        """
+        raise

@@ -16,8 +16,11 @@ class Mover(Leaf):
         Checks if parent comoponent can move to new position.
         """
         if(new_dungeon_level is None):
-            new_dungeon_level =\
+            current_dungeon_level =\
                 self.get_sibling_of_type(DungeonLevel).dungeon_level
+            if(current_dungeon_level is None):
+                raise  # Nowhere to move.
+            new_dungeon_level = current_dungeon_level
         if(not new_dungeon_level.has_tile(new_position)):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
@@ -42,15 +45,19 @@ class Mover(Leaf):
         """
         Moves parent to new position, assumes that it fits there.
         """
+        if(new_position is None):
+            print "can't move without new_position"
+            raise
+        if(dungeon_level is None):
+            print "can't move without dungeon_level"
+            raise
         self.try_remove_from_dungeon()
         new_tile = dungeon_level.get_tile(new_position)
         piece_type = self.get_sibling_of_type(GamePieceType).value
         new_tile.game_pieces[piece_type].append(self.parent)
         print new_tile.game_pieces
         self.get_sibling_of_type(Position).position = new_position
-        dungeon_level_module = DungeonLevel()
-        dungeon_level_module.dungeon_level = dungeon_level
-        self.parent.add_child(dungeon_level_module)
+        self.get_sibling_of_type(DungeonLevel).dungeon_level = dungeon_level
 
     def replace_move(self, new_position, new_dungeon_level=None):
         """
@@ -96,7 +103,8 @@ class Mover(Leaf):
         """
         Tries to remove parent from dungeon.
         """
-        if(not self.has_sibling(DungeonLevel)):
+        if(not self.has_sibling(DungeonLevel) or
+           self.get_sibling_of_type(DungeonLevel).dungeon_level is None):
             return True
         position = self.get_sibling_of_type(Position).position
         tile_i_might_be_on = (self.get_sibling_of_type(DungeonLevel).
@@ -105,9 +113,9 @@ class Mover(Leaf):
         piece_type = self.get_sibling_of_type(GamePieceType).value
         pieces_i_might_be_among = \
             tile_i_might_be_on.game_pieces[piece_type]
-        if self.has_sibling(DungeonLevel):
-            self.parent.remove_child_of_type(DungeonLevel)
         if(any(self.parent is piece for piece in pieces_i_might_be_among)):
             pieces_i_might_be_among.remove(self.parent)
-            return True
-        return False
+        print "b", self.get_sibling_of_type(DungeonLevel).dungeon_level
+        self.get_sibling_of_type(DungeonLevel).dungeon_level = None
+        print "a", self.get_sibling_of_type(DungeonLevel).dungeon_level
+        return True

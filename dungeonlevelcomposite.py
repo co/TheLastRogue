@@ -1,7 +1,4 @@
-from compositecore import Leaf
-from memorymap import MemoryMap
-from dungeonmask import DungeonMask
-import libtcodpy as libtcod
+from compositecore import Leaf, CompositeMessage
 
 
 class DungeonLevel(Leaf):
@@ -25,13 +22,15 @@ class DungeonLevel(Leaf):
         Sets current dungeon_level of the entity.
         Also updates the visibility/solidity of the dungeon_level tiles.
         """
-        if((not self.dungeon_level is value) and (not value is None)):
+        if(not self.dungeon_level is value):
             self._dungeon_level = value
-            dungeon_mask_module = self.get_sibling_of_type(DungeonMask)
-            dungeon_mask_module.dungeon_map = libtcod.map_new(value.width,
-                                                              value.height)
-            dungeon_mask_module.update_dungeon_map()
-            self.path = libtcod.path_new_using_map(self.dungeon_map, 1.0)
-            if(self.has_sibling(MemoryMap)):
-                self.get_sibling_of_type(MemoryMap).\
-                    set_memory_map_if_not_set(self.dungeon_level)
+            if(not self.parent is None):
+                self._dungeon_level.add_actor_if_not_present(self.parent)
+                self.parent.message(CompositeMessage.DUNGEON_LEVEL_CHANGED)
+
+    def on_parent_changed(self):
+        """
+        When the parent changes try to add it to the dungeon.
+        """
+        if(not self.dungeon_level is None):
+            self.dungeon_level.add_actor_if_not_present(self.parent)

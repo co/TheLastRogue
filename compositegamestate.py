@@ -22,7 +22,7 @@ def reset_globals():
 class ComponentGameState(state.State):
     def __init__(self):
         reset_globals()
-        self.player = Player(self)
+        self.player = Player()
         start_position = (20, 10)
         self.dungeon_level =\
             dungeonlevel.dungeon_level_from_file("test.level")
@@ -47,7 +47,7 @@ class ComponentGameState(state.State):
     # right before the player acts.
     # if a redraw is needed do a force_draw instead.
     def draw(self):
-        pass
+        self.force_draw()
 
     def force_draw(self):
         self.camera.update(self.player)
@@ -56,7 +56,8 @@ class ComponentGameState(state.State):
         console.console.flush()
 
     def prepare_draw(self):
-        dungeon_level = self.player.dungeon_level
+        dungeon_level =\
+            self.player.get_child_of_type(DungeonLevel).dungeon_level
         dungeon_level.draw(self.camera)
         self.player_status_bar.draw()
         self.message_bar.draw()
@@ -67,11 +68,11 @@ class ComponentGameState(state.State):
 
         dungeon_level =\
             self.player.get_child_of_type(DungeonLevel).dungeon_level
-        dungeon_level.update()
+        dungeon_level.tick()
 
         self._update_gui()
 
-        if(self.player.get_sibling_of_type(Health).is_dead()):
+        if(self.player.get_child_of_type(Health).is_dead()):
             self.current_stack.pop()
         if(self.has_won):
             self.current_stack.pop()

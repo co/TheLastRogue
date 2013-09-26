@@ -7,6 +7,7 @@ import geometry as geo
 import turn
 import style
 import settings
+from composite import Description, Health
 
 
 class UIElement(object):
@@ -229,16 +230,19 @@ class PlayerStatusBar(RectangularUIElement):
             StackPanelVertical(rect.top_left,
                                margin=style.interface_theme.margin)
 
-        name_text_box = TextBox(player.name, geo.zero2d(),
+        player_name = player.get_child_of_type(Description).name
+        name_text_box = TextBox(player_name, geo.zero2d(),
                                 colors.YELLOW,
                                 geo.zero2d())
 
-        description_text_box = TextBox(player.description, geo.zero2d(),
+        player_description = player.get_child_of_type(Description).description
+        description_text_box = TextBox(player_description, geo.zero2d(),
                                        colors.YELLOW,
                                        geo.zero2d())
 
         element_width = (self.width - style.interface_theme.margin[0] * 2)
-        hp_bar = CounterBar(player.hp, element_width,
+        player_hp = player.get_child_of_type(Health).hp
+        hp_bar = CounterBar(player_hp, element_width,
                             colors.HP_BAR_FULL, colors.HP_BAR_EMPTY)
 
         self._rectangle_bg =\

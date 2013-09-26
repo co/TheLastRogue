@@ -1,5 +1,7 @@
-from compositecore import Leaf
+from dungeonlevelcomposite import DungeonLevel
+from compositecore import Leaf, CompositeMessage
 from sightradius import SightRadius
+from composite import Position
 import libtcodpy as libtcod
 import turn
 
@@ -8,10 +10,32 @@ class DungeonMask(Leaf):
     """
     Holds the visibility mask and solidity mask of the entity
     """
-    def __init__(self, arg):
+    def __init__(self):
         super(DungeonMask, self).__init__()
-        self.dungeon_map
+        self.dungeon_map = None
         self.last_dungeon_map_update_timestamp = -1
+
+    def on_parent_changed(self):
+        """
+        A method hook called when the parent changes.
+        """
+        self.init_dungeon_map_if_has_dungeon_level()
+
+    def init_dungeon_map_if_has_dungeon_level(self):
+        """
+        Initiates the dungeon map of a dungeon_level, if available.
+        """
+        if(self.has_sibling(DungeonLevel) and
+           not self.get_sibling_of_type(DungeonLevel).dungeon_level is None):
+            self.init_dungeon_map(self.get_sibling_of_type(DungeonLevel)
+                                  .dungeon_level)
+
+    def init_dungeon_map(self, dungeon_level):
+        """
+        Initiates the dungeon map of a dungeon_level.
+        """
+        self.dungeon_map = libtcod.map_new(dungeon_level.width,
+                                           dungeon_level.height)
 
     def can_see_point(self, point):
         """
@@ -27,7 +51,7 @@ class DungeonMask(Leaf):
         """
         Calculates the Field of Visuon from the dungeon_map.
         """
-        x, y = self.position
+        x, y = self.get_sibling_of_type(Position).position
         sight_radius = self.get_sibling_of_type(SightRadius).sight_radius
         libtcod.map_compute_fov(self.dungeon_map, x, y,
                                 sight_radius, True)
@@ -75,7 +99,8 @@ class DungeonMask(Leaf):
         """
         Updates the dungeon map it is older than the latest change.
         """
-        if(self.dungeon_level.terrain_changed_timestamp >
+        dungeon_level = self.get_sibling_of_type(DungeonLevel).dungeon_level
+        if(dungeon_level.terrain_changed_timestamp >
            self.last_dungeon_map_update_timestamp):
             self.update_dungeon_map()
 
@@ -83,11 +108,19 @@ class DungeonMask(Leaf):
         """
         Updates the dungeon map.
         """
-        for y in range(self.dungeon_level.height):
-            for x in range(self.dungeon_level.width):
-                terrain = self.dungeon_level.tile_matrix[y][x].get_terrain()
+        dungeon_level = self.get_sibling_of_type(DungeonLevel).dungeon_level
+        for y in range(dungeon_level.height):
+            for x in range(dungeon_level.width):
+                terrain = dungeon_level.tile_matrix[y][x].get_terrain()
                 libtcod.map_set_properties(self.dungeon_map, x, y,
                                            terrain.is_transparent(),
                                            self._can_pass_terrain(terrain))
         self.last_dungeon_map_update_timestamp = turn.current_turn
         self.update_fov()
+
+    def message(self, message):
+        """
+        Handles recieved messages.
+        """
+        if(message == CompositeMessage.DUNGEON_LEVEL_CHANGED):
+            self.init_dungeon_map_if_has_dungeon_level()

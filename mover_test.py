@@ -9,19 +9,22 @@ from mover import Mover
 class TestComposition(unittest.TestCase):
 
     def setUp(self):
-        dungeon = ["#####",
-                   "#...#",
-                   "#.#.#",
-                   "#...#",
-                   "#####"]
-        self.dungeon_level = dungeonlevel.dungeon_level_from_lines(dungeon)
-        self.wall_position = (2, 2)
-        self.open_position = (1, 2)
-        self.open_position2 = (3, 3)
+        dungeon1 = ["#####",
+                    "#...#",
+                    "#.#.#",
+                    "#...#",
+                    "#####"]
+        self.dungeon_level = dungeonlevel.dungeon_level_from_lines(dungeon1)
 
-    def set_up_new_entity(self, dungeon_level):
-        entity = Composite()
-        entity.add_child(Mover())
+        dungeon2 = ["#...#",
+                    "..#..",
+                    ".###.",
+                    "..#..",
+                    "#...#"]
+        self.dungeon_level2 = dungeonlevel.dungeon_level_from_lines(dungeon2)
+        self.wall_position = (2, 2)
+        self.open_position = (1, 1)
+        self.open_position2 = (3, 3)
 
     def set_up_new_entity_with_dungeon(self, dungeon_level):
         entity = Composite()
@@ -97,7 +100,9 @@ class TestComposition(unittest.TestCase):
         mover = entity.get_child_of_type(Mover)
         self.assertTrue(mover.try_move(self.open_position))
         self.assertTrue(mover.try_remove_from_dungeon())
-        self.assertFalse(entity.has_child(DungeonLevel))
+        print entity.get_child_of_type(DungeonLevel).dungeon_level
+        self.assertTrue(entity.get_child_of_type(DungeonLevel).dungeon_level
+                        is None)
 
     def test_try_move_should_move_entity_to_new_position(self):
         entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
@@ -120,6 +125,19 @@ class TestComposition(unittest.TestCase):
                          self.open_position)
         self.assertFalse(self.dungeon_level.get_tile(self.open_position)
                          .has_entity())
+
+    def test_try_move_to_new_dungeon_level_should_update_dungeon_level(self):
+        entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
+        mover = entity.get_child_of_type(Mover)
+
+        self.assertTrue(mover.try_move(self.open_position, self.dungeon_level))
+        self.assertTrue(entity.get_child_of_type(DungeonLevel).dungeon_level
+                        is self.dungeon_level)
+
+        self.assertTrue(mover.try_move(self.open_position,
+                                       self.dungeon_level2))
+        self.assertTrue(entity.get_child_of_type(DungeonLevel).dungeon_level
+                        is self.dungeon_level2)
 
     def test_replace_move_should_replace_a_blocking_entity_on_move(self):
         entity_first = self.set_up_new_entity_with_dungeon(self.dungeon_level)

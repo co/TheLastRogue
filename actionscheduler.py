@@ -8,8 +8,7 @@ class ActionScheduler(object):
 
     @property
     def entities(self):
-        return [actor for actor in self._actors
-                if isinstance(actor, entity.Entity)]
+        return [actor for actor in self._actors]
 
     @property
     def actors(self):
