@@ -6,7 +6,7 @@ from sightradius import SightRadius
 from dungeonmask import DungeonMask
 from gamepiecetype import GamePieceType
 from memorymap import MemoryMap
-from composite import Description, GraphicChar, MovementSpeed
+from composite import Description, GraphicChar, MovementSpeed, IsPlayer
 from composite import Health, Strength, AttackSpeed, Faction, Inventory
 from mover import Mover
 import gametime
@@ -20,6 +20,7 @@ class Player(Composite):
     """
     def __init__(self):
         super(Player, self).__init__()
+        self.add_child(IsPlayer())
         self.add_child(Position())
         self.add_child(DungeonLevel())
         self.add_child(Description())

@@ -1,3 +1,6 @@
+from itertools import chain
+
+
 class Component(object):
     """
     Abstract base class of composite design pattern.
@@ -116,13 +119,15 @@ class Composite(Component):
         """
         Runs update on all child components.
         """
-        map(lambda x: x.update(), self.children)
+        map(lambda x: x.update(),
+            chain.from_iterable(self._children.values()))
 
     def message(self, message):
         """
         Sends message to all child components.
         """
-        map(lambda x: x.message(message), self.children)
+        map(lambda x: x.message(message),
+            chain.from_iterable(self._children.values()))
 
     def __getattr__(self, component_type):
         if(not isinstance(component_type, basestring)):

@@ -47,11 +47,11 @@ class Mover(Leaf):
         new_tile = dungeon_level.get_tile(new_position)
         piece_type = self.parent.game_piece_type.value
         new_tile.game_pieces[piece_type].append(self.parent)
-        print new_tile.game_pieces
         self.parent.position.position = new_position
-        dungeon_level_module = DungeonLevel()
-        dungeon_level_module.dungeon_level = dungeon_level
-        self.parent.add_child(dungeon_level_module)
+        print self.parent._children
+        if(not self.has_sibling("dungeon_level")):
+            self.parent.add_child(DungeonLevel())
+        self.parent.dungeon_level.dungeon_level = dungeon_level
 
     def replace_move(self, new_position, new_dungeon_level=None):
         """
@@ -98,7 +98,8 @@ class Mover(Leaf):
         """
         Tries to remove parent from dungeon.
         """
-        if(not self.has_sibling("dungeon_level")):
+        if(not self.has_sibling("dungeon_level") or
+           self.parent.dungeon_level.dungeon_level is None):
             return True
         position = self.parent.position.position
         tile_i_might_be_on = (self.parent.dungeon_level.

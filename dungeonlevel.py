@@ -1,80 +1,13 @@
-import terrain
-import composite
 import direction
 import dungeonfeature
 import actionscheduler
 import settings
-import tile
 import turn
 import util
 import geometry as geo
 import constants
 import libtcodpy as libtcod
-from memorymap import MemoryMap
-from dungeonmask import DungeonMask
-
-
-def get_empty_tile_matrix(width, height):
-    return [[tile.Tile()
-             for x in range(width)]
-            for y in range(height)]
-
-
-def unknown_level_map(width, height, depth):
-    tile_matrix = get_empty_tile_matrix(width, height)
-    dungeon_level = DungeonLevel(tile_matrix, depth)
-    for x in range(width):
-        for y in range(height):
-            unknown_terrain = terrain.Unknown()
-            unknown_terrain.replace_move((x, y), dungeon_level)
-    return dungeon_level
-
-
-def dungeon_level_from_lines(lines):
-    terrain_matrix = terrain_matrix_from_lines(lines)
-    dungeon_level = DungeonLevel(terrain_matrix, 1)
-    set_terrain_from_lines(dungeon_level, lines)
-    return dungeon_level
-
-
-def dungeon_level_from_file(file_name):
-    lines = read_file(file_name)
-    return dungeon_level_from_lines(lines)
-
-
-def terrain_matrix_from_lines(lines):
-    width = len(lines[0])
-    height = len(lines)
-    terrain_matrix = get_empty_tile_matrix(width, height)
-    return terrain_matrix
-
-
-def set_terrain_from_lines(dungeon_level, lines):
-        for x in range(dungeon_level.width):
-            for y in range(dungeon_level.height):
-                terrain = char_to_terrain(lines[y][x])
-                terrain.replace_move((x, y), dungeon_level)
-
-
-def char_to_terrain(c):
-    if(c == '#'):
-        return terrain.Wall()
-    elif(c == '+'):
-        return terrain.Door(False)
-    elif(c == '~'):
-        return terrain.Water()
-    elif(c == 'g'):
-        return terrain.GlassWall()
-    else:
-        return terrain.Floor()
-
-
-def read_file(file_name):
-    f = open(file_name, "r")
-    data = f.readlines()
-    data = [line.strip() for line in data]
-    f.close()
-    return data
+import tile
 
 
 class DungeonLevel(object):
@@ -120,8 +53,8 @@ class DungeonLevel(object):
             for x in range(settings.WINDOW_WIDTH):
                 position = (x, y)
                 tile_position = geo.add_2d(position, camera.camera_offset)
-                tile = self.get_tile_or_unknown(tile_position)
-                tile.draw(position, True)
+                the_tile = self.get_tile_or_unknown(tile_position)
+                the_tile.draw(position, True)
 
     def draw(self, camera):
         the_player = self._get_player_if_available()
@@ -136,22 +69,22 @@ class DungeonLevel(object):
     def _draw_tile(self, camera, position, the_player):
         tile_position = geo.add_2d(position, camera.camera_offset)
         screen_position = geo.add_2d(position, camera.screen_position)
-        tile = self.get_tile_or_unknown(tile_position)
+        the_tile = self.get_tile_or_unknown(tile_position)
         x, y = tile_position
         dungeon_map = the_player.dungeon_mask.dungeon_map
         memory_map = the_player.memory_map
         if(libtcod.map_is_in_fov(dungeon_map, x, y)):
-            memory_map.update_memory_of_tile(tile, tile_position, self.depth)
-            tile.draw(screen_position, True)
+            memory_map.update_memory_of_tile(the_tile, tile_position,
+                                             self.depth)
+            the_tile.draw(screen_position, True)
         else:
             player_memory_of_map = memory_map.get_memory_of_map(self)
             player_memory_of_map.get_tile_or_unknown(tile_position).\
                 draw(screen_position, False)
 
     def _get_player_if_available(self):
-        print "lets see...", self.entities
         return next((entity for entity in self.entities
-                     if(isinstance(entity, composite.Player))), None)
+                    if entity.has_child("is_player")), None)
 
     def add_dungeon_feature_if_not_present(self, new_dungeon_feature):
         if(not new_dungeon_feature in self.dungeon_features):

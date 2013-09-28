@@ -126,6 +126,13 @@ class TestComposition(unittest.TestCase):
         self.assertTrue(entity.dungeon_level.dungeon_level
                         is self.dungeon_level2)
 
+    def test_try_move_to_dungeon_level_should_handle_no_previous_dungeon(self):
+        entity = self.set_up_new_entity_with_dungeon(None)
+        self.assertTrue(entity.mover.try_move(self.open_position,
+                                              self.dungeon_level))
+        self.assertTrue(entity.dungeon_level.dungeon_level
+                        is self.dungeon_level)
+
     def test_replace_move_should_replace_a_blocking_entity_on_move(self):
         entity_first = self.set_up_new_entity_with_dungeon(self.dungeon_level)
         self.assertTrue(entity_first.mover

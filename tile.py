@@ -1,4 +1,5 @@
 import gamepiece
+import compositecore
 import frame
 import terrain
 
@@ -73,8 +74,15 @@ class Tile(object):
         copy = Tile()
         copy.game_pieces = dict()
         for piece_type, piece_list in self.game_pieces.items():
-            copy.game_pieces[piece_type] =\
-                [piece.piece_copy() for piece in piece_list]
+            copy_list = []
+            for piece in piece_list:
+                new_piece = compositecore.Composite()
+                if(piece.has_child("graphic_char")):
+                    new_piece.add_child(piece.graphic_char.copy())
+                if(piece.has_child("description")):
+                    new_piece.add_child(piece.description.copy())
+                copy_list.add(new_piece)
+            copy.game_pieces[piece_type] = copy_list
         return copy
 
 

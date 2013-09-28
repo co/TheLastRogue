@@ -1,4 +1,3 @@
-import dungeonlevel
 import statestack
 import console
 import geometry as geo
@@ -10,6 +9,7 @@ import turn
 import messenger
 import state
 from playercomposite import Player
+from dungeonlevelfactory import dungeon_level_from_file
 
 
 def reset_globals():
@@ -22,7 +22,7 @@ class ComponentGameState(state.State):
         reset_globals()
         self.player = Player()
         start_position = (20, 10)
-        self.dungeon_level = dungeonlevel.dungeon_level_from_file("test.level")
+        self.dungeon_level = dungeon_level_from_file("test.level")
         self.player.mover.try_move(start_position, self.dungeon_level)
 
         self._init_gui()

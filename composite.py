@@ -47,6 +47,17 @@ class Strength(Leaf):
         self.component_type = "strength"
 
 
+class IsPlayer(Leaf):
+    """
+    Component that marks the player.
+
+    Only the player should have this component.
+    """
+    def __init__(self):
+        super(IsPlayer, self).__init__()
+        self.component_type = "is_player"
+
+
 class AttackSpeed(Leaf):
     """
     Composites holding this has the attack_speed attribute.
@@ -134,6 +145,12 @@ class GraphicChar(Leaf):
         """
         self._blink_color_fg_queue = colors
 
+    def copy(self):
+        """
+        Makes a copy of this component.
+        """
+        return GraphicChar(self.symbol, self.color_bg, self.color_fg)
+
 
 class Description(Leaf):
     """
@@ -145,6 +162,12 @@ class Description(Leaf):
         self.name = name
         self.description = description
         self.component_type = "description"
+
+    def copy(self):
+        """
+        Makes a copy of this component.
+        """
+        return Description(self.name, self.description)
 
 
 class Path(Leaf):
