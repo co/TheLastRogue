@@ -1,7 +1,4 @@
-from dungeonlevelcomposite import DungeonLevel
 from compositecore import Leaf, CompositeMessage
-from sightradius import SightRadius
-from composite import Position
 import libtcodpy as libtcod
 import turn
 
@@ -14,6 +11,7 @@ class DungeonMask(Leaf):
         super(DungeonMask, self).__init__()
         self.dungeon_map = None
         self.last_dungeon_map_update_timestamp = -1
+        self.component_type = "dungeon_mask"
 
     def on_parent_changed(self):
         """
@@ -25,10 +23,9 @@ class DungeonMask(Leaf):
         """
         Initiates the dungeon map of a dungeon_level, if available.
         """
-        if(self.has_sibling(DungeonLevel) and
-           not self.get_sibling_of_type(DungeonLevel).dungeon_level is None):
-            self.init_dungeon_map(self.get_sibling_of_type(DungeonLevel)
-                                  .dungeon_level)
+        if(self.has_sibling("dungeon_level") and
+           not self.parent.dungeon_level.dungeon_level is None):
+            self.init_dungeon_map(self.parent.dungeon_level.dungeon_level)
 
     def init_dungeon_map(self, dungeon_level):
         """
@@ -51,8 +48,8 @@ class DungeonMask(Leaf):
         """
         Calculates the Field of Visuon from the dungeon_map.
         """
-        x, y = self.get_sibling_of_type(Position).position
-        sight_radius = self.get_sibling_of_type(SightRadius).sight_radius
+        x, y = self.parent.position.position
+        sight_radius = self.parent.sight_radius.sight_radius
         libtcod.map_compute_fov(self.dungeon_map, x, y,
                                 sight_radius, True)
 
@@ -99,7 +96,7 @@ class DungeonMask(Leaf):
         """
         Updates the dungeon map it is older than the latest change.
         """
-        dungeon_level = self.get_sibling_of_type(DungeonLevel).dungeon_level
+        dungeon_level = self.parent.dungeon_level.dungeon_level
         if(dungeon_level.terrain_changed_timestamp >
            self.last_dungeon_map_update_timestamp):
             self.update_dungeon_map()
@@ -108,7 +105,7 @@ class DungeonMask(Leaf):
         """
         Updates the dungeon map.
         """
-        dungeon_level = self.get_sibling_of_type(DungeonLevel).dungeon_level
+        dungeon_level = self.parent.dungeon_level.dungeon_level
         for y in range(dungeon_level.height):
             for x in range(dungeon_level.width):
                 terrain = dungeon_level.tile_matrix[y][x].get_terrain()

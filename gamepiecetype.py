@@ -18,6 +18,7 @@ class GamePieceType(Leaf):
 
     def __init__(self, piece_type=None):
         super(GamePieceType, self).__init__()
+        self.component_type = "game_piece_type"
         self.value = piece_type
 
     @property

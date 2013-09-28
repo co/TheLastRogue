@@ -7,6 +7,7 @@ class DungeonLevel(Leaf):
     """
     def __init__(self):
         super(DungeonLevel, self).__init__()
+        self.component_type = "dungeon_level"
         self._dungeon_level = None
 
     @property

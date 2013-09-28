@@ -1,52 +1,9 @@
 import counter
 import random
 import libtcodpy as libtcod
-import gametime
 import colors
-import symbol
 import console
-from mover import Mover
-from position import Position
-from dungeonlevelcomposite import DungeonLevel
-from statusflags import StatusFlags
-from compositecore import Leaf, Composite, CompositeMessage
-from sightradius import SightRadius
-from dungeonmask import DungeonMask
-from gamepiecetype import GamePieceType
-from memorymap import MemoryMap
-
-
-class Player(Composite):
-    """
-    A composite component representing the player character.
-    """
-    def __init__(self):
-        super(Player, self).__init__()
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Description())
-        self.add_child(GraphicChar(symbol.GUNSLINGER_THIN,
-                                   None, colors.WHITE))
-
-        self.add_child(Health(10))
-        self.add_child(Strength(10))
-        self.add_child(MovementSpeed(gametime.single_turn))
-        self.add_child(AttackSpeed(gametime.single_turn))
-        self.add_child(Faction(Faction.PLAYER))
-        self.add_child(SightRadius(6))
-        self.add_child(StatusFlags())
-        self.add_child(DungeonMask())
-        self.add_child(MemoryMap())
-        self.add_child(Inventory())
-        self.add_child(Mover())
-        self.add_child(GamePieceType(GamePieceType.ENTITY))
-        #self.add_child(equipment.Equipment(6))
-
-### EffectQueue # Use Clausen style stuff.
-### StatusFlags
-### GameState???
-### GamePiece
-### DungeonMap
+from compositecore import Leaf, CompositeMessage
 
 
 class Actor(Leaf):
@@ -55,6 +12,7 @@ class Actor(Leaf):
     """
     def __init__(self):
         super(Actor, self).__init__()
+        self.component_type = "actor"
 
     def act(self):
         """
@@ -73,6 +31,7 @@ class KeyboardEventMover(Leaf):
     def __init__(self):
         super(KeyboardEventMover, self).__init__()
         self._status_flags = set()
+        self.component_type = "controler"
 
     def has_status(self, status):
         return status in self._status_flags
@@ -85,6 +44,7 @@ class Strength(Leaf):
     def __init__(self, strength):
         super(Strength, self).__init__()
         self.strength = strength
+        self.component_type = "strength"
 
 
 class AttackSpeed(Leaf):
@@ -94,6 +54,7 @@ class AttackSpeed(Leaf):
     def __init__(self, attack_speed):
         super(AttackSpeed, self).__init__()
         self.attack_speed = attack_speed
+        self.component_type = "attack_speed"
 
 
 class MovementSpeed(Leaf):
@@ -103,6 +64,7 @@ class MovementSpeed(Leaf):
     def __init__(self, attack_speed):
         super(MovementSpeed, self).__init__()
         self.attack_speed = attack_speed
+        self.component_type = "movement_speed"
 
 
 class Faction(Leaf):
@@ -118,6 +80,7 @@ class Faction(Leaf):
     def __init__(self, faction):
         super(Faction, self).__init__()
         self.faction = faction
+        self.component_type = "faction"
 
 
 class GraphicChar(Leaf):
@@ -127,6 +90,7 @@ class GraphicChar(Leaf):
     def __init__(self, symbol, color_bg, color_fg):
         super(GraphicChar, self).__init__()
         self.symbol = symbol
+        self.component_type = "graphic_char"
         self.color_bg = color_bg
         self.color_fg = color_fg
         self._status_cycle_colors = []
@@ -180,6 +144,7 @@ class Description(Leaf):
         super(Description, self).__init__()
         self.name = name
         self.description = description
+        self.component_type = "description"
 
 
 class Path(Leaf):
@@ -189,12 +154,13 @@ class Path(Leaf):
     def __init__(self):
         super(Description, self).__init__()
         self.path = None
+        self.component_type = "path"
 
     def init_path(self):
         """
         Iniates the path using the dungeon map, from the DungeonMask module.
         """
-        dungeon_map = self.get_sibling_of_type(DungeonMask).dungeon_map
+        dungeon_map = self.DungeonMask.dungeon_map
         self.path = libtcod.path_new_using_map(dungeon_map, 1.0)
 
     def has_path(self):
@@ -212,7 +178,7 @@ class Path(Leaf):
         if(not self.has_path()):
             return False
         x, y = libtcod.path_walk(self.path, True)
-        step_succeeded = self.get_sibling_of_type(Mover).try_move_to((x, y))
+        step_succeeded = self.Mover.try_move_to((x, y))
         return step_succeeded
 
     def set_path_to_random_walkable_point(self):
@@ -223,8 +189,8 @@ class Path(Leaf):
         libtcod.path_compute(self.path, sx, sy, dx, dy)
 
     def get_walkable_positions_from_my_position(self):
-        dungeon_level = self.get_sibling_of_type(DungeonLevel).dungeon_level
-        position = self.get_sibling_of_type(Position).position
+        dungeon_level = self.DungeonLevel.dungeon_level
+        position = self.Position.position
         return dungeon_level.walkable_destinations.\
             get_walkable_positions_from_my_position(self.parent, position)
 
@@ -244,6 +210,7 @@ class Health(Leaf):
         super(Health, self).__init__()
         self.hp = counter.Counter(max_hp, max_hp)
         self.killer = None
+        self.component_type = "health"
 
     def hurt(self, damage, entity=None):
         """
@@ -254,7 +221,7 @@ class Health(Leaf):
             entity: The entity that caused the damage (if any)
         """
         self.hp.decrease(damage)
-        self.get_sibling_of_type(GraphicChar).\
+        self.GraphicChar.\
             set_fg_blink_colors([colors.LIGHT_PINK, colors.RED])
         if(self.is_dead()):
             self.killer = entity
@@ -287,6 +254,7 @@ class Inventory(Leaf):
         self._items = []
         self._entity = self.parent
         self._item_capacity = ITEM_CAPACITY
+        self.component_type = "inventory"
 
     @property
     def items(self):

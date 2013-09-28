@@ -1,5 +1,4 @@
 import constants
-from composite import Position
 import geometry as geo
 
 
@@ -24,6 +23,6 @@ class Camera(object):
                           self.screen_position)
 
     def update(self, player):
-        position = player.get_child_of_type(Position).position
+        position = player.position.position
         delta = geo.sub_2d(position, self.screen_center_position)
         self.camera_offset = geo.add_2d(self.camera_offset, delta)

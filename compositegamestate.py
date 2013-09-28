@@ -9,9 +9,7 @@ import rectfactory
 import turn
 import messenger
 import state
-from composite import Player, Health
-from dungeonlevelcomposite import DungeonLevel
-from mover import Mover
+from playercomposite import Player
 
 
 def reset_globals():
@@ -24,10 +22,8 @@ class ComponentGameState(state.State):
         reset_globals()
         self.player = Player()
         start_position = (20, 10)
-        self.dungeon_level =\
-            dungeonlevel.dungeon_level_from_file("test.level")
-        self.player.get_child_of_type(Mover).try_move(start_position,
-                                                      self.dungeon_level)
+        self.dungeon_level = dungeonlevel.dungeon_level_from_file("test.level")
+        self.player.mover.try_move(start_position, self.dungeon_level)
 
         self._init_gui()
         camera_position = (constants.MONSTER_STATUS_BAR_WIDTH, 0)
@@ -57,7 +53,7 @@ class ComponentGameState(state.State):
 
     def prepare_draw(self):
         dungeon_level =\
-            self.player.get_child_of_type(DungeonLevel).dungeon_level
+            self.player.dungeon_level.dungeon_level
         dungeon_level.draw(self.camera)
         self.player_status_bar.draw()
         self.message_bar.draw()
@@ -67,12 +63,12 @@ class ComponentGameState(state.State):
         self.message_bar.update()
 
         dungeon_level =\
-            self.player.get_child_of_type(DungeonLevel).dungeon_level
+            self.player.dungeon_level.dungeon_level
         dungeon_level.tick()
 
         self._update_gui()
 
-        if(self.player.get_child_of_type(Health).is_dead()):
+        if(self.player.health.is_dead()):
             self.current_stack.pop()
         if(self.has_won):
             self.current_stack.pop()

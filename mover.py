@@ -1,26 +1,24 @@
 from compositecore import Leaf
-from position import Position
 from dungeonlevelcomposite import DungeonLevel
 from statusflags import StatusFlags
-from gamepiecetype import GamePieceType
-from terrain import Door
+import terrain
 
 
 class Mover(Leaf):
     """
     Component for moving and checking if a move is legal.
     """
+    def __init__(self):
+        super(Mover, self).__init__()
+        self.component_type = "mover"
 
     def can_move(self, new_position, new_dungeon_level=None):
         """
-        Checks if parent comoponent can move to new position.
+        Checks if parent component can move to new position.
         """
         if(new_dungeon_level is None):
-            current_dungeon_level =\
-                self.get_sibling_of_type(DungeonLevel).dungeon_level
-            if(current_dungeon_level is None):
-                raise  # Nowhere to move.
-            new_dungeon_level = current_dungeon_level
+            new_dungeon_level =\
+                self.parent.dungeon_level.dungeon_level
         if(not new_dungeon_level.has_tile(new_position)):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
@@ -35,7 +33,7 @@ class Mover(Leaf):
         """
         if(new_dungeon_level is None):
             new_dungeon_level =\
-                self.get_sibling_of_type(DungeonLevel).dungeon_level
+                self.parent.dungeon_level.dungeon_level
         if(self.can_move(new_position, new_dungeon_level)):
             self._move(new_position, new_dungeon_level)
             return True
@@ -45,19 +43,15 @@ class Mover(Leaf):
         """
         Moves parent to new position, assumes that it fits there.
         """
-        if(new_position is None):
-            print "can't move without new_position"
-            raise
-        if(dungeon_level is None):
-            print "can't move without dungeon_level"
-            raise
         self.try_remove_from_dungeon()
         new_tile = dungeon_level.get_tile(new_position)
-        piece_type = self.get_sibling_of_type(GamePieceType).value
+        piece_type = self.parent.game_piece_type.value
         new_tile.game_pieces[piece_type].append(self.parent)
         print new_tile.game_pieces
-        self.get_sibling_of_type(Position).position = new_position
-        self.get_sibling_of_type(DungeonLevel).dungeon_level = dungeon_level
+        self.parent.position.position = new_position
+        dungeon_level_module = DungeonLevel()
+        dungeon_level_module.dungeon_level = dungeon_level
+        self.parent.add_child(dungeon_level_module)
 
     def replace_move(self, new_position, new_dungeon_level=None):
         """
@@ -65,22 +59,22 @@ class Mover(Leaf):
         """
         if(new_dungeon_level is None):
             new_dungeon_level =\
-                self.get_sibling_of_type(DungeonLevel).dungeon_level
+                self.parent.dungeon_level.dungeon_level
         if(not new_dungeon_level.has_tile(new_position)):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
         self.try_remove_from_dungeon()
-        piece_type = self.get_sibling_of_type(GamePieceType).value
+        piece_type = self.parent.game_piece_type.value
         new_place = new_tile.game_pieces[piece_type]
         for piece in new_place:
-            piece.get_child_of_type(Mover).try_remove_from_dungeon()
+            piece.mover.try_remove_from_dungeon()
         self.try_move(new_position, new_dungeon_level)
 
     def _can_fit_on_tile(self, tile):
         """
         Checks if the parent can fit on the tile.
         """
-        piece_type = self.get_sibling_of_type(GamePieceType)
+        piece_type = self.parent.game_piece_type
         return (len(tile.game_pieces[piece_type.value]) <
                 piece_type.max_instances_in_tile)
 
@@ -92,30 +86,29 @@ class Mover(Leaf):
             return False
         if(not terrain_to_pass.is_solid()):
             return True
-        status_flags = self.get_sibling_of_type(StatusFlags)
-        if(not status_flags is None and
-           status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
-           isinstance(terrain_to_pass, Door)):
-            return True
+        if(self.has_sibling("status_flags")):
+            status_flags = self.parent.status_flags
+            if(not status_flags is None and
+               status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
+               isinstance(terrain_to_pass, terrain.Door)):
+                return True
         return False
 
     def try_remove_from_dungeon(self):
         """
         Tries to remove parent from dungeon.
         """
-        if(not self.has_sibling(DungeonLevel) or
-           self.get_sibling_of_type(DungeonLevel).dungeon_level is None):
+        if(not self.has_sibling("dungeon_level")):
             return True
-        position = self.get_sibling_of_type(Position).position
-        tile_i_might_be_on = (self.get_sibling_of_type(DungeonLevel).
+        position = self.parent.position.position
+        tile_i_might_be_on = (self.parent.dungeon_level.
                               dungeon_level.get_tile(position))
 
-        piece_type = self.get_sibling_of_type(GamePieceType).value
-        pieces_i_might_be_among = \
-            tile_i_might_be_on.game_pieces[piece_type]
+        piece_type = self.parent.game_piece_type.value
+        pieces_i_might_be_among = tile_i_might_be_on.game_pieces[piece_type]
+        if self.has_sibling("dungeon_level"):
+            self.parent.pop_component("dungeon_level")
         if(any(self.parent is piece for piece in pieces_i_might_be_among)):
             pieces_i_might_be_among.remove(self.parent)
-        print "b", self.get_sibling_of_type(DungeonLevel).dungeon_level
-        self.get_sibling_of_type(DungeonLevel).dungeon_level = None
-        print "a", self.get_sibling_of_type(DungeonLevel).dungeon_level
-        return True
+            return True
+        return False

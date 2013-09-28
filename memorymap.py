@@ -1,6 +1,4 @@
 from compositecore import Leaf, CompositeMessage
-from dungeonlevelcomposite import DungeonLevel
-import dungeonlevel
 
 
 class MemoryMap(Leaf):
@@ -9,6 +7,7 @@ class MemoryMap(Leaf):
     """
     def __init__(self):
         super(MemoryMap, self).__init__()
+        self.component_type = "memory_map"
         self._memory_map = []
 
     def get_memory_of_map(self, dungeon_level):
@@ -25,8 +24,8 @@ class MemoryMap(Leaf):
         if(self._memory_map[depth] is None):
             self._memory_map[depth] =\
                 dungeon_level.unknown_level_map(dungeon_level.width,
-                                               dungeon_level.height,
-                                               dungeon_level.depth)
+                                                dungeon_level.height,
+                                                dungeon_level.depth)
 
     def update_memory_of_tile(self, tile, position, depth):
         """
@@ -44,5 +43,5 @@ class MemoryMap(Leaf):
         """
         if(message == CompositeMessage.DUNGEON_LEVEL_CHANGED):
             dungeon_level =\
-                self.get_sibling_of_type(DungeonLevel).dungeon_level
+                self.parent.dungeon_level.dungeon_level
             self.set_memory_map_if_not_set(dungeon_level)

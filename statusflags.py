@@ -15,6 +15,7 @@ class StatusFlags(Leaf):
 
     def __init__(self):
         super(StatusFlags, self).__init__()
+        self.component_type = "status_flags"
         self._status_flags = set()
 
     def has_status(self, status):

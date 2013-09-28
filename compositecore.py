@@ -28,7 +28,6 @@ class Component(object):
         """
         pass
 
-
     def precondition(self, *args, **kw):
         """
         A method hook for checking if it's valid to update all components.
@@ -46,12 +45,6 @@ class Component(object):
         A method hook for broadcasting a message down the component tree.
         """
         pass
-
-    def get_sibling_of_type(self, component_type):
-        """
-        Gets the first child of the parent which is of the given type.
-        """
-        return self.parent.get_child_of_type(component_type)
 
     def has_sibling(self, component_type):
         """
@@ -86,14 +79,19 @@ class Composite(Component):
     """
     def __init__(self, *args, **kw):
         super(Composite, self).__init__(*args, **kw)
-        self.children = []
+        self._children = {}
 
     def add_child(self, child):
         """
         Adds a child component to this component.
         If the child already has a parent an exception is thrown.
         """
-        self.children.append(child)
+        if child.component_type is None:
+            print "Component {0} tried ta add_child"\
+                  "component: {1} to its children."\
+                  "But component_type was not set.".format(str(self),
+                                                           str(child))
+            raise
         if(not child.parent is None):
             print "Component {0} tried ta add_child"\
                 "component: {1} to its children."\
@@ -102,15 +100,17 @@ class Composite(Component):
                                           str(child),
                                           str(child.parent))
             raise
+
+        if not child.component_type in self._children:
+            self._children[child.component_type] = []
+        self._children[child.component_type].append(child)
         child.parent = self
 
-    def remove_child_of_type(self, child_type):
+    def pop_component(self, component_type):
         """
         Removes a child component to this component.
         """
-        child = self.get_child_of_type(child_type)
-        self.children.remove(child)
-        child.parent = None
+        return self._children[component_type].pop()
 
     def update(self):
         """
@@ -124,15 +124,18 @@ class Composite(Component):
         """
         map(lambda x: x.message(message), self.children)
 
-    def get_child_of_type(self, component_type):
-        """
-        Gets the first child which is of the given type.
-        """
-        if self.has_child(component_type):
-            return next(child for child in self.children
-                        if isinstance(child, component_type))
-        else:
-            return None
+    def __getattr__(self, component_type):
+        if(not isinstance(component_type, basestring)):
+            print "ERROR: component_type should be string"
+            raise
+        if(not component_type in self._children or
+           len(self._children[component_type]) < 1):
+            print self._children
+            print "Tried to access component {0} from composite {1} "\
+                "But it doesn't exist.".format(str(component_type),
+                                               str(self))
+            raise
+        return self._children[component_type][0]
 
     def has_child(self, component_type):
         """
@@ -140,8 +143,8 @@ class Composite(Component):
 
         False otherwise.
         """
-        return any(isinstance(child, component_type)
-                   for child in self.children)
+        return (component_type in self._children and
+                len(self._children[component_type]) > 0)
 
 
 class CompositeMessage(object):

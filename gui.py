@@ -230,18 +230,18 @@ class PlayerStatusBar(RectangularUIElement):
             StackPanelVertical(rect.top_left,
                                margin=style.interface_theme.margin)
 
-        player_name = player.get_child_of_type(Description).name
+        player_name = player.description.name
         name_text_box = TextBox(player_name, geo.zero2d(),
                                 colors.YELLOW,
                                 geo.zero2d())
 
-        player_description = player.get_child_of_type(Description).description
+        player_description = player.description.description
         description_text_box = TextBox(player_description, geo.zero2d(),
                                        colors.YELLOW,
                                        geo.zero2d())
 
         element_width = (self.width - style.interface_theme.margin[0] * 2)
-        player_hp = player.get_child_of_type(Health).hp
+        player_hp = player.health.hp
         hp_bar = CounterBar(player_hp, element_width,
                             colors.HP_BAR_FULL, colors.HP_BAR_EMPTY)
 
