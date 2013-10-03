@@ -1,5 +1,5 @@
 import counter
-import cloud
+#import cloud
 import console
 import symbol
 import action
@@ -82,8 +82,9 @@ class Player(entity.Entity):
                                                   target_entity=self)
 
         elif key == inputhandler.ONE:
-            steam_cloud = cloud.Steam(50)
-            steam_cloud.try_move(self.position, self.dungeon_level)
+            pass
+            #steam_cloud = cloud.Steam(50)
+            #steam_cloud.try_move(self.position, self.dungeon_level)
 
         elif key == inputhandler.TWO:
             self.heal(1)

@@ -1,5 +1,4 @@
 from collections import deque
-import entity
 
 
 class ActionScheduler(object):

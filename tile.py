@@ -1,4 +1,4 @@
-import gamepiece
+from gamepiecetype import GamePieceType
 import compositecore
 import frame
 import terrain
@@ -7,12 +7,12 @@ import terrain
 class Tile(object):
     def __init__(self):
         self.game_pieces = {
-            gamepiece.GamePieceType.ENTITY: [],
-            gamepiece.GamePieceType.CLOUD: [],
-            gamepiece.GamePieceType.ITEM: [],
-            gamepiece.GamePieceType.DUNGEON_FEATURE: [],
-            gamepiece.GamePieceType.DUNGEON_TRASH: [],
-            gamepiece.GamePieceType.TERRAIN: []
+            GamePieceType.ENTITY: [],
+            GamePieceType.CLOUD: [],
+            GamePieceType.ITEM: [],
+            GamePieceType.DUNGEON_FEATURE: [],
+            GamePieceType.DUNGEON_TRASH: [],
+            GamePieceType.TERRAIN: []
         }
 
     def draw(self, screen_position, is_seen):
@@ -25,7 +25,7 @@ class Tile(object):
     def get_piece_to_draw(self):
         pieces = next(list for list in self.game_pieces.values()
                       if len(list) > 0)
-        if (pieces[0].piece_type == gamepiece.GamePieceType.ENTITY):
+        if (pieces[0].piece_type == GamePieceType.ENTITY):
             animation_length = 7
             cycle_length = len(pieces) * animation_length
             current_animation_frame = frame.current_frame % cycle_length
@@ -42,23 +42,23 @@ class Tile(object):
         piece.draw_unseen(screen_position)
 
     def get_first_item(self):
-        return self.get_first_piece_of_type(gamepiece.GamePieceType.ITEM)
+        return self.get_first_piece_of_type(GamePieceType.ITEM)
 
     def get_first_entity(self):
-        return self.get_first_piece_of_type(gamepiece.GamePieceType.ENTITY)
+        return self.get_first_piece_of_type(GamePieceType.ENTITY)
 
     def get_first_cloud(self):
-        return self.get_first_piece_of_type(gamepiece.GamePieceType.CLOUD)
+        return self.get_first_piece_of_type(GamePieceType.CLOUD)
 
     def get_entities(self):
-        return self.game_pieces[gamepiece.GamePieceType.ENTITY]
+        return self.game_pieces[GamePieceType.ENTITY]
 
     def get_terrain(self):
-        return self.get_first_piece_of_type(gamepiece.GamePieceType.TERRAIN)
+        return self.get_first_piece_of_type(GamePieceType.TERRAIN)
 
     def get_dungeon_feature(self):
         return self.\
-            get_first_piece_of_type(gamepiece.GamePieceType.DUNGEON_FEATURE)
+            get_first_piece_of_type(GamePieceType.DUNGEON_FEATURE)
 
     def get_first_piece_of_type(self, piece_type):
         if(len(self.game_pieces[piece_type]) < 1):
@@ -66,7 +66,7 @@ class Tile(object):
         return self.game_pieces[piece_type][0]
 
     def has_entity(self):
-        if(len(self.game_pieces[gamepiece.GamePieceType.ENTITY]) < 1):
+        if(len(self.game_pieces[GamePieceType.ENTITY]) < 1):
             return False
         return True
 
@@ -87,5 +87,5 @@ class Tile(object):
 
 
 unknown_tile = Tile()
-unknown_tile.game_pieces[gamepiece.GamePieceType.TERRAIN]\
+unknown_tile.game_pieces[GamePieceType.TERRAIN]\
     .append(terrain.Unknown())

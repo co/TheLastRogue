@@ -1,4 +1,4 @@
-import gamestate
+import compositegamestate as gamestate
 import compositegamestate
 import equipment
 import rectfactory

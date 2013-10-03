@@ -20,6 +20,7 @@ class Player(Composite):
     """
     def __init__(self):
         super(Player, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ENTITY))
         self.add_child(IsPlayer())
         self.add_child(Position())
         self.add_child(DungeonLevel())
@@ -38,5 +39,4 @@ class Player(Composite):
         self.add_child(MemoryMap())
         self.add_child(Inventory())
         self.add_child(Mover())
-        self.add_child(GamePieceType(GamePieceType.ENTITY))
         #self.add_child(equipment.Equipment(6))
