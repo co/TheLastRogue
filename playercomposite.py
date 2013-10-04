@@ -8,6 +8,7 @@ from gamepiecetype import GamePieceType
 from memorymap import MemoryMap
 from composite import Description, GraphicChar, MovementSpeed, IsPlayer
 from composite import Health, Strength, AttackSpeed, Faction, Inventory
+from composite import CharPrinter
 from mover import Mover
 import gametime
 import symbol
@@ -27,6 +28,7 @@ class Player(Composite):
         self.add_child(Description())
         self.add_child(GraphicChar(symbol.GUNSLINGER_THIN,
                                    None, colors.WHITE))
+        self.add_child(CharPrinter())
 
         self.add_child(Health(10))
         self.add_child(Strength(10))

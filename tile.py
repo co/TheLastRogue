@@ -25,7 +25,7 @@ class Tile(object):
     def get_piece_to_draw(self):
         pieces = next(list for list in self.game_pieces.values()
                       if len(list) > 0)
-        if (pieces[0].piece_type == GamePieceType.ENTITY):
+        if (pieces[0].game_piece_type.value == GamePieceType.ENTITY):
             animation_length = 7
             cycle_length = len(pieces) * animation_length
             current_animation_frame = frame.current_frame % cycle_length
@@ -33,13 +33,12 @@ class Tile(object):
         return pieces[0]
 
     def _draw_seen(self, screen_position, piece):
-        color_bg = piece.color_bg
-        if(color_bg is None):
-            self.get_terrain().draw(screen_position)
-        piece.draw(screen_position)
+        if(piece.graphic_char.color_bg is None):
+            self.get_terrain().char_printer.draw(screen_position)
+        piece.char_printer.draw(screen_position)
 
     def _draw_unseen(self, screen_position, piece):
-        piece.draw_unseen(screen_position)
+        piece.char_printer.draw_unseen(screen_position)
 
     def get_first_item(self):
         return self.get_first_piece_of_type(GamePieceType.ITEM)
@@ -81,7 +80,7 @@ class Tile(object):
                     new_piece.add_child(piece.graphic_char.copy())
                 if(piece.has_child("description")):
                     new_piece.add_child(piece.description.copy())
-                copy_list.add(new_piece)
+                copy_list.append(new_piece)
             copy.game_pieces[piece_type] = copy_list
         return copy
 

@@ -1,4 +1,4 @@
-from composite import Description, GraphicChar
+from composite import Description, GraphicChar, CharPrinter
 from position import Position
 from dungeonlevelcomposite import DungeonLevel
 from compositecore import Composite, Leaf
@@ -22,6 +22,8 @@ class StairsDown(Composite):
                                     "Oh, what horrors awaits there?")))
         self.add_child(GraphicChar(symbol.STAIRS_DOWN,
                                    None, colors.WHITE))
+
+        self.add_child(CharPrinter())
         self.add_child(ShareTilePlayerActions(action.DescendStairsAction()))
 
 
@@ -39,6 +41,7 @@ class StairsUp(Composite):
                                     "nightmare becomes too real.")))
         self.add_child(GraphicChar(symbol.STAIRS_UP,
                                    None, colors.WHITE))
+        self.add_child(CharPrinter())
         self.add_child(ShareTilePlayerActions())
 
 
@@ -57,6 +60,7 @@ class Fountain(Composite):
                                     "healthy by drinking this.")))
         self.add_child(GraphicChar(symbol.STAIRS_UP,
                                    None, colors.WHITE))
+        self.add_child(CharPrinter())
         self.add_child(ShareTilePlayerActions())
 
 

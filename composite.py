@@ -94,6 +94,57 @@ class Faction(Leaf):
         self.component_type = "faction"
 
 
+class CharPrinter(Leaf):
+    def __init__(self):
+        super(CharPrinter, self).__init__()
+        self.component_type = "char_printer"
+        self._status_cycle_colors = []
+        self._blink_color_fg_queue = []
+
+    def draw_no_effect(self, position):
+        """
+        Draws the char on the given position on the console.
+
+        Bypasses all effects.
+        """
+        if(not self.parent.graphic_char.color_bg is None):
+            console.console.set_color_bg(position,
+                                         self.parent.graphic_char.color_bg)
+        if(not self.parent.graphic_char.color_fg is None):
+            console.console.set_color_fg(position,
+                                         self.parent.graphic_char.color_fg)
+        if(not self.parent.graphic_char.symbol is None):
+            console.console.set_symbol(position,
+                                       self.parent.graphic_char.symbol)
+
+    def draw(self, position):
+        """
+        Draws the char on the given position on the console.
+        """
+        self.draw_no_effect(position)
+        if(len(self._blink_color_fg_queue) > 0):
+            console.console.set_color_fg(position,
+                                         self._blink_color_fg_queue.pop())
+
+    def draw_unseen(self, screen_position):
+        """
+        Draws the char as it looks like outside the field of view.
+        """
+        console.console.set_colors_and_symbol(screen_position,
+                                              colors.UNSEEN_FG,
+                                              colors.UNSEEN_BG,
+                                              self.parent.graphic_char.symbol)
+
+    def set_fg_blink_colors(self, colors):
+        """
+        Sets the foreground blink queue.
+
+        These colors will be drawn as an effect,
+        the regular colors won't be drawn until the blink queue is empty.
+        """
+        self._blink_color_fg_queue = colors
+
+
 class GraphicChar(Leaf):
     """
     Composites holding this has a graphical representation as a char.
@@ -104,46 +155,6 @@ class GraphicChar(Leaf):
         self.component_type = "graphic_char"
         self.color_bg = color_bg
         self.color_fg = color_fg
-        self._status_cycle_colors = []
-        self._blink_color_fg_queue = []
-
-    def draw_no_effect(self, position):
-        """
-        Draws the char on the given position on the console.
-
-        Bypasses all effects.
-        """
-        if(not self.color_bg is None):
-            console.set_color_bg(position, self.color_bg)
-        if(not self.color_fg is None):
-            console.set_color_fg(position, self.color_fg)
-        if(not self.symbol is None):
-            console.set_symbol(position, self.symbol)
-
-    def draw(self, position):
-        """
-        Draws the char on the given position on the console.
-        """
-        self.draw_no_effect(position)
-        if(len(self._blink_color_fg_queue) > 0):
-            console.set_color_fg(position, self._blink_color_fg_queue.pop())
-
-    def draw_unseen(self, screen_position):
-        """
-        Draws the char as it looks like outside the field of view.
-        """
-        console.set_colors_and_symbol(screen_position,
-                                      colors.UNSEEN_FG,
-                                      colors.UNSEEN_BG, self.symbol)
-
-    def set_fg_blink_colors(self, colors):
-        """
-        Sets the foreground blink queue.
-
-        These colors will be drawn as an effect,
-        the regular colors won't be drawn until the blink queue is empty.
-        """
-        self._blink_color_fg_queue = colors
 
     def copy(self):
         """

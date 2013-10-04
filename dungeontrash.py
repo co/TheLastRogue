@@ -1,4 +1,4 @@
-from composite import Description, GraphicChar
+from composite import Description, GraphicChar, CharPrinter
 from position import Position
 from dungeonlevelcomposite import DungeonLevel
 from compositecore import Composite
@@ -21,3 +21,4 @@ class Corpse(Composite):
                                    "A rotting corpse."))
         self.add_child(GraphicChar(symbol.CORPSE,
                                    None, colors.WHITE))
+        self.add_child(CharPrinter)
