@@ -95,10 +95,8 @@ class DungeonLevel(object):
             self.dungeon_features.remove(dungeon_feature_to_remove)
 
     def add_actor_if_not_present(self, new_actor):
-        print "I made it this far"
         if(not new_actor in self.actors):
             self.add_actor(new_actor)
-            print "added"
 
     def remove_actor_if_present(self, actor_to_remove):
         if(actor_to_remove in self.actors):

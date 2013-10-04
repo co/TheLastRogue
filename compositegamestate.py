@@ -23,7 +23,9 @@ class ComponentGameState(state.State):
         self.player = Player()
         start_position = (20, 10)
         self.dungeon_level = dungeon_level_from_file("test.level")
+        print self.player.dungeon_level.dungeon_level
         self.player.mover.try_move(start_position, self.dungeon_level)
+        print self.player.dungeon_level.dungeon_level
 
         self._init_gui()
         camera_position = (constants.MONSTER_STATUS_BAR_WIDTH, 0)
@@ -54,6 +56,9 @@ class ComponentGameState(state.State):
     def prepare_draw(self):
         dungeon_level =\
             self.player.dungeon_level.dungeon_level
+        print self.player
+        print self.player.dungeon_level
+        print self.player.dungeon_level.dungeon_level
         dungeon_level.draw(self.camera)
         self.player_status_bar.draw()
         self.message_bar.draw()

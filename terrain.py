@@ -4,6 +4,7 @@ from gamepiecetype import GamePieceType
 from composite import GraphicChar
 from compositecore import Leaf, Composite
 from mover import Mover
+from position import Position
 
 
 #class Terrain(GamePiece):
@@ -40,6 +41,7 @@ class Floor(Composite):
         super(Floor, self).__init__()
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
+        self.add_child(Position())
         self.add_child(GraphicChar(colors.FLOOR_FG,
                                    colors.FLOOR_BG,
                                    icon.CENTER_DOT))
@@ -52,6 +54,7 @@ class Water(Composite):
         super(Water, self).__init__()
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
+        self.add_child(Position())
         self.add_child(GraphicChar(colors.BLUE_D,
                                    colors.CYAN_D,
                                    icon.WATER))
@@ -64,6 +67,7 @@ class GlassWall(Composite):
         super(GlassWall, self).__init__()
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
+        self.add_child(Position())
         self.add_child(GraphicChar(colors.WHITE,
                                    colors.FLOOR_BG,
                                    icon.CAVE_WALLS_ROW))
@@ -76,6 +80,7 @@ class Unknown(Composite):
         super(Unknown, self).__init__()
         self.add_child(GamePieceType())
         self.add_child(Mover())
+        self.add_child(Position())
         self.add_child(GraphicChar(colors.BLACK,
                                    colors.BLACK,
                                    ' '))
@@ -88,6 +93,7 @@ class Wall (Composite):
         super(Wall, self).__init__()
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
+        self.add_child(Position())
         self.add_child(GraphicChar(colors.WALL_FG,
                                    colors.FLOOR_BG,
                                    icon.DUNGEON_WALLS_ROW))
@@ -118,6 +124,7 @@ class Door(Composite):
         super(Door, self).__init__()
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
+        self.add_child(Position())
         self.add_child(GraphicChar(colors.ORANGE_D,
                                    colors.FLOOR_BG,
                                    icon.DUNGEON_WALLS_ROW))

@@ -48,7 +48,6 @@ class Mover(Leaf):
         piece_type = self.parent.game_piece_type.value
         new_tile.game_pieces[piece_type].append(self.parent)
         self.parent.position.position = new_position
-        print self.parent._children
         if(not self.has_sibling("dungeon_level")):
             self.parent.add_child(DungeonLevel())
         self.parent.dungeon_level.dungeon_level = dungeon_level
@@ -82,16 +81,15 @@ class Mover(Leaf):
         """
         Checks if the parent can move through a terrain.
         """
-        if(terrain_to_pass is None):
-            return False
-        if(not terrain_to_pass.is_solid()):
+        if(terrain_to_pass is None or not terrain_to_pass.is_solid.value):
             return True
         if(self.has_sibling("status_flags")):
             status_flags = self.parent.status_flags
-            if(not status_flags is None and
-               status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
-               isinstance(terrain_to_pass, terrain.Door)):
-                return True
+            pass
+            #if(not status_flags is None and
+               #status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
+               #isinstance(terrain_to_pass, terrain.Door)):
+                #return True
         return False
 
     def try_remove_from_dungeon(self):
