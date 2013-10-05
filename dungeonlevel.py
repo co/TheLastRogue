@@ -32,12 +32,6 @@ class DungeonLevel(object):
     def actors(self):
         return self.actor_scheduler.actors
 
-    def add_actor(self, actor):
-        return self.actor_scheduler.register(actor)
-
-    def remove_actor(self, actor):
-        return self.actor_scheduler.release(actor)
-
     @property
     def up_stairs(self):
         return [feature for feature in self.dungeon_features
@@ -58,6 +52,10 @@ class DungeonLevel(object):
 
     def draw(self, camera):
         the_player = self._get_player_if_available()
+        if(the_player is None):
+            raise Exception(("Tried to access the player, "
+                             "from DungeonLevel: " + str(self) +
+                             ", but the player is not in the dungeon."))
         print "player:", the_player
         dungeon_mask = the_player.dungeon_mask
         dungeon_mask.update_fov()
@@ -96,11 +94,17 @@ class DungeonLevel(object):
 
     def add_actor_if_not_present(self, new_actor):
         if(not new_actor in self.actors):
-            self.add_actor(new_actor)
+            self._add_actor(new_actor)
 
     def remove_actor_if_present(self, actor_to_remove):
         if(actor_to_remove in self.actors):
-            self.remove_actor(actor_to_remove)
+            self._remove_actor(actor_to_remove)
+
+    def _add_actor(self, actor):
+        return self.actor_scheduler.register(actor)
+
+    def _remove_actor(self, actor):
+        return self.actor_scheduler.release(actor)
 
     def has_tile(self, position):
         x, y = position

@@ -21,7 +21,7 @@ class ActionScheduler(object):
 
     def _actors_tick(self):
         if len(self._actors) > 0:
-            actor = self._actors[0]
+            actor = self._actors[0].actor
             actor.tick()
             self._actors.rotate()
 

@@ -26,12 +26,14 @@ class DungeonLevel(Leaf):
         if(not self.dungeon_level is value):
             self._dungeon_level = value
             if(not self.parent is None):
-                self._dungeon_level.add_actor_if_not_present(self.parent)
                 self.parent.message(CompositeMessage.DUNGEON_LEVEL_CHANGED)
+                if(self.has_sibling("actor")):
+                    self._dungeon_level.add_actor_if_not_present(self.parent)
 
     def on_parent_changed(self):
         """
         When the parent changes try to add it to the dungeon.
         """
-        if(not self.dungeon_level is None):
+        if(not self.dungeon_level is None and self.has_sibling("actor")):
+            print "added as actor", self.parent
             self.dungeon_level.add_actor_if_not_present(self.parent)

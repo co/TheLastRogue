@@ -19,7 +19,13 @@ class StatusFlags(Leaf):
         self._status_flags = set()
 
     def has_status(self, status):
+        """
+        Returns True if parent entity has the status given.
+        """
         return status in self._status_flags
 
     def add_status(self, status):
+        """
+        Adds the status to the parent entity.
+        """
         return self._status_flags.add(status)
