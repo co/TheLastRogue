@@ -132,7 +132,7 @@ class DungeonLevel(object):
 
     def _remove_dead_monsters(self):
         for entity in self.entities:
-            if(entity.is_dead()):
+            if(entity.health.is_dead()):
                 entity.kill_and_remove()
 
     def signal_terrain_changed(self):

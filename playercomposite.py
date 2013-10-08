@@ -10,7 +10,7 @@ from composite import Description, GraphicChar, MovementSpeed, IsPlayer
 from composite import Health, Strength, AttackSpeed, Faction, Inventory
 from composite import CharPrinter
 from mover import Mover
-from actor import Actor
+from actor import InputActor
 import gametime
 import symbol
 import colors
@@ -42,5 +42,5 @@ class Player(Composite):
         self.add_child(MemoryMap())
         self.add_child(Inventory())
         self.add_child(Mover())
-        self.add_child(Actor())
+        self.add_child(InputActor())
         #self.add_child(equipment.Equipment(6))

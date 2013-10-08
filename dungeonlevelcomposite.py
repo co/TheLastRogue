@@ -24,11 +24,21 @@ class DungeonLevel(Leaf):
         Also updates the visibility/solidity of the dungeon_level tiles.
         """
         if(not self.dungeon_level is value):
+            old_dungeon_level = self._dungeon_level
             self._dungeon_level = value
-            if(not self.parent is None):
-                self.parent.message(CompositeMessage.DUNGEON_LEVEL_CHANGED)
-                if(self.has_sibling("actor")):
-                    self._dungeon_level.add_actor_if_not_present(self.parent)
+            self._signal_dungeon_level_changed()
+            if(not old_dungeon_level is None and
+               not self.has_sibling("actor")):
+                old_dungeon_level.remove_actor_if_present(self.parent)
+
+    def _signal_dungeon_level_changed(self):
+        """
+        Is called when dungeon level has changed.
+        """
+        if(not self.parent is None):
+            self.parent.message(CompositeMessage.DUNGEON_LEVEL_CHANGED)
+            if(self.has_sibling("actor")):
+                self._dungeon_level.add_actor_if_not_present(self.parent)
 
     def on_parent_changed(self):
         """

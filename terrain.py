@@ -44,7 +44,7 @@ class Floor(Composite):
         self.add_child(Position())
         self.add_child(GraphicChar(colors.FLOOR_FG,
                                    colors.FLOOR_BG,
-                                   icon.CENTER_DOT))
+                                   "k"))
         self.add_child(CharPrinter())
         self.add_child(IsSolid(False))
         self.add_child(IsTransparent(True))
