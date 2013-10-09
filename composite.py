@@ -68,13 +68,23 @@ class AttackSpeed(Leaf):
         self.component_type = "attack_speed"
 
 
+class GameState(Leaf):
+    """
+    Composites holding this has the attack_speed attribute.
+    """
+    def __init__(self, value):
+        super(GameState, self).__init__()
+        self.value = value
+        self.component_type = "game_state"
+
+
 class MovementSpeed(Leaf):
     """
     Composites holding this has the attack_speed attribute.
     """
-    def __init__(self, attack_speed):
+    def __init__(self, value):
         super(MovementSpeed, self).__init__()
-        self.attack_speed = attack_speed
+        self.value = value
         self.component_type = "movement_speed"
 
 
@@ -107,13 +117,17 @@ class CharPrinter(Leaf):
 
         Bypasses all effects.
         """
+        print "loool"
         if(not self.parent.graphic_char.color_bg is None):
+            print "1"
             console.console.set_color_bg(position,
                                          self.parent.graphic_char.color_bg)
         if(not self.parent.graphic_char.color_fg is None):
+            print "2"
             console.console.set_color_fg(position,
                                          self.parent.graphic_char.color_fg)
         if(not self.parent.graphic_char.symbol is None):
+            print "3"
             console.console.set_symbol(position,
                                        self.parent.graphic_char.symbol)
 

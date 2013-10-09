@@ -33,6 +33,7 @@ class Tile(object):
         return pieces[0]
 
     def _draw_seen(self, screen_position, piece):
+        print "drawing seen"
         if(piece.graphic_char.color_bg is None):
             self.get_terrain().char_printer.draw(screen_position)
         piece.char_printer.draw(screen_position)

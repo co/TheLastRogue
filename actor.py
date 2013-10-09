@@ -1,5 +1,7 @@
 from compositecore import Leaf
 import turn
+import inputhandler
+import geometry as geo
 import gametime
 
 
@@ -61,4 +63,17 @@ class InputActor(Actor):
         super(InputActor, self).__init__()
 
     def act(self):
-        return gametime.single_turn
+        self.parent.game_state.value.force_draw()
+
+        self.newly_spent_energy = 0
+        key = inputhandler.handler.get_keypress()
+        if(key is None):
+            return 0
+        if key in inputhandler.move_controls:
+            dx, dy = inputhandler.move_controls[key]
+            new_position = geo.add_2d(self.parent.position.value, (dx, dy))
+            move_succeded = self.parent.mover.try_move(new_position)
+            if(move_succeded):
+                self.newly_spent_energy += self.parent.movement_speed.value
+
+        return self.newly_spent_energy

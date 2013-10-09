@@ -8,7 +8,7 @@ from gamepiecetype import GamePieceType
 from memorymap import MemoryMap
 from composite import Description, GraphicChar, MovementSpeed, IsPlayer
 from composite import Health, Strength, AttackSpeed, Faction, Inventory
-from composite import CharPrinter
+from composite import CharPrinter, GameState
 from mover import Mover
 from actor import InputActor
 import gametime
@@ -20,7 +20,7 @@ class Player(Composite):
     """
     A composite component representing the player character.
     """
-    def __init__(self):
+    def __init__(self, game_state):
         super(Player, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ENTITY))
         self.add_child(IsPlayer())
@@ -43,4 +43,5 @@ class Player(Composite):
         self.add_child(Inventory())
         self.add_child(Mover())
         self.add_child(InputActor())
+        self.add_child(GameState(game_state))
         #self.add_child(equipment.Equipment(6))

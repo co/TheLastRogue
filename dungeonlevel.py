@@ -56,7 +56,6 @@ class DungeonLevel(object):
             raise Exception(("Tried to access the player, "
                              "from DungeonLevel: " + str(self) +
                              ", but the player is not in the dungeon."))
-        print "player:", the_player
         dungeon_mask = the_player.dungeon_mask
         dungeon_mask.update_fov()
         for y in range(constants.GAME_STATE_HEIGHT):

@@ -8,4 +8,4 @@ class Position(Leaf):
     def __init__(self):
         super(Position, self).__init__()
         self.component_type = "position"
-        self.position = (-1, -1)
+        self.value = (-1, -1)

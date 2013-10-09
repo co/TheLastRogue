@@ -20,7 +20,7 @@ def reset_globals():
 class ComponentGameState(state.State):
     def __init__(self):
         reset_globals()
-        self.player = Player()
+        self.player = Player(self)
         start_position = (20, 10)
         self.dungeon_level = dungeon_level_from_file("test.level")
         print self.player.dungeon_level.dungeon_level
@@ -51,14 +51,12 @@ class ComponentGameState(state.State):
         self.camera.update(self.player)
         self.prepare_draw()
         self._should_draw = False
+        print "time to flush"
         console.console.flush()
 
     def prepare_draw(self):
         dungeon_level =\
             self.player.dungeon_level.dungeon_level
-        print self.player
-        print self.player.dungeon_level
-        print self.player.dungeon_level.dungeon_level
         dungeon_level.draw(self.camera)
         self.player_status_bar.draw()
         self.message_bar.draw()
