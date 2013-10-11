@@ -1,7 +1,5 @@
 from compositecore import Leaf
 from dungeonlevelcomposite import DungeonLevel
-from statusflags import StatusFlags
-import terrain
 
 
 class Mover(Leaf):
@@ -23,7 +21,7 @@ class Mover(Leaf):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
         return (self._can_fit_on_tile(new_tile) and
-                self._can_pass_terrain(new_tile.get_terrain()))
+                self.can_pass_terrain(new_tile.get_terrain()))
 
     def try_move(self, new_position, new_dungeon_level=None):
         """
@@ -47,7 +45,7 @@ class Mover(Leaf):
         new_tile = dungeon_level.get_tile(new_position)
         piece_type = self.parent.game_piece_type.value
         new_tile.game_pieces[piece_type].append(self.parent)
-        self.parent.position.position = new_position
+        self.parent.position.value = new_position
         if(not self.has_sibling("dungeon_level")):
             self.parent.add_child(DungeonLevel())
         self.parent.dungeon_level.dungeon_level = dungeon_level
@@ -77,15 +75,15 @@ class Mover(Leaf):
         return (len(tile.game_pieces[piece_type.value]) <
                 piece_type.max_instances_in_tile)
 
-    def _can_pass_terrain(self, terrain_to_pass):
+    def can_pass_terrain(self, terrain_to_pass):
         """
         Checks if the parent can move through a terrain.
         """
         if(terrain_to_pass is None or not terrain_to_pass.is_solid.value):
             return True
         if(self.has_sibling("status_flags")):
-            status_flags = self.parent.status_flags
             pass
+            #status_flags = self.parent.status_flags
             #if(not status_flags is None and
                #status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
                #isinstance(terrain_to_pass, terrain.Door)):
@@ -99,7 +97,7 @@ class Mover(Leaf):
         if(not self.has_sibling("dungeon_level") or
            self.parent.dungeon_level.dungeon_level is None):
             return True
-        position = self.parent.position.position
+        position = self.parent.position.value
         tile_i_might_be_on = (self.parent.dungeon_level.
                               dungeon_level.get_tile(position))
 

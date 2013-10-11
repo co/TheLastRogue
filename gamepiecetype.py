@@ -25,3 +25,10 @@ class GamePieceType(Leaf):
     def max_instances_in_tile(self):
         return self.__class__.\
             _MAX_INSTANCES_OF_PIECE_TYPE_ON_TILE[self.value]
+
+    def copy(self):
+        """
+        Makes a copy of this component.
+        """
+        return GamePieceType(self.value)
+

@@ -10,6 +10,7 @@ import messenger
 import state
 from playercomposite import Player
 from dungeonlevelfactory import dungeon_level_from_file
+import libtcodpy as libtcod
 
 
 def reset_globals():
@@ -23,9 +24,7 @@ class ComponentGameState(state.State):
         self.player = Player(self)
         start_position = (20, 10)
         self.dungeon_level = dungeon_level_from_file("test.level")
-        print self.player.dungeon_level.dungeon_level
-        self.player.mover.try_move(start_position, self.dungeon_level)
-        print self.player.dungeon_level.dungeon_level
+        result = self.player.mover.try_move(start_position, self.dungeon_level)
 
         self._init_gui()
         camera_position = (constants.MONSTER_STATUS_BAR_WIDTH, 0)
@@ -51,7 +50,6 @@ class ComponentGameState(state.State):
         self.camera.update(self.player)
         self.prepare_draw()
         self._should_draw = False
-        print "time to flush"
         console.console.flush()
 
     def prepare_draw(self):

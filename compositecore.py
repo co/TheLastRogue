@@ -43,6 +43,12 @@ class Component(object):
         """
         pass
 
+    def on_tick(self, *args, **kw):
+        """
+        A method hook for updating the component tree on tick.
+        """
+        pass
+
     def message(self, message):
         """
         A method hook for broadcasting a message down the component tree.
@@ -121,6 +127,14 @@ class Composite(Component):
         """
         map(lambda x: x.update(),
             chain.from_iterable(self._children.values()))
+
+    def on_tick(self):
+        """
+        Runs on_tick on all child components.
+        """
+        map(lambda x: x.on_tick(),
+            chain.from_iterable(self._children.values()))
+
 
     def message(self, message):
         """

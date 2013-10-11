@@ -48,7 +48,7 @@ class DungeonMask(Leaf):
         """
         Calculates the Field of Visuon from the dungeon_map.
         """
-        x, y = self.parent.position.position
+        x, y = self.parent.position.value
         sight_radius = self.parent.sight_radius.sight_radius
         libtcod.map_compute_fov(self.dungeon_map, x, y,
                                 sight_radius, True)
@@ -92,6 +92,9 @@ class DungeonMask(Leaf):
                     line += "#"
             print(line)
 
+    def on_tick(self):
+        self.update_dungeon_map_if_its_old()
+
     def update_dungeon_map_if_its_old(self):
         """
         Updates the dungeon map it is older than the latest change.
@@ -110,8 +113,8 @@ class DungeonMask(Leaf):
             for x in range(dungeon_level.width):
                 terrain = dungeon_level.tile_matrix[y][x].get_terrain()
                 libtcod.map_set_properties(self.dungeon_map, x, y,
-                                           terrain.is_transparent(),
-                                           self._can_pass_terrain(terrain))
+                                           terrain.is_transparent.value,
+                                           self.parent.mover.can_pass_terrain(terrain))
         self.last_dungeon_map_update_timestamp = turn.current_turn
         self.update_fov()
 

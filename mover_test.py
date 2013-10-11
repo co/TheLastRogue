@@ -101,16 +101,16 @@ class TestComposition(unittest.TestCase):
 
         self.assertTrue(entity.mover.try_move(self.open_position))
 
-        self.assertTrue(entity.position.position == self.open_position)
+        self.assertTrue(entity.position.value == self.open_position)
         self.assertTrue(self.dungeon_level.get_tile(self.open_position)
                         .get_entities()[0] is entity)
 
         self.assertTrue(entity.mover.try_move(self.open_position2))
-        self.assertTrue(entity.position.position == self.open_position2)
+        self.assertTrue(entity.position.value == self.open_position2)
         self.assertTrue(self.dungeon_level.get_tile(self.open_position2)
                         .get_entities()[0] is entity)
 
-        self.assertFalse(entity.position.position == self.open_position)
+        self.assertFalse(entity.position.value == self.open_position)
         self.assertFalse(self.dungeon_level.get_tile(self.open_position)
                          .has_entity())
 

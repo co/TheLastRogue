@@ -23,6 +23,6 @@ class Camera(object):
                           self.screen_position)
 
     def update(self, player):
-        position = player.position.position
+        position = player.position.value
         delta = geo.sub_2d(position, self.screen_center_position)
         self.camera_offset = geo.add_2d(self.camera_offset, delta)

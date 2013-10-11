@@ -1,5 +1,7 @@
 from gamepiecetype import GamePieceType
 import compositecore
+from composite import CharPrinter
+import console
 import frame
 import terrain
 
@@ -33,7 +35,6 @@ class Tile(object):
         return pieces[0]
 
     def _draw_seen(self, screen_position, piece):
-        print "drawing seen"
         if(piece.graphic_char.color_bg is None):
             self.get_terrain().char_printer.draw(screen_position)
         piece.char_printer.draw(screen_position)
@@ -77,10 +78,13 @@ class Tile(object):
             copy_list = []
             for piece in piece_list:
                 new_piece = compositecore.Composite()
+                if(piece.has_child("game_piece_type")):
+                    new_piece.add_child(piece.game_piece_type.copy())
                 if(piece.has_child("graphic_char")):
                     new_piece.add_child(piece.graphic_char.copy())
                 if(piece.has_child("description")):
                     new_piece.add_child(piece.description.copy())
+                new_piece.add_child(CharPrinter())
                 copy_list.append(new_piece)
             copy.game_pieces[piece_type] = copy_list
         return copy

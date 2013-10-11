@@ -55,7 +55,7 @@ class Actor(Leaf):
                                   str(self.parent))
 
     def _update_once_a_tick(self, time_spent):
-        pass
+        self.parent.on_tick()
 
 
 class InputActor(Actor):
@@ -76,4 +76,4 @@ class InputActor(Actor):
             if(move_succeded):
                 self.newly_spent_energy += self.parent.movement_speed.value
 
-        return self.newly_spent_energy
+        return 100

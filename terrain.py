@@ -42,9 +42,9 @@ class Floor(Composite):
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
         self.add_child(Position())
-        self.add_child(GraphicChar(colors.FLOOR_FG,
-                                   colors.FLOOR_BG,
-                                   "k"))
+        self.add_child(GraphicChar(colors.FLOOR_BG,
+                                   colors.FLOOR_FG,
+                                   "."))
         self.add_child(CharPrinter())
         self.add_child(IsSolid(False))
         self.add_child(IsTransparent(True))
@@ -99,8 +99,8 @@ class Wall (Composite):
         self.add_child(Mover())
         self.add_child(Position())
         self.add_child(CharPrinter())
-        self.add_child(GraphicChar(colors.WALL_FG,
-                                   colors.FLOOR_BG,
+        self.add_child(GraphicChar(colors.FLOOR_BG,
+                                   colors.WALL_FG,
                                    icon.DUNGEON_WALLS_ROW))
         self.add_child(IsSolid(True))
         self.add_child(IsTransparent(False))

@@ -27,8 +27,8 @@ class Player(Composite):
         self.add_child(Position())
         self.add_child(DungeonLevel())
         self.add_child(Description())
-        self.add_child(GraphicChar(symbol.GUNSLINGER_THIN,
-                                   None, colors.WHITE))
+        self.add_child(GraphicChar(None, colors.WHITE,
+                                   symbol.GUNSLINGER_THIN))
         self.add_child(CharPrinter())
 
         self.add_child(Health(10))

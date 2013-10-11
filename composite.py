@@ -117,17 +117,13 @@ class CharPrinter(Leaf):
 
         Bypasses all effects.
         """
-        print "loool"
         if(not self.parent.graphic_char.color_bg is None):
-            print "1"
             console.console.set_color_bg(position,
                                          self.parent.graphic_char.color_bg)
         if(not self.parent.graphic_char.color_fg is None):
-            print "2"
             console.console.set_color_fg(position,
                                          self.parent.graphic_char.color_fg)
         if(not self.parent.graphic_char.symbol is None):
-            print "3"
             console.console.set_symbol(position,
                                        self.parent.graphic_char.symbol)
 
@@ -163,7 +159,7 @@ class GraphicChar(Leaf):
     """
     Composites holding this has a graphical representation as a char.
     """
-    def __init__(self, symbol, color_bg, color_fg):
+    def __init__(self, color_bg, color_fg, symbol):
         super(GraphicChar, self).__init__()
         self.symbol = symbol
         self.component_type = "graphic_char"
@@ -174,7 +170,7 @@ class GraphicChar(Leaf):
         """
         Makes a copy of this component.
         """
-        return GraphicChar(self.symbol, self.color_bg, self.color_fg)
+        return GraphicChar(self.color_bg, self.color_fg, self.symbol)
 
 
 class Description(Leaf):

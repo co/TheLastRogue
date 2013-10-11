@@ -95,45 +95,5 @@ class GFXChar(object):
         self.symbol = symbol
         self.color_bg = color_bg
         self.color_fg = color_fg
-        self._status_cycle_colors = []
-        self._blink_color_fg_queue = []
-
-    def draw_no_effect(self, position):
-        """
-        Draws the char on the given position on the console.
-
-        Bypasses all effects.
-        """
-        if(not self.color_bg is None):
-            console.set_color_bg(position, self.color_bg)
-        if(not self.color_fg is None):
-            console.set_color_fg(position, self.color_fg)
-        if(not self.symbol is None):
-            console.set_symbol(position, self.symbol)
-
-    def draw(self, position):
-        """
-        Draws the char on the given position on the console.
-        """
-        self.draw_no_effect(position)
-        if(len(self._blink_color_fg_queue) > 0):
-            console.set_color_fg(position, self._blink_color_fg_queue.pop())
-
-    def draw_unseen(self, screen_position):
-        """
-        Draws the char as it looks like outside the field of view.
-        """
-        console.set_colors_and_symbol(screen_position,
-                                      colors.UNSEEN_FG,
-                                      colors.UNSEEN_BG, self.symbol)
-
-    def set_fg_blink_colors(self, colors):
-        """
-        Sets the foreground blink queue.
-
-        These colors will be drawn as an effect,
-        the regular colors won't be drawn until the blink queue is empty.
-        """
-        self._blink_color_fg_queue = colors
 
 console = ConsoleVisual(settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT)

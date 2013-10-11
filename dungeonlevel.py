@@ -56,8 +56,6 @@ class DungeonLevel(object):
             raise Exception(("Tried to access the player, "
                              "from DungeonLevel: " + str(self) +
                              ", but the player is not in the dungeon."))
-        dungeon_mask = the_player.dungeon_mask
-        dungeon_mask.update_fov()
         for y in range(constants.GAME_STATE_HEIGHT):
             for x in range(constants.GAME_STATE_WIDTH):
                 position = (x, y)
@@ -68,6 +66,8 @@ class DungeonLevel(object):
         screen_position = geo.add_2d(position, camera.screen_position)
         the_tile = self.get_tile_or_unknown(tile_position)
         x, y = tile_position
+        dungeon_mask = the_player.dungeon_mask
+        dungeon_mask.update_fov()
         dungeon_map = the_player.dungeon_mask.dungeon_map
         memory_map = the_player.memory_map
         if(libtcod.map_is_in_fov(dungeon_map, x, y)):
