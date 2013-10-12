@@ -23,11 +23,12 @@ class DungeonMask(Leaf):
         """
         Initiates the dungeon map of a dungeon_level, if available.
         """
+        print "__~~~~~~~~~~~~~~"
         if(self.has_sibling("dungeon_level") and
            not self.parent.dungeon_level.dungeon_level is None):
-            self.init_dungeon_map(self.parent.dungeon_level.dungeon_level)
+            self._init_dungeon_map(self.parent.dungeon_level.dungeon_level)
 
-    def init_dungeon_map(self, dungeon_level):
+    def _init_dungeon_map(self, dungeon_level):
         """
         Initiates the dungeon map of a dungeon_level.
         """
@@ -46,10 +47,10 @@ class DungeonMask(Leaf):
 
     def update_fov(self):
         """
-        Calculates the Field of Visuon from the dungeon_map.
+        Calculates the Field of Vison from the dungeon_map.
         """
         x, y = self.parent.position.value
-        sight_radius = self.parent.sight_radius.sight_radius
+        sight_radius = self.parent.sight_radius.value
         libtcod.map_compute_fov(self.dungeon_map, x, y,
                                 sight_radius, True)
 
@@ -108,13 +109,16 @@ class DungeonMask(Leaf):
         """
         Updates the dungeon map.
         """
+        print "time to update dungeon map"
         dungeon_level = self.parent.dungeon_level.dungeon_level
         for y in range(dungeon_level.height):
             for x in range(dungeon_level.width):
-                terrain = dungeon_level.tile_matrix[y][x].get_terrain()
+                terrain =\
+                    dungeon_level.get_tile_or_unknown((x, y)).get_terrain()
                 libtcod.map_set_properties(self.dungeon_map, x, y,
                                            terrain.is_transparent.value,
-                                           self.parent.mover.can_pass_terrain(terrain))
+                                           self.parent.
+                                           mover.can_pass_terrain(terrain))
         self.last_dungeon_map_update_timestamp = turn.current_turn
         self.update_fov()
 

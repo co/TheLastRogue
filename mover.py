@@ -103,8 +103,6 @@ class Mover(Leaf):
 
         piece_type = self.parent.game_piece_type.value
         pieces_i_might_be_among = tile_i_might_be_on.game_pieces[piece_type]
-        if self.has_sibling("dungeon_level"):
-            self.parent.pop_component("dungeon_level")
         if(any(self.parent is piece for piece in pieces_i_might_be_among)):
             pieces_i_might_be_among.remove(self.parent)
             return True

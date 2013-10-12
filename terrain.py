@@ -74,7 +74,7 @@ class GlassWall(Composite):
                                    colors.FLOOR_BG,
                                    icon.CAVE_WALLS_ROW))
         self.add_child(CharPrinter())
-        self.add_child(IsSolid(False))
+        self.add_child(IsSolid(True))
         self.add_child(IsTransparent(True))
 
 
