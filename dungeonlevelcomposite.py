@@ -23,13 +23,9 @@ class DungeonLevel(Leaf):
         Sets current dungeon_level of the entity.
         Also updates the visibility/solidity of the dungeon_level tiles.
         """
-        print "moving to dungeon_level: ", value, " from: ", self._dungeon_level, self.parent
         if(not self._dungeon_level is value):
-            print "it was new!"
             old_dungeon_level = self._dungeon_level
-            print value
             self._dungeon_level = value
-            print "n", self.dungeon_level, self._dungeon_level
             self._signal_dungeon_level_changed()
             if(not old_dungeon_level is None and
                self.has_sibling("actor")):
@@ -49,5 +45,4 @@ class DungeonLevel(Leaf):
         When the parent changes try to add it to the dungeon.
         """
         if(not self.dungeon_level is None and self.has_sibling("actor")):
-            print "added as actor", self.parent
             self.dungeon_level.add_actor_if_not_present(self.parent)

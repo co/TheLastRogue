@@ -47,14 +47,12 @@ class ComponentGameState(state.State):
         #self.force_draw()
 
     def force_draw(self):
-        print "force_draw"
         self.camera.update(self.player)
         self.prepare_draw()
         self._should_draw = False
         console.console.flush()
 
     def prepare_draw(self):
-        print "prepare_draw"
         dungeon_level =\
             self.player.dungeon_level.dungeon_level
         dungeon_level.draw(self.camera)

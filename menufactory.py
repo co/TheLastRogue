@@ -208,7 +208,7 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
 
 def context_menu(player, state_stack):
     current_dungeon_feature =\
-        player.dungeon_level.get_tile(player.position).get_dungeon_feature()
+        player.dungeon_level.get_tile(player.position.value).get_dungeon_feature()
     context_options = []
     if(not current_dungeon_feature is None):
         context_options.extend(get_dungeon_feature_menu_options
