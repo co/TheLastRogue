@@ -38,7 +38,7 @@ class TestComposition(unittest.TestCase):
         entity.add_child(GamePieceType
                          (GamePieceType.ENTITY))
         dungeon_level_component = DungeonLevel()
-        dungeon_level_component.dungeon_level = dungeon_level
+        dungeon_level_component.value = dungeon_level
         entity.add_child(dungeon_level_component)
 
         return entity
@@ -50,12 +50,12 @@ class TestComposition(unittest.TestCase):
 
     def test_can_pass_terrain_returns_true_if_terrain_is_none(self):
         entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
-        self.assertTrue(entity.mover._can_pass_terrain(None))
+        self.assertTrue(entity.mover.can_pass_terrain(None))
 
     def test_can_pass_terrain_returns_true_if_terrain_floor(self):
         entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
         floor = terrain.Floor()
-        self.assertTrue(entity.mover._can_pass_terrain(floor))
+        self.assertTrue(entity.mover.can_pass_terrain(floor))
 
 #    def test_can_pass_door_if_entity_can_open_door(self):
 #        entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
@@ -94,7 +94,7 @@ class TestComposition(unittest.TestCase):
         entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
         self.assertTrue(entity.mover.try_move(self.open_position))
         self.assertTrue(entity.mover.try_remove_from_dungeon())
-        self.assertFalse(entity.has_child("dungeon_level"))
+        self.assertTrue(entity.has_child("dungeon_level"))
 
     def test_try_move_should_move_entity_to_new_position(self):
         entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
@@ -119,20 +119,17 @@ class TestComposition(unittest.TestCase):
 
         self.assertTrue(entity.mover.try_move(self.open_position,
                                               self.dungeon_level))
-        self.assertTrue(entity.dungeon_level.dungeon_level
-                        is self.dungeon_level)
+        self.assertTrue(entity.dungeon_level.value is self.dungeon_level)
 
         self.assertTrue(entity.mover.try_move(self.open_position,
                                               self.dungeon_level2))
-        self.assertTrue(entity.dungeon_level.dungeon_level
-                        is self.dungeon_level2)
+        self.assertTrue(entity.dungeon_level.value is self.dungeon_level2)
 
     def test_try_move_to_dungeon_level_should_handle_no_previous_dungeon(self):
         entity = self.set_up_new_entity_with_dungeon(None)
         self.assertTrue(entity.mover.try_move(self.open_position,
                                               self.dungeon_level))
-        self.assertTrue(entity.dungeon_level.dungeon_level
-                        is self.dungeon_level)
+        self.assertTrue(entity.dungeon_level.value is self.dungeon_level)
 
     def test_replace_move_should_replace_a_blocking_entity_on_move(self):
         entity_first = self.set_up_new_entity_with_dungeon(self.dungeon_level)

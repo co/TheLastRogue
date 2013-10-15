@@ -1,4 +1,5 @@
 from position import Position
+import equipment
 from dungeonlevelcomposite import DungeonLevel
 from statusflags import StatusFlags
 from compositecore import Composite
@@ -44,4 +45,4 @@ class Player(Composite):
         self.add_child(Mover())
         self.add_child(InputActor())
         self.add_child(GameState(game_state))
-        #self.add_child(equipment.Equipment(6))
+        self.add_child(equipment.Equipment())

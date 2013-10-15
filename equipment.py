@@ -58,7 +58,9 @@ class EquipmentSlots(object):
 
 
 class Equipment(composite.Leaf):
-    def __init__(self, entity):
+    def __init__(self):
+        super(Equipment, self).__init__()
+        self.component_type = "equipment"
         self._equipment = {
             EquipmentSlots.HEADGEAR: None,
             EquipmentSlots.ARMOR: None,
@@ -71,7 +73,6 @@ class Equipment(composite.Leaf):
             EquipmentSlots.MELEE_WEAPON: None,
             EquipmentSlots.RANGED_WEAPON: None
         }
-        self.entity = entity
 
     def get(self, equipment_slot):
         return self._equipment[equipment_slot]
@@ -86,17 +87,17 @@ class Equipment(composite.Leaf):
 
     def unequip(self, equipment_slot):
         equipment = self._equipment[equipment_slot]
-        equipment.unequip_effect(self.entity)
+        equipment.unequip_effect(self.parent)
         self._equipment[equipment_slot] = None
         return equipment
 
     def can_unequip_to_inventory(self, equipment_slot):
-        return (self.entity.inventory.has_room_for_item() and
+        return (self.parent.inventory.has_room_for_item() and
                 self.slot_is_equiped(equipment_slot))
 
     def unequip_to_inventory(self, equipment_slot):
         equipment = self.unequip(equipment_slot)
-        succeded = self.entity.inventory.try_add(equipment)
+        succeded = self.parent.inventory.try_add(equipment)
         return succeded
 
     def get_slots_of_type(self, equipment_type):
@@ -127,12 +128,12 @@ class Equipment(composite.Leaf):
 
     def _equip_into_slot(self, equipment, slot):
         self._equipment[slot] = equipment
-        equipment.equip_effect(self.entity)
+        equipment.equip_effect(self.parent)
 
     def execute_equip_effects(self):
         for equipment_slot in EquipmentSlots.ALL:
             if(self.slot_is_equiped(equipment_slot)):
-                self._equipment[equipment_slot].equiped_effect(self.entity)
+                self._equipment[equipment_slot].equiped_effect(self.parent)
 
     def print_equipment(self):
         print "###############################"

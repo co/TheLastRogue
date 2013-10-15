@@ -79,9 +79,10 @@ class InputActor(Actor):
                 self.newly_spent_energy += self.parent.movement_speed.value
         elif key == inputhandler.ENTER:
             context_menu =\
-                menufactory.context_menu(self,
-                                         self.game_state.value.menu_prompt_stack)
-            self.game_state.start_prompt(context_menu)
+                menufactory.context_menu(self.parent,
+                                         self.parent.
+                                         game_state.value.menu_prompt_stack)
+            self.parent.game_state.value.start_prompt(context_menu)
 
         elif key == inputhandler.PRINTSCREEN:
             console.console.print_screen()

@@ -15,8 +15,7 @@ class Mover(Leaf):
         Checks if parent component can move to new position.
         """
         if(new_dungeon_level is None):
-            new_dungeon_level =\
-                self.parent.dungeon_level.dungeon_level
+            new_dungeon_level = self.parent.dungeon_level.value
         if(not new_dungeon_level.has_tile(new_position)):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
@@ -30,8 +29,7 @@ class Mover(Leaf):
         Returns true if it is successful, false otherwise.
         """
         if(new_dungeon_level is None):
-            new_dungeon_level =\
-                self.parent.dungeon_level.dungeon_level
+            new_dungeon_level = self.parent.dungeon_level.value
         if(self.can_move(new_position, new_dungeon_level)):
             self._move(new_position, new_dungeon_level)
             return True
@@ -48,15 +46,14 @@ class Mover(Leaf):
         self.parent.position.value = new_position
         if(not self.has_sibling("dungeon_level")):
             self.parent.add_child(DungeonLevel())
-        self.parent.dungeon_level.dungeon_level = dungeon_level
+        self.parent.dungeon_level.value = dungeon_level
 
     def replace_move(self, new_position, new_dungeon_level=None):
         """
         Moves parent to new position and replaces what was already there.
         """
         if(new_dungeon_level is None):
-            new_dungeon_level =\
-                self.parent.dungeon_level.dungeon_level
+            new_dungeon_level = self.parent.dungeon_level.value
         if(not new_dungeon_level.has_tile(new_position)):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
@@ -95,11 +92,11 @@ class Mover(Leaf):
         Tries to remove parent from dungeon.
         """
         if(not self.has_sibling("dungeon_level") or
-           self.parent.dungeon_level.dungeon_level is None):
+           self.parent.dungeon_level.value is None):
             return True
         position = self.parent.position.value
         tile_i_might_be_on = (self.parent.dungeon_level.
-                              dungeon_level.get_tile(position))
+                              value.get_tile(position))
 
         piece_type = self.parent.game_piece_type.value
         pieces_i_might_be_among = tile_i_might_be_on.game_pieces[piece_type]

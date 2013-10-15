@@ -24,8 +24,8 @@ class DungeonMask(Leaf):
         Initiates the dungeon map of a dungeon_level, if available.
         """
         if(self.has_sibling("dungeon_level") and
-           not self.parent.dungeon_level.dungeon_level is None):
-            self._init_dungeon_map(self.parent.dungeon_level.dungeon_level)
+           not self.parent.dungeon_level.value is None):
+            self._init_dungeon_map(self.parent.dungeon_level.value)
 
     def _init_dungeon_map(self, dungeon_level):
         """
@@ -99,7 +99,7 @@ class DungeonMask(Leaf):
         """
         Updates the dungeon map it is older than the latest change.
         """
-        dungeon_level = self.parent.dungeon_level.dungeon_level
+        dungeon_level = self.parent.dungeon_level.value
         if(dungeon_level.terrain_changed_timestamp >
            self.last_dungeon_map_update_timestamp):
             self.update_dungeon_map()
@@ -108,7 +108,7 @@ class DungeonMask(Leaf):
         """
         Updates the dungeon map.
         """
-        dungeon_level = self.parent.dungeon_level.dungeon_level
+        dungeon_level = self.parent.dungeon_level.value
         for y in range(dungeon_level.height):
             for x in range(dungeon_level.width):
                 terrain =\

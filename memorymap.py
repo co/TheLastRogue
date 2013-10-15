@@ -34,7 +34,7 @@ class MemoryMap(Leaf):
         """
         if (tile.get_first_entity() is self):
             return  # No need to remember where you was, you are not there.
-        self.set_memory_map_if_not_set(self.parent.dungeon_level.dungeon_level)
+        self.set_memory_map_if_not_set(self.parent.dungeon_level.value)
         x, y = position
         self._memory_map[depth].tile_matrix[y][x] = tile.copy()
 
@@ -44,4 +44,4 @@ class MemoryMap(Leaf):
         """
         if(message == CompositeMessage.DUNGEON_LEVEL_CHANGED):
             self.set_memory_map_if_not_set(self.parent.
-                                           dungeon_level.dungeon_level)
+                                           dungeon_level.value)
