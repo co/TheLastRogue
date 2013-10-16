@@ -27,7 +27,7 @@ class Player(Composite):
         self.add_child(IsPlayer())
         self.add_child(Position())
         self.add_child(DungeonLevel())
-        self.add_child(Description())
+        self.add_child(Description("CO", "The Brave"))
         self.add_child(GraphicChar(None, colors.WHITE,
                                    symbol.GUNSLINGER_THIN))
         self.add_child(CharPrinter())

@@ -11,9 +11,15 @@ class Component(object):
     Attributes:
         parent (Component): The parent component.
         Is None if this is a root component.
+        component_type (string): The component_type, a composite can only
+        have one active child of a given component_type.
+        tags (Set of strings): Tags can be used as a second
+        means of identifying a component.
     """
     def __init__(self, *args, **kw):
         self._parent = None
+        self.component_type = None
+        self.tags = set()
         pass
 
     @property
@@ -134,7 +140,6 @@ class Composite(Component):
         """
         map(lambda x: x.on_tick(),
             chain.from_iterable(self._children.values()))
-
 
     def message(self, message):
         """

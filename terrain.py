@@ -7,21 +7,6 @@ from mover import Mover
 from position import Position
 
 
-#class Terrain(GamePiece):
-#    def __init__(self):
-#        super(Terrain, self).__init__()
-#        self.max_instances_in_single_tile = 1
-#        self.piece_type = GamePieceType.TERRAIN
-#
-#    @staticmethod
-#    def is_solid():
-#        return False
-#
-#    @staticmethod
-#    def is_transparent():
-#        return True
-#
-
 class IsSolid(Leaf):
     def __init__(self, is_solid=True):
         super(IsSolid, self).__init__()

@@ -73,6 +73,26 @@ class ShareTilePlayerActions(Leaf):
         self.actions = actions
 
 
+class DescendStairsAction(action.Action):
+    def __init__(self):
+        super(DescendStairsAction, self).__init__()
+        self.name = "Descend Stairs"
+        self.display_order = 50
+
+    def act(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        source_entity = kwargs["source_entity"]
+        current_dungeon_level = target_entity.dungeon_level
+        next_dungeon_level = current_dungeon_level.\
+            dungeon.get_dungeon_level(current_dungeon_level.depth + 1)
+        if(next_dungeon_level is None):
+            return False
+        destination_position = next_dungeon_level.up_stairs[0].position
+        target_entity.try_move(destination_position, next_dungeon_level)
+        self.add_energy_spent_to_entity(source_entity)
+
+
+
 #class DungeonFeature(gamepiece.GamePiece):
 #    def __init__(self):
 #        super(DungeonFeature, self).__init__()
