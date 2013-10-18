@@ -170,6 +170,12 @@ class Composite(Component):
         return (component_type in self._children and
                 len(self._children[component_type]) > 0)
 
+    def get_children_with_tag(self, tag):
+        """
+        Gets the list of all children with the given tag.
+        """
+        return [child for child in self._children if tag in child.tags]
+
 
 class CompositeMessage(object):
     """

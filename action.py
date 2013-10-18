@@ -247,11 +247,20 @@ class Action(Leaf):
         self.display_order = 100
         self.energy_cost = gametime.single_turn
 
+    def __call__(self, *args, **kwargs):
+        self.act(*args, **kwargs)
 
-class DelayedActionCall(object):
-    def __init__(self, **kwargs):
-        self.action = kwargs[ACTION]
-        self.args = kwargs
+    def delayed_call(self, *args, **kwargs):
+        return DelayedFunctionCall(self, *args, **kwargs)
+
+    def act(self, *args, **kwargs):
+        pass
+
+
+class DelayedFunctionCall(object):
+    def __init__(self, function, **kwargs):
+        self.function = function
+        self.kwargs = kwargs
 
     def __call__(self):
-        self.action.act(**self.args)
+        self.function(**self.kwargs)

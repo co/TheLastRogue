@@ -241,7 +241,7 @@ class UnEquipAction(Action):
 
     def act(self, **kwargs):
         """
-        Will attempt to unequip the parent item to the given entity.
+        Will attempt to unequip item to the given equipment_slot.
         """
         target_entity = kwargs[action.TARGET_ENTITY]
         source_entity = kwargs[action.SOURCE_ENTITY]
@@ -252,7 +252,7 @@ class UnEquipAction(Action):
 
     def can_act(self, **kwargs):
         """
-        Returns true if it's legal for the entity to unequip the parent item.
+        Returns true if it's legal for the entity to unequip item.
         """
         source_entity = kwargs[action.SOURCE_ENTITY]
         equipment_slot = kwargs[action.EQUIPMENT_SLOT]

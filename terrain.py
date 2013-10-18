@@ -29,7 +29,7 @@ class Floor(Composite):
         self.add_child(Position())
         self.add_child(GraphicChar(colors.FLOOR_BG,
                                    colors.FLOOR_FG,
-                                   "."))
+                                   icon.CENTER_DOT))
         self.add_child(CharPrinter())
         self.add_child(IsSolid(False))
         self.add_child(IsTransparent(True))
@@ -116,9 +116,9 @@ class Door(Composite):
         self.add_child(Mover())
         self.add_child(Position())
         self.add_child(CharPrinter())
-        self.add_child(GraphicChar(colors.ORANGE_D,
-                                   colors.FLOOR_BG,
-                                   icon.DUNGEON_WALLS_ROW))
+        self.add_child(GraphicChar(colors.FLOOR_BG,
+                                   colors.ORANGE_D,
+                                   icon.DOOR))
         self.add_child(IsSolid(True))
         self.add_child(IsTransparent(False))
 
