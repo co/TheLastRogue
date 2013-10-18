@@ -13,7 +13,7 @@ from action import Action
 import equipment
 import entityeffect
 import entity
-from compositecore import Leaf
+from compositecore import Leaf, Composite
 
 
 class ItemType(object):
@@ -222,11 +222,11 @@ class ReEquipAction(Action):
         re_equip_effect =\
             entityeffect.ReEquip(target_entity, target_entity,
                                  equipment_slot, self.parent)
-        target_entity.add_entity_effect(re_equip_effect)
+        target_entity.effect_queue.add_entity_effect(re_equip_effect)
         target_entity.inventory.remove_item(self.parent)
 
 
-class UnEquipAction(Action):
+class UnequipAction(Action):
     """
     An Item with this component can be unequipped.
 
@@ -234,7 +234,7 @@ class UnEquipAction(Action):
     equipment slot that item will be unequipped first.
     """
     def __init__(self):
-        super(UnEquipAction, self).__init__()
+        super(UnequipAction, self).__init__()
         self.component_type = "unequip_action"
         self.name = "Remove"
         self.display_order = 90
@@ -265,16 +265,16 @@ class UnEquipAction(Action):
         """
         if(not target_entity.equipment.slot_is_equiped(equipment_slot)):
             return
-        unequip_effect = entityeffect.UnEquip(target_entity,
+        unequip_effect = entityeffect.Unequip(target_entity,
                                               target_entity, equipment_slot)
-        target_entity.add_entity_effect(unequip_effect)
+        target_entity.effect_queue.add_entity_effect(unequip_effect)
 
 
 class DrinkAction(Action):
     """
     Abstract class, drink actions should inherit from this class.
     """
-    def __init__(self, source_item):
+    def __init__(self):
         super(DrinkAction, self).__init__()
         self.name = "Drink"
         self.display_order = 90
@@ -297,12 +297,12 @@ class DrinkAction(Action):
         pass
 
 
-class HealingPotionDrink(DrinkAction):
+class HealingPotionDrinkAction(DrinkAction):
     """
     Defines the healing potion drink action.
     """
-    def __init__(self, source_item):
-        super(HealingPotionDrink, self).__init__(source_item)
+    def __init__(self):
+        super(HealingPotionDrinkAction, self).__init__()
         self.component_type = "health_potion_drink_action"
         self.min_health = 5
         self.max_health = 10
@@ -313,7 +313,7 @@ class HealingPotionDrink(DrinkAction):
         """
         health = random.randrange(self.min_health, self.max_health)
         heal_effect = entityeffect.Heal(target_entity, target_entity, health)
-        target_entity.add_entity_effect(heal_effect)
+        target_entity.effect_queue.add_entity_effect(heal_effect)
 
 
 class PickUpItemAction(Action):
@@ -386,23 +386,46 @@ class DamageProvider(Leaf):
         self._types = types
 
 
+class OnUnequipEffect(Leaf):
+    """
+    Parent items with this component has a effect that happens on equipping.
+    """
+    def __init__(self, effect_function):
+        self.component_type = "on_unequip_effect"
+        self.effect = effect_function
+
+
+class EquippedEffect(Leaf):
+    """
+    Parent items with this component has a
+    effect that happens while item is equipped.
+    """
+    def __init__(self, effect_function):
+        self.component_type = "equipped_effect"
+        self.effect = effect_function
+
+
 class OnEquipEffect(Leaf):
     """
-    Parent items with this component has a effect that happens on equiping.
+    Parent items with this component has a effect that happens on equipping.
     """
     def __init__(self, effect_function):
         self.component_type = "on_equip_effect"
         self.effect = effect_function
 
-#class StackAbleItem(Item):
-#    """
-#    Abstract class, subclasses of this class is stackaple in entity inventory.
-#    """
-#    def __init__(self):
-#        super(StackAbleItem, self).__init__()
-#        self.quantity = 1
-#
-#
+
+class Stacker(Leaf):
+    """
+    Parent component is Stacker.
+
+    Should only be used for items where all instances are equal.
+    """
+    def __init__(self):
+        super(Stacker, self).__init__()
+        self.component_type = "stacker"
+        self.quantity = 1
+
+
 #class EquipableItem(Item):
 #    """
 #    Abstract class, subclasses of this class is equipable.
@@ -473,13 +496,14 @@ class OnEquipEffect(Leaf):
 #        self.weapon_range = 0
 #
 
-class Gun(Leaf):
+class Gun(Composite):
     """
     A composite component representing a Gun item.
     """
     def __init__(self):
         super(Gun, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ITEM))
+        self.equipment_type = equipment.EquipmentTypes.RANGED_WEAPON
         self.add_child(Position())
         self.add_child(DungeonLevel())
         self.add_child(Description("Gun",
@@ -493,90 +517,116 @@ class Gun(Leaf):
         self.add_child(DamageProvider(10, 5, [damage.DamageTypes.PHYSICAL,
                                               damage.DamageTypes.PIERCING]))
         self.add_child(WeaponRange(15))
+        self.add_child(ReEquipAction())
+        self.add_child(ThrowerNonBreak())
 
 
-class JewellryItem(EquipableItem):
+class RingOfInvisibility(Leaf):
     """
-    Abstract class, subclasses of this class are of ItemType JEWELLRY.
-    """
-    def __init__(self):
-        super(JewellryItem, self).__init__()
-        self.item_type = ItemType.JEWELLRY
-
-
-class RingItem(JewellryItem):
-    """
-    Abstract class, subclasses of this class are rings
-    and fits in the ring equipment slots.
-    """
-    def __init__(self):
-        super(RingItem, self).__init__()
-        self.equipment_type = equipment.EquipmentTypes.RING
-        self.gfx_char.symbol = symbol.RING
-
-
-class RingOfInvisibility(RingItem):
-    """
-    Non-abstract ranged ring item class,
-    instance items will make the user entity invisible.
+    The Ring of Invisibility will make the entity who equips it invisible.
     """
     def __init__(self):
         super(RingOfInvisibility, self).__init__()
-        self.gfx_char.color_fg = colors.YELLOW
-        self._name = "Ring of Invisibility"
-        self._description =\
-            "The metal is warm to your skin,\
-            this ring will make you invisible"
+        self.equipment_type = equipment.EquipmentTypes.RING
+        self.add_child(GamePieceType(GamePieceType.ITEM))
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(Description("Ring of Invisibility",
+                                   "The metal is warm to your skin,\
+                                   this ring will make you invisible"))
+        self.add_child(GraphicChar(None, colors.YELLOW,
+                                   symbol.RING))
+        self.add_child(CharPrinter())
+        self.add_child(ReEquipAction())
+        self.add_child(EquippedEffect(self.set_invisibility_flag))
 
-    def equiped_effect(self, target_entity):
+    def set_invisibility_flag(self):
         """
         Causes the entity that equips this item to become invisible.
         """
         invisibile_flag = entity.StatusFlags.INVISIBILE
         invisibility_effect = entityeffect.\
-            StatusAdder(target_entity, target_entity,
+            StatusAdder(self.parent, self.parent,
                         invisibile_flag, time_to_live=1)
-        target_entity.add_entity_effect(invisibility_effect)
+        self.parent.effect_queue.add_entity_effect(invisibility_effect)
 
 
-class Potion(StackAbleItem):
+class HealthPotion(Composite):
     def __init__(self):
         """
         Abstract class, subclasses of this class are potions,
         """
-        super(Potion, self).__init__()
-        self.gfx_char.symbol = symbol.POTION
-        self._name = "XXX_Potion_XXX"
-        self._description =\
-            "An unusual liquid contained in a glass flask."
+        super(HealthPotion, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ITEM))
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(Description("Health Potion",
+                                   "An unusual liquid\
+                                   contained in a glass flask."))
+        self.add_child(GraphicChar(None, colors.PINK,
+                                   symbol.POTION))
+        self.add_child(CharPrinter())
+        self.add_child(Stacker())
+        self.add_child(HealingPotionDrinkAction())
+
+
+#TODO: thrower should also contain the move through air animation.
+class Thrower(Leaf):
+    """
+    Items with this component can be thrown.
+    """
+    def __init__(self, arg):
+        super(Thrower, self).__init__()
+        self.component_type = "thrower"
+
+    def hit_ground_effect(self, position):
+        """
+        The effect of the item has when it hits the ground.
+
+        position: The point at which the item hits the ground.
+        """
+        pass
+
+
+class ThrowerNonBreak(Thrower):
+    """
+    Items with this component can be thrown, but will survive the fall.
+    """
+    def __init__(self, arg):
+        super(ThrowerNonBreak, self).__init__()
+
+    def hit_ground_effect(self, position):
+        """
+        The item will be placed at the tile where it lands.
+
+        position: The point at which the item hits the ground.
+        """
+        self.try_move(position, self.parent.dungeon_level.value)
+        message = "The " + self.parent.description.name.lower() +\
+            " hits the ground with a thud."
+        messenger.messenger.message(message)
+
+
+class ThrowerBreak(Thrower):
+    """
+    Items with this component can be thrown, but will survive the fall.
+    """
+    def __init__(self, arg):
+        super(ThrowerNonBreak, self).__init__()
 
     def throw_effect(self, dungeon_level, position):
         message = "The " + self.name.lower() +\
             " smashes to the ground and breaks into pieces."
         messenger.messenger.message(message)
 
-
-class HealthPotion(Potion):
-    """
-    Health Potions are potion that heals entities.
-    """
-    def __init__(self):
-        super(HealthPotion, self).__init__()
-        self.gfx_char.color_fg = colors.PINK
-        self._name = "Health Potion"
-        self._description =\
-            "An unusual liquid contained in a glass flask."
-        self.actions.append(action.HealingPotionDrink(self))
-
-
-class Ammo(StackAbleItem):
-    """
-    Gun bullets, are needed to fire guns.
-    """
-    def __init__(self):
-        super(Ammo, self).__init__()
-        self.gfx_char.color_fg = colors.GRAY
-        self.gfx_char.symbol = ":"
-        self._name = "Ammunition"
-        self._description =\
-            "Rounds for a gun."
+#class Ammo(StackAbleItem):
+#    """
+#    Gun bullets, are needed to fire guns.
+#    """
+#    def __init__(self):
+#        super(Ammo, self).__init__()
+#        self.gfx_char.color_fg = colors.GRAY
+#        self.gfx_char.symbol = ":"
+#        self._name = "Ammunition"
+#        self._description =\
+#            "Rounds for a gun."

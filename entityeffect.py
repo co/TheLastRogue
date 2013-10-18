@@ -1,4 +1,5 @@
 import messenger
+from compositecore import Leaf
 import random
 
 
@@ -16,8 +17,9 @@ class EffectTypes(object):
                 TELEPORT, HEAL, DAMAGE, EQUIPMENT]
 
 
-class EffectQueue(object):
+class EffectQueue(Leaf):
     def __init__(self):
+        self.component_type = "effect_queue"
         self._effect_queue = [None for x in range(len(EffectTypes.ALLTYPES))]
         for effect_type in EffectTypes.ALLTYPES:
             self._effect_queue[effect_type] = []
@@ -39,6 +41,7 @@ class EffectQueue(object):
                 effect.update(time_spent)
 
 
+#TODO: Target_entity should always be self.parent and can thus be removed.
 class EntityEffect(object):
     def __init__(self, source_entity, target_entity,
                  time_to_live, effect_type):
