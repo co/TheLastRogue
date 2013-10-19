@@ -361,6 +361,10 @@ class Entity(actor.Actor):
         dx, dy = destination
         libtcod.path_compute(self.path, sx, sy, dx, dy)
 
+    def get_walkable_positions_from_my_position(self):
+        return self.dungeon_level.walkable_destinations.\
+            get_walkable_positions_from_my_position(self, self.position)
+
     def has_status(self, status):
         return status in (self._temporary_status_flags |
                           self._permanent_status_flags)
@@ -386,10 +390,6 @@ class Entity(actor.Actor):
            isinstance(terrain_to_pass, terrain.Door)):
             return True
         return False
-
-    def get_walkable_positions_from_my_position(self):
-        return self.dungeon_level.walkable_destinations.\
-            get_walkable_positions_from_my_position(self, self.position)
 
     def on_death(self):
         return

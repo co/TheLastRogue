@@ -8,6 +8,7 @@ import rectfactory
 import turn
 import messenger
 import state
+import item
 from playercomposite import Player
 from dungeonlevelfactory import dungeon_level_from_file
 
@@ -24,6 +25,9 @@ class ComponentGameState(state.State):
         start_position = (20, 10)
         self.dungeon_level = dungeon_level_from_file("test.level")
         self.player.mover.try_move(start_position, self.dungeon_level)
+
+        potion = item.HealthPotion()
+        potion.mover.try_move((24, 16), self.dungeon_level)
 
         self._init_gui()
         camera_position = (constants.MONSTER_STATUS_BAR_WIDTH, 0)

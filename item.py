@@ -10,6 +10,7 @@ import damage
 import messenger
 import action
 from action import Action
+from mover import Mover
 import equipment
 import entityeffect
 import entity
@@ -289,7 +290,7 @@ class DrinkAction(Action):
         self.remove_from_inventory()
         self.add_energy_spent_to_entity(source_entity)
 
-    def _drink(self):
+    def _drink(self, target_entity):
         """
         The drink action subclasses should override
         and define the drink action here.
@@ -307,7 +308,7 @@ class HealingPotionDrinkAction(DrinkAction):
         self.min_health = 5
         self.max_health = 10
 
-    def drink(self, target_entity):
+    def _drink(self, target_entity):
         """
         When an entity drinks a healing potion, it is healed.
         """
@@ -506,6 +507,7 @@ class Gun(Composite):
         self.equipment_type = equipment.EquipmentTypes.RANGED_WEAPON
         self.add_child(Position())
         self.add_child(DungeonLevel())
+        self.add_child(Mover())
         self.add_child(Description("Gun",
                                    "This was once a fine weapon, \
                                    but age has torn it real bad.\n\
@@ -531,6 +533,7 @@ class RingOfInvisibility(Leaf):
         self.add_child(GamePieceType(GamePieceType.ITEM))
         self.add_child(Position())
         self.add_child(DungeonLevel())
+        self.add_child(Mover())
         self.add_child(Description("Ring of Invisibility",
                                    "The metal is warm to your skin,\
                                    this ring will make you invisible"))
@@ -560,6 +563,7 @@ class HealthPotion(Composite):
         self.add_child(GamePieceType(GamePieceType.ITEM))
         self.add_child(Position())
         self.add_child(DungeonLevel())
+        self.add_child(Mover())
         self.add_child(Description("Health Potion",
                                    "An unusual liquid\
                                    contained in a glass flask."))

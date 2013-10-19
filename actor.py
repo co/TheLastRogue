@@ -86,6 +86,12 @@ class InputActor(Actor):
 
         elif key == inputhandler.PRINTSCREEN:
             console.console.print_screen()
+        elif key == inputhandler.PICKUP:  # Pick up
+            if(self.parent.pick_up_item_action.can_act()):
+                self.parent.pick_up_item_action.act()
+            else:
+                self.parent.pick_up_item_action.print_player_error()
+
         return self.newly_spent_energy
 
         return 100

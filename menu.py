@@ -1,5 +1,4 @@
 import inputhandler
-import action
 import geometry as geo
 import colors
 import gui
@@ -206,11 +205,11 @@ class InventoryMenu(Menu):
         item_rect = geo.Rect(self.parent.offset,
                              self.parent.width, self.parent.height)
         self._menu_items =\
-            [MenuOption(item.name,
+            [MenuOption(item.description.name,
                         [OpenItemActionMenuAction(self._state_stack,
                                                   item_rect, item,
                                                   self._player)],
-                        (len(item.actions) >= 1))
+                        (len(item.get_children_with_tag("user_action")) >= 1))
              for item in self._player.inventory.items]
 
 
@@ -235,7 +234,8 @@ class ItemActionsMenu(Menu):
                                               margin=margin,
                                               vertical_space=vertical_space)
         self._actions =\
-            sorted(item.actions, key=lambda action: action.display_order)
+            sorted(item.get_children_with_tag("user_action"),
+                   key=lambda action: action.display_order)
         self._player = player
         self._update_menu_items()
         self.try_set_index_to_valid_value()
@@ -245,8 +245,7 @@ class ItemActionsMenu(Menu):
         self._menu_items = []
         for item_action in self._actions:
             action_function =\
-                action.DelayedActionCall(action=item_action,
-                                         source_entity=self._player,
+                item_action.delayed_call(source_entity=self._player,
                                          target_entity=self._player,
                                          game_state=game_state)
             back_to_game_function = BackToGameFunction(self._state_stack)
@@ -269,7 +268,7 @@ class StackPopFunction(object):
 
 
 class BackToGameFunction(object):
-    def __init__(self, state_stack, function):
+    def __init__(self, state_stack):
         self._state_stack = state_stack
 
     def __call__(self):

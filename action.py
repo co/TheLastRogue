@@ -1,4 +1,5 @@
 import gametime
+from messenger import messenger
 from compositecore import Leaf
 
 
@@ -200,39 +201,6 @@ ACTION = "action"
 #        self.add_energy_spent_to_entity(source_entity)
 #
 #
-#class PickUpItemAction(Action):
-#    def __init__(self):
-#        super(PickUpItemAction, self).__init__()
-#        self.name = "Pick Up"
-#        self.display_order = 70
-#
-#    def can_act(self, **kwargs):
-#        source_entity = kwargs[SOURCE_ENTITY]
-#        item = self._get_item_on_floor(source_entity)
-#        return (not item is None and
-#                source_entity.inventory.has_room_for_item())
-#
-#    def act(self, **kwargs):
-#        source_entity = kwargs[SOURCE_ENTITY]
-#        item = self._get_item_on_floor(source_entity)
-#        pickup_succeded = source_entity.inventory.try_add(item)
-#        if(pickup_succeded):
-#            message = "Picked up: " + item.name
-#            messenger.messenger.message(message)
-#            source_entity.newly_spent_energy += gametime.single_turn
-#
-#    def _get_item_on_floor(self, entity):
-#        return entity.dungeon_level.get_tile(entity.position).get_first_item()
-#
-#    def print_player_error(self, **kwargs):
-#        source_entity = kwargs[SOURCE_ENTITY]
-#        item = self._get_item_on_floor(source_entity)
-#        if(item is None and
-#           not source_entity.inventory.has_room_for_item()):
-#            message = "Could not pick up: " + item.name +\
-#                ", the inventory is full."
-#            messenger.messenger.message(message)
-
 
 class Action(Leaf):
     """
@@ -256,6 +224,9 @@ class Action(Leaf):
     def act(self, *args, **kwargs):
         pass
 
+    def can_act(self, *args, **kwargs):
+        return True
+
 
 class DelayedFunctionCall(object):
     def __init__(self, function, **kwargs):
@@ -264,3 +235,37 @@ class DelayedFunctionCall(object):
 
     def __call__(self):
         self.function(**self.kwargs)
+
+
+class PickUpItemAction(Action):
+    def __init__(self):
+        super(PickUpItemAction, self).__init__()
+        self.component_type = "pick_up_item_action"
+        self.name = "Pick Up"
+        self.display_order = 70
+
+    def can_act(self, **kwargs):
+        item = self._get_item_on_floor()
+        return (not item is None and
+                self.parent.inventory.has_room_for_item())
+
+    def act(self, **kwargs):
+        item = self._get_item_on_floor()
+        pickup_succeded = self.parent.inventory.try_add(item)
+        if(pickup_succeded):
+            message = "Picked up: " + item.description.name
+            messenger.message(message)
+            self.parent.actor.newly_spent_energy += gametime.single_turn
+
+    def _get_item_on_floor(self):
+        dungeon_level = self.parent.dungeon_level.value
+        position = self.parent.position.value
+        return dungeon_level.get_tile(position).get_first_item()
+
+    def print_player_error(self, **kwargs):
+        item = self._get_item_on_floor()
+        if(item is None and
+           not self.parent.inventory.has_room_for_item()):
+            message = "Could not pick up: " + item.description.name +\
+                ", the inventory is full."
+            messenger.message(message)

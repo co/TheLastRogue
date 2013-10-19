@@ -143,3 +143,8 @@ class DungeonLevel(object):
             for x, tile in enumerate(row):
                 line += str(self.get_tile_or_unknown((x, y)).symbol)
             print line
+
+    def get_walkable_positions(self):
+        return (self.walkable_destinations
+                .get_walkable_positions(self.parent,
+                                        self.parent.position.value))

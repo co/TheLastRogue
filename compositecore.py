@@ -101,20 +101,23 @@ class Composite(Component):
         Adds a child component to this component.
         If the child already has a parent an exception is thrown.
         """
+        if child.tags is None:
+            raise Exception("Component {0} tried ta add_child"
+                            "component: {1} to its children."
+                            "But tags"
+                            "was not set.".format(str(self), str(child)))
         if child.component_type is None:
-            print "Component {0} tried ta add_child"\
-                  "component: {1} to its children."\
-                  "But component_type was not set.".format(str(self),
-                                                           str(child))
-            raise
+            raise Exception("Component {0} tried ta add_child"
+                            "component: {1} to its children."
+                            "But component_type"
+                            "was not set.".format(str(self), str(child)))
         if(not child.parent is None):
-            print "Component {0} tried ta add_child"\
-                "component: {1} to its children."\
-                "But it already"\
-                "had parent: {2}.".format(str(self),
-                                          str(child),
-                                          str(child.parent))
-            raise
+            raise Exception("Component {0} tried ta add_child"
+                            "component: {1} to its children."
+                            "But it already"
+                            "had parent: {2}.".format(str(self),
+                                                      str(child),
+                                                      str(child.parent)))
 
         if not child.component_type in self._children:
             self._children[child.component_type] = []
@@ -150,14 +153,12 @@ class Composite(Component):
 
     def __getattr__(self, component_type):
         if(not isinstance(component_type, basestring)):
-            print "ERROR: component_type should be string"
-            raise
+            raise Exception("ERROR: component_type should be string")
         if(not component_type in self._children or
            len(self._children[component_type]) < 1):
-            print self._children
-            print "Tried to access component {0} from composite {1} "\
-                "But it doesn't exist.".format(str(component_type),
-                                               str(self))
+            raise Exception("Tried to access component {0} from composite {1} "
+                            "But it doesn't exist.".format(str(component_type),
+                                                           str(self)))
             raise
         return self._children[component_type][0]
 
@@ -174,7 +175,8 @@ class Composite(Component):
         """
         Gets the list of all children with the given tag.
         """
-        return [child for child in self._children if tag in child.tags]
+        return [child[0] for child in self._children.values()
+                if tag in child[0].tags]
 
 
 class CompositeMessage(object):

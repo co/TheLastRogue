@@ -252,9 +252,9 @@ class Health(Leaf):
     """
     def __init__(self, max_hp):
         super(Health, self).__init__()
+        self.component_type = "health"
         self.hp = counter.Counter(max_hp, max_hp)
         self.killer = None
-        self.component_type = "health"
 
     def hurt(self, damage, entity=None):
         """
@@ -313,9 +313,11 @@ class Inventory(Leaf):
         if(not self.has_room_for_item()):
             return False
         else:
-            item.try_remove_from_dungeon()
+            success = item.mover.try_remove_from_dungeon()
+            if not success:
+                raise Exception("ERROR: Tried to remove item: "
+                                + str(item) + "but could not.")
             self._items.append(item)
-            item.inventory = self
             return True
 
     def has_room_for_item(self):
@@ -328,8 +330,8 @@ class Inventory(Leaf):
         """
         Returns true if it is a legal action to drop the item.
         """
-        return item.can_move(self._entity.position,
-                             self._entity.dungeon_level)
+        return item.mover.can_move(self._entity.position,
+                                   self._entity.dungeon_level)
 
     def try_drop_item(self, item):
         """
@@ -337,8 +339,8 @@ class Inventory(Leaf):
 
         Returns True on success otherwise False.
         """
-        drop_successful = item.try_move(self._entity.position,
-                                        self._entity.dungeon_level)
+        drop_successful = item.mover.try_move(self._entity.position,
+                                              self._entity.dungeon_level)
         if drop_successful:
             self.remove_item(item)
         return drop_successful
@@ -348,7 +350,6 @@ class Inventory(Leaf):
         Removes item from the inventory.
         """
         self._items.remove(item)
-        item.inventory = None
 
     def has_item(self, item):
         """
@@ -366,4 +367,5 @@ class Inventory(Leaf):
         """
         Returns a list of all items in the inventory of the given type.
         """
-        return [item for item in self._items if item.equipment_type == type_]
+        return [item for item in self._items
+                if item.equipment_type.value == type_]

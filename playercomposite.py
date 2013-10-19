@@ -13,6 +13,7 @@ from composite import CharPrinter, GameState
 from entityeffect import EffectQueue
 from mover import Mover
 from actor import InputActor
+from action import PickUpItemAction
 import gametime
 import symbol
 import colors
@@ -48,3 +49,4 @@ class Player(Composite):
         self.add_child(GameState(game_state))
         self.add_child(equipment.Equipment())
         self.add_child(EffectQueue())
+        self.add_child(PickUpItemAction())

@@ -96,7 +96,7 @@ def inventory_menu(player, state_stack):
 def item_actions_menu(item, player, state_stack):
     right_side_menu_rect = rectfactory.right_side_menu_rect()
     menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left)
-    heading = gui.TextBox(item.name, geo.zero2d(),
+    heading = gui.TextBox(item.description.name, geo.zero2d(),
                           colors.INVENTORY_HEADING,
                           margin=style.menu_theme.margin)
     menu_stack_panel.append(heading)
