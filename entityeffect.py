@@ -1,4 +1,5 @@
 import messenger
+from statusflags import StatusFlags
 from compositecore import Leaf
 import random
 
@@ -76,16 +77,15 @@ class StatusRemover(EntityEffect):
 
 
 class StatusAdder(EntityEffect):
-    def __init__(self, source_entity,
-                 status_flag, time_to_live=1):
-        super(StatusAdder,
-              self).__init__(source_entity,
-                             time_to_live,
-                             EffectTypes.STATUS_ADDER)
+    def __init__(self, source_entity, status_flag, time_to_live=1):
+        super(StatusAdder, self).__init__(source_entity, time_to_live,
+                                          EffectTypes.STATUS_ADDER)
         self.status_flag = status_flag
 
     def update(self, time_spent):
-        self.parent.add_temporary_status(self.status_flag)
+        status_flags = StatusFlags(self.status_flag)
+        status_flags.to_be_removed = True
+        self.parent.add_child(status_flags)
         self.tick(time_spent)
 
 
@@ -119,7 +119,7 @@ class DamageEntityEffect(EntityEffect):
 
     def message(self):
         message = "%s hits %s for %d damage." %\
-            (self.source_entity.name,
+            (self.source_entity.description.name,
              self.parent.description.name, self.damage)
         messenger.messenger.message(message)
 
@@ -139,7 +139,7 @@ class Heal(EntityEffect):
 
     def message(self):
         message = "%s heals %s for %d health." %\
-            (self.source_entity.name, self.parent.description.name,
+            (self.source_entity.description.name, self.parent.description.name,
              self.health)
         messenger.messenger.message(message)
 
@@ -157,7 +157,8 @@ class Equip(EntityEffect):
         self.item = item
 
     def message(self):
-        message = "%s equips %s." % (self.source_entity.name, self.item.name)
+        message = "%s equips %s." % (self.source_entity.description.name,
+                                     self.item.name)
         messenger.messenger.message(message)
 
     def update(self, time_spent):
@@ -165,8 +166,8 @@ class Equip(EntityEffect):
         equip_succeded = equipment.try_equip(self.item)
         if(equip_succeded):
             self.message()
-            if(self.source_entity.inventory.has_item(self.item)):
-                self.source_entity.inventory.remove_item(self.item)
+            if(self.parent.inventory.has_item(self.item)):
+                self.parent.inventory.remove_item(self.item)
         self.tick(time_spent)
 
 

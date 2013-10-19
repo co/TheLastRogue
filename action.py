@@ -221,11 +221,30 @@ class Action(Leaf):
     def delayed_call(self, *args, **kwargs):
         return DelayedFunctionCall(self, *args, **kwargs)
 
-    def act(self, *args, **kwargs):
+    def act(self, **kwargs):
+        """
+        The action that this component defines.
+        """
         pass
 
-    def can_act(self, *args, **kwargs):
+    def can_act(self, **kwargs):
+        """
+        Returns true if it is valid to call the act method.
+        """
         return True
+
+    def add_energy_spent_to_entity(self, entity):
+        """
+        Help method for spending energy for the act performing entity.
+        """
+        entity.actor.newly_spent_energy += self.energy_cost
+
+    def copy(self):
+        """
+        Copy function.
+        """
+        result = self.__class__()
+        return result
 
 
 class DelayedFunctionCall(object):

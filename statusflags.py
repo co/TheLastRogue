@@ -22,10 +22,8 @@ class StatusFlags(Leaf):
         """
         Returns True if parent entity has the status given.
         """
-        return status in self._status_flags
-
-    def add_status(self, status):
-        """
-        Adds the status to the parent entity.
-        """
-        return self._status_flags.add(status)
+        next = self.next
+        if(not next is None):
+            return status in self._status_flags or next.has_status(status)
+        else:
+            return status in self._status_flags

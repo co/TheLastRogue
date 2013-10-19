@@ -107,31 +107,6 @@ class WeaponRange(Leaf):
         self.component_type = "weapon_range"
         self.value = range
 
-    def act(self, **kwargs):
-        """
-        The action that this component defines.
-        """
-        pass
-
-    def can_act(self, **kwargs):
-        """
-        Returns true if it is valid to call the act method.
-        """
-        return True
-
-    def add_energy_spent_to_entity(self, entity):
-        """
-        Help method for spending energy for the act performing entity.
-        """
-        entity.newly_spent_energy += self.energy_cost
-
-    def copy(self):
-        """
-        Copy function.
-        """
-        result = self.__class__()
-        return result
-
 
 class DropAction(Action):
     """
@@ -223,7 +198,7 @@ class ReEquipAction(Action):
         re_equip_effect =\
             entityeffect.ReEquip(target_entity, target_entity,
                                  equipment_slot, self.parent)
-        target_entity.effect_queue.add_entity_effect(re_equip_effect)
+        target_entity.effect_queue.add(re_equip_effect)
         target_entity.inventory.remove_item(self.parent)
 
 
@@ -268,7 +243,7 @@ class UnequipAction(Action):
             return
         unequip_effect = entityeffect.Unequip(target_entity,
                                               target_entity, equipment_slot)
-        target_entity.effect_queue.add_entity_effect(unequip_effect)
+        target_entity.effect_queue.add(unequip_effect)
 
 
 class DrinkAction(Action):
@@ -287,8 +262,11 @@ class DrinkAction(Action):
         target_entity = kwargs[action.TARGET_ENTITY]
         source_entity = kwargs[action.SOURCE_ENTITY]
         self._drink(target_entity)
-        self.remove_from_inventory()
+        self.remove_from_inventory(target_entity)
         self.add_energy_spent_to_entity(source_entity)
+
+    def remove_from_inventory(self, target_entity):
+        target_entity.inventory.remove_item(self.parent)
 
     def _drink(self, target_entity):
         """
@@ -314,7 +292,7 @@ class HealingPotionDrinkAction(DrinkAction):
         """
         health = random.randrange(self.min_health, self.max_health)
         heal_effect = entityeffect.Heal(target_entity, target_entity, health)
-        target_entity.effect_queue.add_entity_effect(heal_effect)
+        target_entity.effect_queue.add(heal_effect)
 
 
 class PickUpItemAction(Action):
@@ -551,7 +529,7 @@ class RingOfInvisibility(Leaf):
         invisibility_effect = entityeffect.\
             StatusAdder(self.parent, self.parent,
                         invisibile_flag, time_to_live=1)
-        self.parent.effect_queue.add_entity_effect(invisibility_effect)
+        self.parent.effect_queue.add(invisibility_effect)
 
 
 class HealthPotion(Composite):

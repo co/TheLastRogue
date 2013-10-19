@@ -20,6 +20,7 @@ class Component(object):
         self._parent = None
         self.component_type = None
         self.tags = set()
+        self.to_be_removed = False
         pass
 
     @property
@@ -30,6 +31,18 @@ class Component(object):
     def parent(self, value):
         self._parent = value
         self.on_parent_changed()
+
+    @property
+    def next(self):
+        """
+        Gets the next sibling of the same type,
+        allows components to decorate components of the same type.
+        """
+        siblings = self.parent.get_children_of_type(self.component_type)
+        next_index = siblings.index(self) + 1
+        if(len(siblings) > next_index):
+            return siblings[next_index]
+        return None
 
     def on_parent_changed(self):
         """
@@ -118,17 +131,26 @@ class Composite(Component):
                             "had parent: {2}.".format(str(self),
                                                       str(child),
                                                       str(child.parent)))
-
         if not child.component_type in self._children:
             self._children[child.component_type] = []
         self._children[child.component_type].append(child)
         child.parent = self
 
-    def pop_component(self, component_type):
+    def remove_component(self, component):
         """
         Removes a child component to this component.
         """
-        return self._children[component_type].pop()
+        return self._children[component.component_type].remove(component)
+
+    def remove_components_flagged_for_removal(self):
+        """
+        Removes a child component to this component.
+        """
+        for component_list in self._children.values:
+            to_be_removed = [component for component in component_list
+                             if component.to_be_removed]
+            for component in to_be_removed:
+                component_list.remove(component)
 
     def update(self):
         """
@@ -159,8 +181,18 @@ class Composite(Component):
             raise Exception("Tried to access component {0} from composite {1} "
                             "But it doesn't exist.".format(str(component_type),
                                                            str(self)))
-            raise
         return self._children[component_type][0]
+
+    def get_children_of_type(self, component_type):
+        if(not isinstance(component_type, basestring)):
+            raise Exception("ERROR: component_type should be string")
+        if(not component_type in self._children or
+           len(self._children[component_type]) < 1):
+            raise Exception("Tried to access components of type"
+                            " {0} from composite {1} "
+                            "But it doesn't exist.".format(str(component_type),
+                                                           str(self)))
+        return self._children[component_type]
 
     def has_child(self, component_type):
         """
