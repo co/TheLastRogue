@@ -13,6 +13,9 @@ import style
 
 
 def main_menu(state_stack):
+    """
+    Creates the first menu of the game.
+    """
     ui_elements = []
     ui_state = state.UIState(gui.UIElementList(ui_elements))
 

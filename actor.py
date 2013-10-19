@@ -47,7 +47,7 @@ class Actor(Leaf):
 
     def tick(self):
         self.energy += self.energy_recovery
-        self._update_once_a_tick(self.energy_recovery)
+        self.parent.on_tick(self.energy_recovery)
         while self.energy > 0:
             self.energy -= self.act()
         turn.current_turn += 1
@@ -55,9 +55,6 @@ class Actor(Leaf):
     def act(self):
         raise NotImplementedError("act method not implemented for parent:" +
                                   str(self.parent))
-
-    def _update_once_a_tick(self, time_spent):
-        self.parent.on_tick()
 
 
 class InputActor(Actor):

@@ -27,7 +27,10 @@ class ComponentGameState(state.State):
         self.player.mover.try_move(start_position, self.dungeon_level)
 
         potion = item.HealthPotion()
-        potion.mover.try_move((24, 16), self.dungeon_level)
+        potion.mover.try_move((20, 12), self.dungeon_level)
+
+        gun = item.Gun()
+        gun.mover.try_move((20, 13), self.dungeon_level)
 
         self._init_gui()
         camera_position = (constants.MONSTER_STATUS_BAR_WIDTH, 0)
@@ -35,6 +38,7 @@ class ComponentGameState(state.State):
         self.has_won = False
         self._should_draw = True
         self.menu_prompt_stack = statestack.GameMenuStateStack(self)
+        messenger.messenger.message("Welcome to: The Last Rogue!")
 
     def start_prompt(self, prompt_state):
         self.menu_prompt_stack.push(prompt_state)
@@ -48,7 +52,6 @@ class ComponentGameState(state.State):
     # if a redraw is needed do a force_draw instead.
     def draw(self):
         pass
-        #self.force_draw()
 
     def force_draw(self):
         self.camera.update(self.player)

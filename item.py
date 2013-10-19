@@ -196,8 +196,7 @@ class ReEquipAction(Action):
         Performs the actual reequip.
         """
         re_equip_effect =\
-            entityeffect.ReEquip(target_entity, target_entity,
-                                 equipment_slot, self.parent)
+            entityeffect.ReEquip(target_entity, equipment_slot, self.parent)
         target_entity.effect_queue.add(re_equip_effect)
         target_entity.inventory.remove_item(self.parent)
 
@@ -291,7 +290,7 @@ class HealingPotionDrinkAction(DrinkAction):
         When an entity drinks a healing potion, it is healed.
         """
         health = random.randrange(self.min_health, self.max_health)
-        heal_effect = entityeffect.Heal(target_entity, target_entity, health)
+        heal_effect = entityeffect.Heal(target_entity, health)
         target_entity.effect_queue.add(heal_effect)
 
 
@@ -358,8 +357,8 @@ class DamageProvider(Leaf):
     The provides a way for the parent calculate damage.
     """
     def __init__(self, damage, variance, types):
-        super(EquipmentType, self).__init__()
-        self.component_type = "equipment_type"
+        super(DamageProvider, self).__init__()
+        self.component_type = "damage_provider"
         self._strength = damage
         self._variance = variance
         self._types = types
@@ -482,7 +481,7 @@ class Gun(Composite):
     def __init__(self):
         super(Gun, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.equipment_type = equipment.EquipmentTypes.RANGED_WEAPON
+        self.add_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
         self.add_child(Position())
         self.add_child(DungeonLevel())
         self.add_child(Mover())
@@ -507,7 +506,7 @@ class RingOfInvisibility(Leaf):
     """
     def __init__(self):
         super(RingOfInvisibility, self).__init__()
-        self.equipment_type = equipment.EquipmentTypes.RING
+        self.add_child(EquipmentType(equipment.EquipmentTypes.RING))
         self.add_child(GamePieceType(GamePieceType.ITEM))
         self.add_child(Position())
         self.add_child(DungeonLevel())
@@ -557,7 +556,7 @@ class Thrower(Leaf):
     """
     Items with this component can be thrown.
     """
-    def __init__(self, arg):
+    def __init__(self):
         super(Thrower, self).__init__()
         self.component_type = "thrower"
 
@@ -574,7 +573,7 @@ class ThrowerNonBreak(Thrower):
     """
     Items with this component can be thrown, but will survive the fall.
     """
-    def __init__(self, arg):
+    def __init__(self):
         super(ThrowerNonBreak, self).__init__()
 
     def hit_ground_effect(self, position):
@@ -593,7 +592,7 @@ class ThrowerBreak(Thrower):
     """
     Items with this component can be thrown, but will survive the fall.
     """
-    def __init__(self, arg):
+    def __init__(self):
         super(ThrowerNonBreak, self).__init__()
 
     def throw_effect(self, dungeon_level, position):
