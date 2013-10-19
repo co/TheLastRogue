@@ -161,10 +161,59 @@ class GraphicChar(Leaf):
     """
     def __init__(self, color_bg, color_fg, symbol):
         super(GraphicChar, self).__init__()
-        self.symbol = symbol
         self.component_type = "graphic_char"
-        self.color_bg = color_bg
-        self.color_fg = color_fg
+        self._symbol = symbol
+        self._color_bg = color_bg
+        self._color_fg = color_fg
+
+    @property
+    def symbol(self):
+        return self._symbol
+
+    @property
+    def color_bg(self):
+        return self._color_bg
+
+    @property
+    def color_fg(self):
+        return self._color_fg
+
+    def copy(self):
+        """
+        Makes a copy of this component.
+        """
+        return GraphicChar(self.color_bg, self.color_fg, self.symbol)
+
+
+class GraphicCharTerrainCorners(GraphicChar):
+    """
+    Composites holding this has a graphical representation as a char.
+    """
+    def __init__(self, color_bg, color_fg, symbol, sticky_terrain_classes):
+        super(GraphicCharTerrainCorners, self).__init__(color_bg, color_fg,
+                                                        symbol)
+        self._sticky_terrain_classes = sticky_terrain_classes
+        self._wall_symbol_row = symbol
+        self.has_calculated = False
+
+    @property
+    def symbol(self):
+        if not self.has_calculated:
+            self.calculate_wall_symbol()
+        return self._symbol
+
+    def calculate_wall_symbol(self):
+        neighbours_mask = 0
+        for index, neighbour in enumerate(self._get_neighbour_terrains()):
+            if(any([terrain is neighbour.__class__
+                   for terrain in self._sticky_terrain_classes])):
+                neighbours_mask |= 2 ** index
+        self._symbol = self._wall_symbol_row + neighbours_mask
+
+    def _get_neighbour_terrains(self):
+        tiles = (self.parent.dungeon_level.value.
+                 get_tiles_surrounding_position(self.parent.position.value))
+        return [tile.get_terrain() for tile in tiles]
 
     def copy(self):
         """

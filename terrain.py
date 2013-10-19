@@ -1,7 +1,7 @@
 import colors
 import icon
 from gamepiecetype import GamePieceType
-from composite import GraphicChar, CharPrinter
+from composite import GraphicChar, CharPrinter, GraphicCharTerrainCorners
 from compositecore import Leaf, Composite
 from mover import Mover
 from position import Position
@@ -84,9 +84,10 @@ class Wall (Composite):
         self.add_child(Mover())
         self.add_child(Position())
         self.add_child(CharPrinter())
-        self.add_child(GraphicChar(colors.FLOOR_BG,
-                                   colors.WALL_FG,
-                                   icon.DUNGEON_WALLS_ROW))
+        self.add_child(GraphicCharTerrainCorners(colors.FLOOR_BG,
+                                                 colors.WALL_FG,
+                                                 icon.DUNGEON_WALLS_ROW,
+                                                 [Wall, Door]))
         self.add_child(IsSolid(True))
         self.add_child(IsTransparent(False))
 
@@ -108,7 +109,6 @@ class Wall (Composite):
 #            self.dungeon_level.get_tiles_surrounding_position(self.position)
 #        return [tile.get_terrain() for tile in tiles]
 
-
 class Door(Composite):
     def __init__(self, is_open=True):
         super(Door, self).__init__()
@@ -121,7 +121,6 @@ class Door(Composite):
                                    icon.DOOR))
         self.add_child(IsSolid(True))
         self.add_child(IsTransparent(False))
-
 
 #    def is_solid(self):
 #        return not self.is_open
