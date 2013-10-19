@@ -1,5 +1,4 @@
 import compositegamestate as gamestate
-import compositegamestate
 import equipment
 import rectfactory
 import dungeoncreatorvisualizer
@@ -10,6 +9,7 @@ import geometry as geo
 import colors
 import symbol
 import style
+#from equipactions import UnequipAction
 
 
 def main_menu(state_stack):
@@ -20,8 +20,7 @@ def main_menu(state_stack):
     ui_state = state.UIState(gui.UIElementList(ui_elements))
 
     start_composite_game_function =\
-        lambda: ui_state.current_stack.push(compositegamestate
-                                            .ComponentGameState())
+        lambda: ui_state.current_stack.push(gamestate.ComponentGameState())
     start_test_game_function =\
         lambda: ui_state.current_stack.push(gamestate.TestGameState())
     start_game_function =\
@@ -139,9 +138,9 @@ def equipment_menu(player, state_stack):
                             style.menu_theme.rect_style)
 
     equipment_options = []
-    slots_with_items = [slot for slot in equipment.EquipmentSlots.ALL
-                        if not player.equipment.get(slot) is None]
-    for slot in slots_with_items:
+    #slots_with_items = [slot for slot in equipment.EquipmentSlots.ALL
+                        #if not player.equipment.get(slot) is None]
+    for slot in equipment.EquipmentSlots.ALL:
         slot_menu = equipment_slot_menu(player, slot, state_stack)
         option_func = DelayedStatePush(state_stack, slot_menu)
         item_in_slot = player.equipment.get(slot)
@@ -184,22 +183,23 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
         player.inventory.items_of_equipment_type(equipment_slot.equipment_type)
     re_equip_options = []
     for item in items:
-        re_equip_function =\
-            item.unequip_action.delayed_call(source_entity=player,
+        reequip_function =\
+            item.reequip_action.delayed_call(source_entity=player,
+                                             target_entity=player,
                                              equipment_slot=equipment_slot)
         stack_pop_function = menu.StackPopFunction(state_stack, 3)
-        functions = [re_equip_function, stack_pop_function]
-        re_equip_options.append(menu.MenuOption(item.name, functions))
+        functions = [reequip_function, stack_pop_function]
+        re_equip_options.append(menu.MenuOption(item.description.name,
+                                                functions))
 
-#    item = player.equipment.get(equipment_slot)
-    unequip_function =\
-        item.UnEquipAction.delayed_call(source_entity=player,
-                                        target_entity=player,
-                                        equipment_slot=equipment_slot)
-    stack_pop_function = menu.StackPopFunction(state_stack, 3)
-    functions = [unequip_function, stack_pop_function]
-
-    re_equip_options.append(menu.MenuOption("- None -", functions))
+#    unequip_function =\
+#        UnequipAction().delayed_call(source_entity=player,
+#                                     target_entity=player,
+#                                     equipment_slot=equipment_slot)
+#    stack_pop_function = menu.StackPopFunction(state_stack, 3)
+#    functions = [unequip_function, stack_pop_function]
+#
+#    re_equip_options.append(menu.MenuOption("- None -", functions))
 
     resulting_menu = menu.StaticMenu(equipment_menu_rect.top_left,
                                      re_equip_options, state_stack,

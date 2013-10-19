@@ -1,3 +1,4 @@
+from inputactor import InputActor
 from position import Position
 import equipment
 from dungeonlevelcomposite import DungeonLevel
@@ -12,7 +13,6 @@ from composite import Health, Strength, AttackSpeed, Faction, Inventory
 from composite import CharPrinter, GameState
 from entityeffect import EffectQueue
 from mover import Mover
-from actor import InputActor
 from action import PickUpItemAction
 import gametime
 import symbol

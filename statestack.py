@@ -1,8 +1,8 @@
+import compositegamestate as gamestate
 import frame
 import gui
 import rectfactory
 import colors
-import compositegamestate as gamestate
 
 
 class StateStack(object):

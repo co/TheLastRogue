@@ -1,3 +1,4 @@
+from playercomposite import Player
 import statestack
 import console
 import geometry as geo
@@ -9,7 +10,6 @@ import turn
 import messenger
 import state
 import item
-from playercomposite import Player
 from dungeonlevelfactory import dungeon_level_from_file
 
 
