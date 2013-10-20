@@ -6,7 +6,7 @@ Website: www.thelastrogue.com
 
 ##Windows - Play Now!
 
-If you are on windows and don't need the latest, you can download and play now!
+If you are on windows and don't need the latest build, you can download and play now!
 
 Download and unzip this, run main: www.coern.com/TLR_latest.7z
 
@@ -14,6 +14,7 @@ Download and unzip this, run main: www.coern.com/TLR_latest.7z
 ###Linux
 
 Clone this repository: <code>git clone http://github.com/co/TheLastRogue.git</code>
+
 Next, download the libtcod library and move the .so files from the archive to the "TheLastRogue" directory.
 
 
