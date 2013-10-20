@@ -97,11 +97,11 @@ class Entity(actor.Actor):
         """
         pass
 
-    """
-    Tries to make the entity step to a random direction.
-    If the step succeeds True is return otherwise False.
-    """
     def try_step_random_direction(self):
+        """
+        Tries to make the entity step to a random direction.
+        If the step succeeds True is return otherwise False.
+        """
         random_direction = random.sample(list(direction.DIRECTIONS), 1)[0]
         new_position = geo.add_2d(self.position, random_direction)
         return self.try_move_to(new_position)
@@ -419,7 +419,7 @@ class Entity(actor.Actor):
         return copy
 
     def _update_once_a_tick(self, time_spent):
-        self.equipment.execute_equip_effects()
-        self.clear_all_temporary_status_flags()
-        self.update_effect_queue(time_spent)
-        self.update_dungeon_map_if_its_old()
+        #self.equipment.execute_equip_effects()
+        #self.clear_all_temporary_status_flags()
+        #self.update_effect_queue(time_spent)
+        #self.update_dungeon_map_if_its_old()

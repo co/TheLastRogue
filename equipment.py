@@ -130,6 +130,9 @@ class Equipment(composite.Leaf):
         self._equipment[slot] = equipment
         equipment.equip_effect(self.parent)
 
+    def on_tick(self, time_spent):
+        self.execute_equip_effects()
+
     def execute_equip_effects(self):
         for equipment_slot in EquipmentSlots.ALL:
             if(self.slot_is_equiped(equipment_slot)):

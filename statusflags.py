@@ -17,6 +17,7 @@ class StatusFlags(Leaf):
         super(StatusFlags, self).__init__()
         self.component_type = "status_flags"
         self._status_flags = set()
+        self._temp_status_flags = set()
 
     def has_status(self, status):
         """
@@ -24,6 +25,18 @@ class StatusFlags(Leaf):
         """
         next = self.next
         if(not next is None):
-            return status in self._status_flags or next.has_status(status)
+            return (status in self._status_flags or
+                    status in self._temp_status_flags or
+                    next.has_status(status))
         else:
-            return status in self._status_flags
+            return (status in self._status_flags or
+                    status in self._temp_status_flags)
+
+    def add_temp_status(self, status):
+        """
+        Adds a temporary status that will be removed the next tick.
+        """
+        self._temp_status_flags.add(status)
+
+    def before_tick(self, time):
+        self._temp_status_flags = set()

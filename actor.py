@@ -43,7 +43,6 @@ class Actor(Leaf):
 
     def tick(self):
         self.energy += self.energy_recovery
-        self.parent.on_tick(self.energy_recovery)
         while self.energy > 0:
             self.energy -= self.act()
         turn.current_turn += 1

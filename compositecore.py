@@ -62,6 +62,12 @@ class Component(object):
         """
         pass
 
+    def before_tick(self, time):
+        """
+        A method hook for updating the component tree before tick.
+        """
+        pass
+
     def on_tick(self, time):
         """
         A method hook for updating the component tree on tick.
@@ -157,6 +163,13 @@ class Composite(Component):
         Runs update on all child components.
         """
         map(lambda x: x.update(),
+            chain.from_iterable(self._children.values()))
+
+    def before_tick(self, time):
+        """
+        Runs before_tick on all child components.
+        """
+        map(lambda x: x.before_tick(time),
             chain.from_iterable(self._children.values()))
 
     def on_tick(self, time):

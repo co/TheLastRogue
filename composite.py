@@ -292,6 +292,16 @@ class Path(Leaf):
             self.init_path()
 
 
+class EntityMessages(Leaf):
+    """
+    Holds the text messages that may be sent by the parent entity.
+    """
+    def __init__(self, random, death):
+        super(Health, self).__init__()
+        self.random = random
+        self.death = death
+
+
 class Health(Leaf):
     """
     Health Component. Composites holding this has health points.

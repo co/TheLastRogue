@@ -1,9 +1,26 @@
+from inputactor import InputActor
+from position import Position
+import equipment
+from dungeonlevelcomposite import DungeonLevel
+from statusflags import StatusFlags
+from compositecore import Composite
+from sightradius import SightRadius
+from dungeonmask import DungeonMask
+from gamepiecetype import GamePieceType
+from memorymap import MemoryMap
+from composite import Description, GraphicChar, MovementSpeed
+from composite import Health, Strength, AttackSpeed, Faction, Inventory
+from composite import CharPrinter, GameState, EntityMessages
+from entityeffect import EffectQueue
+from mover import Mover
+from action import PickUpItemAction
+import gametime
+import symbol
+import colors
+
 import counter
 import spawner
-import symbol
 import entityeffect
-import gametime
-import colors
 import entity
 import player
 import rng
@@ -55,14 +72,42 @@ class Monster(entity.Entity):
         return step_succeeded
 
 
-class RatMan(Monster):
+class RatMan(Composite):
+    """
+    A composite component representing a RatMan monster.
+    """
     def __init__(self, game_state):
-        super(RatMan, self).__init__(game_state)
-        self.hp = counter.Counter(10, 10)
-        self._name = "Rat-Man"
-        self.death_message = "The Rat-Man is beaten to a pulp."
-        self.gfx_char.color_fg = colors.ORANGE
-        self.gfx_char.symbol = symbol.RATMAN
+        super(RatMan, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ENTITY))
+
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(Mover())
+
+self.add_child(EntityMessages("The ratman looks at you.",
+                              "The ratman is beaten to a pulp.")
+        self.add_child(Description("Ratman",
+                                   "A Rat/Man hybrid it looks hostile."))
+        self.add_child(GraphicChar(None, colors.ORANGE,
+                                   symbol.RATMAN))
+        self.add_child(CharPrinter())
+
+        self.add_child(Faction(Faction.MONSTER))
+        self.add_child(Health(10))
+        self.add_child(Strength(2))
+        self.add_child(SightRadius(6))
+        self.add_child(MovementSpeed(gametime.single_turn))
+        self.add_child(AttackSpeed(gametime.single_turn))
+        self.add_child(StatusFlags())
+        self.add_child(DungeonMask())
+
+        self.add_child(MemoryMap())
+        self.add_child(Inventory())
+        self.add_child(InputActor())
+        self.add_child(GameState(game_state))
+        self.add_child(equipment.Equipment())
+        self.add_child(EffectQueue())
+        self.add_child(PickUpItemAction())
 
     def act(self):
         self.step_looking_for_player()

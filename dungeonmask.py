@@ -92,7 +92,7 @@ class DungeonMask(Leaf):
                     line += "#"
             print(line)
 
-    def on_tick(self, time):
+    def before_tick(self, time):
         self.update_dungeon_map_if_its_old()
 
     def update_dungeon_map_if_its_old(self):

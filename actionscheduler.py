@@ -22,6 +22,8 @@ class ActionScheduler(object):
     def _actors_tick(self):
         if len(self._actors) > 0:
             actor = self._actors[0].actor
+            actor.before_tick(self.energy_recovery)
+            actor.on_tick(self.energy_recovery)
             actor.tick()
             self._actors.rotate()
 
