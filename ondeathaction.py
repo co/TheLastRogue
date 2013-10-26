@@ -29,5 +29,6 @@ class EntityDeathAction(OnDeathAction):
     def act(self):
         if(self.parent.status_flags.has_status(StatusFlags.LEAVES_CORPSE)):
             spawner.spawn_corpse_of_entity(self.parent)
+        self.parent.dungeon_level.value.remove_actor_if_present(self.parent)
         self.parent.mover.try_remove_from_dungeon()
         messenger.message(Message(self.parent.entity_messages.death))

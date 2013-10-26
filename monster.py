@@ -1,4 +1,4 @@
-from actor import DoNothingActor
+from monsteractor import StepRandomDirectonActor
 from attacker import Attacker
 from position import Position
 import equipment
@@ -102,7 +102,7 @@ class Ratman(Composite):
 
         self.add_child(MemoryMap())
         self.add_child(Inventory())
-        self.add_child(DoNothingActor())
+        self.add_child(StepRandomDirectonActor())
         self.add_child(GameState(game_state))
         self.add_child(equipment.Equipment())
         self.add_child(EffectQueue())
