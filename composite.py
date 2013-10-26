@@ -257,7 +257,7 @@ class Path(Leaf):
     Composites holding this has a path that it may step through.
     """
     def __init__(self):
-        super(Description, self).__init__()
+        super(Path, self).__init__()
         self.path = None
         self.component_type = "path"
 
@@ -265,7 +265,7 @@ class Path(Leaf):
         """
         Iniates the path using the dungeon map, from the DungeonMask module.
         """
-        dungeon_map = self.DungeonMask.dungeon_map
+        dungeon_map = self.parent.dungeon_mask.dungeon_map
         self.path = libtcod.path_new_using_map(dungeon_map, 1.0)
 
     def has_path(self):
@@ -278,24 +278,27 @@ class Path(Leaf):
 
     def try_step_path(self):
         """
-        Tries to step the entity along the path, relies on the Mover module.
+        Tries to step the entity along the path, relies on the mover module.
         """
         if(not self.has_path()):
             return False
         x, y = libtcod.path_walk(self.path, True)
-        step_succeeded = self.Mover.try_move_to((x, y))
+        step_succeeded = self.parent.mover.try_move_or_bump((x, y))
         return step_succeeded
+#
+#    def set_path_to_random_walkable_point(self):
+#        positions = self.get_walkable_positions_from_my_position()
+#        destination = random.sample(positions, 1)[0]
+#
 
-    def set_path_to_random_walkable_point(self):
-        positions = self.get_walkable_positions_from_my_position()
-        destination = random.sample(positions, 1)[0]
-        sx, sy = self.position
+    def compute_path(self, destination):
+        sx, sy = self.parent.position.value
         dx, dy = destination
         libtcod.path_compute(self.path, sx, sy, dx, dy)
 
     def get_walkable_positions_from_my_position(self):
-        dungeon_level = self.DungeonLevel.dungeon_level
-        position = self.Position.position
+        dungeon_level = self.dungeon_level.value
+        position = self.position.value
         return dungeon_level.walkable_destinations.\
             get_walkable_positions_from_my_position(self.parent, position)
 

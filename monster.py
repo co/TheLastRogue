@@ -1,4 +1,4 @@
-from monsteractor import StepRandomDirectonActor
+from monsteractor import ChasePlayerActor
 from attacker import Attacker
 from position import Position
 import equipment
@@ -11,7 +11,7 @@ from gamepiecetype import GamePieceType
 from memorymap import MemoryMap
 from composite import Description, GraphicChar, MovementSpeed
 from composite import Health, Strength, AttackSpeed, Faction, Inventory
-from composite import CharPrinter, GameState, EntityMessages
+from composite import CharPrinter, GameState, EntityMessages, Path
 from entityeffect import EffectQueue
 from mover import EntityMover
 from action import PickUpItemAction
@@ -102,7 +102,8 @@ class Ratman(Composite):
 
         self.add_child(MemoryMap())
         self.add_child(Inventory())
-        self.add_child(StepRandomDirectonActor())
+        self.add_child(Path())
+        self.add_child(ChasePlayerActor())
         self.add_child(GameState(game_state))
         self.add_child(equipment.Equipment())
         self.add_child(EffectQueue())

@@ -2,15 +2,8 @@ import random
 import geometry as geo
 import rng
 import direction
+from statusflags import StatusFlags
 from actor import Actor
-
-
-class ChasePlayerActor(Actor):
-    """
-    Standard Monster AI will chase the player.
-    """
-    def __init__(self):
-        super(ChasePlayerActor, self).__init__()
 
 
 class MonsterActor(Actor):
@@ -63,7 +56,7 @@ class MonsterActor(Actor):
         """
         seen_entities = []
         for entity in self.parent.dungeon_level.value.entities:
-            if self.parent.dungeon_mask.can_see_point(entity.position):
+            if self.parent.dungeon_mask.can_see_point(entity.position.value):
                 seen_entities.append(entity)
         return [entity for entity in seen_entities if not entity is self]
 
@@ -85,6 +78,34 @@ class MonsterActor(Actor):
             return None
         return closest_seen_entities[0]
 
+    def can_see_player(self):
+        seen_entities = self.get_seen_entities()
+        return any(entity.has_child("is_player")
+                   for entity in seen_entities)
+
+    def get_player_if_seen(self):
+        seen_entities = self.get_seen_entities()
+        found_player = next((entity for entity in seen_entities
+                             if(entity.has_child("is_player"))), None)
+        if(not found_player is None and
+           not found_player.status_flags.has_status(StatusFlags.INVISIBILE)):
+            return found_player
+        return None
+
+    def set_path_to_player_if_seen(self):
+        player = self.get_player_if_seen()
+        if(player is None):
+            return False
+        self.parent.path.compute_path(player.position.value)
+        return True
+
+    def step_looking_for_player(self):
+        self.set_path_to_player_if_seen()
+        if(not self.parent.path.has_path()):
+            self.set_path_to_random_walkable_point()
+        step_succeeded = self.parent.path.try_step_path()
+        return step_succeeded
+
 
 class StepRandomDirectonActor(MonsterActor):
     """
@@ -95,4 +116,16 @@ class StepRandomDirectonActor(MonsterActor):
 
     def act(self):
         self.try_step_random_direction()
+        return self.parent.movement_speed.value
+
+
+class ChasePlayerActor(MonsterActor):
+    """
+    Standard Monster AI will chase the player.
+    """
+    def __init__(self):
+        super(ChasePlayerActor, self).__init__()
+
+    def act(self):
+        self.step_looking_for_player()
         return self.parent.movement_speed.value
