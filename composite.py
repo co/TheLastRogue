@@ -1,5 +1,4 @@
 import counter
-import random
 import libtcodpy as libtcod
 import colors
 import console
@@ -285,22 +284,11 @@ class Path(Leaf):
         x, y = libtcod.path_walk(self.path, True)
         step_succeeded = self.parent.mover.try_move_or_bump((x, y))
         return step_succeeded
-#
-#    def set_path_to_random_walkable_point(self):
-#        positions = self.get_walkable_positions_from_my_position()
-#        destination = random.sample(positions, 1)[0]
-#
 
     def compute_path(self, destination):
         sx, sy = self.parent.position.value
         dx, dy = destination
         libtcod.path_compute(self.path, sx, sy, dx, dy)
-
-    def get_walkable_positions_from_my_position(self):
-        dungeon_level = self.dungeon_level.value
-        position = self.position.value
-        return dungeon_level.walkable_destinations.\
-            get_walkable_positions_from_my_position(self.parent, position)
 
     def message(self, message):
         if(message == CompositeMessage.DUNGEON_LEVEL_CHANGED):

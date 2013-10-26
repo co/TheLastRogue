@@ -147,7 +147,7 @@ def equipment_menu(player, state_stack):
         if(item_in_slot is None):
             item_name = "-"
         else:
-            item_name = item_in_slot.name
+            item_name = item_in_slot.description.name
         equipment_options.append(menu.MenuOptionWithSymbols(item_name,
                                                             slot.symbol,
                                                             slot.symbol,

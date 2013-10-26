@@ -161,7 +161,7 @@ class Equip(EntityEffect):
 
     def message(self):
         message = "%s equips %s." % (self.source_entity.description.name,
-                                     self.item.name)
+                                     self.item.description.name)
         messenger.messenger.message(message)
 
     def update(self, time_spent):
@@ -183,7 +183,8 @@ class UnEquip(EntityEffect):
         self.equipment_slot = equipment_slot
 
     def message(self):
-        message = "%s unequips %s." % (self.source_entity.name, self.item.name)
+        message = "%s unequips %s." % (self.source_entity.name,
+                                       self.item.description.name)
         messenger.messenger.message(message)
 
     def update(self, time_spent):
@@ -205,7 +206,8 @@ class ReEquip(EntityEffect):
         self.item = item
 
     def message(self):
-        message = "%s equips %s." % (self.source_entity.name, self.item.name)
+        message = "%s equips %s." % (self.source_entity.description.name,
+                                     self.item.description.name)
         messenger.messenger.message(message)
 
     def update(self, time_spent):

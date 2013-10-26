@@ -87,6 +87,8 @@ class Equipment(composite.Leaf):
 
     def unequip(self, equipment_slot):
         equipment = self._equipment[equipment_slot]
+        if(equipment.has_child("unequip_effect")):
+            equipment.unequip_effect.effect()
         equipment.unequip_effect(self.parent)
         self._equipment[equipment_slot] = None
         return equipment
@@ -112,7 +114,7 @@ class Equipment(composite.Leaf):
         return len(self.get_open_slots_of_type(equipment_type)) < 1
 
     def can_equip(self, equipment):
-        if(self._all_slots_of_type_are_used(equipment.equipment_type)):
+        if(self._all_slots_of_type_are_used(equipment.equipment_type.value)):
             return False
         return True
 
@@ -123,12 +125,14 @@ class Equipment(composite.Leaf):
         return False
 
     def _equip(self, equipment):
-        open_slots = self.get_open_slots_of_type(equipment.equipment_type)
+        open_slots =\
+            self.get_open_slots_of_type(equipment.equipment_type.value)
         self._equip_into_slot(equipment, open_slots[0])
 
     def _equip_into_slot(self, equipment, slot):
         self._equipment[slot] = equipment
-        equipment.equip_effect(self.parent)
+        if(equipment.has_child("on_equip_effect")):
+            equipment.on_equip_effect.effect(self.parent)
 
     def on_tick(self, time_spent):
         self.execute_equip_effects()
@@ -136,7 +140,9 @@ class Equipment(composite.Leaf):
     def execute_equip_effects(self):
         for equipment_slot in EquipmentSlots.ALL:
             if(self.slot_is_equiped(equipment_slot)):
-                self._equipment[equipment_slot].equiped_effect(self.parent)
+                equipment = self._equipment[equipment_slot]
+                if(equipment.has_child("equiped_effect")):
+                    equipment.equiped_effect.effect(self.parent)
 
     def print_equipment(self):
         print "###############################"
