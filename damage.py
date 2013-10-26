@@ -19,6 +19,6 @@ class Damage(object):
     def damage_entity(self, source_entity, target_entity):
         damage = rng.random_variance_no_negative(self.strength, self.variance)
         damage_effect =\
-            entityeffect.DamageEntityEffect(source_entity, target_entity,
-                                            damage, self.damage_types)
-        target_entity.add_entity_effect(damage_effect)
+            entityeffect.DamageEntityEffect(source_entity, damage,
+                                            self.damage_types)
+        target_entity.effect_queue.add(damage_effect)

@@ -10,6 +10,7 @@ import turn
 import messenger
 import state
 import item
+import monster
 from dungeonlevelfactory import dungeon_level_from_file
 
 
@@ -31,6 +32,9 @@ class ComponentGameState(state.State):
 
         gun = item.Gun()
         gun.mover.try_move((20, 13), self.dungeon_level)
+
+        rat = monster.Ratman(self)
+        rat.mover.try_move((20, 8), self.dungeon_level)
 
         self._init_gui()
         camera_position = (constants.MONSTER_STATUS_BAR_WIDTH, 0)

@@ -13,10 +13,10 @@ class StatusFlags(Leaf):
     SWALLOWED_BY_SLIME = 5
     LEAVES_CORPSE = 6
 
-    def __init__(self):
+    def __init__(self, status_flags=[]):
         super(StatusFlags, self).__init__()
         self.component_type = "status_flags"
-        self._status_flags = set()
+        self._status_flags = set(status_flags)
         self._temp_status_flags = set()
 
     def has_status(self, status):

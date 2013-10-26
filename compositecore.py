@@ -21,7 +21,6 @@ class Component(object):
         self.component_type = None
         self.tags = set()
         self.to_be_removed = False
-        pass
 
     @property
     def parent(self):
@@ -87,10 +86,10 @@ class Component(object):
         False otherwise.
         """
         if(self.parent is None):
-            print "ERROR: Tries to find sibling {0} "\
-                "of component {1} but it "\
-                "has no parent!".format(str(component_type), str(self))
-            raise
+            raise Exception("ERROR: Tries to find sibling {0} "
+                            "of component {1} but it "
+                            "has no parent!".format(str(component_type),
+                                                    str(self)))
         return self.parent.has_child(component_type)
 
 

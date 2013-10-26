@@ -42,6 +42,12 @@ class Actor(Leaf):
 #        return remove_succeded
 
     def tick(self):
+        """
+        Gives the actor an opportunity to act.
+
+        The actor will act if it isn't in an energy debt.
+        It also receives some energy.
+        """
         self.energy += self.energy_recovery
         while self.energy > 0:
             self.energy -= self.act()
@@ -50,3 +56,17 @@ class Actor(Leaf):
     def act(self):
         raise NotImplementedError("act method not implemented for parent:" +
                                   str(self.parent))
+
+
+class DoNothingActor(Actor):
+    """
+    Entities with this actor will do nothing.
+    """
+    def __init__(self):
+        super(DoNothingActor, self).__init__()
+
+    def act(self):
+        """
+        Just returns energy spent, nothing is done.
+        """
+        return self.parent.movement_speed.value

@@ -43,8 +43,8 @@ class Strength(Leaf):
     """
     def __init__(self, strength):
         super(Strength, self).__init__()
-        self.strength = strength
         self.component_type = "strength"
+        self.value = strength
 
 
 class IsPlayer(Leaf):
@@ -100,8 +100,8 @@ class Faction(Leaf):
 
     def __init__(self, faction):
         super(Faction, self).__init__()
-        self.faction = faction
         self.component_type = "faction"
+        self.value = faction
 
 
 class CharPrinter(Leaf):
@@ -297,7 +297,8 @@ class EntityMessages(Leaf):
     Holds the text messages that may be sent by the parent entity.
     """
     def __init__(self, random, death):
-        super(Health, self).__init__()
+        super(EntityMessages, self).__init__()
+        self.component_type = "entity_messages"
         self.random = random
         self.death = death
 
@@ -324,7 +325,7 @@ class Health(Leaf):
             entity: The entity that caused the damage (if any)
         """
         self.hp.decrease(damage)
-        self.GraphicChar.\
+        self.parent.char_printer.\
             set_fg_blink_colors([colors.LIGHT_PINK, colors.RED])
         if(self.is_dead()):
             self.killer = entity
@@ -343,7 +344,6 @@ class Health(Leaf):
         Returns True if the entity is considered dead.
         """
         return self.hp.value == 0
-
 
 ITEM_CAPACITY = 16
 
@@ -427,4 +427,5 @@ class Inventory(Leaf):
         Returns a list of all items in the inventory of the given type.
         """
         return [item for item in self._items
-                if item.equipment_type.value == type_]
+                if item.has_child("equipment_type") and
+                item.equipment_type.value == type_]

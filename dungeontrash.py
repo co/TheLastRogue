@@ -1,4 +1,5 @@
 from composite import Description, GraphicChar, CharPrinter
+from mover import Mover
 from position import Position
 from dungeonlevelcomposite import DungeonLevel
 from compositecore import Composite
@@ -19,6 +20,7 @@ class Corpse(Composite):
         self.add_child(DungeonLevel())
         self.add_child(Description("A routeing corpse.",
                                    "A rotting corpse."))
-        self.add_child(GraphicChar(symbol.CORPSE,
-                                   None, colors.WHITE))
-        self.add_child(CharPrinter)
+        self.add_child(GraphicChar(None, colors.WHITE,
+                                   symbol.CORPSE,))
+        self.add_child(CharPrinter())
+        self.add_child(Mover())

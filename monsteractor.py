@@ -3,18 +3,32 @@ import geometry as geo
 import rng
 import direction
 import terrain
-from compositecore import Leaf
+from actor import Actor
 import libtcodpy as libtcod
 from statusflags import StatusFlags
 
 
-class MonsterActor(Leaf):
+class ChasePlayerActor(Actor):
     """
     Standard Monster AI will chase the player.
     """
-    def __init__(self, arg):
+    def __init__(self):
+        super(ChasePlayerActor, self).__init__()
+
+
+class StepRandomDirectonActor(Actor):
+    """
+    Standard Monster AI will chase the player.
+    """
+    def __init__(self):
+        super(ChasePlayerActor, self).__init__()
+
+class MonsterActor(Actor):
+    """
+    Standard Monster AI will chase the player.
+    """
+    def __init__(self):
         super(MonsterActor, self).__init__()
-        self.arg = arg
 
     def try_step_random_direction(self):
         """
@@ -24,32 +38,6 @@ class MonsterActor(Leaf):
         random_direction = random.sample(list(direction.DIRECTIONS), 1)[0]
         new_position = geo.add_2d(self.position, random_direction)
         return self.try_move_to(new_position)
-
-    def try_move_to(self, position):
-        """
-        Tries to move the entity to a position.
-
-        If there is a unfriendly entity in the way hit it instead.
-        If there is a door in the way try to open it.
-        If an action is taken return True otherwise return False.
-
-        Args:
-            position (int, int): The position the entity tries to move to.
-        """
-
-        if(self.has_status(StatusFlags.SWALLOWED_BY_SLIME)):
-            escape_successful = self.try_to_escape_slime(position)
-            if(not escape_successful):
-                return True
-        terrain_to_step = self.dungeon_level.get_tile(position).get_terrain()
-        if(isinstance(terrain_to_step, terrain.Door) and
-           self.try_open_door(terrain_to_step)):
-            return True
-        if(self.try_hit(position)):
-            return True
-        if(self.try_move(position)):
-            return True
-        return False
 
     def try_open_door(self, door):
         """

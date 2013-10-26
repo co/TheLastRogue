@@ -5,6 +5,7 @@ from composite import GraphicChar, CharPrinter, GraphicCharTerrainCorners
 from compositecore import Leaf, Composite
 from mover import Mover
 from position import Position
+from statusflags import StatusFlags
 
 
 class IsSolid(Leaf):
@@ -19,6 +20,21 @@ class IsTransparent(Leaf):
         super(IsTransparent, self).__init__()
         self.component_type = "is_transparent"
         self.value = is_transparent
+
+
+class BumpAction(Leaf):
+    """
+    Defines what happens if the player bumps into this terrain.
+    """
+    def __init__(self, is_transparent=False):
+        super(BumpAction, self).__init__()
+        self.component_type = "bump_action"
+
+    def bump(self, source_entity):
+        pass
+
+    def can_bump(self, source_entity):
+        return True
 
 
 class Floor(Composite):
@@ -109,6 +125,7 @@ class Wall (Composite):
 #            self.dungeon_level.get_tiles_surrounding_position(self.position)
 #        return [tile.get_terrain() for tile in tiles]
 
+
 class Door(Composite):
     def __init__(self, is_open=True):
         super(Door, self).__init__()
@@ -121,6 +138,38 @@ class Door(Composite):
                                    icon.DOOR))
         self.add_child(IsSolid(True))
         self.add_child(IsTransparent(False))
+
+        self.add_child(OpenDoorAction())
+        self.add_child(OpenDoorBumpAction())
+
+
+class OpenDoorAction(Leaf):
+    """Opens the door terrain."""
+    def __init__(self):
+        super(OpenDoorAction, self).__init__()
+        self.component_type = "open_door_action"
+
+    def open_door(self):
+        self.parent.is_solid.value = True
+        self.parent.is_transparent.value = False
+        self.parent.graphic_char.icon = icon.DOOR_OPEN
+
+
+class OpenDoorBumpAction(BumpAction):
+    """
+    Defines what happens if the player bumps into this terrain.
+    """
+    def __init__(self, is_transparent=False):
+        super(OpenDoorBumpAction, self).__init__()
+        self.component_type = "bump_action"
+
+    def bump(self, source_entity):
+        self.parent.open_door_action.open_door()
+
+    def can_bump(self, source_entity):
+        return (self.parent.is_solid.value and
+                (source_entity.status_flags.
+                 has_status(StatusFlags.CAN_OPEN_DOORS)))
 
 #    def is_solid(self):
 #        return not self.is_open

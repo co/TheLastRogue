@@ -19,7 +19,7 @@ class InputActor(Actor):
         if key in inputhandler.move_controls:
             dx, dy = inputhandler.move_controls[key]
             new_position = geo.add_2d(self.parent.position.value, (dx, dy))
-            move_succeded = self.parent.mover.try_move(new_position)
+            move_succeded = self.parent.mover.try_move_or_bump(new_position)
             if(move_succeded):
                 self.newly_spent_energy += self.parent.movement_speed.value
         elif key == inputhandler.ENTER:

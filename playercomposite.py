@@ -12,7 +12,8 @@ from composite import Description, GraphicChar, MovementSpeed, IsPlayer
 from composite import Health, Strength, AttackSpeed, Faction, Inventory
 from composite import CharPrinter, GameState
 from entityeffect import EffectQueue
-from mover import Mover
+from mover import EntityMover
+from attacker import Attacker
 from action import PickUpItemAction
 import gametime
 import symbol
@@ -30,7 +31,9 @@ class Player(Composite):
 
         self.add_child(Position())
         self.add_child(DungeonLevel())
-        self.add_child(Mover())
+
+        self.add_child(EntityMover())
+        self.add_child(Attacker())
 
         self.add_child(Description("CO", "The Brave"))
         self.add_child(GraphicChar(None, colors.WHITE,

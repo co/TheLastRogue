@@ -238,23 +238,6 @@ class Entity(actor.Actor):
         """
         return self.hp.value == 0
 
-    def try_hit(self, position):
-        """
-        Tries to hit an entity at a position.
-
-        Returns False if there is no entity
-        there or the entity is of the same faction.
-
-        Args:
-            position(int, int): The position that the entity tries to hit.
-        """
-        entity = self.dungeon_level.get_tile(position).get_first_entity()
-        if(entity is None or
-           entity._faction == self._faction):
-            return False
-        self.hit(entity)
-        return True
-
     def _unarmed_damage(self):
         """
         Calculates an instance of damage
@@ -269,16 +252,6 @@ class Entity(actor.Actor):
         caused by a rock throw by the entity.
         """
         return self._unarmed_damage()
-
-    def hit(self, target_entity):
-        """
-        Causes the entity to hit the target entity.
-
-        Args:
-            target_entity: The entity that this entity is trying to hit.
-        """
-        # implement melee weapon damage here.
-        self._unarmed_damage().damage_entity(self, target_entity)
 
     def add_entity_effect(self, effect):
         """
@@ -419,6 +392,7 @@ class Entity(actor.Actor):
         return copy
 
     def _update_once_a_tick(self, time_spent):
+        pass
         #self.equipment.execute_equip_effects()
         #self.clear_all_temporary_status_flags()
         #self.update_effect_queue(time_spent)

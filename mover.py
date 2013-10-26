@@ -1,5 +1,6 @@
 from compositecore import Leaf
 from dungeonlevelcomposite import DungeonLevel
+from statusflags import StatusFlags
 
 
 class Mover(Leaf):
@@ -102,5 +103,44 @@ class Mover(Leaf):
         pieces_i_might_be_among = tile_i_might_be_on.game_pieces[piece_type]
         if(any(self.parent is piece for piece in pieces_i_might_be_among)):
             pieces_i_might_be_among.remove(self.parent)
+            return True
+        return False
+
+
+class EntityMover(Mover):
+    """
+    Component for moving and checking if a move is legal.
+
+    will also interact with what it bumps into.
+    """
+    def __init__(self):
+        super(EntityMover, self).__init__()
+
+    def try_move_or_bump(self, position):
+        """
+        Tries to move the entity to a position.
+
+        If there is a unfriendly entity in the way hit it instead.
+        If there is a door in the way try to open it.
+        If an action is taken return True otherwise return False.
+
+        Args:
+            position (int, int): The position the entity tries to move to.
+        """
+
+        if(self.parent.status_flags.
+           has_status(StatusFlags.SWALLOWED_BY_SLIME)):
+            #escape_successful = self.try_to_escape_slime(position)
+            #if(not escape_successful):
+            return True
+        terrain_to_step = self.parent.dungeon_level.value.get_tile(position).get_terrain()
+        if(terrain_to_step.has_child("bump_action") and
+           terrain_to_step.bump_action.can_bump(self.parent)):
+            terrain_to_step.bump(self.parent)
+            return True
+        if(self.parent.has_child("attacker") and
+           self.parent.attacker.try_hit(position)):
+            return True
+        if(self.try_move(position)):
             return True
         return False
