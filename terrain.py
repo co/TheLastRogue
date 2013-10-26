@@ -150,9 +150,11 @@ class OpenDoorAction(Leaf):
         self.component_type = "open_door_action"
 
     def open_door(self):
-        self.parent.is_solid.value = True
-        self.parent.is_transparent.value = False
-        self.parent.graphic_char.icon = icon.DOOR_OPEN
+        print "time to open door!"
+        self.parent.is_solid.value = False
+        self.parent.is_transparent.value = True
+        self.parent.graphic_char.symbol = icon.DOOR_OPEN
+        self.parent.dungeon_level.value.signal_terrain_changed()
 
 
 class OpenDoorBumpAction(BumpAction):

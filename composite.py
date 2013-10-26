@@ -170,13 +170,25 @@ class GraphicChar(Leaf):
     def symbol(self):
         return self._symbol
 
+    @symbol.setter
+    def symbol(self, value):
+        self._symbol = value
+
     @property
     def color_bg(self):
         return self._color_bg
 
+    @color_bg.setter
+    def color_bg(self, value):
+        self._color_bg = value
+
     @property
     def color_fg(self):
         return self._color_fg
+
+    @color_fg.setter
+    def color_fg(self, value):
+        self._color_fg = value
 
     def copy(self):
         """

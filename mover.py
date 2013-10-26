@@ -133,10 +133,11 @@ class EntityMover(Mover):
             #escape_successful = self.try_to_escape_slime(position)
             #if(not escape_successful):
             return True
-        terrain_to_step = self.parent.dungeon_level.value.get_tile(position).get_terrain()
+        terrain_to_step =\
+            self.parent.dungeon_level.value.get_tile(position).get_terrain()
         if(terrain_to_step.has_child("bump_action") and
            terrain_to_step.bump_action.can_bump(self.parent)):
-            terrain_to_step.bump(self.parent)
+            terrain_to_step.bump_action.bump(self.parent)
             return True
         if(self.parent.has_child("attacker") and
            self.parent.attacker.try_hit(position)):
