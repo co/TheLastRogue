@@ -71,8 +71,8 @@ class GlassWall(Composite):
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
         self.add_child(Position())
-        self.add_child(GraphicChar(colors.WHITE,
-                                   colors.FLOOR_BG,
+        self.add_child(GraphicChar(colors.FLOOR_BG,
+                                   colors.WHITE,
                                    icon.CAVE_WALLS_ROW))
         self.add_child(CharPrinter())
         self.add_child(IsSolid(True))
