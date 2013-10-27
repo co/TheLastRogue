@@ -15,7 +15,7 @@ import equipment
 import entityeffect
 import entity
 from compositecore import Leaf, Composite
-from equipactions import UnequipAction
+from missileaction import PlayerThrowItemAction
 
 
 class ItemType(object):
@@ -222,6 +222,9 @@ class DrinkAction(Action):
         self.add_energy_spent_to_entity(source_entity)
 
     def remove_from_inventory(self, target_entity):
+        """
+        Removes the parent item from the inventory.
+        """
         target_entity.inventory.remove_item(self.parent)
 
     def _drink(self, target_entity):
@@ -454,8 +457,9 @@ class Gun(Composite):
                                               damage.DamageTypes.PIERCING]))
         self.add_child(WeaponRange(15))
         self.add_child(ReEquipAction())
-        #self.add_child(UnequipAction())
+        self.add_child(PlayerThrowItemAction())
         self.add_child(ThrowerNonBreak())
+        self.add_child(Weight(5))
 
 
 class RingOfInvisibility(Leaf):
@@ -534,13 +538,13 @@ class ThrowerNonBreak(Thrower):
     def __init__(self):
         super(ThrowerNonBreak, self).__init__()
 
-    def hit_ground_effect(self, position):
+    def throw_effect(self, dungeon_level, position):
         """
         The item will be placed at the tile where it lands.
 
         position: The point at which the item hits the ground.
         """
-        self.try_move(position, self.parent.dungeon_level.value)
+        self.parent.mover.try_move(position, dungeon_level)
         message = "The " + self.parent.description.name.lower() +\
             " hits the ground with a thud."
         messenger.messenger.message(message)

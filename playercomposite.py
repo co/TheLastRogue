@@ -10,7 +10,7 @@ from gamepiecetype import GamePieceType
 from memorymap import MemoryMap
 from composite import Description, GraphicChar, MovementSpeed, IsPlayer
 from composite import Health, Strength, AttackSpeed, Faction, Inventory
-from composite import CharPrinter, GameState
+from composite import CharPrinter, GameState, Vision
 from entityeffect import EffectQueue
 from mover import EntityMover
 from attacker import Attacker
@@ -43,11 +43,13 @@ class Player(Composite):
         self.add_child(Faction(Faction.PLAYER))
         self.add_child(Health(10))
         self.add_child(Strength(10))
-        self.add_child(SightRadius(6))
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(AttackSpeed(gametime.single_turn))
         self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
+
         self.add_child(DungeonMask())
+        self.add_child(SightRadius(6))
+        self.add_child(Vision())
 
         self.add_child(MemoryMap())
         self.add_child(Inventory())

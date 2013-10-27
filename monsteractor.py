@@ -50,41 +50,13 @@ class MonsterActor(Actor):
         escape_successful = rng.coin_flip() and rng.coin_flip()
         return escape_successful
 
-    def get_seen_entities(self):
-        """
-        Gets all entities seen by this entity not including self.
-        """
-        seen_entities = []
-        for entity in self.parent.dungeon_level.value.entities:
-            if self.parent.dungeon_mask.can_see_point(entity.position.value):
-                seen_entities.append(entity)
-        return [entity for entity in seen_entities if not entity is self]
-
-    def get_seen_entities_closest_first(self):
-        """
-        Gets all seen entities sorted on distance from self not including self.
-        """
-        return sorted(self.get_seen_entities(),
-                      key=lambda entity:
-                      geo.chess_distance(self.parent.position.value,
-                                         entity.position.value))
-
-    def get_closest_seen_entity(self):
-        """
-        Gets the closest of all seen entities not including self.
-        """
-        closest_seen_entities = self.get_seen_entities_closest_first()
-        if(len(closest_seen_entities) < 1):
-            return None
-        return closest_seen_entities[0]
-
     def can_see_player(self):
-        seen_entities = self.get_seen_entities()
+        seen_entities = self.parent.vision.get_seen_entities()
         return any(entity.has_child("is_player")
                    for entity in seen_entities)
 
     def get_player_if_seen(self):
-        seen_entities = self.get_seen_entities()
+        seen_entities = self.parent.vision.get_seen_entities()
         found_player = next((entity for entity in seen_entities
                              if(entity.has_child("is_player"))), None)
         if(not found_player is None and
