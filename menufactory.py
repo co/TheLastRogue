@@ -9,7 +9,7 @@ import geometry as geo
 import colors
 import symbol
 import style
-#from equipactions import UnequipAction
+from equipactions import UnequipAction
 
 
 def main_menu(state_stack):
@@ -192,14 +192,14 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
         re_equip_options.append(menu.MenuOption(item.description.name,
                                                 functions))
 
-#    unequip_function =\
-#        UnequipAction().delayed_call(source_entity=player,
-#                                     target_entity=player,
-#                                     equipment_slot=equipment_slot)
-#    stack_pop_function = menu.StackPopFunction(state_stack, 3)
-#    functions = [unequip_function, stack_pop_function]
-#
-#    re_equip_options.append(menu.MenuOption("- None -", functions))
+    unequip_function =\
+        UnequipAction().delayed_call(source_entity=player,
+                                     target_entity=player,
+                                     equipment_slot=equipment_slot)
+    stack_pop_function = menu.StackPopFunction(state_stack, 3)
+    functions = [unequip_function, stack_pop_function]
+
+    re_equip_options.append(menu.MenuOption("- None -", functions))
 
     resulting_menu = menu.StaticMenu(equipment_menu_rect.top_left,
                                      re_equip_options, state_stack,

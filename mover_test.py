@@ -95,6 +95,7 @@ class TestComposition(unittest.TestCase):
         self.assertTrue(entity.mover.try_move(self.open_position))
         self.assertTrue(entity.mover.try_remove_from_dungeon())
         self.assertTrue(entity.has_child("dungeon_level"))
+        self.assertTrue(entity.dungeon_level.value is None)
 
     def test_try_move_should_move_entity_to_new_position(self):
         entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)

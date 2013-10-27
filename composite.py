@@ -375,10 +375,11 @@ class Inventory(Leaf):
         if(not self.has_room_for_item()):
             return False
         else:
-            success = item.mover.try_remove_from_dungeon()
-            if not success:
-                raise Exception("ERROR: Tried to remove item: "
-                                + str(item) + "but could not.")
+            if not item.dungeon_level.value is None:
+                success = item.mover.try_remove_from_dungeon()
+                if not success:
+                    raise Exception("ERROR: Tried to remove item: "
+                                    + str(item) + "but could not.")
             self._items.append(item)
             return True
 

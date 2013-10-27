@@ -89,7 +89,6 @@ class Equipment(composite.Leaf):
         equipment = self._equipment[equipment_slot]
         if(equipment.has_child("unequip_effect")):
             equipment.unequip_effect.effect()
-        equipment.unequip_effect(self.parent)
         self._equipment[equipment_slot] = None
         return equipment
 

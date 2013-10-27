@@ -174,16 +174,16 @@ class Equip(EntityEffect):
         self.tick(time_spent)
 
 
-class UnEquip(EntityEffect):
+class Unequip(EntityEffect):
     def __init__(self, source_entity, equipment_slot):
-        super(UnEquip, self).__init__(source_entity=source_entity,
+        super(Unequip, self).__init__(source_entity=source_entity,
                                       effect_type=EffectTypes.EQUIPMENT,
                                       time_to_live=1)
         self.item = source_entity.equipment.get(equipment_slot)
         self.equipment_slot = equipment_slot
 
     def message(self):
-        message = "%s unequips %s." % (self.source_entity.name,
+        message = "%s unequips %s." % (self.source_entity.description.name,
                                        self.item.description.name)
         messenger.messenger.message(message)
 

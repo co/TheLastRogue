@@ -22,7 +22,7 @@ class UnequipAction(action.Action):
         target_entity = kwargs[action.TARGET_ENTITY]
         source_entity = kwargs[action.SOURCE_ENTITY]
         equipment_slot = kwargs[action.EQUIPMENT_SLOT]
-        if(not self.parent is None):
+        if(target_entity.equipment.slot_is_equiped(equipment_slot)):
             self._unequip(target_entity, equipment_slot)
             self.add_energy_spent_to_entity(source_entity)
 
@@ -41,6 +41,5 @@ class UnequipAction(action.Action):
         """
         if(not target_entity.equipment.slot_is_equiped(equipment_slot)):
             return
-        unequip_effect = entityeffect.Unequip(target_entity,
-                                              target_entity, equipment_slot)
+        unequip_effect = entityeffect.Unequip(target_entity, equipment_slot)
         target_entity.effect_queue.add(unequip_effect)

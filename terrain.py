@@ -150,7 +150,6 @@ class OpenDoorAction(Leaf):
         self.component_type = "open_door_action"
 
     def open_door(self):
-        print "time to open door!"
         self.parent.is_solid.value = False
         self.parent.is_transparent.value = True
         self.parent.graphic_char.symbol = icon.DOOR_OPEN
