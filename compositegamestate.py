@@ -86,7 +86,7 @@ class ComponentGameState(state.State):
             self.current_stack.pop()
 
     def _update_gui(self):
-        #self.monster_status_bar.update(self.player)
+        self.monster_status_bar.update(self.player)
         self.player_status_bar.update()
 
     def _init_gui(self):
