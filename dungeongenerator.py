@@ -49,8 +49,8 @@ def place_up_down_stairs(dungeon_level, up_position, down_position):
 
 def _place_feature_replace_terrain_with_floor(feature, dungeon_level,
                                               position):
-    feature.try_move(position, dungeon_level)
-    terrain.Floor().replace_move(position, dungeon_level)
+    feature.mover.try_move(position, dungeon_level)
+    terrain.Floor().mover.replace_move(position, dungeon_level)
 
 
 def get_full_of_terrain_dungeon(terrain_class, width, height, depth):
@@ -58,7 +58,7 @@ def get_full_of_terrain_dungeon(terrain_class, width, height, depth):
     for y in range(height):
         for x in range(width):
             wall = terrain.Wall()
-            wall.try_move((x, y), dungeon)
+            wall.mover.try_move((x, y), dungeon)
     return dungeon
 
 
@@ -83,7 +83,7 @@ def is_solid_ratio(dungeon_level):
     for y in range(dungeon_level.height):
         for x in range(dungeon_level.width):
             tile = dungeon_level.get_tile((x, y))
-            if tile.get_terrain().is_solid():
+            if tile.get_terrain().is_solid.value:
                 solid += 1
     result = float(solid) / float(dungeon_level.width * dungeon_level.height)
     return result
@@ -161,7 +161,7 @@ def cellular_automata(dungeon_level):
             solid_neighbors = 0
             for point in neighbors:
                 if(not dungeon_level.has_tile(point) or
-                   dungeon_level.get_tile(point).get_terrain().is_solid()):
+                   dungeon_level.get_tile(point).get_terrain().is_solid.value):
                     solid_neighbors += 1
             _apply_cellular_automata_rule_on_tile(dungeon_level, position,
                                                   solid_neighbors)
@@ -171,11 +171,11 @@ def _apply_cellular_automata_rule_on_tile(dungeon_level, position,
                                           number_of_solid_neighbors):
     this_terrain = dungeon_level.get_tile(position).get_terrain()
     solid_neighborhood_size =\
-        number_of_solid_neighbors + (1 if this_terrain.is_solid() else 0)
+        number_of_solid_neighbors + (1 if this_terrain.is_solid.value else 0)
     if solid_neighborhood_size >= 5:
-        terrain.Wall().replace_move(position, dungeon_level)
+        terrain.Wall().mover.replace_move(position, dungeon_level)
     else:
-        terrain.Floor().replace_move(position, dungeon_level)
+        terrain.Floor().mover.replace_move(position, dungeon_level)
 
 
 def generate_dungeon_exploded_rooms(open_area, depth):
@@ -220,9 +220,9 @@ def generate_dungeon_exploded_rooms(open_area, depth):
     apply_brush_to_points(dungeon_level, normalized_open_points, brush)
 
     feature_positions = random.sample(normalized_open_points, 3)
-    place_up_down_stairs(dungeon_level, feature_positions[0], feature_positions[1])
-    drinks = 1 if rng.coin_flip() else 0
-    _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(drinks),
+    place_up_down_stairs(dungeon_level, feature_positions[0],
+                         feature_positions[1])
+    _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(),
                                               dungeon_level,
                                               feature_positions[2])
 
@@ -260,14 +260,13 @@ def generate_dungeon_cave_floor(size, depth):
     apply_brush_to_points(dungeon_level, normalized_open_points, brush)
 
     feature_positions = random.sample(normalized_open_points, 2)
-    place_up_down_stairs(dungeon_level, feature_positions[0], feature_positions[1])
+    place_up_down_stairs(dungeon_level, feature_positions[0],
+                         feature_positions[1])
 
     drinks = 1 if rng.coin_flip() else 0
     _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(drinks),
                                               dungeon_level,
                                               feature_positions[2])
-
-
     return dungeon_level
 
 
@@ -350,7 +349,7 @@ class ReplaceTerrain(TileModifier):
 
     def modify(self, dungeon_level, position):
         terrain_to_modify = self.terrain_class()
-        terrain_to_modify.replace_move(position, dungeon_level)
+        terrain_to_modify.mover.replace_move(position, dungeon_level)
 
 
 class CountDownCondition():

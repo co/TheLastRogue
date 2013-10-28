@@ -3,6 +3,7 @@ from position import Position
 from dungeonlevelcomposite import DungeonLevel
 from compositecore import Composite, Leaf
 from gamepiecetype import GamePieceType
+from mover import Mover
 import symbol
 import action
 import colors
@@ -20,11 +21,12 @@ class StairsDown(Composite):
         self.add_child(Description("Stairs Down",
                                    ("A dark pass way downward.",
                                     "Oh, what horrors awaits there?")))
-        self.add_child(GraphicChar(symbol.STAIRS_DOWN,
-                                   None, colors.WHITE))
+        self.add_child(GraphicChar(None, colors.WHITE,
+                                   symbol.STAIRS_DOWN))
 
         self.add_child(CharPrinter())
         self.add_child(ShareTilePlayerActions(action.DescendStairsAction()))
+        self.add_child(Mover())
 
 
 class StairsUp(Composite):
@@ -32,17 +34,18 @@ class StairsUp(Composite):
     Stairs up allows the player to ascend to the next level.
     """
     def __init__(self):
-        super(StairsDown, self).__init__()
+        super(StairsUp, self).__init__()
         self.add_child(GamePieceType(GamePieceType.DUNGEON_FEATURE))
         self.add_child(Position())
         self.add_child(DungeonLevel())
         self.add_child(Description("Stairs Up",
                                    ("A way back, when the ",
                                     "nightmare becomes too real.")))
-        self.add_child(GraphicChar(symbol.STAIRS_UP,
-                                   None, colors.WHITE))
+        self.add_child(GraphicChar(None, colors.WHITE,
+                                   symbol.STAIRS_UP))
         self.add_child(CharPrinter())
         self.add_child(ShareTilePlayerActions())
+        self.add_child(Mover())
 
 
 class Fountain(Composite):
@@ -50,7 +53,7 @@ class Fountain(Composite):
     Drinking from the fountain makes the player stronger.
     """
     def __init__(self):
-        super(StairsDown, self).__init__()
+        super(Fountain, self).__init__()
         self.add_child(GamePieceType(GamePieceType.DUNGEON_FEATURE))
         self.add_child(Position())
         self.add_child(DungeonLevel())
@@ -58,10 +61,11 @@ class Fountain(Composite):
                                    ("A Fountain full of clean water",
                                     "surely you will become more",
                                     "healthy by drinking this.")))
-        self.add_child(GraphicChar(symbol.STAIRS_UP,
-                                   None, colors.WHITE))
+        self.add_child(GraphicChar(None, colors.CYAN,
+                                   symbol.FOUNTAIN_FULL))
         self.add_child(CharPrinter())
-        self.add_child(ShareTilePlayerActions())
+        #self.add_child(ShareTilePlayerActions())
+        self.add_child(Mover())
 
 
 class ShareTilePlayerActions(Leaf):
@@ -69,6 +73,7 @@ class ShareTilePlayerActions(Leaf):
     Defines actions that the player may take while sharing tile the parent.
     """
     def __init__(self, actions=[]):
+        super(ShareTilePlayerActions, self).__init__()
         self.component_type = "share_tile_player_actions"
         self.actions = actions
 
