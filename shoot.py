@@ -34,7 +34,13 @@ class MissileHitDetection(object):
         for index, point in enumerate(path):
             tile = dungeon_level.get_tile_or_unknown(point)
             if(tile.get_terrain().is_solid.value and not self.passes_solid):
-                return path[:index - 1]
+                return self._last_n_or_default(path, index, None)
             if(tile.has_entity() and not self.passes_entity):
-                return path[:index + 1]
-        return path[:index]
+                return self._last_n_or_default(path, index + 1, None)
+        return self._last_n_or_default(path, index, None)
+
+    def _last_n_or_default(self, the_list, n, default):
+        if(n >= len(the_list)):
+            return default
+        else:
+            return the_list[:n]

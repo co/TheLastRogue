@@ -2,27 +2,30 @@ from action import Action, SOURCE_ENTITY, GAME_STATE
 import shoot
 import animation
 import colors
+import symbol
 
 
 class PlayerMissileAction(Action):
     def act(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
         game_state = kwargs[GAME_STATE]
-        max_throw_distance =\
-            self.max_throw_distance(source_entity=source_entity)
+        max_missile_distance =\
+            self.max_missile_distance(source_entity=source_entity)
         path = shoot.player_select_missile_path(source_entity,
-                                                max_throw_distance,
+                                                max_missile_distance,
                                                 game_state)
 
-        if(path is None or path[-1] == source_entity.position):
+        if(path is None or path[-1] == source_entity.position.value):
             return False
         dungeon_level = source_entity.dungeon_level.value
         hit_detector = shoot.MissileHitDetection(False, False)
         path_taken = hit_detector.get_path_taken(path, dungeon_level)
+        if path_taken is None or len(path_taken) < 1:
+            return False
         self.send_missile(dungeon_level, path_taken, game_state, source_entity)
         self.add_energy_spent_to_entity(source_entity)
 
-    def max_throw_distance(self, **kwargs):
+    def max_missile_distance(self, **kwargs):
         pass
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
@@ -44,7 +47,7 @@ class PlayerThrowItemAction(PlayerMissileAction):
         self.name = "Throw"
         self.display_order = 95
 
-    def max_throw_distance(self, **kwargs):
+    def max_missile_distance(self, **kwargs):
         """
         The distance the item can be thrown by the player.
         """
@@ -62,7 +65,6 @@ class PlayerThrowItemAction(PlayerMissileAction):
         The final step of the throw.
         """
         self.remove_from_inventory(source_entity)
-        print self.parent
         self.animate_flight(game_state, path, self.parent.graphic_char.symbol,
                             self.parent.graphic_char.color_fg)
         self.parent.thrower.throw_effect(dungeon_level, path[-1])
@@ -73,7 +75,7 @@ class PlayerThrowRockAction(PlayerMissileAction):
         super(PlayerThrowRockAction, self).__init__()
         self.name = "Throw Rock"
         self.display_order = 95
-        self.symbol = 249
+        self.symbol = symbol.BIG_CENTER_DOT
         self.color_fg = colors.GRAY
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
@@ -87,20 +89,20 @@ class PlayerThrowRockAction(PlayerMissileAction):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
         if(target_entity is None):
             return
-        source_entity.rock_throwing_damage().damage_entity(source_entity,
-                                                           target_entity)
+        source_entity.attacker.throw_rock_damage_entity(target_entity)
 
-    def max_throw_distance(self, **kwargs):
+    def max_missile_distance(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
         return source_entity.strength.value + 1
 
 
 class PlayerShootWeaponAction(PlayerMissileAction):
-    def __init__(self, source_item):
+    def __init__(self, ranged_weapon):
         super(PlayerShootWeaponAction, self).__init__()
         self.name = "Shoot"
         self.display_order = 85
-        self.symbol = '.'
+        self.symbol = symbol.BIG_CENTER_DOT
+        self.ranged_weapon = ranged_weapon
         self.color_fg = colors.WHITE
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
@@ -116,5 +118,5 @@ class PlayerShootWeaponAction(PlayerMissileAction):
             return
         self.parent.damage.damage_entity(source_entity, target_entity)
 
-    def max_throw_distance(self, **kwargs):
-        return self.parent.weapon_range.value
+    def max_missile_distance(self, **kwargs):
+        return self.ranged_weapon.weapon_range.value

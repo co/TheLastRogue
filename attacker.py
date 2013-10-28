@@ -25,6 +25,15 @@ class Attacker(Leaf):
         self.hit(entity)
         return True
 
+    def throw_rock_damage_entity(self, target_entity):
+        """
+        Makes entity to hit the target entity with the force of a thrown rock.
+        """
+        damage_types = [damage.DamageTypes.BLUNT, damage.DamageTypes.PHYSICAL]
+        strength = self.parent.strength.value
+        thrown_damage = damage.Damage(strength / 2, strength / 3, damage_types)
+        thrown_damage.damage_entity(self.parent, target_entity)
+
     def hit(self, target_entity):
         """
         Causes the entity to hit the target entity.

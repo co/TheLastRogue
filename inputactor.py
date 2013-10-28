@@ -1,8 +1,11 @@
 import menufactory
-from actor import Actor
 import console
 import geometry as geo
 import inputhandler
+import gametime
+from actor import Actor
+from equipment import EquipmentSlots
+from missileaction import PlayerShootWeaponAction, PlayerThrowRockAction
 
 
 class InputActor(Actor):
@@ -36,5 +39,31 @@ class InputActor(Actor):
                 self.parent.pick_up_item_action.act()
             else:
                 self.parent.pick_up_item_action.print_player_error()
+        elif key == inputhandler.FIRE:
+            equipment = self.parent.equipment
+            if(equipment.slot_is_equiped(EquipmentSlots.RANGED_WEAPON)):
+                self.shoot_weapon()
+            else:
+                self.throw_rock()
 
+        elif key == inputhandler.PRINTSCREEN:
+            console.console.print_screen()
         return self.newly_spent_energy
+
+    def shoot_weapon(self):
+        weapon = self.parent.equipment.get(EquipmentSlots.RANGED_WEAPON)
+        shooting = PlayerShootWeaponAction(weapon)
+        game_state = self.parent.game_state.value
+        if(shooting.can_act(source_entity=self.parent, game_state=game_state)):
+            shooting_succeded = shooting.act(source_entity=self.parent,
+                                             game_state=game_state)
+            if shooting_succeded:
+                self.newly_spent_energy += gametime.single_turn
+
+    def throw_rock(self):
+        rock_throwing = PlayerThrowRockAction()
+        game_state = self.parent.game_state.value
+        if(rock_throwing.can_act(source_entity=self.parent,
+                                 game_state=game_state)):
+            rock_throwing.act(source_entity=self.parent,
+                              game_state=game_state)
