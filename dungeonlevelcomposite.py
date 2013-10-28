@@ -39,10 +39,15 @@ class DungeonLevel(Leaf):
             self.parent.message(CompositeMessage.DUNGEON_LEVEL_CHANGED)
             if(self.has_sibling("actor")):
                 self.value.add_actor_if_not_present(self.parent)
+            if(self.has_sibling("is_dungeon_feature")):
+                print "getting closer..."
+                self.value.add_dungeon_feature_if_not_present(self.parent)
 
     def on_parent_changed(self):
         """
         When the parent changes try to add it to the dungeon.
         """
-        if(not self.value is None and self.has_sibling("actor")):
-            self.value.add_actor_if_not_present(self.parent)
+        self._signal_dungeon_level_changed()
+#        if(not self.value is None):
+#            if(self.has_sibling("actor")):
+#                self.value.add_actor_if_not_present(self.parent)

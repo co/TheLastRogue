@@ -1,4 +1,5 @@
 from monsteractor import ChasePlayerActor
+from actor import DoNothingActor
 from attacker import Attacker
 from position import Position
 import equipment
@@ -128,6 +129,60 @@ class Jerico(Ratman):
         self.gfx_char.color_fg = colors.YELLOW
         self.energy_recovery = gametime.double_energy_gain
 
+
+class StoneStatue(Composite):
+    """
+    A composite component representing a Ratman monster.
+    """
+    def __init__(self, game_state):
+        super(StoneStatue, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ENTITY))
+
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(EntityMover())
+
+        self.add_child(EntityMessages(("The stone statue casts a"
+                                       "long shadow on the floor."),
+                                      ("The stone statue shatters pieces, "
+                                       "sharp rocks covers the ground.")))
+        self.add_child(Description("Stone Statue",
+                                   ("A Statue made out of stone stands tall."
+                                    "It seems to be looking at you...")))
+        self.add_child(GraphicChar(None, colors.GRAY,
+                                   symbol.GOLEM))
+        self.add_child(CharPrinter())
+        self.add_child(EntityDeathAction())
+
+        self.add_child(Faction(Faction.MONSTER))
+        self.add_child(Health(30))
+        self.add_child(Strength(0))
+        self.add_child(MovementSpeed(gametime.single_turn))
+        self.add_child(AttackSpeed(gametime.single_turn))
+        self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
+                                    StatusFlags.CAN_OPEN_DOORS]))
+
+        self.add_child(SightRadius(6))
+        self.add_child(DungeonMask())
+        self.add_child(Vision())
+
+        self.add_child(MemoryMap())
+        self.add_child(Inventory())
+        self.add_child(Path())
+        self.add_child(DoNothingActor())
+        self.add_child(GameState(game_state))
+        self.add_child(equipment.Equipment())
+        self.add_child(EffectQueue())
+        self.add_child(PickUpItemAction())
+        self.add_child(Attacker())
+
+#        self.hp = counter.Counter(30, 30)
+#        self._name = "stone statue"
+#        self.death_message = "The stone statue shatters pieces, "\
+#            "sharp rocks covers the ground."
+#        self.gfx_char.color_fg = colors.GRAY
+#        self._permanent_status_flags = set()
+#        self.gfx_char.symbol = symbol.GOLEM
 
 #class Slime(Monster):
 #    """

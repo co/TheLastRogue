@@ -1,17 +1,18 @@
+from dungeonlevelfactory import dungeon_level_from_file
 from playercomposite import Player
-import statestack
+from dungeon import Dungeon
+import camera
 import console
+import constants
 import geometry as geo
 import gui
-import camera
-import constants
-import rectfactory
-import turn
-import messenger
-import state
 import item
+import messenger
 import monster
-from dungeonlevelfactory import dungeon_level_from_file
+import rectfactory
+import state
+import statestack
+import turn
 
 
 def reset_globals():
@@ -19,24 +20,12 @@ def reset_globals():
     messenger.messenger = messenger.Messenger()
 
 
-class ComponentGameState(state.State):
+class GameStateBase(state.State):
     def __init__(self):
+        super(GameStateBase, self).__init__()
         reset_globals()
         self.player = Player(self)
-        start_position = (20, 10)
-        self.dungeon_level = dungeon_level_from_file("test.level")
-        self.player.mover.try_move(start_position, self.dungeon_level)
 
-        potion = item.HealthPotion()
-        potion.mover.try_move((20, 12), self.dungeon_level)
-
-        gun = item.Gun()
-        gun.mover.try_move((20, 13), self.dungeon_level)
-
-        rat = monster.Ratman(self)
-        rat.mover.try_move((20, 8), self.dungeon_level)
-
-        self._init_gui()
         camera_position = (constants.MONSTER_STATUS_BAR_WIDTH, 0)
         self.camera = camera.Camera(camera_position, geo.zero2d())
         self.has_won = False
@@ -107,22 +96,41 @@ class ComponentGameState(state.State):
             gui.MessageDisplay(rectfactory.message_display_rect())
 
 
-#class GameState(GameStateBase):
-#    def __init__(self):
-#        super(GameState, self).__init__()
-#        self.dungeon = dungeon.Dungeon(self)
-#        self._init_player_position()
-#
-#    def _init_player_position(self):
-#        first_level = self.dungeon.get_dungeon_level(0)
-#        self.dungeon_level = first_level
-#        for stairs in first_level.up_stairs:
-#            move_succeded = self.player.try_move(stairs.position, first_level)
-#            if(move_succeded):
-#                return
-#        raise
-#
-#
+class TestGameState(GameStateBase):
+    def __init__(self):
+        super(TestGameState, self).__init__()
+        reset_globals()
+        start_position = (20, 10)
+        self.dungeon_level = dungeon_level_from_file("test.level")
+        self.player.mover.try_move(start_position, self.dungeon_level)
+
+        potion = item.HealthPotion()
+        potion.mover.try_move((20, 12), self.dungeon_level)
+
+        gun = item.Gun()
+        gun.mover.try_move((20, 13), self.dungeon_level)
+
+        rat = monster.Ratman(self)
+        rat.mover.try_move((20, 8), self.dungeon_level)
+
+
+class GameState(GameStateBase):
+    def __init__(self):
+        super(GameState, self).__init__()
+        self.dungeon = Dungeon(self)
+        self._init_player_position()
+        self._init_gui()
+
+    def _init_player_position(self):
+        first_level = self.dungeon.get_dungeon_level(0)
+        self.dungeon_level = first_level
+        for stairs in first_level.up_stairs:
+            move_succeded = self.player.mover.try_move(stairs.position.value,
+                                                       first_level)
+            if(move_succeded):
+                return
+        raise Exception("Could not put player at first up stairs.")
+
 #class TestGameState(GameStateBase):
 #    def __init__(self):
 #        super(TestGameState, self).__init__()

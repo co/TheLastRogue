@@ -27,6 +27,7 @@ class StairsDown(Composite):
         self.add_child(CharPrinter())
         self.add_child(ShareTilePlayerActions(action.DescendStairsAction()))
         self.add_child(Mover())
+        self.add_child(IsDungeonFeature())
 
 
 class StairsUp(Composite):
@@ -46,6 +47,7 @@ class StairsUp(Composite):
         self.add_child(CharPrinter())
         self.add_child(ShareTilePlayerActions())
         self.add_child(Mover())
+        self.add_child(IsDungeonFeature())
 
 
 class Fountain(Composite):
@@ -66,6 +68,7 @@ class Fountain(Composite):
         self.add_child(CharPrinter())
         #self.add_child(ShareTilePlayerActions())
         self.add_child(Mover())
+        self.add_child(IsDungeonFeature())
 
 
 class ShareTilePlayerActions(Leaf):
@@ -76,6 +79,15 @@ class ShareTilePlayerActions(Leaf):
         super(ShareTilePlayerActions, self).__init__()
         self.component_type = "share_tile_player_actions"
         self.actions = actions
+
+
+class IsDungeonFeature(Leaf):
+    """
+    Defines that the parent is a dungeon feature.
+    """
+    def __init__(self):
+        super(IsDungeonFeature, self).__init__()
+        self.component_type = "is_dungeon_feature"
 
 
 class DescendStairsAction(action.Action):

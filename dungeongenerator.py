@@ -49,8 +49,8 @@ def place_up_down_stairs(dungeon_level, up_position, down_position):
 
 def _place_feature_replace_terrain_with_floor(feature, dungeon_level,
                                               position):
-    feature.mover.try_move(position, dungeon_level)
     terrain.Floor().mover.replace_move(position, dungeon_level)
+    success = feature.mover.try_move(position, dungeon_level)
 
 
 def get_full_of_terrain_dungeon(terrain_class, width, height, depth):

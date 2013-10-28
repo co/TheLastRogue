@@ -20,7 +20,7 @@ class StateStack(object):
     def push(self, state):
         state.current_stack = self
         self._stack.append(state)
-        if isinstance(state, gamestate.ComponentGameState):
+        if isinstance(state, gamestate.GameStateBase):
             self._current_game_state_cache = state
 
     def peek(self):
@@ -38,7 +38,7 @@ class StateStack(object):
 
     def pop_to_game_state(self):
         while(len(self._stack) > 0 and
-              not isinstance(self.peek(), gamestate.ComponentGameState)):
+              not isinstance(self.peek(), gamestate.GameStateBase)):
             self.pop()
 
 
