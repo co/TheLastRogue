@@ -221,25 +221,6 @@ class Action(Leaf):
         entity.actor.newly_spent_energy += self.energy_cost
 
 
-class DescendStairsAction(Action):
-    def __init__(self):
-        super(DescendStairsAction, self).__init__()
-        self.name = "Descend Stairs"
-        self.display_order = 50
-
-    def act(self, **kwargs):
-        target_entity = kwargs[TARGET_ENTITY]
-        source_entity = kwargs[SOURCE_ENTITY]
-        current_dungeon_level = target_entity.dungeon_level.value
-        next_dungeon_level = current_dungeon_level.\
-            dungeon.get_dungeon_level(current_dungeon_level.depth + 1)
-        if(next_dungeon_level is None):
-            return False
-        destination_position = next_dungeon_level.up_stairs[0].position.value
-        target_entity.mover.try_move(destination_position, next_dungeon_level)
-        self.add_energy_spent_to_entity(source_entity)
-
-
 class DelayedFunctionCall(object):
     def __init__(self, function, **kwargs):
         self.function = function

@@ -25,7 +25,7 @@ class StairsDown(Composite):
                                    symbol.STAIRS_DOWN))
 
         self.add_child(CharPrinter())
-        self.add_child(ShareTilePlayerActions(action.DescendStairsAction()))
+        self.add_child(DescendStairsAction())
         self.add_child(Mover())
         self.add_child(IsDungeonFeature())
 
@@ -45,7 +45,6 @@ class StairsUp(Composite):
         self.add_child(GraphicChar(None, colors.WHITE,
                                    symbol.STAIRS_UP))
         self.add_child(CharPrinter())
-        self.add_child(ShareTilePlayerActions())
         self.add_child(Mover())
         self.add_child(IsDungeonFeature())
 
@@ -71,16 +70,6 @@ class Fountain(Composite):
         self.add_child(IsDungeonFeature())
 
 
-class ShareTilePlayerActions(Leaf):
-    """
-    Defines actions that the player may take while sharing tile the parent.
-    """
-    def __init__(self, actions=[]):
-        super(ShareTilePlayerActions, self).__init__()
-        self.component_type = "share_tile_player_actions"
-        self.actions = actions
-
-
 class IsDungeonFeature(Leaf):
     """
     Defines that the parent is a dungeon feature.
@@ -93,19 +82,21 @@ class IsDungeonFeature(Leaf):
 class DescendStairsAction(action.Action):
     def __init__(self):
         super(DescendStairsAction, self).__init__()
+        self.component_type = "descend_stairs_action"
         self.name = "Descend Stairs"
+        print "down stair action!: ", self.tags
         self.display_order = 50
 
     def act(self, **kwargs):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
-        current_dungeon_level = target_entity.dungeon_level
+        current_dungeon_level = target_entity.dungeon_level.value
         next_dungeon_level = current_dungeon_level.\
             dungeon.get_dungeon_level(current_dungeon_level.depth + 1)
         if(next_dungeon_level is None):
             return False
-        destination_position = next_dungeon_level.up_stairs[0].position
-        target_entity.try_move(destination_position, next_dungeon_level)
+        destination_position = next_dungeon_level.up_stairs[0].position.value
+        target_entity.mover.try_move(destination_position, next_dungeon_level)
         self.add_energy_spent_to_entity(source_entity)
 
 
