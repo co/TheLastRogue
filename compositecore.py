@@ -219,7 +219,6 @@ class Composite(Component):
         """
         Gets the list of all children with the given tag.
         """
-        print [child[0] for child in self._children.values()]
         return [child[0] for child in self._children.values()
                 if tag in child[0].tags]
 

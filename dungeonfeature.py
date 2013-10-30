@@ -84,7 +84,6 @@ class DescendStairsAction(action.Action):
         super(DescendStairsAction, self).__init__()
         self.component_type = "descend_stairs_action"
         self.name = "Descend Stairs"
-        print "down stair action!: ", self.tags
         self.display_order = 50
 
     def act(self, **kwargs):

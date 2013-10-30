@@ -40,7 +40,6 @@ class DungeonLevel(Leaf):
             if(self.has_sibling("actor")):
                 self.value.add_actor_if_not_present(self.parent)
             if(self.has_sibling("is_dungeon_feature")):
-                print "getting closer..."
                 self.value.add_dungeon_feature_if_not_present(self.parent)
 
     def on_parent_changed(self):

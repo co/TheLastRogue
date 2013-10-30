@@ -26,6 +26,7 @@ class DungeonMask(Leaf):
         if(self.has_sibling("dungeon_level") and
            not self.parent.dungeon_level.value is None):
             self._init_dungeon_map(self.parent.dungeon_level.value)
+            self.last_dungeon_map_update_timestamp = -1
 
     def _init_dungeon_map(self, dungeon_level):
         """

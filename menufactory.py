@@ -247,9 +247,7 @@ def context_menu(player, state_stack):
 def get_dungeon_feature_menu_options(dungeon_feature, state_stack, player):
     feature_options = []
     game_state = player.game_state.value
-    print "lol", [feature_action[0].tags for feature_action in dungeon_feature._children.values()]
     for feature_action in dungeon_feature.get_children_with_tag("user_action"):
-        print "found one: ", feature_action
         feat_function = feature_action.delayed_call(source_entity=player,
                                                     target_entity=player,
                                                     game_state=game_state)

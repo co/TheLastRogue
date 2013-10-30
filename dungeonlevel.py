@@ -6,7 +6,6 @@ import turn
 import util
 import geometry as geo
 import constants
-import libtcodpy as libtcod
 import tile
 
 
@@ -65,12 +64,9 @@ class DungeonLevel(object):
         tile_position = geo.add_2d(position, camera.camera_offset)
         screen_position = geo.add_2d(position, camera.screen_position)
         the_tile = self.get_tile_or_unknown(tile_position)
-        x, y = tile_position
-        dungeon_mask = the_player.dungeon_mask
-        dungeon_mask.update_fov()
-        dungeon_map = the_player.dungeon_mask.dungeon_map
+        the_player.dungeon_mask.update_fov()
         memory_map = the_player.memory_map
-        if(libtcod.map_is_in_fov(dungeon_map, x, y)):
+        if(the_player.dungeon_mask.can_see_point(tile_position)):
             memory_map.update_memory_of_tile(the_tile, tile_position,
                                              self.depth)
             the_tile.draw(screen_position, True)
