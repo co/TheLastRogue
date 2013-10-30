@@ -35,7 +35,7 @@ def main_menu(state_stack):
     start_test_game_option =\
         menu.MenuOptionWithSymbols("Start Test Dungeon",
                                    symbol.GUN, " ",
-                                   start_test_game_function)
+                                   [start_test_game_function])
     dungeon_creator_option =\
         menu.MenuOptionWithSymbols("Dungeon Creator",
                                    symbol.GUN, " ",

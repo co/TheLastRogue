@@ -25,6 +25,7 @@ class GameStateBase(state.State):
         super(GameStateBase, self).__init__()
         reset_globals()
         self.player = Player(self)
+        self._init_gui()
 
         camera_position = (constants.MONSTER_STATUS_BAR_WIDTH, 0)
         self.camera = camera.Camera(camera_position, geo.zero2d())
@@ -119,7 +120,6 @@ class GameState(GameStateBase):
         super(GameState, self).__init__()
         self.dungeon = Dungeon(self)
         self._init_player_position()
-        self._init_gui()
 
     def _init_player_position(self):
         first_level = self.dungeon.get_dungeon_level(0)

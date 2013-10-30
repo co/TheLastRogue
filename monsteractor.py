@@ -110,5 +110,6 @@ class ChasePlayerActor(MonsterActor):
         super(ChasePlayerActor, self).__init__()
 
     def act(self):
+        self.parent.dungeon_mask.update_fov()
         self.step_looking_for_player()
         return self.parent.movement_speed.value
