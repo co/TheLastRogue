@@ -157,3 +157,24 @@ class EntityMover(Mover):
         if(self.try_move(position)):
             return True
         return False
+
+
+class CanShareTileEntityMover(EntityMover):
+    """
+    Parent entities with this mover may enter tiles of other entities.
+    """
+
+    def __init__(self):
+        super(CanShareTileEntityMover, self).__init__()
+
+    def _can_fit_on_tile(self, tile):
+        """
+        Slime monsters fight by entering the tile of another entity.
+        Therefore it must override '_can_fit_on_tile' so it doesn't think
+        A tile with an entity is too crowded.
+        """
+        piece_type = self.parent.game_piece_type.value
+        entities_on_tile = tile.game_pieces[piece_type]
+        if(len(entities_on_tile) > 1):
+            return False
+        return True

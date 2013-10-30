@@ -1,7 +1,6 @@
 from gamepiecetype import GamePieceType
 import compositecore
 from composite import CharPrinter
-import console
 import frame
 import terrain
 
@@ -60,6 +59,10 @@ class Tile(object):
     def get_dungeon_feature(self):
         return self.\
             get_first_piece_of_type(GamePieceType.DUNGEON_FEATURE)
+
+    def get_all_pieces(self):
+        return [piece for piece_list in self.game_pieces.values()
+                for piece in piece_list]
 
     def get_first_piece_of_type(self, piece_type):
         if(len(self.game_pieces[piece_type]) < 1):
