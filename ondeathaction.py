@@ -32,3 +32,14 @@ class EntityDeathAction(OnDeathAction):
         #self.parent.dungeon_level.value.remove_actor_if_present(self.parent)
         self.parent.mover.try_remove_from_dungeon()
         messenger.message(Message(self.parent.entity_messages.death))
+
+
+class DoNothingDeathAction(OnDeathAction):
+    """
+    The action will be called when parent Entity dies.
+    """
+    def __init__(self):
+        super(DoNothingDeathAction, self).__init__()
+
+    def act(self):
+        self.parent.health.hp.set_min()

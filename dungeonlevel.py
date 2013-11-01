@@ -21,7 +21,7 @@ class DungeonLevel(object):
 
         self.terrain_changed_timestamp = 0
 
-        self.walkable_destinations = util.WalkableDestinatinationsPath()
+        self._walkable_destinations = util.WalkableDestinatinationsPath()
 
     @property
     def entities(self):
@@ -140,7 +140,6 @@ class DungeonLevel(object):
                 line += str(self.get_tile_or_unknown((x, y)).symbol)
             print line
 
-    def get_walkable_positions(self):
-        return (self.walkable_destinations
-                .get_walkable_positions(self.parent,
-                                        self.parent.position.value))
+    def get_walkable_positions(self, entity, position):
+        return (self._walkable_destinations
+                .get_walkable_positions(entity, position))

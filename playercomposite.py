@@ -11,6 +11,7 @@ from gamepiecetype import GamePieceType
 from inputactor import InputActor
 from memorymap import MemoryMap
 from mover import EntityMover
+from ondeathaction import DoNothingDeathAction
 from position import Position
 from sightradius import SightRadius
 from statusflags import StatusFlags
@@ -59,3 +60,4 @@ class Player(Composite):
         self.add_child(equipment.Equipment())
         self.add_child(EffectQueue())
         self.add_child(PickUpItemAction())
+        self.add_child(DoNothingDeathAction())

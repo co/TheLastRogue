@@ -86,8 +86,7 @@ class MonsterActor(Actor):
     def get_walkable_positions_from_my_position(self):
         dungeon_level = self.parent.dungeon_level.value
         position = self.parent.position.value
-        return (dungeon_level.walkable_destinations.
-                get_walkable_positions(self.parent, position))
+        return (dungeon_level.get_walkable_positions(self.parent, position))
 
 
 class StepRandomDirectonActor(MonsterActor):
