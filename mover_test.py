@@ -1,11 +1,11 @@
-import unittest
-import terrain
-import dungeonlevelfactory
 from compositecore import Composite
-from gamepiecetype import GamePieceType
 from dungeonlevelcomposite import DungeonLevel
 from mover import Mover
 from position import Position
+from stats import GamePieceType
+import dungeonlevelfactory
+import terrain
+import unittest
 
 
 class TestComposition(unittest.TestCase):

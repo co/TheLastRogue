@@ -31,4 +31,3 @@ class GamePieceType(Leaf):
         Makes a copy of this component.
         """
         return GamePieceType(self.value)
-

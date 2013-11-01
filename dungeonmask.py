@@ -127,3 +127,47 @@ class DungeonMask(Leaf):
         """
         if(message == CompositeMessage.DUNGEON_LEVEL_CHANGED):
             self.init_dungeon_map_if_has_dungeon_level()
+
+
+class Path(Leaf):
+    """
+    Composites holding this has a path that it may step through.
+    """
+    def __init__(self):
+        super(Path, self).__init__()
+        self.path = None
+        self.component_type = "path"
+
+    def init_path(self):
+        """
+        Iniates the path using the dungeon map, from the DungeonMask module.
+        """
+        dungeon_map = self.parent.dungeon_mask.dungeon_map
+        self.path = libtcod.path_new_using_map(dungeon_map, 1.0)
+
+    def has_path(self):
+        """
+        Returns True if the entity has a path to walk.
+        """
+        if(self.path is None or libtcod.path_is_empty(self.path)):
+            return False
+        return True
+
+    def try_step_path(self):
+        """
+        Tries to step the entity along the path, relies on the mover module.
+        """
+        if(not self.has_path()):
+            return False
+        x, y = libtcod.path_walk(self.path, True)
+        step_succeeded = self.parent.mover.try_move_or_bump((x, y))
+        return step_succeeded
+
+    def compute_path(self, destination):
+        sx, sy = self.parent.position.value
+        dx, dy = destination
+        libtcod.path_compute(self.path, sx, sy, dx, dy)
+
+    def message(self, message):
+        if(message == CompositeMessage.DUNGEON_LEVEL_CHANGED):
+            self.init_path()

@@ -1,4 +1,4 @@
-import compositegamestate as gamestate
+import gamestate
 import frame
 import gui
 import rectfactory

@@ -1,18 +1,18 @@
-import dungeonlevel
-import statestack
-import console
-import player
-import dungeon
-import monster
-import geometry as geo
-import item
-import gui
+from dungeonlevelfactory import dungeon_level_from_file
+from player import Player
+from dungeon import Dungeon
 import camera
+import console
 import constants
-import rectfactory
-import turn
+import geometry as geo
+import gui
+import item
 import messenger
+import monster
+import rectfactory
 import state
+import statestack
+import turn
 
 
 def reset_globals():
@@ -20,25 +20,19 @@ def reset_globals():
     messenger.messenger = messenger.Messenger()
 
 
-class ComponentGameState(state.State):
-    def __init__(self):
-        #hero = compsite.Player()
-        self.dungeon_level =\
-            dungeonlevel.dungeon_level_from_file("test.level")
-        self.player = compsite.Player(self)
-
-
 class GameStateBase(state.State):
     def __init__(self):
+        super(GameStateBase, self).__init__()
         reset_globals()
-        self.player = player.Player(self)
+        self.player = Player(self)
         self._init_gui()
+
         camera_position = (constants.MONSTER_STATUS_BAR_WIDTH, 0)
         self.camera = camera.Camera(camera_position, geo.zero2d())
         self.has_won = False
-        self.dungeon_level = None
         self._should_draw = True
         self.menu_prompt_stack = statestack.GameMenuStateStack(self)
+        messenger.messenger.message("Welcome to: The Last Rogue!")
 
     def start_prompt(self, prompt_state):
         self.menu_prompt_stack.push(prompt_state)
@@ -60,7 +54,8 @@ class GameStateBase(state.State):
         console.console.flush()
 
     def prepare_draw(self):
-        dungeon_level = self.player.dungeon_level
+        dungeon_level =\
+            self.player.dungeon_level.value
         dungeon_level.draw(self.camera)
         self.player_status_bar.draw()
         self.message_bar.draw()
@@ -69,12 +64,13 @@ class GameStateBase(state.State):
     def update(self):
         self.message_bar.update()
 
-        dungeon_level = self.player.dungeon_level
-        dungeon_level.update()
+        dungeon_level =\
+            self.player.dungeon_level.value
+        dungeon_level.tick()
 
         self._update_gui()
 
-        if(self.player.is_dead()):
+        if(self.player.health.is_dead()):
             self.current_stack.pop()
         if(self.has_won):
             self.current_stack.pop()
@@ -101,65 +97,88 @@ class GameStateBase(state.State):
             gui.MessageDisplay(rectfactory.message_display_rect())
 
 
+class TestGameState(GameStateBase):
+    def __init__(self):
+        super(TestGameState, self).__init__()
+        reset_globals()
+        start_position = (20, 10)
+        self.dungeon_level = dungeon_level_from_file("test.level")
+        self.player.mover.try_move(start_position, self.dungeon_level)
+
+        potion = item.HealthPotion()
+        potion.mover.try_move((20, 12), self.dungeon_level)
+
+        gun = item.Gun()
+        gun.mover.try_move((20, 13), self.dungeon_level)
+        armor = item.Armor()
+        armor.mover.try_move((21, 10), self.dungeon_level)
+
+        rat = monster.Ratman(self)
+        rat.mover.try_move((20, 8), self.dungeon_level)
+
+        slime = monster.Slime(self)
+        slime.mover.try_move((20, 18), self.dungeon_level)
+
+
 class GameState(GameStateBase):
     def __init__(self):
         super(GameState, self).__init__()
-        self.dungeon = dungeon.Dungeon(self)
+        self.dungeon = Dungeon(self)
         self._init_player_position()
 
     def _init_player_position(self):
         first_level = self.dungeon.get_dungeon_level(0)
         self.dungeon_level = first_level
         for stairs in first_level.up_stairs:
-            move_succeded = self.player.try_move(stairs.position, first_level)
+            move_succeded = self.player.mover.try_move(stairs.position.value,
+                                                       first_level)
             if(move_succeded):
                 return
-        raise
+        raise Exception("Could not put player at first up stairs.")
 
-
-class TestGameState(GameStateBase):
-    def __init__(self):
-        super(TestGameState, self).__init__()
-        self.dungeon_level =\
-            dungeonlevel.dungeon_level_from_file("test.level")
-
-        self._init_player()
-        self._init_items()
-        self._init_monsters()
-
-    def _init_player(self):
-        start_position = (20, 10)
-        player_move_success = self.player.try_move(start_position,
-                                                   self.dungeon_level)
-        if(not player_move_success):
-            self.player.try_move((1, 1), self.dungeon_level)
-
-    def _init_items(self):
-        gun1 = item.Gun()
-        gun2 = item.Gun()
-        gun1_position = (20, 20)
-        gun2_position = (22, 20)
-
-        potion = item.HealthPotion()
-        potion_position = (24, 16)
-
-        ring = item.RingOfInvisibility()
-        ring_position = (20, 13)
-
-        gun1.try_move(gun1_position, self.dungeon_level)
-        gun2.try_move(gun2_position, self.dungeon_level)
-        potion.try_move(potion_position, self.dungeon_level)
-        ring.try_move(ring_position, self.dungeon_level)
-
-    def _init_monsters(self):
-        rat = monster.RatMan(self)
-        rat_pos = (15, 15)
-        rat.try_move(rat_pos, self.dungeon_level)
-
-        slime = monster.Slime(self)
-        slime_pos = (15, 25)
-        slime.try_move(slime_pos, self.dungeon_level)
-
-        statue = monster.StoneStatue(self)
-        statue_pos = (25, 7)
-        statue.try_move(statue_pos, self.dungeon_level)
+#class TestGameState(GameStateBase):
+#    def __init__(self):
+#        super(TestGameState, self).__init__()
+#        self.dungeon_level =\
+#            dungeonlevel.dungeon_level_from_file("test.level")
+#
+#        self._init_player()
+#        self._init_items()
+#        self._init_monsters()
+#
+#    def _init_player(self):
+#        start_position = (20, 10)
+#        player_move_success = self.player.try_move(start_position,
+#                                                   self.dungeon_level)
+#        if(not player_move_success):
+#            self.player.try_move((1, 1), self.dungeon_level)
+#
+#    def _init_items(self):
+#        gun1 = item.Gun()
+#        gun2 = item.Gun()
+#        gun1_position = (20, 20)
+#        gun2_position = (22, 20)
+#
+#        potion = item.HealthPotion()
+#        potion_position = (24, 16)
+#
+#        ring = item.RingOfInvisibility()
+#        ring_position = (20, 13)
+#
+#        gun1.try_move(gun1_position, self.dungeon_level)
+#        gun2.try_move(gun2_position, self.dungeon_level)
+#        potion.try_move(potion_position, self.dungeon_level)
+#        ring.try_move(ring_position, self.dungeon_level)
+#
+#    def _init_monsters(self):
+#        rat = monster.RatMan(self)
+#        rat_pos = (15, 15)
+#        rat.try_move(rat_pos, self.dungeon_level)
+#
+#        slime = monster.Slime(self)
+#        slime_pos = (15, 25)
+#        slime.try_move(slime_pos, self.dungeon_level)
+#
+#        statue = monster.StoneStatue(self)
+#        statue_pos = (25, 7)
+#        statue.try_move(statue_pos, self.dungeon_level)

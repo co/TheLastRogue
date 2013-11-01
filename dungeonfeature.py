@@ -1,12 +1,13 @@
-from composite import Description, GraphicChar, CharPrinter
-from position import Position
-from dungeonlevelcomposite import DungeonLevel
 from compositecore import Composite, Leaf
-from gamepiecetype import GamePieceType
+from dungeonlevelcomposite import DungeonLevel
+from graphic import GraphicChar, CharPrinter
 from mover import Mover
-import symbol
+from position import Position
+from stats import GamePieceType
+from text import Description
 import action
 import colors
+import symbol
 
 
 class StairsDown(Composite):

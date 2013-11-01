@@ -1,11 +1,11 @@
-import colors
-import icon
-from gamepiecetype import GamePieceType
-from composite import GraphicChar, CharPrinter, GraphicCharTerrainCorners
 from compositecore import Leaf, Composite
+from graphic import GraphicChar, CharPrinter, GraphicCharTerrainCorners
 from mover import Mover
 from position import Position
+from stats import GamePieceType
 from statusflags import StatusFlags
+import colors
+import icon
 
 
 class IsSolid(Leaf):

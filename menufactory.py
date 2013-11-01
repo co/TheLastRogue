@@ -1,15 +1,15 @@
-import compositegamestate as gamestate
-import equipment
-import rectfactory
-import dungeoncreatorvisualizer
-import menu
-import gui
-import state
-import geometry as geo
-import colors
-import symbol
-import style
 from equipactions import UnequipAction
+import colors
+import dungeoncreatorvisualizer
+import equipment
+import gamestate
+import geometry as geo
+import gui
+import menu
+import rectfactory
+import state
+import style
+import symbol
 
 
 def main_menu(state_stack):

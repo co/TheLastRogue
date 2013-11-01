@@ -1,6 +1,6 @@
-from gamepiecetype import GamePieceType
+from graphic import CharPrinter
+from stats import GamePieceType
 import compositecore
-from composite import CharPrinter
 import frame
 import terrain
 

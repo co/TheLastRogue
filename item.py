@@ -1,21 +1,22 @@
-import colors
-from gamepiecetype import GamePieceType
-from position import Position
+from action import Action
+from compositecore import Leaf, Composite
 from dungeonlevelcomposite import DungeonLevel
-from composite import Description, GraphicChar, CharPrinter
-from composite import BlockDamageHealthSpoof
+from graphic import GraphicChar, CharPrinter
+from health import BlockDamageHealthSpoof
+from missileaction import PlayerThrowItemAction
+from mover import Mover
+from position import Position
+from stats import GamePieceType
+from text import Description
+import action
+import colors
+import damage
+import entityeffect
+import equipment
 import gametime
+import messenger
 import random
 import symbol
-import damage
-import messenger
-import action
-from action import Action
-from mover import Mover
-import equipment
-import entityeffect
-from compositecore import Leaf, Composite
-from missileaction import PlayerThrowItemAction
 
 
 class ItemType(object):

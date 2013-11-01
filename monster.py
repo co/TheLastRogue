@@ -1,30 +1,30 @@
-from monsteractor import ChasePlayerActor
+from action import PickUpItemAction
 from actor import DoNothingActor
 from attacker import Attacker
-from position import Position
-from damage import DamageTypes, Damage
-import equipment
-from dungeonlevelcomposite import DungeonLevel
-from statusflags import StatusFlags
 from compositecore import Composite, Leaf
-from sightradius import SightRadius
-from dungeonmask import DungeonMask
-from gamepiecetype import GamePieceType
-from memorymap import MemoryMap
-from composite import Description, GraphicChar, MovementSpeed, Vision
-from composite import Health, Strength, AttackSpeed, Faction, Inventory
-from composite import CharPrinter, GameState, EntityMessages, Path
-from composite import HealthModifier
+from damage import DamageTypes, Damage
+from dungeonlevelcomposite import DungeonLevel
+from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue
+from graphic import CharPrinter, GraphicChar
+from health import Health, HealthModifier
+from inventory import Inventory
+from memorymap import MemoryMap
+from monsteractor import ChasePlayerActor
 from mover import EntityMover, CanShareTileEntityMover
-from action import PickUpItemAction
 from ondeathaction import EntityDeathAction
-import gametime
-import symbol
+from position import Position
+from stats import AttackSpeed, Faction, GameState
+from stats import MovementSpeed, Strength, GamePieceType
+from statusflags import StatusFlags
+from text import Description, EntityMessages
+from vision import Vision, SightRadius
 import colors
-
-import rng
+import equipment
+import gametime
 import messenger
+import rng
+import symbol
 
 
 class Ratman(Composite):
