@@ -1,23 +1,23 @@
-from inputactor import InputActor
-from position import Position
-import equipment
-from dungeonlevelcomposite import DungeonLevel
-from statusflags import StatusFlags
-from compositecore import Composite
-from sightradius import SightRadius
-from dungeonmask import DungeonMask
-from gamepiecetype import GamePieceType
-from memorymap import MemoryMap
+from action import PickUpItemAction
+from attacker import Attacker
+from composite import CharPrinter, GameState, Vision, HealthModifier
 from composite import Description, GraphicChar, MovementSpeed, IsPlayer
 from composite import Health, Strength, AttackSpeed, Faction, Inventory
-from composite import CharPrinter, GameState, Vision
+from compositecore import Composite
+from dungeonlevelcomposite import DungeonLevel
+from dungeonmask import DungeonMask
 from entityeffect import EffectQueue
+from gamepiecetype import GamePieceType
+from inputactor import InputActor
+from memorymap import MemoryMap
 from mover import EntityMover
-from attacker import Attacker
-from action import PickUpItemAction
+from position import Position
+from sightradius import SightRadius
+from statusflags import StatusFlags
+import colors
+import equipment
 import gametime
 import symbol
-import colors
 
 
 class Player(Composite):
@@ -42,6 +42,7 @@ class Player(Composite):
 
         self.add_child(Faction(Faction.PLAYER))
         self.add_child(Health(10))
+        self.add_child(HealthModifier())
         self.add_child(Strength(10))
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(AttackSpeed(gametime.single_turn))

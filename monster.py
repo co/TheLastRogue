@@ -14,6 +14,7 @@ from memorymap import MemoryMap
 from composite import Description, GraphicChar, MovementSpeed, Vision
 from composite import Health, Strength, AttackSpeed, Faction, Inventory
 from composite import CharPrinter, GameState, EntityMessages, Path
+from composite import HealthModifier
 from entityeffect import EffectQueue
 from mover import EntityMover, CanShareTileEntityMover
 from action import PickUpItemAction
@@ -49,6 +50,7 @@ class Ratman(Composite):
 
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(Health(10))
+        self.add_child(HealthModifier())
         self.add_child(Strength(2))
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(AttackSpeed(gametime.single_turn))
@@ -112,6 +114,7 @@ class StoneStatue(Composite):
 
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(Health(30))
+        self.add_child(HealthModifier())
         self.add_child(Strength(0))
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(AttackSpeed(gametime.single_turn))
@@ -158,6 +161,7 @@ class Slime(Composite):
 
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(Health(20))
+        self.add_child(HealthModifier())
         self.add_child(Strength(6))
         self.add_child(MovementSpeed(gametime.double_turn))
         self.add_child(AttackSpeed(gametime.single_turn))

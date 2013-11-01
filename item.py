@@ -3,6 +3,7 @@ from gamepiecetype import GamePieceType
 from position import Position
 from dungeonlevelcomposite import DungeonLevel
 from composite import Description, GraphicChar, CharPrinter
+from composite import BlockDamageHealthSpoof
 import gametime
 import random
 import symbol
@@ -13,7 +14,6 @@ from action import Action
 from mover import Mover
 import equipment
 import entityeffect
-import entity
 from compositecore import Leaf, Composite
 from missileaction import PlayerThrowItemAction
 
@@ -30,61 +30,146 @@ class ItemType(object):
 
     ALL = [POTION, WEAPON, ARMOR, AMMO]
 
-#
-#class Item(gamepiece.GamePiece):
-#    """
-#    Abstract class representing an item in the game.
-#
-#    Attributes:
-#        piece_type (GamePieceType): Denotes that Item and all its
-#                                    subclasses are of type ITEM.
-#        max_instances_in_single_tile: The number of allowed pieces of this
-#                                      types on a tile.
-#        item_type (ItemType): Denotes the type of item it is, should be
-#                              provided by the subclasses.
-#
-#        inventory (Inventory): If this item is in an entities inventory this
-#                            field should be point to that inventory
-#                            otherwise it shall be None.
-#        actions (list of Action): A list of player actions the player
-#                                can do with this item.
-#
-#        weight (int): The Weight of the item.
-#    """
-#    def __init__(self):
-#        super(Item, self).__init__()
-#
-#        self.piece_type = gamepiece.GamePieceType.ITEM
-#        self.max_instances_in_single_tile = 1
-#
-#        self._name = "XXX_UNNAMED_ITEM_XXX"
-#        self._description = "XXX_DESCRIPTION_ITEM_XXX"
-#        self.item_type = None
-#        self.equipment_type = None
-#
-#        self._color_bg = None
-#        self.inventory = None
-#        self.actions = []
-#        self.actions.append(action.DropAction(self))
-#        self.actions.append(missileaction.PlayerThrowItemAction(self))
-#        self.weight = 5
-#
-#    def throw_effect(self, dungeon_level, position):
-#        """
-#        The effect of throwing this item.
-#
-#        dungeon_level: The DungeonLevel the throw was performed on.
-#        position: The point at which the item hits the ground.
-#        """
-#        self.try_move(position, dungeon_level)
-#        message = "The " + self.name.lower() +\
-#            " hits the ground with a thud."
-#        messenger.messenger.message(message)
-#
-#    def _can_pass_terrain(self, terrain_to_pass):
-#        if(terrain_to_pass is None):
-#            return False
-#        return not terrain_to_pass.is_solid()
+
+class Gun(Composite):
+    """
+    A composite component representing a Gun item.
+    """
+    def __init__(self):
+        super(Gun, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ITEM))
+        self.add_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(Mover())
+        self.add_child(Description("Gun",
+                                   "This was once a fine weapon, \
+                                   but age has torn it real bad.\n\
+                                   The wooden handle is dry and gray, \
+                                   you see rust eating into the iron pipe."))
+        self.add_child(GraphicChar(None, colors.WHITE,
+                                   symbol.GUN))
+        self.add_child(CharPrinter())
+        self.add_child(DamageProvider(10, 5, [damage.DamageTypes.PHYSICAL,
+                                              damage.DamageTypes.PIERCING]))
+        self.add_child(WeaponRange(15))
+        self.add_child(ReEquipAction())
+        self.add_child(PlayerThrowItemAction())
+        self.add_child(ThrowerNonBreak())
+        self.add_child(Weight(5))
+
+
+class EquippedEffect(Leaf):
+    """
+    Parent items with this component has a
+    effect that happens while item is equipped.
+    """
+    def __init__(self):
+        super(EquippedEffect, self).__init__()
+        self.component_type = "equipped_effect"
+
+    def effect(self, entity):
+        pass
+
+
+class Armor(Composite):
+    """
+    A composite component representing a Armor item.
+    """
+    def __init__(self):
+        super(Armor, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ITEM))
+        self.add_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(Mover())
+        self.add_child(Description("Leather Armor",
+                                   "A worn leather armor, "
+                                   "it's old, but should still "
+                                   "protect you from some damage."))
+        self.add_child(GraphicChar(None, colors.ORANGE_D,
+                                   symbol.ARMOR))
+        self.add_child(BlockDamageEquippedEffect(5, 3,
+                                                 [damage.DamageTypes.
+                                                  PHYSICAL]))
+        self.add_child(CharPrinter())
+        self.add_child(ReEquipAction())
+        self.add_child(PlayerThrowItemAction())
+        self.add_child(ThrowerNonBreak())
+        self.add_child(Weight(10))
+
+
+class BlockDamageEquippedEffect(EquippedEffect):
+    def __init__(self, block, block_variance, blocked_damage_types):
+        super(BlockDamageEquippedEffect, self).__init__()
+        self.block = block
+        self.block_variance = block_variance
+        self.blocked_damage_types = blocked_damage_types
+
+    def effect(self, entity):
+        """
+        Causes the entity that to block some damage.
+        """
+        entity.add_spoof_child(BlockDamageHealthSpoof
+                               (self.block,
+                                self.block_variance,
+                                self.blocked_damage_types))
+
+
+class RingOfInvisibility(Leaf):
+    """
+    The Ring of Invisibility will make the entity who equips it invisible.
+    """
+    def __init__(self):
+        super(RingOfInvisibility, self).__init__()
+        self.add_child(EquipmentType(equipment.EquipmentTypes.RING))
+        self.add_child(GamePieceType(GamePieceType.ITEM))
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(Mover())
+        self.add_child(Description("Ring of Invisibility",
+                                   "The metal is warm to your skin,\
+                                   this ring will make you invisible"))
+        self.add_child(GraphicChar(None, colors.YELLOW,
+                                   symbol.RING))
+        self.add_child(CharPrinter())
+        self.add_child(ReEquipAction())
+        self.add_child(EquippedEffect(SetInvisibilityFlagEquippedEffect()))
+
+
+class SetInvisibilityFlagEquippedEffect(EquippedEffect):
+    def __init__(self):
+        super(SetInvisibilityFlagEquippedEffect, self).__init__()
+
+    def effect(self, entity):
+        """
+        Causes the entity that equips this item to become invisible.
+        """
+        invisibile_flag = entity.StatusFlags.INVISIBILE
+        invisibility_effect = entityeffect.\
+            StatusAdder(self.parent, self.parent,
+                        invisibile_flag, time_to_live=1)
+        self.parent.effect_queue.add(invisibility_effect)
+
+
+class HealthPotion(Composite):
+    def __init__(self):
+        """
+        Abstract class, subclasses of this class are potions,
+        """
+        super(HealthPotion, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ITEM))
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(Mover())
+        self.add_child(Description("Health Potion",
+                                   "An unusual liquid\
+                                   contained in a glass flask."))
+        self.add_child(GraphicChar(None, colors.PINK,
+                                   symbol.POTION))
+        self.add_child(CharPrinter())
+        self.add_child(Stacker())
+        self.add_child(HealingPotionDrinkAction())
 
 
 class Weight(Leaf):
@@ -333,16 +418,6 @@ class OnUnequipEffect(Leaf):
         self.effect = effect_function
 
 
-class EquippedEffect(Leaf):
-    """
-    Parent items with this component has a
-    effect that happens while item is equipped.
-    """
-    def __init__(self, effect_function):
-        self.component_type = "equipped_effect"
-        self.effect = effect_function
-
-
 class OnEquipEffect(Leaf):
     """
     Parent items with this component has a effect that happens on equipping.
@@ -364,156 +439,6 @@ class Stacker(Leaf):
         self.quantity = 1
 
 
-#class EquipableItem(Item):
-#    """
-#    Abstract class, subclasses of this class is equipable.
-#    """
-#    def __init__(self):
-#        super(EquipableItem, self).__init__()
-#        self.actions.append(action.ReEquipAction(self))
-#
-#    """
-#    Effect that will happen the entity that equips this item.
-#    Will be called on equip.
-#    """
-#    def equip_effect(self, entity):
-#        pass
-#
-#    """
-#    Effect that will happen the entity that un-equips this item.
-#    Will be called on un-equip.
-#    """
-#    def unequip_effect(self, entity):
-#        pass
-#
-#    """
-#    Effect that will happen while this item is equiped.
-#    Will be called each tick this item is equiped.
-#    """
-#    def equiped_effect(self, entity):
-#        pass
-
-
-#class WeaponItem(EquipableItem):
-#    """
-#    Abstract class, subclasses of this class are of ItemType WEAPON.
-#    """
-#    def __init__(self):
-#        super(WeaponItem, self).__init__()
-#        self.item_type = ItemType.WEAPON
-#        self._damage_strength = 0
-#        self._damage_variance = 0
-#        self._damage_types = []
-#
-#    @property
-#    def damage(self):
-#        return damage.Damage(self._damage_strength, self._damage_variance,
-#                             self._damage_types)
-#
-#
-#class MeleeWeapon(WeaponItem):
-#    """
-#    Abstract class, subclasses of this class are melee weapons
-#    and fits in the melee weapon equipment slot.
-#    """
-#    def __init__(self):
-#        super(MeleeWeapon, self).__init__()
-#        self.equipment_type = equipment.EquipmentTypes.MELEE_WEAPON
-#
-#
-#class RangedWeapon(WeaponItem):
-#    """
-#    Abstract class, subclasses of this class are ranged weapons
-#    and fits in the ranged weapon equipment slot.
-#
-#    weapon_range (int): Distance the weapon can fire.
-#    """
-#    def __init__(self):
-#        super(RangedWeapon, self).__init__()
-#        self.equipment_type = equipment.EquipmentTypes.RANGED_WEAPON
-#        self.weapon_range = 0
-#
-
-class Gun(Composite):
-    """
-    A composite component representing a Gun item.
-    """
-    def __init__(self):
-        super(Gun, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Mover())
-        self.add_child(Description("Gun",
-                                   "This was once a fine weapon, \
-                                   but age has torn it real bad.\n\
-                                   The wooden handle is dry and gray, \
-                                   you see rust eating into the iron pipe."))
-        self.add_child(GraphicChar(None, colors.WHITE,
-                                   symbol.GUN))
-        self.add_child(CharPrinter())
-        self.add_child(DamageProvider(10, 5, [damage.DamageTypes.PHYSICAL,
-                                              damage.DamageTypes.PIERCING]))
-        self.add_child(WeaponRange(15))
-        self.add_child(ReEquipAction())
-        self.add_child(PlayerThrowItemAction())
-        self.add_child(ThrowerNonBreak())
-        self.add_child(Weight(5))
-
-
-class RingOfInvisibility(Leaf):
-    """
-    The Ring of Invisibility will make the entity who equips it invisible.
-    """
-    def __init__(self):
-        super(RingOfInvisibility, self).__init__()
-        self.add_child(EquipmentType(equipment.EquipmentTypes.RING))
-        self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Mover())
-        self.add_child(Description("Ring of Invisibility",
-                                   "The metal is warm to your skin,\
-                                   this ring will make you invisible"))
-        self.add_child(GraphicChar(None, colors.YELLOW,
-                                   symbol.RING))
-        self.add_child(CharPrinter())
-        self.add_child(ReEquipAction())
-        self.add_child(EquippedEffect(self.set_invisibility_flag))
-
-    def set_invisibility_flag(self):
-        """
-        Causes the entity that equips this item to become invisible.
-        """
-        invisibile_flag = entity.StatusFlags.INVISIBILE
-        invisibility_effect = entityeffect.\
-            StatusAdder(self.parent, self.parent,
-                        invisibile_flag, time_to_live=1)
-        self.parent.effect_queue.add(invisibility_effect)
-
-
-class HealthPotion(Composite):
-    def __init__(self):
-        """
-        Abstract class, subclasses of this class are potions,
-        """
-        super(HealthPotion, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Mover())
-        self.add_child(Description("Health Potion",
-                                   "An unusual liquid\
-                                   contained in a glass flask."))
-        self.add_child(GraphicChar(None, colors.PINK,
-                                   symbol.POTION))
-        self.add_child(CharPrinter())
-        self.add_child(Stacker())
-        self.add_child(HealingPotionDrinkAction())
-
-
-#TODO: thrower should also contain the move through air animation.
 class Thrower(Leaf):
     """
     Items with this component can be thrown.

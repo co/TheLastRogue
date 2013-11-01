@@ -26,6 +26,7 @@ class ActionScheduler(object):
             actor.parent.before_tick(actor.energy_recovery)
             self.on_tick(actor)
             actor.parent.on_tick(actor.energy_recovery)
+            actor.parent.after_tick(actor.energy_recovery)
             actor.tick()
             self._actors.rotate()
 

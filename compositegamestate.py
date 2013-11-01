@@ -110,6 +110,8 @@ class TestGameState(GameStateBase):
 
         gun = item.Gun()
         gun.mover.try_move((20, 13), self.dungeon_level)
+        armor = item.Armor()
+        armor.mover.try_move((21, 10), self.dungeon_level)
 
         rat = monster.Ratman(self)
         rat.mover.try_move((20, 8), self.dungeon_level)

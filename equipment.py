@@ -133,15 +133,15 @@ class Equipment(composite.Leaf):
         if(equipment.has_child("on_equip_effect")):
             equipment.on_equip_effect.effect(self.parent)
 
-    def on_tick(self, time_spent):
+    def before_tick(self, time_spent):
         self.execute_equip_effects()
 
     def execute_equip_effects(self):
         for equipment_slot in EquipmentSlots.ALL:
             if(self.slot_is_equiped(equipment_slot)):
                 equipment = self._equipment[equipment_slot]
-                if(equipment.has_child("equiped_effect")):
-                    equipment.equiped_effect.effect(self.parent)
+                if(equipment.has_child("equipped_effect")):
+                    equipment.equipped_effect.effect(self.parent)
 
     def print_equipment(self):
         print "###############################"

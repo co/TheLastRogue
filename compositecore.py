@@ -1,6 +1,3 @@
-from itertools import chain
-
-
 class Component(object):
     """
     Abstract base class of composite design pattern.
@@ -37,11 +34,14 @@ class Component(object):
         Gets the next sibling of the same type,
         allows components to decorate components of the same type.
         """
-        siblings = self.parent.get_children_of_type(self.component_type)
+        if(self.parent.get_original_child(self.component_type) is self):
+            return None
+        siblings =\
+            self.parent.get_spoofed_children_of_type(self.component_type)
         next_index = siblings.index(self) + 1
         if(len(siblings) > next_index):
             return siblings[next_index]
-        return None
+        return self.parent.get_original_child(self.component_type)
 
     def on_parent_changed(self):
         """
@@ -70,6 +70,12 @@ class Component(object):
     def on_tick(self, time):
         """
         A method hook for updating the component tree on tick.
+        """
+        pass
+
+    def after_tick(self, time):
+        """
+        A method hook for updating the component tree after tick.
         """
         pass
 
@@ -112,6 +118,7 @@ class Composite(Component):
     """
     def __init__(self, *args, **kw):
         super(Composite, self).__init__(*args, **kw)
+        self._spoofed_children = {}
         self._children = {}
 
     def add_child(self, child):
@@ -136,75 +143,116 @@ class Composite(Component):
                             "had parent: {2}.".format(str(self),
                                                       str(child),
                                                       str(child.parent)))
-        if not child.component_type in self._children:
-            self._children[child.component_type] = []
-        self._children[child.component_type].append(child)
+        self._children[child.component_type] = child
         child.parent = self
+
+    def add_spoof_child(self, child):
+        """
+        Adds a spoofed child component to this composite.
+        If the child already has a parent an exception is thrown.
+        """
+        if child.tags is None:
+            raise Exception("Component {0} tried to add_child "
+                            "component: {1} to its children. "
+                            "But tags "
+                            "was not set.".format(str(self), str(child)))
+        if child.component_type is None:
+            raise Exception("Component {0} tried to add_child "
+                            "component: {1} to its children. "
+                            "But component_type "
+                            "was not set.".format(str(self), str(child)))
+        if(not child.parent is None):
+            raise Exception("Component {0} tried to add_child "
+                            "component: {1} to its children. "
+                            "But it already "
+                            "had parent: {2}.".format(str(self),
+                                                      str(child),
+                                                      str(child.parent)))
+        if(not child.component_type in self._children):
+            raise Exception("Component {0} tried to add_spoof_child"
+                            "component: {1} to its spoofed_children."
+                            "But there was no real "
+                            "child of that type.".format(str(self),
+                                                         str(child)))
+        if(not child.component_type in self._spoofed_children):
+            self._spoofed_children[child.component_type] = []
+        self._spoofed_children[child.component_type].append(child)
+        child.parent = self
+
+    def reset_spoofed_children(self):
+        """
+        Removes all spoofed children.
+        """
+        self._spoofed_children = {}
 
     def remove_component(self, component):
         """
         Removes a child component to this component.
         """
-        return self._children[component.component_type].remove(component)
-
-    def remove_components_flagged_for_removal(self):
-        """
-        Removes a child component to this component.
-        """
-        for component_list in self._children.values:
-            to_be_removed = [component for component in component_list
-                             if component.to_be_removed]
-            for component in to_be_removed:
-                component_list.remove(component)
+        del self._children[component.component_type]
+        return component
 
     def update(self):
         """
         Runs update on all child components.
         """
-        map(lambda x: x.update(),
-            chain.from_iterable(self._children.values()))
+        map(lambda x: x.update(), self._children.values())
 
     def before_tick(self, time):
         """
         Runs before_tick on all child components.
         """
-        map(lambda x: x.before_tick(time),
-            chain.from_iterable(self._children.values()))
+        map(lambda x: x.before_tick(time), self._children.values())
 
     def on_tick(self, time):
         """
         Runs on_tick on all child components.
         """
-        map(lambda x: x.on_tick(time),
-            chain.from_iterable(self._children.values()))
+        map(lambda x: x.on_tick(time), self._children.values())
+
+    def after_tick(self, time):
+        """
+        Runs after_tick on all child components.
+
+        It also resets all spoofed children.
+        """
+        self.reset_spoofed_children()
+        map(lambda x: x.after_tick(time), self._children.values())
 
     def message(self, message):
         """
         Sends message to all child components.
         """
-        map(lambda x: x.message(message),
-            chain.from_iterable(self._children.values()))
+        map(lambda x: x.message(message), self._children.values())
 
     def __getattr__(self, component_type):
         if(not isinstance(component_type, basestring)):
             raise Exception("ERROR: component_type should be string")
-        if(not component_type in self._children or
-           len(self._children[component_type]) < 1):
+        if(not self.has_child(component_type)):
             raise Exception("Tried to access component {0} from composite {1} "
                             "But it doesn't exist.".format(str(component_type),
                                                            str(self)))
-        return self._children[component_type][0]
+        if(component_type in self._spoofed_children and
+           len(self._spoofed_children[component_type]) > 0):
+            return self._spoofed_children[component_type][0]
+        return self._children[component_type]
 
-    def get_children_of_type(self, component_type):
+    def get_original_child(self, component_type):
+        """
+        Gets the "real" child of the composite.
+        """
+        return self._children[component_type]
+
+    def get_spoofed_children_of_type(self, component_type):
         if(not isinstance(component_type, basestring)):
             raise Exception("ERROR: component_type should be string")
-        if(not component_type in self._children or
-           len(self._children[component_type]) < 1):
+        if(not self.has_child(component_type)):
+            print self._children, self._spoofed_children
             raise Exception("Tried to access components of type"
                             " {0} from composite {1} "
                             "But it doesn't exist.".format(str(component_type),
                                                            str(self)))
-        return self._children[component_type]
+        return self._spoofed_children[component_type]
 
     def has_child(self, component_type):
         """
@@ -212,15 +260,15 @@ class Composite(Component):
 
         False otherwise.
         """
-        return (component_type in self._children and
-                len(self._children[component_type]) > 0)
+        return component_type in self._children
 
     def get_children_with_tag(self, tag):
         """
         Gets the list of all children with the given tag.
         """
-        return [child[0] for child in self._children.values()
-                if tag in child[0].tags]
+        return [self.__getattr__(component_type)
+                for component_type in self._children.keys()
+                if tag in self.__getattr__(component_type).tags]
 
 
 class CompositeMessage(object):

@@ -121,15 +121,17 @@ class DamageEntityEffect(EntityEffect):
         self.damage = damage
         self.damage_types = damage_types
 
-    def message(self):
+    def message(self, damage_caused):
         message = "%s hits %s for %d damage." %\
             (self.source_entity.description.name,
-             self.target_entity.description.name, self.damage)
+             self.target_entity.description.name, damage_caused)
         messenger.messenger.message(message)
 
     def update(self, time_spent):
-        self.target_entity.health.hurt(self.damage)
-        self.message()
+        damage_caused =\
+            self.target_entity.health_modifier.hurt(self.damage,
+                                                    self.damage_types)
+        self.message(damage_caused)
         self.tick(time_spent)
 
 
@@ -147,7 +149,7 @@ class Heal(EntityEffect):
         messenger.messenger.message(message)
 
     def update(self, time_spent):
-        self.target_entity.health.heal(self.health)
+        self.target_entity.health_modifier.heal(self.health)
         self.message()
         self.tick(time_spent)
 
