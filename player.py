@@ -1,7 +1,6 @@
 from action import PickUpItemAction
 from attacker import Attacker
 from compositecore import Composite
-from dungeonlevelcomposite import DungeonLevel
 from dungeonmask import DungeonMask
 from entityeffect import EffectQueue
 from graphic import CharPrinter, GraphicChar
@@ -11,7 +10,7 @@ from inventory import Inventory
 from memorymap import MemoryMap
 from mover import EntityMover
 from ondeathaction import DoNothingDeathAction
-from position import Position
+from position import Position, DungeonLevel
 from stats import AttackSpeed, Faction, GameState, GamePieceType
 from stats import MovementSpeed, Strength, IsPlayer
 from statusflags import StatusFlags

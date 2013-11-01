@@ -1,8 +1,7 @@
 from compositecore import Composite
-from dungeonlevelcomposite import DungeonLevel
 from graphic import GraphicChar, CharPrinter
 from mover import Mover
-from position import Position
+from position import Position, DungeonLevel
 from stats import GamePieceType
 from text import Description
 import colors

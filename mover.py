@@ -1,5 +1,6 @@
+import terrain
 from compositecore import Leaf
-from dungeonlevelcomposite import DungeonLevel
+from position import DungeonLevel
 from statusflags import StatusFlags
 
 
@@ -80,12 +81,10 @@ class Mover(Leaf):
         if(terrain_to_pass is None or not terrain_to_pass.is_solid.value):
             return True
         if(self.has_sibling("status_flags")):
-            pass
-            #status_flags = self.parent.status_flags
-            #if(not status_flags is None and
-               #status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
-               #isinstance(terrain_to_pass, terrain.Door)):
-                #return True
+            status_flags = self.parent.status_flags
+            if(status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
+               isinstance(terrain_to_pass, terrain.Door)):
+                return True
         return False
 
     def try_remove_from_dungeon(self):

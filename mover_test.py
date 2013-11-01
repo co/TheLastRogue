@@ -1,8 +1,8 @@
 from compositecore import Composite
-from dungeonlevelcomposite import DungeonLevel
 from mover import Mover
-from position import Position
+from position import Position, DungeonLevel
 from stats import GamePieceType
+from statusflags import StatusFlags
 import dungeonlevelfactory
 import terrain
 import unittest
@@ -57,20 +57,15 @@ class TestComposition(unittest.TestCase):
         floor = terrain.Floor()
         self.assertTrue(entity.mover.can_pass_terrain(floor))
 
-#    def test_can_pass_door_if_entity_can_open_door(self):
-#        entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
-#        status_flags = StatusFlags()
-#        status_flags.add_status(StatusFlags.CAN_OPEN_DOORS)
-#        entity.add_child(status_flags)
-#        door = terrain.Door()
-#        door.close()
-#        self.assertTrue(entity.mover._can_pass_terrain(door))
-#
-#    def test_cant_pass_door_if_entity_cant_open_door(self):
-#        entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
-#        door = terrain.Door()
-#        door.close()
-#        self.assertFalse(entity.mover._can_pass_terrain(door))
+    def test_can_pass_door_if_entity_can_open_door(self):
+        entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
+        status_flags = StatusFlags([StatusFlags.CAN_OPEN_DOORS])
+        entity.add_child(status_flags)
+        door = terrain.Door()
+        door.mover.replace_move((2, 1), self.dungeon_level)
+        self.assertTrue(door.bump_action.can_bump(entity))
+        door.bump_action.bump(entity)
+        self.assertTrue(entity.mover.can_pass_terrain(door))
 
     def test_can_fit_on_tile_should_retun_false_if_there_is_not_room(self):
         blocked_position = (1, 1)

@@ -1,8 +1,7 @@
 from compositecore import Composite, Leaf
-from dungeonlevelcomposite import DungeonLevel
 from graphic import GraphicChar, CharPrinter
 from mover import Mover
-from position import Position
+from position import Position, DungeonLevel
 from stats import GamePieceType
 from text import Description
 import action
@@ -66,7 +65,6 @@ class Fountain(Composite):
         self.add_child(GraphicChar(None, colors.CYAN,
                                    symbol.FOUNTAIN_FULL))
         self.add_child(CharPrinter())
-        #self.add_child(ShareTilePlayerActions())
         self.add_child(Mover())
         self.add_child(IsDungeonFeature())
 
@@ -98,36 +96,3 @@ class DescendStairsAction(action.Action):
         destination_position = next_dungeon_level.up_stairs[0].position.value
         target_entity.mover.try_move(destination_position, next_dungeon_level)
         self.add_energy_spent_to_entity(source_entity)
-
-
-
-#class DungeonFeature(gamepiece.GamePiece):
-#    def __init__(self):
-#        super(DungeonFeature, self).__init__()
-#        self.piece_type = gamepiece.GamePieceType.DUNGEON_FEATURE
-#        self.max_instances_in_single_tile = 1
-#        self.player_actions = []
-#        self._name = "XXX_UNNAMED_XXX"
-#        self._description = "XXX_DESCRIPTION_XXX"
-#        self._color_bg = None
-#
-#    def try_move(self, new_position, new_dungeon_level=None):
-#        if(new_dungeon_level is None):
-#            new_dungeon_level = self.dungeon_level
-#        old_dungeon_level = self.dungeon_level
-#        move_succeded = super(DungeonFeature, self).\
-#            try_move(new_position, new_dungeon_level)
-#        if(move_succeded):
-#            if(not old_dungeon_level is None and
-#               (not old_dungeon_level is new_dungeon_level)):
-#                old_dungeon_level.remove_dungeon_feature_if_present(self)
-#            new_dungeon_level.add_dungeon_feature_if_not_present(self)
-#        return move_succeded
-#
-#    def try_remove_from_dungeon(self):
-#        old_dungeon_level = self.dungeon_level
-#        remove_succeded = super(DungeonFeature, self).\
-#            try_remove_from_dungeon()
-#        if(remove_succeded and (not old_dungeon_level is None)):
-#            old_dungeon_level.remove_dungeon_feature_if_present(self)
-#        return remove_succeded

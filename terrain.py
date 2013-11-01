@@ -1,7 +1,7 @@
 from compositecore import Leaf, Composite
 from graphic import GraphicChar, CharPrinter, GraphicCharTerrainCorners
 from mover import Mover
-from position import Position
+from position import Position, DungeonLevel
 from stats import GamePieceType
 from statusflags import StatusFlags
 import colors
@@ -43,6 +43,7 @@ class Floor(Composite):
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
         self.add_child(Position())
+        self.add_child(DungeonLevel())
         self.add_child(GraphicChar(colors.FLOOR_BG,
                                    colors.FLOOR_FG,
                                    icon.CENTER_DOT))
@@ -57,6 +58,7 @@ class Water(Composite):
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
         self.add_child(Position())
+        self.add_child(DungeonLevel())
         self.add_child(GraphicChar(colors.BLUE_D,
                                    colors.CYAN_D,
                                    icon.WATER))
@@ -71,6 +73,7 @@ class GlassWall(Composite):
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
         self.add_child(Position())
+        self.add_child(DungeonLevel())
         self.add_child(GraphicChar(colors.FLOOR_BG,
                                    colors.WHITE,
                                    icon.CAVE_WALLS_ROW))
@@ -85,6 +88,7 @@ class Unknown(Composite):
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
         self.add_child(Position())
+        self.add_child(DungeonLevel())
         self.add_child(CharPrinter())
         self.add_child(GraphicChar(colors.BLACK,
                                    colors.BLACK,
@@ -99,6 +103,7 @@ class Wall (Composite):
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
         self.add_child(Position())
+        self.add_child(DungeonLevel())
         self.add_child(CharPrinter())
         self.add_child(GraphicCharTerrainCorners(colors.FLOOR_BG,
                                                  colors.WALL_FG,
@@ -107,24 +112,6 @@ class Wall (Composite):
         self.add_child(IsSolid(True))
         self.add_child(IsTransparent(False))
 
-#    def on_draw(self):
-#        self.calculate_wall_symbol()
-#
-#    def calculate_wall_symbol(self):
-#        neighbours_mask = 0
-#        for index, neighbour in enumerate(self._get_neighbour_terrains()):
-#            if(isinstance(neighbour, Wall) or isinstance(neighbour, Door)):
-#                neighbours_mask |= 2 ** index
-#        self.gfx_char.symbol = self._wall_symbol_row + neighbours_mask
-#
-#    def is_transparent(self):
-#        return False
-#
-#    def _get_neighbour_terrains(self):
-#        tiles =\
-#            self.dungeon_level.get_tiles_surrounding_position(self.position)
-#        return [tile.get_terrain() for tile in tiles]
-
 
 class Door(Composite):
     def __init__(self, is_open=True):
@@ -132,6 +119,7 @@ class Door(Composite):
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
         self.add_child(Position())
+        self.add_child(DungeonLevel())
         self.add_child(CharPrinter())
         self.add_child(GraphicChar(colors.FLOOR_BG,
                                    colors.ORANGE_D,
@@ -171,41 +159,3 @@ class OpenDoorBumpAction(BumpAction):
         return (self.parent.is_solid.value and
                 (source_entity.status_flags.
                  has_status(StatusFlags.CAN_OPEN_DOORS)))
-
-#    def is_solid(self):
-#        return not self.is_open
-#
-#    @property
-#    def is_open(self):
-#        return self.__is_open
-#
-#    @is_open.setter
-#    def is_open(self, value):
-#        self.__is_open = value
-#        if(self.__is_open):
-#            self.gfx_char.symbol = icon.DOOR_OPEN
-#        else:
-#            self.gfx_char.symbol = icon.DOOR
-#        if(not self.dungeon_level is None):
-#            self.dungeon_level.signal_terrain_changed()
-#
-#    @property
-#    def symbol(self):
-#        if(self.is_open):
-#            return icon.DOOR_OPEN
-#        else:
-#            return icon.DOOR
-#
-#    def is_transparent(self):
-#        return self.is_open
-#
-#    def close(self):
-#        self.is_open = False
-#
-#    def open(self):
-#        self.is_open = True
-#
-#    def piece_copy(self, copy=None):
-#        if(copy is None):
-#            copy = Door(self.is_open)
-#        return super(Door, self).piece_copy(copy)

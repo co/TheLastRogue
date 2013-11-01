@@ -1,11 +1,10 @@
 from action import Action
 from compositecore import Leaf, Composite
-from dungeonlevelcomposite import DungeonLevel
 from graphic import GraphicChar, CharPrinter
 from health import BlockDamageHealthSpoof
 from missileaction import PlayerThrowItemAction
 from mover import Mover
-from position import Position
+from position import Position, DungeonLevel
 from stats import GamePieceType
 from text import Description
 import action
@@ -487,15 +486,3 @@ class ThrowerBreak(Thrower):
         message = "The " + self.name.lower() +\
             " smashes to the ground and breaks into pieces."
         messenger.messenger.message(message)
-
-#class Ammo(StackAbleItem):
-#    """
-#    Gun bullets, are needed to fire guns.
-#    """
-#    def __init__(self):
-#        super(Ammo, self).__init__()
-#        self.gfx_char.color_fg = colors.GRAY
-#        self.gfx_char.symbol = ":"
-#        self._name = "Ammunition"
-#        self._description =\
-#            "Rounds for a gun."
