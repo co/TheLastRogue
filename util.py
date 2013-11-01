@@ -35,8 +35,8 @@ class WalkableDestinatinationsPath(object):
         # Maybe a per point time_stamp is necessary?
         self._time_stamps[entity.__class__] = turn.current_turn
 
-    def get_walkable_positions_from_my_position(self, entity, position):
-        time_stamp = entity.dungeon_level.terrain_changed_timestamp
+    def get_walkable_positions(self, entity, position):
+        time_stamp = entity.dungeon_level.value.terrain_changed_timestamp
         if(not self._has_destinations_newer_than(entity, position,
                                                  time_stamp)):
             self._calculate_walkable_positions_from_entity_position(entity,
@@ -65,8 +65,9 @@ class WalkableDestinatinationsPath(object):
         for direction_ in direction.DIRECTIONS:
             neighbor_position = geo.add_2d(position, direction_)
             try:
-                neighbor = entity.dungeon_level.get_tile(neighbor_position)
-                if(entity._can_pass_terrain(neighbor.get_terrain())):
+                neighbor =\
+                    entity.dungeon_level.value.get_tile(neighbor_position)
+                if(entity.mover.can_pass_terrain(neighbor.get_terrain())):
                     result_positions.append(neighbor_position)
             except IndexError:
                 pass

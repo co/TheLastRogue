@@ -1,5 +1,4 @@
 import inputhandler
-import action
 import geometry as geo
 import colors
 import gui
@@ -123,14 +122,15 @@ class Menu(gui.UIElement):
 
 
 class MenuOption(gui.UIElement):
-    def __init__(self, text, activate_function,
-                 can_activate=True):
+    def __init__(self, text, functions, can_activate=True):
         self.text = text
-        self._activate_function = activate_function
+        self._functions = functions
         self.can_activate = can_activate
 
     def activate(self):
-        return self._activate_function()
+        for function in self._functions:
+            function()
+        return
 
     def selected_ui_representation(self):
         return gui.TextBox(self.text, geo.zero2d(), colors.TEXT_SELECTED)
@@ -142,10 +142,12 @@ class MenuOption(gui.UIElement):
         return gui.TextBox(self.text, geo.zero2d(), colors.TEXT_INACTIVE)
 
 
+#TODO MenuOption should probably have a graphic represtation object
+# this should not be solved by subclassing!
 class MenuOptionWithSymbols(MenuOption):
     def __init__(self, text, selected_symbol, unselected_symbol,
-                 activate_function, can_activate=True):
-        super(MenuOptionWithSymbols, self).__init__(text, activate_function,
+                 functions, can_activate=True):
+        super(MenuOptionWithSymbols, self).__init__(text, functions,
                                                     can_activate)
         self.selected_symbol = selected_symbol
         self.unselected_symbol = unselected_symbol
@@ -203,11 +205,11 @@ class InventoryMenu(Menu):
         item_rect = geo.Rect(self.parent.offset,
                              self.parent.width, self.parent.height)
         self._menu_items =\
-            [MenuOption(item.name,
-                        OpenItemActionMenuAction(self._state_stack,
-                                                 item_rect, item,
-                                                 self._player),
-                        (len(item.actions) >= 1))
+            [MenuOption(item.description.name,
+                        [OpenItemActionMenuAction(self._state_stack,
+                                                  item_rect, item,
+                                                  self._player)],
+                        (len(item.get_children_with_tag("user_action")) >= 1))
              for item in self._player.inventory.items]
 
 
@@ -232,7 +234,8 @@ class ItemActionsMenu(Menu):
                                               margin=margin,
                                               vertical_space=vertical_space)
         self._actions =\
-            sorted(item.actions, key=lambda action: action.display_order)
+            sorted(item.get_children_with_tag("user_action"),
+                   key=lambda action: action.display_order)
         self._player = player
         self._update_menu_items()
         self.try_set_index_to_valid_value()
@@ -242,36 +245,31 @@ class ItemActionsMenu(Menu):
         self._menu_items = []
         for item_action in self._actions:
             action_function =\
-                action.DelayedActionCall(action=item_action,
-                                         source_entity=self._player,
+                item_action.delayed_call(source_entity=self._player,
                                          target_entity=self._player,
                                          game_state=game_state)
-            function = DelayedFunctionCallAndPopToGame(self._state_stack,
-                                                       action_function)
+            back_to_game_function = BackToGameFunction(self._state_stack)
+            functions = [action_function, back_to_game_function]
             option =\
-                MenuOption(item_action.name, function,
+                MenuOption(item_action.name, functions,
                            item_action.can_act(source_entity=self._player,
                                                target_entity=self._player))
             self._menu_items.append(option)
 
 
-class DelayedFunctionCall(object):
-    def __init__(self, state_stack, function, states_to_pop=0):
-        self.function = function
+class StackPopFunction(object):
+    def __init__(self, state_stack, states_to_pop):
         self._state_stack = state_stack
         self._states_to_pop = states_to_pop
 
     def __call__(self):
-        self.function()
         for _ in range(self._states_to_pop):
             self._state_stack.pop()
 
 
-class DelayedFunctionCallAndPopToGame(object):
-    def __init__(self, state_stack, function):
-        self.function = function
+class BackToGameFunction(object):
+    def __init__(self, state_stack):
         self._state_stack = state_stack
 
     def __call__(self):
-        self.function()
         self._state_stack.pop_to_game_state()

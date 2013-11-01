@@ -3,13 +3,13 @@ class Counter(object):
         if(not(min_value <= initValue <= max_value)):
             raise Exception("Incorrectly Initialized Counter")
 
-        self.__value = initValue
+        self._value = initValue
         self.min_value = min_value
         self.max_value = max_value
 
     @property
     def value(self):
-        return self.__value
+        return self._value
 
     def ratio_of_full(self):
         return float(self.value - self.min_value) / float(self.size())
@@ -18,13 +18,13 @@ class Counter(object):
         return self.max_value - self.min_value
 
     def decrease(self, delta):
-        self.__value = max(self.min_value, self.value - delta)
+        self._value = max(self.min_value, self.value - delta)
 
     def increase(self, delta):
-        self.__value = min(self.max_value, self.value + delta)
+        self._value = min(self.max_value, self.value + delta)
 
     def set_max(self):
-        self.__value = self.max_value
+        self._value = self.max_value
 
     def set_min(self):
-        self.__value = self.min_value
+        self._value = self.min_value

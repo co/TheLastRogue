@@ -1,68 +1,74 @@
-import counter
-import spawner
-import symbol
-import entityeffect
-import gametime
+from action import PickUpItemAction
+from actor import DoNothingActor
+from attacker import Attacker
+from compositecore import Composite, Leaf
+from damage import DamageTypes, Damage
+from dungeonmask import DungeonMask, Path
+from entityeffect import EffectQueue
+from graphic import CharPrinter, GraphicChar
+from health import Health, HealthModifier
+from inventory import Inventory
+from memorymap import MemoryMap
+from monsteractor import ChasePlayerActor
+from mover import EntityMover, CanShareTileEntityMover
+from ondeathaction import EntityDeathAction
+from position import Position, DungeonLevel
+from stats import AttackSpeed, Faction, GameState
+from stats import MovementSpeed, Strength, GamePieceType
+from statusflags import StatusFlags
+from text import Description, EntityMessages
+from vision import Vision, SightRadius
 import colors
-import entity
-import player
-import rng
+import equipment
+import gametime
 import messenger
-import libtcodpy as libtcod
+import rng
+import symbol
 
 
-class Monster(entity.Entity):
+class Ratman(Composite):
+    """
+    A composite component representing a Ratman monster.
+    """
     def __init__(self, game_state):
-        super(Monster, self).__init__(game_state)
+        super(Ratman, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ENTITY))
 
-    def kill_and_remove(self):
-        self.hp.set_min()
-        self.on_death()
-        if(self.has_status(entity.StatusFlags.LEAVES_CORPSE)):
-            spawner.spawn_corpse_of_entity(self)
-        self.try_remove_from_dungeon()
-        messenger.messenger.message(messenger.Message(self.death_message))
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(EntityMover())
 
-    def can_see_player(self):
-        seen_entities = self.get_seen_entities()
-        return any(isinstance(entity, player.Player)
-                   for entity in seen_entities)
+        self.add_child(EntityMessages("The ratman looks at you.",
+                                      "The ratman is beaten to a pulp."))
+        self.add_child(Description("Ratman",
+                                   "A Rat/Man hybrid it looks hostile."))
+        self.add_child(GraphicChar(None, colors.ORANGE,
+                                   symbol.RATMAN))
+        self.add_child(CharPrinter())
+        self.add_child(EntityDeathAction())
 
-    def get_player_if_seen(self):
-        seen_entities = self.get_seen_entities()
-        found_player = next((entity for entity in seen_entities
-                             if(isinstance(entity, player.Player))),
-                            None)
-        if(not found_player is None and
-           not found_player.has_status(entity.StatusFlags.INVISIBILE)):
-            return found_player
-        return None
+        self.add_child(Faction(Faction.MONSTER))
+        self.add_child(Health(10))
+        self.add_child(HealthModifier())
+        self.add_child(Strength(2))
+        self.add_child(MovementSpeed(gametime.single_turn))
+        self.add_child(AttackSpeed(gametime.single_turn))
+        self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
+                                    StatusFlags.CAN_OPEN_DOORS]))
 
-    def set_path_to_player_if_seen(self):
-        player = self.get_player_if_seen()
-        if(player is None):
-            return False
-        mx, my = self.position
-        px, py = player.position
-        libtcod.path_compute(self.path, mx, my, px, py)
-        return True
+        self.add_child(SightRadius(6))
+        self.add_child(DungeonMask())
+        self.add_child(Vision())
 
-    def step_looking_for_player(self):
-        self.set_path_to_player_if_seen()
-        if(not self.has_path()):
-            self.set_path_to_random_walkable_point()
-        step_succeeded = self.try_step_path()
-        return step_succeeded
-
-
-class RatMan(Monster):
-    def __init__(self, game_state):
-        super(RatMan, self).__init__(game_state)
-        self.hp = counter.Counter(10, 10)
-        self._name = "Rat-Man"
-        self.death_message = "The Rat-Man is beaten to a pulp."
-        self.gfx_char.color_fg = colors.ORANGE
-        self.gfx_char.symbol = symbol.RATMAN
+        self.add_child(MemoryMap())
+        self.add_child(Inventory())
+        self.add_child(Path())
+        self.add_child(ChasePlayerActor())
+        self.add_child(GameState(game_state))
+        self.add_child(equipment.Equipment())
+        self.add_child(EffectQueue())
+        self.add_child(PickUpItemAction())
+        self.add_child(Attacker())
 
     def act(self):
         self.step_looking_for_player()
@@ -72,7 +78,7 @@ class RatMan(Monster):
         return gametime.single_turn
 
 
-class Jerico(RatMan):
+class Jerico(Ratman):
     def __init__(self, game_state):
         super(Jerico, self).__init__(game_state)
         self._name = "Jerico"
@@ -81,82 +87,128 @@ class Jerico(RatMan):
         self.energy_recovery = gametime.double_energy_gain
 
 
-class Slime(Monster):
+class StoneStatue(Composite):
     """
-    Slime monsters, can swallow the player.
-    They fight by entering the tile of another entity.
+    A composite component representing a Ratman monster.
     """
     def __init__(self, game_state):
-        super(Slime, self).__init__(game_state)
-        self._name = "Slime"
-        self.death_message = "The slime melts away."
-        self.gfx_char.color_fg = colors.GREEN
-        self.gfx_char.symbol = symbol.SLIME
-        # The slime cannot open doors and does not leave a corpse.
-        self._permanent_status_flags = set()
+        super(StoneStatue, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ENTITY))
 
-        self.hp = counter.Counter(20, 20)
-        self.energy_recovery = gametime.half_energy_gain
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(EntityMover())
 
-    def _can_fit_on_tile(self, tile):
-        """
-        Slime monsters fight by entering the tile of another entity.
-        Therefore it must override '_can_fit_on_tile' so it doesn't think
-        A tile with an entity is too crowded.
-        """
-        entities_on_tile = tile.game_pieces[self.piece_type]
-        if(len(entities_on_tile) == 0):
-            return True
-        elif(len(entities_on_tile) > 1):
-            return False
-        else:
-            return (not isinstance(entities_on_tile[0], Slime))
+        self.add_child(EntityMessages(("The stone statue casts a"
+                                       "long shadow on the floor."),
+                                      ("The stone statue shatters pieces, "
+                                       "sharp rocks covers the ground.")))
+        self.add_child(Description("Stone Statue",
+                                   ("A Statue made out of stone stands tall."
+                                    "It seems to be looking at you...")))
+        self.add_child(GraphicChar(None, colors.GRAY,
+                                   symbol.GOLEM))
+        self.add_child(CharPrinter())
+        self.add_child(EntityDeathAction())
 
-    def act(self):
-        """
-        Slime monsters pursues the player.
-        Slime monsters may stay at the same tile as other entities
-        and will hurt them in the process.
-        """
-        player = self.get_player_if_seen()
-        if(not player is None and (player.position == self.position)):
-            pass  # eat player.
-        else:
-            self.step_looking_for_player()
+        self.add_child(Faction(Faction.MONSTER))
+        self.add_child(Health(30))
+        self.add_child(HealthModifier())
+        self.add_child(Strength(0))
+        self.add_child(MovementSpeed(gametime.single_turn))
+        self.add_child(AttackSpeed(gametime.single_turn))
+        self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
+                                    StatusFlags.CAN_OPEN_DOORS]))
 
-        if(not player is None and (player.position == self.position)):
-            slime_status = entity.StatusFlags.SWALLOWED_BY_SLIME
-            slime_status_adder = entityeffect.StatusAdder(self, player,
-                                                          slime_status, 2)
-            player.add_entity_effect(slime_status_adder)
-            self.hit(player)
+        self.add_child(SightRadius(6))
+        self.add_child(DungeonMask())
+        self.add_child(Vision())
 
-        if(rng.coin_flip() and self.can_see_player()):
-            message = "The slime seems to wobble with happiness."
-            messenger.messenger.message(message)
-
-        return gametime.single_turn
-
-    def try_hit(self, position):
-        """
-        Slime monsters never "hit" anything, they move into something.
-        """
-        return False
+        self.add_child(MemoryMap())
+        self.add_child(Inventory())
+        self.add_child(Path())
+        self.add_child(DoNothingActor())
+        self.add_child(GameState(game_state))
+        self.add_child(equipment.Equipment())
+        self.add_child(EffectQueue())
+        self.add_child(PickUpItemAction())
+        self.add_child(Attacker())
 
 
-class StoneStatue(Monster):
+class Slime(Composite):
+    """
+    A composite component representing a Ratman monster.
+    """
     def __init__(self, game_state):
-        super(StoneStatue, self).__init__(game_state)
-        self.hp = counter.Counter(30, 30)
-        self._name = "stone statue"
-        self.death_message = "The stone statue shatters pieces, "\
-            "sharp rocks covers the ground."
-        self.gfx_char.color_fg = colors.GRAY
-        self._permanent_status_flags = set()
-        self.gfx_char.symbol = symbol.GOLEM
+        super(Slime, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ENTITY))
 
-    def act(self):
-        if(rng.coin_flip() and self.can_see_player()):
-            message = "The stone statue casts a long shadow on the floor."
-            messenger.messenger.message(message)
-        return gametime.single_turn
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(CanShareTileEntityMover())
+
+        self.add_child(EntityMessages(("The slime seems to",
+                                       "wobble with happiness."),
+                                      ("The slime melts away.")))
+        self.add_child(Description("Slime",
+                                   ("Slime, slime, slime. Ugh, I hate Slimes."
+                                    "It seems to be looking at you...")))
+        self.add_child(GraphicChar(None, colors.GREEN,
+                                   symbol.SLIME))
+        self.add_child(CharPrinter())
+        self.add_child(EntityDeathAction())
+
+        self.add_child(Faction(Faction.MONSTER))
+        self.add_child(Health(20))
+        self.add_child(HealthModifier())
+        self.add_child(Strength(6))
+        self.add_child(MovementSpeed(gametime.double_turn))
+        self.add_child(AttackSpeed(gametime.single_turn))
+        self.add_child(StatusFlags())
+
+        self.add_child(SightRadius(6))
+        self.add_child(DungeonMask())
+        self.add_child(Vision())
+
+        self.add_child(MemoryMap())
+        self.add_child(Inventory())
+        self.add_child(Path())
+        self.add_child(ChasePlayerActor())
+        self.add_child(GameState(game_state))
+        self.add_child(equipment.Equipment())
+        self.add_child(EffectQueue())
+        self.add_child(PickUpItemAction())
+
+        self.add_child(EntityShareTileEffect
+                       (DissolveEntitySlimeShareTileEffect()))
+
+
+class EntityShareTileEffect(Leaf):
+    """
+    Defines an effect that sharing tile with this parent entity will result in.
+    """
+    def __init__(self, effect):
+        super(EntityShareTileEffect, self).__init__()
+        self.component_type = "entity_share_tile_effect"
+        self.effect = effect
+
+    def share_tile_effect_tick(self, sharing_entity, time_spent):
+        if(not sharing_entity is self.parent):
+            self.effect(source_entity=self.parent,
+                        target_entity=sharing_entity,
+                        time=time_spent)
+
+
+class DissolveEntitySlimeShareTileEffect(object):
+    def __init__(self):
+        pass
+
+    def __call__(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        source_entity = kwargs["source_entity"]
+        time = kwargs["time"]
+        strength = source_entity.strength.value
+        damager = Damage(strength, strength / 3,
+                         [DamageTypes.ACID, DamageTypes.PHYSICAL],
+                         time / gametime.single_turn)
+        damager.damage_entity(source_entity, target_entity)

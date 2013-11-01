@@ -1,4 +1,6 @@
 import messenger
+from statusflags import StatusFlags
+from compositecore import Leaf
 import random
 
 
@@ -16,173 +18,177 @@ class EffectTypes(object):
                 TELEPORT, HEAL, DAMAGE, EQUIPMENT]
 
 
-class EffectQueue(object):
+class EffectQueue(Leaf):
     def __init__(self):
+        super(EffectQueue, self).__init__()
+        self.component_type = "effect_queue"
         self._effect_queue = [None for x in range(len(EffectTypes.ALLTYPES))]
         for effect_type in EffectTypes.ALLTYPES:
             self._effect_queue[effect_type] = []
 
     def add(self, effect):
         self._effect_queue[effect.effect_type].append(effect)
+        effect.queue = self
 
     def remove(self, effect):
         self._effect_queue[effect.effect_type].remove(effect)
+        effect.queue = None
 
     def remove_status_adder_of_status(self, status_to_remove):
         for effect in self._effect_queue[EffectTypes.STATUS_ADDER]:
             if(effect.status_flag == status_to_remove):
                 self._effect_queue[EffectTypes.STATUS_ADDER].remove(effect)
 
-    def update(self, time_spent):
+    def on_tick(self, time_spent):
         for effect_type_queue in EffectTypes.ALLTYPES:
             for effect in self._effect_queue[effect_type_queue]:
                 effect.update(time_spent)
 
 
 class EntityEffect(object):
-    def __init__(self, source_entity, target_entity,
-                 time_to_live, effect_type):
+    def __init__(self, source_entity, time_to_live, effect_type):
         self.source_entity = source_entity
-        self.target_entity = target_entity
         self.time_to_live = time_to_live
         self.effect_type = effect_type
         self.is_blocked = False
+        self.queue = None
 
     def update(self, time_spent):
         pass
 
+    @property
+    def target_entity(self):
+        return self.queue.parent
+
     def tick(self, time_spent):
         self.time_to_live = self.time_to_live - time_spent
         if(self.time_to_live < 1):
-            self.target_entity.remove_entity_effect(self)
+            self.queue.remove(self)
 
 
 class StatusRemover(EntityEffect):
-    def __init__(self, source_entity, target_entity,
+    def __init__(self, source_entity,
                  status_type_to_remove, time_to_live=1):
         super(StatusRemover,
               self).__init__(source_entity,
-                             target_entity,
                              time_to_live,
                              EffectTypes.STATUS_REMOVER)
         self.status_type_to_remove = status_type_to_remove
 
     def update(self, time_spent):
-        effect_queue = self.target_entity.effect_queue
-        effect_queue.remove_status_adder_of_status(self.status_type_to_remove)
+        self.queue.remove_status_adder_of_status(self.status_type_to_remove)
         self.tick(time_spent)
 
 
 class StatusAdder(EntityEffect):
-    def __init__(self, source_entity, target_entity,
-                 status_flag, time_to_live=1):
-        super(StatusAdder,
-              self).__init__(source_entity,
-                             target_entity,
-                             time_to_live,
-                             EffectTypes.STATUS_ADDER)
+    def __init__(self, source_entity, status_flag, time_to_live=1):
+        super(StatusAdder, self).__init__(source_entity, time_to_live,
+                                          EffectTypes.STATUS_ADDER)
         self.status_flag = status_flag
 
     def update(self, time_spent):
-        self.target_entity.add_temporary_status(self.status_flag)
+        status_flags = StatusFlags([self.status_flag])
+        status_flags.to_be_removed = True
+        self.target_entity.add_child(status_flags)
         self.tick(time_spent)
 
 
 class Teleport(EntityEffect):
-    def __init__(self, source_entity, target_entity,
+    def __init__(self, source_entity,
                  time_to_live=1):
         super(Teleport,
               self).__init__(source_entity,
-                             target_entity,
                              time_to_live,
                              EffectTypes.TELEPORT)
 
     def update(self, time_spent):
-        positions =\
-            self.target_entity.get_walkable_positions_from_my_position()
+        positions = (self.target_entity.dungeon_level.value.
+                     get_walkable_positions(self.target_entity,
+                                            self.target_entity.position.value))
         random_positions = random.sample(positions, len(positions))
         for position in random_positions:
-            teleport_successful = self.target_entity.try_move(position)
+            teleport_successful = self.target_entity.mover.try_move(position)
             if teleport_successful:
                 break
         self.tick(time_spent)
 
 
 class DamageEntityEffect(EntityEffect):
-    def __init__(self, source_entity, target_entity, damage,
+    def __init__(self, source_entity, damage,
                  damage_types, time_to_live=1):
         super(DamageEntityEffect,
               self).__init__(source_entity=source_entity,
-                             target_entity=target_entity,
                              effect_type=EffectTypes.DAMAGE,
                              time_to_live=time_to_live)
         self.damage = damage
         self.damage_types = damage_types
 
-    def message(self):
+    def message(self, damage_caused):
         message = "%s hits %s for %d damage." %\
-            (self.source_entity.name, self.target_entity.name, self.damage)
+            (self.source_entity.description.name,
+             self.target_entity.description.name, damage_caused)
         messenger.messenger.message(message)
 
     def update(self, time_spent):
-        self.target_entity.hurt(self.damage)
-        self.message()
+        damage_caused =\
+            self.target_entity.health_modifier.hurt(self.damage,
+                                                    self.damage_types)
+        self.message(damage_caused)
         self.tick(time_spent)
 
 
 class Heal(EntityEffect):
-    def __init__(self, source_entity, target_entity, health,
-                 time_to_live=1):
+    def __init__(self, source_entity, health, time_to_live=1):
         super(Heal, self).__init__(source_entity=source_entity,
-                                   target_entity=target_entity,
                                    effect_type=EffectTypes.HEAL,
                                    time_to_live=time_to_live)
         self.health = health
 
     def message(self):
         message = "%s heals %s for %d health." %\
-            (self.source_entity.name, self.target_entity.name, self.health)
+            (self.source_entity.description.name,
+             self.target_entity.description.name, self.health)
         messenger.messenger.message(message)
 
     def update(self, time_spent):
-        self.target_entity.heal(self.health)
+        self.target_entity.health_modifier.heal(self.health)
         self.message()
         self.tick(time_spent)
 
 
 class Equip(EntityEffect):
-    def __init__(self, source_entity, target_entity, item):
+    def __init__(self, source_entity, item):
         super(Equip, self).__init__(source_entity=source_entity,
-                                    target_entity=target_entity,
                                     effect_type=EffectTypes.EQUIPMENT,
                                     time_to_live=1)
         self.item = item
 
     def message(self):
-        message = "%s equips %s." % (self.source_entity.name, self.item.name)
+        message = "%s equips %s." % (self.source_entity.description.name,
+                                     self.item.description.name)
         messenger.messenger.message(message)
 
     def update(self, time_spent):
-        equipment = self.target_entity.equipment
+        equipment = self.queue.target_entity.equipment
         equip_succeded = equipment.try_equip(self.item)
         if(equip_succeded):
             self.message()
-            if(self.source_entity.inventory.has_item(self.item)):
-                self.source_entity.inventory.remove_item(self.item)
+            if(self.queue.target_entity.inventory.has_item(self.item)):
+                self.queue.target_entity.inventory.remove_item(self.item)
         self.tick(time_spent)
 
 
-class UnEquip(EntityEffect):
-    def __init__(self, source_entity, target_entity, equipment_slot):
-        super(UnEquip, self).__init__(source_entity=source_entity,
-                                      target_entity=target_entity,
+class Unequip(EntityEffect):
+    def __init__(self, source_entity, equipment_slot):
+        super(Unequip, self).__init__(source_entity=source_entity,
                                       effect_type=EffectTypes.EQUIPMENT,
                                       time_to_live=1)
         self.item = source_entity.equipment.get(equipment_slot)
         self.equipment_slot = equipment_slot
 
     def message(self):
-        message = "%s unequips %s." % (self.source_entity.name, self.item.name)
+        message = "%s unequips %s." % (self.source_entity.description.name,
+                                       self.item.description.name)
         messenger.messenger.message(message)
 
     def update(self, time_spent):
@@ -196,16 +202,16 @@ class UnEquip(EntityEffect):
 
 
 class ReEquip(EntityEffect):
-    def __init__(self, source_entity, target_entity, equipment_slot, item):
+    def __init__(self, source_entity, equipment_slot, item):
         super(ReEquip, self).__init__(source_entity=source_entity,
-                                      target_entity=target_entity,
                                       effect_type=EffectTypes.EQUIPMENT,
                                       time_to_live=1)
         self.equipment_slot = equipment_slot
         self.item = item
 
     def message(self):
-        message = "%s equips %s." % (self.source_entity.name, self.item.name)
+        message = "%s equips %s." % (self.source_entity.description.name,
+                                     self.item.description.name)
         messenger.messenger.message(message)
 
     def update(self, time_spent):

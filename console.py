@@ -7,7 +7,9 @@ import libtcodpy as libtcod
 class ConsoleVisual(object):
     def __init__(self, width, height):
         self._visual_char_matrix =\
-            [[GFXChar() for _ in range(width)] for _ in range(height)]
+            [[GFXChar(' ', colors.BLACK, colors.BLACK)
+              for _ in range(width)]
+             for _ in range(height)]
         self._default_color_fg = colors.BLACK
         self._default_color_bg = colors.BLACK
 
@@ -85,36 +87,13 @@ class ConsoleVisual(object):
 
 
 class GFXChar(object):
-    def __init__(self, symbol=' ', color_bg=colors.BLACK,
-                 color_fg=colors.BLACK):
+    """
+    Composites holding this has a graphical representation as a char.
+    """
+    def __init__(self, symbol, color_bg, color_fg):
+        super(GFXChar, self).__init__()
         self.symbol = symbol
         self.color_bg = color_bg
         self.color_fg = color_fg
-        self._status_cycle_colors = []
-        self._blink_color_fg_queue = []
-
-    def draw_no_effect(self, position):
-        if(not self.color_bg is None):
-            console.set_color_bg(position, self.color_bg)
-        if(not self.color_fg is None):
-            console.set_color_fg(position, self.color_fg)
-        if(not self.symbol is None):
-            console.set_symbol(position, self.symbol)
-
-    def draw(self, position):
-        self.draw_no_effect(position)
-        if(len(self._blink_color_fg_queue) > 0):
-            console.set_color_fg(position, self._blink_color_fg_queue.pop())
-
-    def draw_unseen(self, screen_position):
-        console.set_colors_and_symbol(screen_position,
-                                      colors.UNSEEN_FG,
-                                      colors.UNSEEN_BG, self.symbol)
-
-    def set_fg_blink_colors(self, colors):
-        self._blink_color_fg_queue = colors
-
-    def clear_temporary_color(self):
-        self.temporary_color_fg = None
 
 console = ConsoleVisual(settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT)

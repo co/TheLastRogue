@@ -20,8 +20,9 @@ class Camera(object):
 
     def dungeon_to_screen_position(self, position):
         return geo.add_2d(geo.sub_2d(position, self.camera_offset),
-                       self.screen_position)
+                          self.screen_position)
 
     def update(self, player):
-        delta = geo.sub_2d(player.position, self.screen_center_position)
+        position = player.position.value
+        delta = geo.sub_2d(position, self.screen_center_position)
         self.camera_offset = geo.add_2d(self.camera_offset, delta)

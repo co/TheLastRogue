@@ -229,16 +229,19 @@ class PlayerStatusBar(RectangularUIElement):
             StackPanelVertical(rect.top_left,
                                margin=style.interface_theme.margin)
 
-        name_text_box = TextBox(player.name, geo.zero2d(),
+        player_name = player.description.name
+        name_text_box = TextBox(player_name, geo.zero2d(),
                                 colors.YELLOW,
                                 geo.zero2d())
 
-        description_text_box = TextBox(player.description, geo.zero2d(),
+        player_description = player.description.description
+        description_text_box = TextBox(player_description, geo.zero2d(),
                                        colors.YELLOW,
                                        geo.zero2d())
 
         element_width = (self.width - style.interface_theme.margin[0] * 2)
-        hp_bar = CounterBar(player.hp, element_width,
+        player_hp = player.health.hp
+        hp_bar = CounterBar(player_hp, element_width,
                             colors.HP_BAR_FULL, colors.HP_BAR_EMPTY)
 
         self._rectangle_bg =\
@@ -269,7 +272,9 @@ class EntityStatusList(RectangularUIElement):
             StyledRectangle(rect, style.interface_theme.rect_style)
 
     def update(self, entity):
-        seen_entities = entity.get_seen_entities()
+        seen_entities = entity.vision.get_seen_entities()
+        if entity in seen_entities:
+            seen_entities.remove(entity)
         self._entity_stack_panel.clear()
         entity_status_width = (self.width -
                                style.interface_theme.margin[0] * 2)
@@ -287,9 +292,9 @@ class EntityStatusList(RectangularUIElement):
 class EntityStatus(UIElement):
     def __init__(self, entity, offset, width, margin=geo.zero2d()):
         super(EntityStatus, self).__init__(margin)
-        monster_name_text_box = TextBox(entity.name[:width], geo.zero2d(),
-                                        colors.TEXT_ACTIVE)
-        monster_health_bar = CounterBar(entity.hp, width,
+        monster_name_text_box = TextBox(entity.description.name[:width],
+                                        geo.zero2d(), colors.TEXT_ACTIVE)
+        monster_health_bar = CounterBar(entity.health.hp, width,
                                         colors.HP_BAR_FULL,
                                         colors.HP_BAR_EMPTY)
         self._width = width

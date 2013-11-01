@@ -6,16 +6,16 @@ import positionexaminer
 def player_select_missile_path(source_entity, max_throw_distance,
                                game_gamestate):
     choose_target_prompt = statestack.StateStack()
-    target_entity = source_entity.get_closest_seen_entity()
+    target_entity = source_entity.vision.get_closest_seen_entity()
     if(not target_entity is None and
-       geo.chess_distance(target_entity.position, source_entity.position)
-       <= max_throw_distance):
-        init_target = target_entity.position
+       geo.chess_distance(target_entity.position.value,
+                          source_entity.position.value) <= max_throw_distance):
+        init_target = target_entity.position.value
     else:
-        init_target = source_entity.position
+        init_target = source_entity.position.value
     destination_selector = positionexaminer.\
         MissileDestinationSelector(choose_target_prompt,
-                                   source_entity.position,
+                                   source_entity.position.value,
                                    source_entity,
                                    game_gamestate,
                                    max_throw_distance,
@@ -33,8 +33,14 @@ class MissileHitDetection(object):
     def get_path_taken(self, path, dungeon_level):
         for index, point in enumerate(path):
             tile = dungeon_level.get_tile_or_unknown(point)
-            if(tile.get_terrain().is_solid() and not self.passes_solid):
-                return path[:index - 1]
+            if(tile.get_terrain().is_solid.value and not self.passes_solid):
+                return self._last_n_or_default(path, index, None)
             if(tile.has_entity() and not self.passes_entity):
-                return path[:index + 1]
-        return path[:index]
+                return self._last_n_or_default(path, index + 1, None)
+        return self._last_n_or_default(path, index, None)
+
+    def _last_n_or_default(self, the_list, n, default):
+        if(n >= len(the_list)):
+            return default
+        else:
+            return the_list[:n]

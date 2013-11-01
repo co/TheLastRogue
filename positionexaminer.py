@@ -125,9 +125,10 @@ class MissileDestinationSelector(PositionSelector):
 
     def _draw_path_point(self, point):
         screen_position = self.camera.dungeon_to_screen_position(point)
-        terrain = self.entity.dungeon_level.\
+        terrain = self.entity.dungeon_level.value.\
             get_tile_or_unknown(point).get_terrain()
-        if(self.entity.can_see_point(point) and terrain.is_solid()):
+        if(self.entity.dungeon_mask.can_see_point(point) and
+           terrain.is_solid.value):
             console.set_symbol(screen_position, ' ')
             console.set_color_bg(screen_position, colors.BLOCKED_PATH)
         else:

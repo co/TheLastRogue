@@ -1,77 +1,12 @@
-import terrain
 import direction
 import dungeonfeature
 import actionscheduler
 import settings
-import tile
 import turn
-import player
 import util
 import geometry as geo
 import constants
-import libtcodpy as libtcod
-
-
-def get_empty_tile_matrix(width, height):
-    return [[tile.Tile()
-             for x in range(width)]
-            for y in range(height)]
-
-
-def unknown_level_map(width, height, depth):
-    tile_matrix = get_empty_tile_matrix(width, height)
-    dungeon_level = DungeonLevel(tile_matrix, depth)
-    for x in range(width):
-        for y in range(height):
-            unknown_terrain = terrain.Unknown()
-            unknown_terrain.replace_move((x, y), dungeon_level)
-    return dungeon_level
-
-
-def dungeon_level_from_file(file_name):
-    terrain_matrix = terrain_matrix_from_file(file_name)
-    dungeon_level = DungeonLevel(terrain_matrix, 1)
-    set_terrain_from_file(dungeon_level, file_name)
-    return dungeon_level
-
-
-def terrain_matrix_from_file(file_name):
-    dungeon = read_file(file_name)
-    width = len(dungeon[0])
-    height = len(dungeon)
-
-    terrain_matrix = get_empty_tile_matrix(width, height)
-    return terrain_matrix
-
-
-def set_terrain_from_file(dungeon_level, file_name):
-    dungeon = read_file(file_name)
-
-    for x in range(dungeon_level.width):
-        for y in range(dungeon_level.height):
-            terrain = char_to_terrain(dungeon[y][x])
-            terrain.replace_move((x, y), dungeon_level)
-
-
-def char_to_terrain(c):
-    if(c == '#'):
-        return terrain.Wall()
-    elif(c == '+'):
-        return terrain.Door(False)
-    elif(c == '~'):
-        return terrain.Water()
-    elif(c == 'g'):
-        return terrain.GlassWall()
-    else:
-        return terrain.Floor()
-
-
-def read_file(file_name):
-    f = open(file_name, "r")
-    data = f.readlines()
-    data = [line.strip() for line in data]
-    f.close()
-    return data
+import tile
 
 
 class DungeonLevel(object):
@@ -86,7 +21,7 @@ class DungeonLevel(object):
 
         self.terrain_changed_timestamp = 0
 
-        self.walkable_destinations = util.WalkableDestinatinationsPath()
+        self._walkable_destinations = util.WalkableDestinatinationsPath()
 
     @property
     def entities(self):
@@ -95,12 +30,6 @@ class DungeonLevel(object):
     @property
     def actors(self):
         return self.actor_scheduler.actors
-
-    def add_actor(self, actor):
-        return self.actor_scheduler.register(actor)
-
-    def remove_actor(self, actor):
-        return self.actor_scheduler.release(actor)
 
     @property
     def up_stairs(self):
@@ -117,12 +46,15 @@ class DungeonLevel(object):
             for x in range(settings.WINDOW_WIDTH):
                 position = (x, y)
                 tile_position = geo.add_2d(position, camera.camera_offset)
-                tile = self.get_tile_or_unknown(tile_position)
-                tile.draw(position, True)
+                the_tile = self.get_tile_or_unknown(tile_position)
+                the_tile.draw(position, True)
 
     def draw(self, camera):
         the_player = self._get_player_if_available()
-        the_player.update_fov()
+        if(the_player is None):
+            raise Exception(("Tried to access the player, "
+                             "from DungeonLevel: " + str(self) +
+                             ", but the player is not in the dungeon."))
         for y in range(constants.GAME_STATE_HEIGHT):
             for x in range(constants.GAME_STATE_WIDTH):
                 position = (x, y)
@@ -131,20 +63,21 @@ class DungeonLevel(object):
     def _draw_tile(self, camera, position, the_player):
         tile_position = geo.add_2d(position, camera.camera_offset)
         screen_position = geo.add_2d(position, camera.screen_position)
-        tile = self.get_tile_or_unknown(tile_position)
-        x, y = tile_position
-        if(libtcod.map_is_in_fov(the_player.dungeon_map, x, y)):
-            the_player.update_memory_of_tile(tile, tile_position, self.depth)
-            tile.draw(screen_position, True)
+        the_tile = self.get_tile_or_unknown(tile_position)
+        the_player.dungeon_mask.update_fov()
+        memory_map = the_player.memory_map
+        if(the_player.dungeon_mask.can_see_point(tile_position)):
+            memory_map.update_memory_of_tile(the_tile, tile_position,
+                                             self.depth)
+            the_tile.draw(screen_position, True)
         else:
-            player_memory_of_map = the_player.get_memory_of_map(self)
+            player_memory_of_map = memory_map.get_memory_of_map(self)
             player_memory_of_map.get_tile_or_unknown(tile_position).\
                 draw(screen_position, False)
 
     def _get_player_if_available(self):
         return next((entity for entity in self.entities
-                     if(isinstance(entity, player.Player))),
-                    None)
+                    if entity.has_child("is_player")), None)
 
     def add_dungeon_feature_if_not_present(self, new_dungeon_feature):
         if(not new_dungeon_feature in self.dungeon_features):
@@ -156,11 +89,17 @@ class DungeonLevel(object):
 
     def add_actor_if_not_present(self, new_actor):
         if(not new_actor in self.actors):
-            self.add_actor(new_actor)
+            self._add_actor(new_actor)
 
     def remove_actor_if_present(self, actor_to_remove):
         if(actor_to_remove in self.actors):
-            self.remove_actor(actor_to_remove)
+            self._remove_actor(actor_to_remove)
+
+    def _add_actor(self, actor):
+        return self.actor_scheduler.register(actor)
+
+    def _remove_actor(self, actor):
+        return self.actor_scheduler.release(actor)
 
     def has_tile(self, position):
         x, y = position
@@ -182,14 +121,14 @@ class DungeonLevel(object):
         return [self.get_tile_or_unknown(geo.add_2d(offset, position))
                 for offset in direction.AXIS_DIRECTIONS]
 
-    def update(self):
+    def tick(self):
         self.actor_scheduler.tick()
         self._remove_dead_monsters()
 
     def _remove_dead_monsters(self):
         for entity in self.entities:
-            if(entity.is_dead()):
-                entity.kill_and_remove()
+            if(entity.health.is_dead()):
+                entity.on_death_action.act()
 
     def signal_terrain_changed(self):
         self.terrain_changed_timestamp = turn.current_turn
@@ -200,3 +139,7 @@ class DungeonLevel(object):
             for x, tile in enumerate(row):
                 line += str(self.get_tile_or_unknown((x, y)).symbol)
             print line
+
+    def get_walkable_positions(self, entity, position):
+        return (self._walkable_destinations
+                .get_walkable_positions(entity, position))

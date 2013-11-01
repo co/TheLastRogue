@@ -1,4 +1,5 @@
-import symbol
+import icon
+import composite
 
 
 class EquipmentSlot(object):
@@ -35,29 +36,31 @@ class EquipmentTypes(object):
 class EquipmentSlots(object):
     #  Weapons
     MELEE_WEAPON = EquipmentSlot("Melee Weapon", EquipmentTypes.MELEE_WEAPON,
-	symbol.SWORD)
+                                 icon.SWORD)
     RANGED_WEAPON = EquipmentSlot("Ranged Weapon",
-                                  EquipmentTypes.RANGED_WEAPON, symbol.GUN)
+                                  EquipmentTypes.RANGED_WEAPON, icon.GUN)
 
     #  Armor
-    HEADGEAR = EquipmentSlot("Headgear", EquipmentTypes.HEADGEAR, symbol.HELM)
-    ARMOR = EquipmentSlot("Armor", EquipmentTypes.ARMOR, symbol.ARMOR)
-    BOOTS = EquipmentSlot("Boots", EquipmentTypes.BOOTS, symbol.BOOTS)
+    HEADGEAR = EquipmentSlot("Headgear", EquipmentTypes.HEADGEAR, icon.HELM)
+    ARMOR = EquipmentSlot("Armor", EquipmentTypes.ARMOR, icon.ARMOR)
+    BOOTS = EquipmentSlot("Boots", EquipmentTypes.BOOTS, icon.BOOTS)
 
     #  Jewelry
     RIGHT_RING = EquipmentSlot("Right Ring", EquipmentTypes.RING,
-                               symbol.RING)
+                               icon.RING)
     LEFT_RING = EquipmentSlot("Left Ring", EquipmentTypes.RING,
-                              symbol.RING)
+                              icon.RING)
     AMULET = EquipmentSlot("Amulet", EquipmentTypes.AMULET,
-                           symbol.AMULET)
+                           icon.AMULET)
 
     ALL = [MELEE_WEAPON, RANGED_WEAPON, HEADGEAR, ARMOR,
            BOOTS, RIGHT_RING, LEFT_RING, AMULET]
 
 
-class Equipment(object):
-    def __init__(self, entity):
+class Equipment(composite.Leaf):
+    def __init__(self):
+        super(Equipment, self).__init__()
+        self.component_type = "equipment"
         self._equipment = {
             EquipmentSlots.HEADGEAR: None,
             EquipmentSlots.ARMOR: None,
@@ -70,7 +73,6 @@ class Equipment(object):
             EquipmentSlots.MELEE_WEAPON: None,
             EquipmentSlots.RANGED_WEAPON: None
         }
-        self.entity = entity
 
     def get(self, equipment_slot):
         return self._equipment[equipment_slot]
@@ -85,17 +87,18 @@ class Equipment(object):
 
     def unequip(self, equipment_slot):
         equipment = self._equipment[equipment_slot]
-        equipment.unequip_effect(self.entity)
+        if(equipment.has_child("unequip_effect")):
+            equipment.unequip_effect.effect()
         self._equipment[equipment_slot] = None
         return equipment
 
     def can_unequip_to_inventory(self, equipment_slot):
-        return (self.entity.inventory.has_room_for_item() and
+        return (self.parent.inventory.has_room_for_item() and
                 self.slot_is_equiped(equipment_slot))
 
     def unequip_to_inventory(self, equipment_slot):
         equipment = self.unequip(equipment_slot)
-        succeded = self.entity.inventory.try_add(equipment)
+        succeded = self.parent.inventory.try_add(equipment)
         return succeded
 
     def get_slots_of_type(self, equipment_type):
@@ -110,7 +113,7 @@ class Equipment(object):
         return len(self.get_open_slots_of_type(equipment_type)) < 1
 
     def can_equip(self, equipment):
-        if(self._all_slots_of_type_are_used(equipment.equipment_type)):
+        if(self._all_slots_of_type_are_used(equipment.equipment_type.value)):
             return False
         return True
 
@@ -121,17 +124,24 @@ class Equipment(object):
         return False
 
     def _equip(self, equipment):
-        open_slots = self.get_open_slots_of_type(equipment.equipment_type)
+        open_slots =\
+            self.get_open_slots_of_type(equipment.equipment_type.value)
         self._equip_into_slot(equipment, open_slots[0])
 
     def _equip_into_slot(self, equipment, slot):
         self._equipment[slot] = equipment
-        equipment.equip_effect(self.entity)
+        if(equipment.has_child("on_equip_effect")):
+            equipment.on_equip_effect.effect(self.parent)
+
+    def before_tick(self, time_spent):
+        self.execute_equip_effects()
 
     def execute_equip_effects(self):
         for equipment_slot in EquipmentSlots.ALL:
             if(self.slot_is_equiped(equipment_slot)):
-                self._equipment[equipment_slot].equiped_effect(self.entity)
+                equipment = self._equipment[equipment_slot]
+                if(equipment.has_child("equipped_effect")):
+                    equipment.equipped_effect.effect(self.parent)
 
     def print_equipment(self):
         print "###############################"

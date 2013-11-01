@@ -1,133 +1,161 @@
+from compositecore import Leaf, Composite
+from graphic import GraphicChar, CharPrinter, GraphicCharTerrainCorners
+from mover import Mover
+from position import Position, DungeonLevel
+from stats import GamePieceType
+from statusflags import StatusFlags
 import colors
-import symbol
-import gamepiece
+import icon
 
 
-class Terrain(gamepiece.GamePiece):
-    def __init__(self):
-        super(Terrain, self).__init__()
-        self.max_instances_in_single_tile = 1
-        self.piece_type = gamepiece.GamePieceType.TERRAIN
+class IsSolid(Leaf):
+    def __init__(self, is_solid=True):
+        super(IsSolid, self).__init__()
+        self.component_type = "is_solid"
+        self.value = is_solid
 
-    @staticmethod
-    def is_solid():
-        return False
 
-    @staticmethod
-    def is_transparent():
+class IsTransparent(Leaf):
+    def __init__(self, is_transparent=False):
+        super(IsTransparent, self).__init__()
+        self.component_type = "is_transparent"
+        self.value = is_transparent
+
+
+class BumpAction(Leaf):
+    """
+    Defines what happens if the player bumps into this terrain.
+    """
+    def __init__(self, is_transparent=False):
+        super(BumpAction, self).__init__()
+        self.component_type = "bump_action"
+
+    def bump(self, source_entity):
+        pass
+
+    def can_bump(self, source_entity):
         return True
 
 
-class Wall (Terrain):
-    def __init__(self):
-        super(Wall, self).__init__()
-        self.gfx_char.color_fg = colors.WALL_FG
-        self.gfx_char.color_bg = colors.FLOOR_BG
-        self._wall_symbol_row = symbol.DUNGEON_WALLS_ROW
-
-    @staticmethod
-    def is_solid():
-        return True
-
-    def on_draw(self):
-        self.calculate_wall_symbol()
-
-    def calculate_wall_symbol(self):
-        neighbours_mask = 0
-        for index, neighbour in enumerate(self._get_neighbour_terrains()):
-            if(isinstance(neighbour, Wall) or isinstance(neighbour, Door)):
-                neighbours_mask |= 2 ** index
-        self.gfx_char.symbol = self._wall_symbol_row + neighbours_mask
-
-    def is_transparent(self):
-        return False
-
-    def _get_neighbour_terrains(self):
-        tiles =\
-            self.dungeon_level.get_tiles_surrounding_position(self.position)
-        return [tile.get_terrain() for tile in tiles]
-
-
-class Floor(Terrain):
+class Floor(Composite):
     def __init__(self):
         super(Floor, self).__init__()
-        self.gfx_char.color_fg = colors.FLOOR_FG
-        self.gfx_char.color_bg = colors.FLOOR_BG
-        self.gfx_char.symbol = symbol.CENTER_DOT
+        self.add_child(GamePieceType(GamePieceType.TERRAIN))
+        self.add_child(Mover())
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(GraphicChar(colors.FLOOR_BG,
+                                   colors.FLOOR_FG,
+                                   icon.CENTER_DOT))
+        self.add_child(CharPrinter())
+        self.add_child(IsSolid(False))
+        self.add_child(IsTransparent(True))
 
 
-class Water(Terrain):
+class Water(Composite):
     def __init__(self):
         super(Water, self).__init__()
-        self.gfx_char.color_fg = colors.BLUE_D
-        self.gfx_char.color_bg = colors.CYAN_D
-        self.gfx_char.symbol = symbol.WATER
+        self.add_child(GamePieceType(GamePieceType.TERRAIN))
+        self.add_child(Mover())
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(GraphicChar(colors.BLUE_D,
+                                   colors.CYAN_D,
+                                   icon.WATER))
+        self.add_child(CharPrinter())
+        self.add_child(IsSolid(False))
+        self.add_child(IsTransparent(True))
 
 
-class Door(Terrain):
-    def __init__(self, is_open=True):
-        super(Door, self).__init__()
-        self.is_open = is_open
-        self.gfx_char.color_fg = colors.ORANGE_D
-        self.gfx_char.color_bg = colors.FLOOR_BG
-
-    def is_solid(self):
-        return not self.is_open
-
-    @property
-    def is_open(self):
-        return self.__is_open
-
-    @is_open.setter
-    def is_open(self, value):
-        self.__is_open = value
-        if(self.__is_open):
-            self.gfx_char.symbol = symbol.DOOR_OPEN
-        else:
-            self.gfx_char.symbol = symbol.DOOR
-        if(not self.dungeon_level is None):
-            self.dungeon_level.signal_terrain_changed()
-
-    @property
-    def symbol(self):
-        if(self.is_open):
-            return symbol.DOOR_OPEN
-        else:
-            return symbol.DOOR
-
-    def is_transparent(self):
-        return self.is_open
-
-    def close(self):
-        self.is_open = False
-
-    def open(self):
-        self.is_open = True
-
-    def piece_copy(self, copy=None):
-        if(copy is None):
-            copy = Door(self.is_open)
-        return super(Door, self).piece_copy(copy)
-
-
-class GlassWall(Wall):
+class GlassWall(Composite):
     def __init__(self):
         super(GlassWall, self).__init__()
-        self.gfx_char.color_fg = colors.WHITE
-        self.gfx_char.symbol = symbol.CAVE_WALLS_ROW
+        self.add_child(GamePieceType(GamePieceType.TERRAIN))
+        self.add_child(Mover())
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(GraphicChar(colors.FLOOR_BG,
+                                   colors.WHITE,
+                                   icon.CAVE_WALLS_ROW))
+        self.add_child(CharPrinter())
+        self.add_child(IsSolid(True))
+        self.add_child(IsTransparent(True))
 
-    @staticmethod
-    def is_transparent():
-        return True
 
-
-class Unknown(Terrain):
+class Unknown(Composite):
     def __init__(self):
         super(Unknown, self).__init__()
-        self.gfx_char.color_fg = colors.BLACK
-        self.gfx_char.color_bg = colors.BLACK
-        self.gfx_char.symbol = ' '
+        self.add_child(GamePieceType(GamePieceType.TERRAIN))
+        self.add_child(Mover())
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(CharPrinter())
+        self.add_child(GraphicChar(colors.BLACK,
+                                   colors.BLACK,
+                                   ' '))
+        self.add_child(IsSolid(True))
+        self.add_child(IsTransparent(True))
 
-    @property
-    def symbol(self):
-        return ' '
+
+class Wall (Composite):
+    def __init__(self):
+        super(Wall, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.TERRAIN))
+        self.add_child(Mover())
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(CharPrinter())
+        self.add_child(GraphicCharTerrainCorners(colors.FLOOR_BG,
+                                                 colors.WALL_FG,
+                                                 icon.DUNGEON_WALLS_ROW,
+                                                 [Wall, Door]))
+        self.add_child(IsSolid(True))
+        self.add_child(IsTransparent(False))
+
+
+class Door(Composite):
+    def __init__(self, is_open=True):
+        super(Door, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.TERRAIN))
+        self.add_child(Mover())
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(CharPrinter())
+        self.add_child(GraphicChar(colors.FLOOR_BG,
+                                   colors.ORANGE_D,
+                                   icon.DOOR))
+        self.add_child(IsSolid(True))
+        self.add_child(IsTransparent(False))
+
+        self.add_child(OpenDoorAction())
+        self.add_child(OpenDoorBumpAction())
+
+
+class OpenDoorAction(Leaf):
+    """Opens the door terrain."""
+    def __init__(self):
+        super(OpenDoorAction, self).__init__()
+        self.component_type = "open_door_action"
+
+    def open_door(self):
+        self.parent.is_solid.value = False
+        self.parent.is_transparent.value = True
+        self.parent.graphic_char.symbol = icon.DOOR_OPEN
+        self.parent.dungeon_level.value.signal_terrain_changed()
+
+
+class OpenDoorBumpAction(BumpAction):
+    """
+    Defines what happens if the player bumps into this terrain.
+    """
+    def __init__(self, is_transparent=False):
+        super(OpenDoorBumpAction, self).__init__()
+        self.component_type = "bump_action"
+
+    def bump(self, source_entity):
+        self.parent.open_door_action.open_door()
+
+    def can_bump(self, source_entity):
+        return (self.parent.is_solid.value and
+                (source_entity.status_flags.
+                 has_status(StatusFlags.CAN_OPEN_DOORS)))

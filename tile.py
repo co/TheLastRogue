@@ -1,4 +1,6 @@
-import gamepiece
+from graphic import CharPrinter
+from stats import GamePieceType
+import compositecore
 import frame
 import terrain
 
@@ -6,12 +8,12 @@ import terrain
 class Tile(object):
     def __init__(self):
         self.game_pieces = {
-            gamepiece.GamePieceType.ENTITY: [],
-            gamepiece.GamePieceType.CLOUD: [],
-            gamepiece.GamePieceType.ITEM: [],
-            gamepiece.GamePieceType.DUNGEON_FEATURE: [],
-            gamepiece.GamePieceType.DUNGEON_TRASH: [],
-            gamepiece.GamePieceType.TERRAIN: []
+            GamePieceType.ENTITY: [],
+            GamePieceType.CLOUD: [],
+            GamePieceType.ITEM: [],
+            GamePieceType.DUNGEON_FEATURE: [],
+            GamePieceType.DUNGEON_TRASH: [],
+            GamePieceType.TERRAIN: []
         }
 
     def draw(self, screen_position, is_seen):
@@ -24,7 +26,7 @@ class Tile(object):
     def get_piece_to_draw(self):
         pieces = next(list for list in self.game_pieces.values()
                       if len(list) > 0)
-        if (pieces[0].piece_type == gamepiece.GamePieceType.ENTITY):
+        if (pieces[0].game_piece_type.value == GamePieceType.ENTITY):
             animation_length = 7
             cycle_length = len(pieces) * animation_length
             current_animation_frame = frame.current_frame % cycle_length
@@ -32,32 +34,35 @@ class Tile(object):
         return pieces[0]
 
     def _draw_seen(self, screen_position, piece):
-        color_bg = piece.color_bg
-        if(color_bg is None):
-            self.get_terrain().draw(screen_position)
-        piece.draw(screen_position)
+        if(piece.graphic_char.color_bg is None):
+            self.get_terrain().char_printer.draw(screen_position)
+        piece.char_printer.draw(screen_position)
 
     def _draw_unseen(self, screen_position, piece):
-        piece.draw_unseen(screen_position)
+        piece.char_printer.draw_unseen(screen_position)
 
     def get_first_item(self):
-        return self.get_first_piece_of_type(gamepiece.GamePieceType.ITEM)
+        return self.get_first_piece_of_type(GamePieceType.ITEM)
 
     def get_first_entity(self):
-        return self.get_first_piece_of_type(gamepiece.GamePieceType.ENTITY)
+        return self.get_first_piece_of_type(GamePieceType.ENTITY)
 
     def get_first_cloud(self):
-        return self.get_first_piece_of_type(gamepiece.GamePieceType.CLOUD)
+        return self.get_first_piece_of_type(GamePieceType.CLOUD)
 
     def get_entities(self):
-        return self.game_pieces[gamepiece.GamePieceType.ENTITY]
+        return self.game_pieces[GamePieceType.ENTITY]
 
     def get_terrain(self):
-        return self.get_first_piece_of_type(gamepiece.GamePieceType.TERRAIN)
+        return self.get_first_piece_of_type(GamePieceType.TERRAIN)
 
     def get_dungeon_feature(self):
         return self.\
-            get_first_piece_of_type(gamepiece.GamePieceType.DUNGEON_FEATURE)
+            get_first_piece_of_type(GamePieceType.DUNGEON_FEATURE)
+
+    def get_all_pieces(self):
+        return [piece for piece_list in self.game_pieces.values()
+                for piece in piece_list]
 
     def get_first_piece_of_type(self, piece_type):
         if(len(self.game_pieces[piece_type]) < 1):
@@ -65,7 +70,7 @@ class Tile(object):
         return self.game_pieces[piece_type][0]
 
     def has_entity(self):
-        if(len(self.game_pieces[gamepiece.GamePieceType.ENTITY]) < 1):
+        if(len(self.game_pieces[GamePieceType.ENTITY]) < 1):
             return False
         return True
 
@@ -73,11 +78,21 @@ class Tile(object):
         copy = Tile()
         copy.game_pieces = dict()
         for piece_type, piece_list in self.game_pieces.items():
-            copy.game_pieces[piece_type] =\
-                [piece.piece_copy() for piece in piece_list]
+            copy_list = []
+            for piece in piece_list:
+                new_piece = compositecore.Composite()
+                if(piece.has_child("game_piece_type")):
+                    new_piece.add_child(piece.game_piece_type.copy())
+                if(piece.has_child("graphic_char")):
+                    new_piece.add_child(piece.graphic_char.copy())
+                if(piece.has_child("description")):
+                    new_piece.add_child(piece.description.copy())
+                new_piece.add_child(CharPrinter())
+                copy_list.append(new_piece)
+            copy.game_pieces[piece_type] = copy_list
         return copy
 
 
 unknown_tile = Tile()
-unknown_tile.game_pieces[gamepiece.GamePieceType.TERRAIN]\
+unknown_tile.game_pieces[GamePieceType.TERRAIN]\
     .append(terrain.Unknown())
