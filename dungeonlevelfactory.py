@@ -14,8 +14,7 @@ def unknown_level_map(width, height, depth):
     dungeon_level = DungeonLevel(tile_matrix, depth)
     for x in range(width):
         for y in range(height):
-            unknown_terrain = terrain.Unknown()
-            unknown_terrain.mover.replace_move((x, y), dungeon_level)
+            tile_matrix[y][x] = tile.unknown_tile
     return dungeon_level
 
 
@@ -41,8 +40,8 @@ def terrain_matrix_from_lines(lines):
 def set_terrain_from_lines(dungeon_level, lines):
         for x in range(dungeon_level.width):
             for y in range(dungeon_level.height):
-                terrain = char_to_terrain(lines[y][x])
-                terrain.mover.replace_move((x, y), dungeon_level)
+                current_terrain = char_to_terrain(lines[y][x])
+                current_terrain.mover.replace_move((x, y), dungeon_level)
 
 
 def char_to_terrain(c):

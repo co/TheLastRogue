@@ -124,5 +124,4 @@ class Tile(object):
 
 
 unknown_tile = Tile()
-unknown_tile.game_pieces[GamePieceType.TERRAIN]\
-    .append(terrain.Unknown())
+unknown_tile.add(terrain.Unknown())

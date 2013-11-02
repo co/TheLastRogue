@@ -232,14 +232,15 @@ class Composite(Component):
         map(lambda x: x.message(message), self._children.values())
 
     def __getattr__(self, component_type):
-        if(not self.has_child(component_type)):
+        try:
+            if(component_type in self._spoofed_children and
+               len(self._spoofed_children[component_type]) > 0):
+                return self._spoofed_children[component_type][0]
+            return self._children[component_type]
+        except KeyError:
             raise Exception("Tried to access component {0} from composite {1} "
                             "But it doesn't exist.".format(str(component_type),
                                                            str(self)))
-        if(component_type in self._spoofed_children and
-           len(self._spoofed_children[component_type]) > 0):
-            return self._spoofed_children[component_type][0]
-        return self._children[component_type]
 
     def get_original_child(self, component_type):
         """
@@ -248,15 +249,13 @@ class Composite(Component):
         return self._children[component_type]
 
     def get_spoofed_children_of_type(self, component_type):
-        if(not isinstance(component_type, basestring)):
-            raise Exception("ERROR: component_type should be string")
-        if(not self.has_child(component_type)):
-            print self._children, self._spoofed_children
+        try:
+            return self._spoofed_children[component_type]
+        except KeyError:
             raise Exception("Tried to access components of type"
                             " {0} from composite {1} "
                             "But it doesn't exist.".format(str(component_type),
                                                            str(self)))
-        return self._spoofed_children[component_type]
 
     def has_child(self, component_type):
         """

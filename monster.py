@@ -8,7 +8,6 @@ from entityeffect import EffectQueue
 from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier
 from inventory import Inventory
-from memorymap import MemoryMap
 from monsteractor import ChasePlayerActor
 from mover import EntityMover, CanShareTileEntityMover
 from ondeathaction import EntityDeathAction
@@ -60,7 +59,6 @@ class Ratman(Composite):
         self.add_child(DungeonMask())
         self.add_child(Vision())
 
-        self.add_child(MemoryMap())
         self.add_child(Inventory())
         self.add_child(Path())
         self.add_child(ChasePlayerActor())
@@ -124,7 +122,6 @@ class StoneStatue(Composite):
         self.add_child(DungeonMask())
         self.add_child(Vision())
 
-        self.add_child(MemoryMap())
         self.add_child(Inventory())
         self.add_child(Path())
         self.add_child(DoNothingActor())
@@ -170,7 +167,6 @@ class Slime(Composite):
         self.add_child(DungeonMask())
         self.add_child(Vision())
 
-        self.add_child(MemoryMap())
         self.add_child(Inventory())
         self.add_child(Path())
         self.add_child(ChasePlayerActor())
