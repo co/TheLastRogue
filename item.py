@@ -1,5 +1,6 @@
 from action import Action
 from compositecore import Leaf, Composite
+from damage import Damage
 from graphic import GraphicChar, CharPrinter
 from health import BlockDamageHealthSpoof
 from missileaction import PlayerThrowItemAction
@@ -47,11 +48,10 @@ class Gun(Composite):
                                    but age has torn it real bad.\n\
                                    The wooden handle is dry and gray, \
                                    you see rust eating into the iron pipe."))
-        self.add_child(GraphicChar(None, colors.WHITE,
-                                   symbol.GUN))
+        self.add_child(GraphicChar(None, colors.WHITE, symbol.GUN))
         self.add_child(CharPrinter())
-        self.add_child(DamageProvider(10, 5, [damage.DamageTypes.PHYSICAL,
-                                              damage.DamageTypes.PIERCING]))
+        self.add_child(DamageProvider(15, 10, [damage.DamageTypes.PHYSICAL,
+                                               damage.DamageTypes.PIERCING]))
         self.add_child(WeaponRange(15))
         self.add_child(ReEquipAction())
         self.add_child(PlayerThrowItemAction())
@@ -87,8 +87,7 @@ class Armor(Composite):
                                    "A worn leather armor, "
                                    "it's old, but should still "
                                    "protect you from some damage."))
-        self.add_child(GraphicChar(None, colors.ORANGE_D,
-                                   symbol.ARMOR))
+        self.add_child(GraphicChar(None, colors.ORANGE_D, symbol.ARMOR))
         self.add_child(BlockDamageEquippedEffect(5, 3,
                                                  [damage.DamageTypes.
                                                   PHYSICAL]))
@@ -116,6 +115,31 @@ class BlockDamageEquippedEffect(EquippedEffect):
                                 self.blocked_damage_types))
 
 
+class Sword(Composite):
+    """
+    A composite component representing a Sword item.
+    """
+    def __init__(self):
+        super(Sword, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ITEM))
+        self.add_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(Mover())
+        self.add_child(Description("Iron Sword",
+                                   "This old blade has seen some, "
+                                   "better days, it's as sharp as "
+                                   "tough."))
+        self.add_child(GraphicChar(None, colors.GRAY, symbol.SWORD))
+        self.add_child(DamageProvider(10, 3, [damage.DamageTypes.PHYSICAL,
+                                              damage.DamageTypes.CUTTING]))
+        self.add_child(CharPrinter())
+        self.add_child(ReEquipAction())
+        self.add_child(PlayerThrowItemAction())
+        self.add_child(ThrowerNonBreak())
+        self.add_child(Weight(10))
+
+
 class RingOfInvisibility(Leaf):
     """
     The Ring of Invisibility will make the entity who equips it invisible.
@@ -128,10 +152,9 @@ class RingOfInvisibility(Leaf):
         self.add_child(DungeonLevel())
         self.add_child(Mover())
         self.add_child(Description("Ring of Invisibility",
-                                   "The metal is warm to your skin,\
-                                   this ring will make you invisible"))
-        self.add_child(GraphicChar(None, colors.YELLOW,
-                                   symbol.RING))
+                                   "The metal is warm to your skin, "
+                                   "this ring will make you invisible"))
+        self.add_child(GraphicChar(None, colors.YELLOW, symbol.RING))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
         self.add_child(EquippedEffect(SetInvisibilityFlagEquippedEffect()))
@@ -165,8 +188,7 @@ class HealthPotion(Composite):
         self.add_child(Description("Health Potion",
                                    "An unusual liquid\
                                    contained in a glass flask."))
-        self.add_child(GraphicChar(None, colors.PINK,
-                                   symbol.POTION))
+        self.add_child(GraphicChar(None, colors.PINK, symbol.POTION))
         self.add_child(CharPrinter())
         self.add_child(Stacker())
         self.add_child(HealingPotionDrinkAction())
@@ -399,14 +421,15 @@ class EquipmentType(Leaf):
 
 class DamageProvider(Leaf):
     """
-    The provides a way for the parent calculate damage.
+    The provides holds damage, actual damage will be calculated on use.
     """
     def __init__(self, damage, variance, types):
         super(DamageProvider, self).__init__()
         self.component_type = "damage_provider"
-        self._strength = damage
-        self._variance = variance
-        self._types = types
+        self._damage = Damage(damage, variance, types)
+
+    def damage_entity(self, source_entity, target_entity):
+        return self._damage.damage_entity(source_entity, target_entity)
 
 
 class OnUnequipEffect(Leaf):

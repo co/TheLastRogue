@@ -1,5 +1,5 @@
 import icon
-import composite
+from compositecore import Leaf
 
 
 class EquipmentSlot(object):
@@ -57,7 +57,7 @@ class EquipmentSlots(object):
            BOOTS, RIGHT_RING, LEFT_RING, AMULET]
 
 
-class Equipment(composite.Leaf):
+class Equipment(Leaf):
     def __init__(self):
         super(Equipment, self).__init__()
         self.component_type = "equipment"

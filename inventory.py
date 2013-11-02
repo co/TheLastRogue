@@ -10,7 +10,6 @@ class Inventory(Leaf):
     def __init__(self):
         super(Inventory, self).__init__()
         self._items = []
-        self._entity = self.parent
         self._item_capacity = ITEM_CAPACITY
         self.component_type = "inventory"
 
@@ -45,8 +44,8 @@ class Inventory(Leaf):
         """
         Returns true if it is a legal action to drop the item.
         """
-        return item.mover.can_move(self._entity.position,
-                                   self._entity.dungeon_level)
+        return item.mover.can_move(self.parent.position,
+                                   self.parent.dungeon_level)
 
     def try_drop_item(self, item):
         """
@@ -54,8 +53,8 @@ class Inventory(Leaf):
 
         Returns True on success otherwise False.
         """
-        drop_successful = item.mover.try_move(self._entity.position,
-                                              self._entity.dungeon_level)
+        drop_successful = item.mover.try_move(self.parent.position,
+                                              self.parent.dungeon_level)
         if drop_successful:
             self.remove_item(item)
         return drop_successful

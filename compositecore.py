@@ -21,6 +21,9 @@ class Component(object):
 
     @property
     def parent(self):
+        if self._parent is None:
+            raise LookupError("Tried to get parent of {0}, "
+                              "but parent was not set".format(str(self)))
         return self._parent
 
     @parent.setter
@@ -136,7 +139,7 @@ class Composite(Component):
                             "component: {1} to its children."
                             "But component_type"
                             "was not set.".format(str(self), str(child)))
-        if(not child.parent is None):
+        if(not child._parent is None):
             raise Exception("Component {0} tried ta add_child"
                             "component: {1} to its children."
                             "But it already"

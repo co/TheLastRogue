@@ -1,5 +1,6 @@
 import damage
 from compositecore import Leaf
+from equipment import EquipmentSlots
 
 
 class Attacker(Leaf):
@@ -38,8 +39,12 @@ class Attacker(Leaf):
         """
         Causes the entity to hit the target entity.
         """
-        # implement melee weapon damage here.
-        self._unarmed_damage().damage_entity(self.parent, target_entity)
+        equipment = self.parent.equipment
+        if(equipment.slot_is_equiped(EquipmentSlots.MELEE_WEAPON)):
+            weapon = self.parent.equipment.get(EquipmentSlots.MELEE_WEAPON)
+            weapon.damage_provider.damage_entity(self.parent, target_entity)
+        else:
+            self._unarmed_damage().damage_entity(self.parent, target_entity)
 
     def _unarmed_damage(self):
         """

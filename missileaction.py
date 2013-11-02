@@ -116,7 +116,8 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
         if(target_entity is None):
             return
-        self.parent.damage.damage_entity(source_entity, target_entity)
+        self.ranged_weapon.damage_provider.damage_entity(source_entity,
+                                                         target_entity)
 
     def max_missile_distance(self, **kwargs):
         return self.ranged_weapon.weapon_range.value
