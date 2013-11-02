@@ -45,7 +45,7 @@ class DungeonLevel(Leaf):
         """
         Is called when dungeon level has changed.
         """
-        if(not self.parent is None and not self.value is None):
+        if(self.has_parent() and not self.value is None):
             self.parent.message(CompositeMessage.DUNGEON_LEVEL_CHANGED)
             if(self.has_sibling("actor")):
                 self.value.add_actor_if_not_present(self.parent)

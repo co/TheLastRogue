@@ -31,6 +31,9 @@ class Component(object):
         self._parent = value
         self.on_parent_changed()
 
+    def has_parent(self):
+        return not self._parent is None
+
     @property
     def next(self):
         """
@@ -229,8 +232,6 @@ class Composite(Component):
         map(lambda x: x.message(message), self._children.values())
 
     def __getattr__(self, component_type):
-        if(not isinstance(component_type, basestring)):
-            raise Exception("ERROR: component_type should be string")
         if(not self.has_child(component_type)):
             raise Exception("Tried to access component {0} from composite {1} "
                             "But it doesn't exist.".format(str(component_type),

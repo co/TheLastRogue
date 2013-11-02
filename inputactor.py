@@ -109,6 +109,9 @@ class InputActor(Actor):
 
         elif key == inputhandler.PRINTSCREEN:
             console.console.print_screen()
+
+        if(self.has_sibling("dungeon_mask")):
+            self.parent.dungeon_mask.update_fov()
         return self.newly_spent_energy
 
     def shoot_weapon(self):

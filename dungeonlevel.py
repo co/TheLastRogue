@@ -64,7 +64,7 @@ class DungeonLevel(object):
         tile_position = geo.add_2d(position, camera.camera_offset)
         screen_position = geo.add_2d(position, camera.screen_position)
         the_tile = self.get_tile_or_unknown(tile_position)
-        the_player.dungeon_mask.update_fov()
+        #the_player.dungeon_mask.update_fov()
         memory_map = the_player.memory_map
         if(the_player.dungeon_mask.can_see_point(tile_position)):
             memory_map.update_memory_of_tile(the_tile, tile_position,

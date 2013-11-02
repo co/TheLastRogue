@@ -1,4 +1,3 @@
-import terrain
 from compositecore import Leaf
 from position import DungeonLevel
 from statusflags import StatusFlags
@@ -42,9 +41,7 @@ class Mover(Leaf):
         Moves parent to new position, assumes that it fits there.
         """
         self._remove_from_old_tile()
-        new_tile = dungeon_level.get_tile(new_position)
-        piece_type = self.parent.game_piece_type.value
-        new_tile.game_pieces[piece_type].append(self.parent)
+        dungeon_level.get_tile(new_position).add(self.parent)
         self.parent.position.value = new_position
         if(not self.has_sibling("dungeon_level")):
             self.parent.add_child(DungeonLevel())
@@ -83,7 +80,7 @@ class Mover(Leaf):
         if(self.has_sibling("status_flags")):
             status_flags = self.parent.status_flags
             if(status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
-               isinstance(terrain_to_pass, terrain.Door)):
+               terrain_to_pass.has_child("is_door")):
                 return True
         return False
 
@@ -109,13 +106,7 @@ class Mover(Leaf):
         position = self.parent.position.value
         tile_i_might_be_on = (self.parent.dungeon_level.
                               value.get_tile(position))
-
-        piece_type = self.parent.game_piece_type.value
-        pieces_i_might_be_among = tile_i_might_be_on.game_pieces[piece_type]
-        if(any(self.parent is piece for piece in pieces_i_might_be_among)):
-            pieces_i_might_be_among.remove(self.parent)
-            return True
-        return False
+        return tile_i_might_be_on.remove(self.parent)
 
 
 class EntityMover(Mover):

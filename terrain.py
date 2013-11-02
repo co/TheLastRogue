@@ -114,7 +114,7 @@ class Wall (Composite):
 
 
 class Door(Composite):
-    def __init__(self, is_open=True):
+    def __init__(self):
         super(Door, self).__init__()
         self.add_child(GamePieceType(GamePieceType.TERRAIN))
         self.add_child(Mover())
@@ -129,6 +129,13 @@ class Door(Composite):
 
         self.add_child(OpenDoorAction())
         self.add_child(OpenDoorBumpAction())
+        self.add_child(IsDoor())
+
+
+class IsDoor(Leaf):
+    def __init__(self):
+        super(IsDoor, self).__init__()
+        self.component_type = "is_door"
 
 
 class OpenDoorAction(Leaf):

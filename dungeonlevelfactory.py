@@ -49,7 +49,7 @@ def char_to_terrain(c):
     if(c == '#'):
         return terrain.Wall()
     elif(c == '+'):
-        return terrain.Door(False)
+        return terrain.Door()
     elif(c == '~'):
         return terrain.Water()
     elif(c == 'g'):

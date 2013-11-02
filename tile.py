@@ -15,31 +15,58 @@ class Tile(object):
             GamePieceType.DUNGEON_TRASH: [],
             GamePieceType.TERRAIN: []
         }
+        self._top_level = GamePieceType.TERRAIN
 
     def draw(self, screen_position, is_seen):
-        piece = self.get_piece_to_draw()
+        piece_list = self.game_pieces[self._top_level]
         if(is_seen):
-            self._draw_seen(screen_position, piece)
+            self._draw_seen(screen_position, piece_list)
         else:
-            self._draw_unseen(screen_position, piece)
+            self._draw_unseen(screen_position, piece_list)
 
-    def get_piece_to_draw(self):
-        pieces = next(list for list in self.game_pieces.values()
-                      if len(list) > 0)
-        if (pieces[0].game_piece_type.value == GamePieceType.ENTITY):
-            animation_length = 7
-            cycle_length = len(pieces) * animation_length
+    def _update_top_level(self):
+        try:
+            piece_type = next(pice_type for pice_type in
+                              self.game_pieces.keys()
+                              if self.has_piece_of_type(pice_type))
+            self._top_level = piece_type
+        except StopIteration:
+            self._top_level = GamePieceType.TERRAIN
+
+    def _cycle_through_pieces(self, piece_list):
+        """
+        If multiple pieces of the same type share tile.
+        create a cycle through each one of them.
+        """
+        number_of_pieces = len(piece_list)
+        if (number_of_pieces > 0):
+            animation_length = 3
+            cycle_length = number_of_pieces * animation_length
             current_animation_frame = frame.current_frame % cycle_length
-            return pieces[int(current_animation_frame / animation_length)]
-        return pieces[0]
+            return piece_list[int(current_animation_frame / animation_length)]
+        return piece_list[0]
 
-    def _draw_seen(self, screen_position, piece):
+    def add(self, piece):
+        piece_type = piece.game_piece_type.value
+        self.game_pieces[piece_type].append(piece)
+        self._update_top_level()
+
+    def remove(self, piece):
+        piece_type = piece.game_piece_type.value
+        if(piece in self.game_pieces[piece_type]):
+            self.game_pieces[piece_type].remove(piece)
+            self._update_top_level()
+            return True
+        return False
+
+    def _draw_seen(self, screen_position, piece_list):
+        piece = self._cycle_through_pieces(piece_list)
         if(piece.graphic_char.color_bg is None):
             self.get_terrain().char_printer.draw(screen_position)
         piece.char_printer.draw(screen_position)
 
-    def _draw_unseen(self, screen_position, piece):
-        piece.char_printer.draw_unseen(screen_position)
+    def _draw_unseen(self, screen_position, piece_list):
+        piece_list[0].char_printer.draw_unseen(screen_position)
 
     def get_first_item(self):
         return self.get_first_piece_of_type(GamePieceType.ITEM)
@@ -70,7 +97,10 @@ class Tile(object):
         return self.game_pieces[piece_type][0]
 
     def has_entity(self):
-        if(len(self.game_pieces[GamePieceType.ENTITY]) < 1):
+        return self.has_piece_of_type(GamePieceType.ENTITY)
+
+    def has_piece_of_type(self, piece_type):
+        if(len(self.game_pieces[piece_type]) < 1):
             return False
         return True
 
