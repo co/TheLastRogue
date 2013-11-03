@@ -1,4 +1,3 @@
-import libtcodpy as libtcod
 import messenger
 import math
 from console import console
@@ -35,6 +34,46 @@ class UIElement(object):
     @property
     def total_width(self):
         return self.width + self.margin[0] * 2
+
+
+class VerticalSpace(UIElement):
+    def __init__(self, height, margin=geo.zero2d()):
+        super(VerticalSpace, self).__init__(margin)
+        self._height = height
+
+    @property
+    def height(self):
+        return self._height
+
+
+class HorizontalLine(UIElement):
+    def __init__(self, symbol, color_fg, color_bg, width, margin=geo.zero2d()):
+        super(HorizontalLine, self).__init__(margin)
+        self.symbol = symbol
+        self.color_bg = color_bg
+        self.color_fg = color_fg
+        self._width = width
+
+    @property
+    def height(self):
+        return 1
+
+    @property
+    def width(self):
+        return self._width
+
+    def draw(self, offset=geo.zero2d()):
+        """
+        Draws the line.
+        """
+        x, y = geo.add_2d(offset, self.margin)
+        for i in range(self.width):
+            if(not self.symbol is None):
+                console.set_symbol((x + i, y), self.symbol)
+            if(not self.color_bg is None):
+                console.set_color_bg((x + i, y), self.color_bg)
+            if(not self.color_fg is None):
+                console.set_color_fg((x + i, y), self.color_fg)
 
 
 class RectangularUIElement(UIElement):
@@ -111,20 +150,17 @@ class StyledRectangle(RectangularUIElement):
 
 
 class RectangleGray(FilledRectangle):
-    def __init__(self, rect, color_bg, margin=geo.zero2d()):
+    def __init__(self, rect, color_bg,
+                 color_fg=colors.INACTIVE_GAME_FG, margin=geo.zero2d()):
         super(RectangleGray, self).__init__(rect, color_bg, margin)
+        self.color_fg = color_fg
 
     def draw(self, offset=geo.zero2d()):
         px, py = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         for y in range(py, self.height + py):
             for x in range(px, self.width + px):
-                console.set_color_bg((x, y), self.color_bg,
-                                     libtcod.BKGND_DARKEN)
-                old_fg = console.get_color_fg((x, y))
-                if(old_fg == colors.UNSEEN_FG):
-                    console.set_color_fg((x, y), colors.GRAY_D)
-                else:
-                    console.set_color_fg((x, y), colors.INACTIVE_GAME_FG)
+                console.set_color_bg((x, y), self.color_bg)
+                console.set_color_fg((x, y), self.color_fg)
 
 
 class UIElementList(object):
@@ -220,6 +256,19 @@ class StackPanelVertical(StackPanel):
             element_position = geo.add_2d(element_position,
                                           (0, element.total_height +
                                            self.vertical_space))
+
+
+class StackPanelVerticalCentering(StackPanelVertical):
+    def __init__(self, offset, margin=geo.zero2d(), vertical_space=0):
+        super(StackPanelVerticalCentering, self).__init__(offset,
+                                                          margin=margin)
+
+    def draw(self, offset=geo.zero2d()):
+        root_x, y = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
+        for element in self._elements:
+            x = root_x + (self.width - element.width + 1) / 2
+            element.draw((x, y))
+            y = y + element.total_height + self.vertical_space
 
 
 class PlayerStatusBar(RectangularUIElement):
@@ -435,8 +484,7 @@ class CounterBarWithNumbers(CounterBar):
 
 
 class TextBox(UIElement):
-    def __init__(self, text, offset, color_fg, margin=(0, 0),
-                 cut_off_length=0):
+    def __init__(self, text, offset, color_fg, margin=(0, 0)):
         super(TextBox, self).__init__(margin)
         self.offset = offset
         self.text = text

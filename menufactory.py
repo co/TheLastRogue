@@ -7,6 +7,7 @@ import geometry as geo
 import gui
 import menu
 import rectfactory
+import settings
 import state
 import style
 import symbol
@@ -226,10 +227,10 @@ def context_menu(player, state_stack):
     context_options.append(open_inventory_option)
 
     equipment_menu_opt = equipment_menu(player, state_stack)
-    open_inventory_option =\
+    open_equipment_option =\
         menu.MenuOption("Equipment",
                         [lambda: state_stack.push(equipment_menu_opt)])
-    context_options.append(open_inventory_option)
+    context_options.append(open_equipment_option)
 
     context_menu_rect = rectfactory.center_of_screen_rect(30, 30)
     resulting_menu = menu.StaticMenu(context_menu_rect.top_left,
@@ -256,6 +257,39 @@ def get_dungeon_feature_menu_options(dungeon_feature, state_stack, player):
         feature_options.append(menu.MenuOption(feature_action.name, functions,
                                                feature_action.can_act()))
     return feature_options
+
+
+def game_over_screen(state_stack):
+    game_over_stack_panel = gui.StackPanelVerticalCentering((0, 0))
+    red_line = gui.HorizontalLine(symbol.H_LINE, colors.RED,
+                                  colors.BLACK, settings.WINDOW_WIDTH)
+    game_over_text = gui.TextBox("YOU DIED", (0, 0), colors.RED)
+    insult_text = gui.TextBox("Like a bitch.", (0, 0), colors.DARK_BROWN)
+
+    continue_option =\
+        menu.MenuOption("Press Enter to Accept Your Fate...",
+                        [lambda: state_stack.pop_to_main_menu()], True)
+
+    continue_menu = menu.StaticMenu((0, 0), [continue_option], state_stack,
+                                    margin=style.menu_theme.margin)
+
+    short_vspace = gui.VerticalSpace(7)
+    long_vspace = gui.VerticalSpace(settings.WINDOW_HEIGHT - 18)
+
+    game_over_stack_panel.append(short_vspace)
+    game_over_stack_panel.append(red_line)
+    game_over_stack_panel.append(game_over_text)
+    game_over_stack_panel.append(red_line)
+    game_over_stack_panel.append(insult_text)
+    game_over_stack_panel.append(long_vspace)
+    game_over_stack_panel.append(continue_menu)
+
+    grayout_rect = gui.RectangleGray(rectfactory.full_screen_rect(),
+                                     colors.BLACK, colors.DARK_PURPLE)
+
+    ui_elements = [grayout_rect, game_over_stack_panel]
+    ui_state = state.UIState(gui.UIElementList(ui_elements))
+    return ui_state
 
 
 class DelayedStatePush(object):

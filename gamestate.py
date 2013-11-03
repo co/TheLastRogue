@@ -1,12 +1,13 @@
+from dungeon import Dungeon
 from dungeonlevelfactory import dungeon_level_from_file
 from player import Player
-from dungeon import Dungeon
 import camera
 import console
 import constants
 import geometry as geo
 import gui
 import item
+import menufactory
 import messenger
 import monster
 import rectfactory
@@ -71,7 +72,8 @@ class GameStateBase(state.State):
         self._update_gui()
 
         if(self.player.health.is_dead()):
-            self.current_stack.pop()
+            game_over_screen = menufactory.game_over_screen(self.current_stack)
+            self.current_stack.push(game_over_screen)
         if(self.has_won):
             self.current_stack.pop()
 

@@ -54,8 +54,7 @@ class ConsoleVisual(object):
             libtcod.console_set_char_foreground(0, x, y, color)
 
     def set_color_bg(self, position, color, effect=libtcod.BKGND_SET):
-        if(not color == self.get_color_bg(position) or
-           not effect == libtcod.BKGND_SET):
+        if(not color == self.get_color_bg(position)):
             x, y = position
             self._visual_char_matrix[y][x].color_bg = color
             libtcod.console_set_char_background(0, x, y, color, effect)

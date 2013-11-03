@@ -41,12 +41,16 @@ class StateStack(object):
               not isinstance(self.peek(), gamestate.GameStateBase)):
             self.pop()
 
+    def pop_to_main_menu(self):
+        while(len(self._stack) > 1):
+            self.pop()
+
 
 class GameMenuStateStack(StateStack):
     def __init__(self, gamestate):
         super(GameMenuStateStack, self).__init__()
         self._grayout_rectangle =\
-            gui.RectangleGray(rectfactory.full_screen_rect(), colors.GRAY_D)
+            gui.RectangleGray(rectfactory.full_screen_rect(), colors.BLACK)
         self._stack = []
         self._game_state = gamestate
 
