@@ -23,6 +23,7 @@ class PositionExaminer(state.State):
         self._handle_directional_input(key)
         self._handle_escape(key)
         self._handle_enter(key)
+        self._handle_tab(key)
 
     def _handle_directional_input(self, key):
         step_size = 1
@@ -47,6 +48,9 @@ class PositionExaminer(state.State):
     def _handle_enter(self, key):
         if key == inputhandler.ENTER:
             self._exit()
+
+    def _handle_tab(self, key):
+        pass
 
     def _draw_background(self):
         if(not self._background_state is None):
@@ -122,6 +126,30 @@ class MissileDestinationSelector(PositionSelector):
         if key == inputhandler.ENTER:
             self.selected_path = self._get_current_path()
             self._exit()
+
+    def _handle_tab(self, key):
+        """
+        Pressing tab should cycle through seen entities within range.
+        """
+        if key == inputhandler.TAB:
+            seen_entities = self._get_seen_entities_within_max_distance()
+            if(len(seen_entities) < 1):
+                return
+            current_entity = self.entity.dungeon_level.value.\
+                get_tile_or_unknown(self.cursor_position).get_first_entity()
+            if(current_entity is None):
+                self.cursor_position = seen_entities[0].position.value
+            else:
+                current_index = seen_entities.index(current_entity)
+                next_index = (current_index + 1) % len(seen_entities)
+                self.cursor_position = seen_entities[next_index].position.value
+
+    def _get_seen_entities_within_max_distance(self):
+        return [entity for entity in
+                self.entity.vision.get_seen_entities_closest_first()
+                if geo.chess_distance(entity.position.value,
+                                      self.entity.position.value)
+                <= self.max_distance]
 
     def _draw_path_point(self, point):
         screen_position = self.camera.dungeon_to_screen_position(point)

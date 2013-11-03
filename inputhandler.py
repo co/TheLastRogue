@@ -28,6 +28,7 @@ DESCEND = 120
 ZERO = 121
 FIRE = 122
 PRINTSCREEN = 123
+TAB = 124
 
 #Aliases:
 UP = NORTH
@@ -101,6 +102,7 @@ controls = {
     libtcod.KEY_7: SEVEN,
     libtcod.KEY_8: EIGHT,
     libtcod.KEY_9: NINE,
+    libtcod.KEY_TAB: TAB,
 }
 
 

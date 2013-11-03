@@ -18,7 +18,7 @@ class Vision(Leaf):
         for entity in self.parent.dungeon_level.value.entities:
             if self.parent.dungeon_mask.can_see_point(entity.position.value):
                 seen_entities.append(entity)
-        return [entity for entity in seen_entities if not entity is self]
+        return [entity for entity in seen_entities if not entity is self.parent]
 
     def get_seen_entities_closest_first(self):
         """
@@ -34,9 +34,9 @@ class Vision(Leaf):
         Gets the closest of all seen entities not including self.
         """
         closest_seen_entities = self.get_seen_entities_closest_first()
-        if(len(closest_seen_entities) < 2):
+        if(len(closest_seen_entities) < 1):
             return None
-        return closest_seen_entities[1]  # The first is oneself.
+        return closest_seen_entities[0]  # The first is oneself.
 
 
 class SightRadius(Leaf):

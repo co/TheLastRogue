@@ -5,6 +5,9 @@ import positionexaminer
 
 def player_select_missile_path(source_entity, max_throw_distance,
                                game_gamestate):
+    """
+    Method initiating a prompt for the player to select a missile path.
+    """
     choose_target_prompt = statestack.StateStack()
     target_entity = source_entity.vision.get_closest_seen_entity()
     if(not target_entity is None and
@@ -26,11 +29,17 @@ def player_select_missile_path(source_entity, max_throw_distance,
 
 
 class MissileHitDetection(object):
+    """
+    Is able to detect collisions on a given path.
+    """
     def __init__(self, passes_entity=False, passes_solid=False):
         self.passes_entity = passes_entity
         self.passes_solid = passes_solid
 
     def get_path_taken(self, path, dungeon_level):
+        """
+        Returns a list of points of the path until the collision occured.
+        """
         for index, point in enumerate(path):
             tile = dungeon_level.get_tile_or_unknown(point)
             if(tile.get_terrain().is_solid.value and not self.passes_solid):
@@ -40,6 +49,9 @@ class MissileHitDetection(object):
         return self._last_n_or_default(path, index, None)
 
     def _last_n_or_default(self, the_list, n, default):
+        """
+        Help function for getting last n elements of a list or default value.
+        """
         if(n >= len(the_list)):
             return default
         else:
