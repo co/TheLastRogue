@@ -34,9 +34,9 @@ class Vision(Leaf):
         Gets the closest of all seen entities not including self.
         """
         closest_seen_entities = self.get_seen_entities_closest_first()
-        if(len(closest_seen_entities) < 1):
+        if(len(closest_seen_entities) < 2):
             return None
-        return closest_seen_entities[0]
+        return closest_seen_entities[1]  # The first is oneself.
 
 
 class SightRadius(Leaf):

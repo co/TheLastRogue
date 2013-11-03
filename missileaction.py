@@ -1,4 +1,5 @@
 from action import Action, SOURCE_ENTITY, GAME_STATE
+import gametime
 import shoot
 import animation
 import colors
@@ -77,6 +78,7 @@ class PlayerThrowRockAction(PlayerMissileAction):
         self.display_order = 95
         self.symbol = symbol.BIG_CENTER_DOT
         self.color_fg = colors.GRAY
+        self.energy_cost = gametime.double_turn
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         self.animate_flight(game_state, path, self.symbol, self.color_fg)
