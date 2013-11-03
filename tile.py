@@ -105,10 +105,8 @@ class Tile(object):
         return True
 
     def copy(self):
-        copy = Tile()
-        copy.game_pieces = dict()
+        copy_tile = Tile()
         for piece_type, piece_list in self.game_pieces.items():
-            copy_list = []
             for piece in piece_list:
                 new_piece = compositecore.Composite()
                 if(piece.has_child("game_piece_type")):
@@ -118,9 +116,8 @@ class Tile(object):
                 if(piece.has_child("description")):
                     new_piece.add_child(piece.description.copy())
                 new_piece.add_child(CharPrinter())
-                copy_list.append(new_piece)
-            copy.game_pieces[piece_type] = copy_list
-        return copy
+                copy_tile.add(new_piece)
+        return copy_tile
 
 
 unknown_tile = Tile()
