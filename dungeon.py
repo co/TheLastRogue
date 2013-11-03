@@ -7,7 +7,7 @@ import spawner
 
 class Dungeon(object):
     def __init__(self, game_state):
-        level_count = 5
+        level_count = 3
         self._dungeon_levels = [None for _ in range(level_count)]
         self.game_state = game_state
 

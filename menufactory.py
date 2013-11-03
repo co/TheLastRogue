@@ -279,8 +279,8 @@ def game_over_screen(state_stack):
     game_over_stack_panel.append(long_vspace)
     game_over_stack_panel.append(continue_menu)
 
-    grayout_rect = gui.RectangleGray(rectfactory.full_screen_rect(),
-                                     colors.BLACK, colors.DARK_PURPLE)
+    grayout_rect = gui.RectangleChangeColor(rectfactory.full_screen_rect(),
+                                            colors.BLACK, colors.DARK_PURPLE)
 
     ui_elements = [grayout_rect, game_over_stack_panel]
     ui_state = state.UIState(gui.UIElementList(ui_elements))
@@ -316,6 +316,41 @@ def title_screen(state_stack):
 
     ui_state.ui_element.elements = [bg_rect, bg_sign_rect,
                                     title_stack_panel] + ui_elements
+    return ui_state
+
+
+def victory_screen(state_stack):
+    victory_stack_panel = gui.StackPanelVerticalCentering((0, 0))
+    line = gui.HorizontalLine(symbol.H_LINE, colors.YELLOW,
+                              None, settings.WINDOW_WIDTH)
+    victory_text = gui.TextBox("A WINNER IS YOU", (0, 0), colors.WHITE)
+    ironic_text =\
+        gui.TextBox("Good job! No seriously, I bet it was real hard...",
+                    (0, 0), colors.YELLOW_D)
+
+    continue_option =\
+        menu.MenuOption("Press Enter to Continue...",
+                        [lambda: state_stack.pop_to_main_menu()], True)
+
+    continue_menu = menu.StaticMenu((0, 0), [continue_option], state_stack,
+                                    margin=style.menu_theme.margin)
+
+    short_vspace = gui.VerticalSpace(7)
+    long_vspace = gui.VerticalSpace(settings.WINDOW_HEIGHT - 18)
+
+    victory_stack_panel.append(short_vspace)
+    victory_stack_panel.append(line)
+    victory_stack_panel.append(victory_text)
+    victory_stack_panel.append(line)
+    victory_stack_panel.append(ironic_text)
+    victory_stack_panel.append(long_vspace)
+    victory_stack_panel.append(continue_menu)
+
+    grayout_rect = gui.RectangleChangeColor(rectfactory.full_screen_rect(),
+                                            colors.DARK_BROWN, colors.YELLOW_D)
+
+    ui_elements = [grayout_rect, victory_stack_panel]
+    ui_state = state.UIState(gui.UIElementList(ui_elements))
     return ui_state
 
 

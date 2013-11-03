@@ -149,10 +149,10 @@ class StyledRectangle(RectangularUIElement):
                                       char_visual.color_bg, char_visual.symbol)
 
 
-class RectangleGray(FilledRectangle):
+class RectangleChangeColor(FilledRectangle):
     def __init__(self, rect, color_bg,
                  color_fg=colors.INACTIVE_GAME_FG, margin=geo.zero2d()):
-        super(RectangleGray, self).__init__(rect, color_bg, margin)
+        super(RectangleChangeColor, self).__init__(rect, color_bg, margin)
         self.color_fg = color_fg
 
     def draw(self, offset=geo.zero2d()):

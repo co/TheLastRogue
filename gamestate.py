@@ -75,7 +75,8 @@ class GameStateBase(state.State):
             game_over_screen = menufactory.game_over_screen(self.current_stack)
             self.current_stack.push(game_over_screen)
         if(self.has_won):
-            self.current_stack.pop()
+            victory_screen = menufactory.victory_screen(self.current_stack)
+            self.current_stack.push(victory_screen)
 
     def _update_gui(self):
         self.monster_status_bar.update(self.player)
@@ -122,6 +123,9 @@ class TestGameState(GameStateBase):
 
         slime = monster.Slime(self)
         slime.mover.try_move((20, 18), self.dungeon_level)
+
+        jerico = monster.Jerico(self)
+        jerico.mover.try_move((56, 14), self.dungeon_level)
 
 
 class GameState(GameStateBase):

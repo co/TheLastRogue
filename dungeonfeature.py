@@ -111,7 +111,8 @@ class DescendStairsAction(action.Action):
         next_dungeon_level = current_dungeon_level.\
             dungeon.get_dungeon_level(current_dungeon_level.depth + 1)
         if(next_dungeon_level is None):
-            return False
+            self.add_energy_spent_to_entity(target_entity)
+            return
         destination_position = next_dungeon_level.up_stairs[0].position.value
         target_entity.mover.try_move(destination_position, next_dungeon_level)
         self.add_energy_spent_to_entity(target_entity)

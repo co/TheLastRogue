@@ -107,6 +107,10 @@ class InputActor(Actor):
                                   self.parent.game_state.value)
             self.newly_spent_energy += gametime.single_turn
 
+        elif key == inputhandler.ZERO:
+            self.parent.game_state.value.has_won = True
+            self.newly_spent_energy += gametime.single_turn
+
         elif key == inputhandler.PRINTSCREEN:
             console.console.print_screen()
 
