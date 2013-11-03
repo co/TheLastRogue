@@ -32,33 +32,62 @@ class HealthModifier(Leaf):
     def hurt(self, damage, damage_types=[], entity=None):
         """
         Damages the entity by reducing hp by damage.
-
-        Args:
-            damage: The ammount of damage caused.
-            entity: The entity that caused the damage (if any)
         """
         self.parent.health.hp.decrease(damage)
-        self.parent.char_printer.\
-            set_fg_blink_colors([colors.LIGHT_PINK, colors.RED])
+        self._animate_hurt()
         if(self.parent.health.is_dead()):
             self.parent.health.killer = entity
         return damage
 
+    def _animate_hurt(self):
+        """
+        Adds a blink animation to hurt entity.
+        """
+        self.parent.char_printer.set_fg_blink_colors([colors.LIGHT_PINK,
+                                                      colors.RED])
+
     def heal(self, health):
         """
         Heals increases the current hp by health.
-
-        Args:
-            heal: The amount of health that was regained.
         """
         self.parent.health.hp.increase(health)
         return health
 
+    def increases_max_hp(self, amount):
+        """
+        Increases max hp and heals the same amount.
+        """
+        hp = self.parent.health.hp
+        hp.max_value = hp.max_value + amount
+        hp.increase(amount)
 
-class BlockDamageHealthSpoof(Leaf):
+
+class HealthSpoof(Leaf):
+    def __init__(self):
+        self.component_type = "health_modifier"
+
+    def hurt(self, damage, damage_types=[], entity=None):
+        """
+        Passes call to next spoof.
+        """
+        return self.next.hurt(damage, damage_types=damage_types, entity=entity)
+
+    def heal(self, health):
+        """
+        Passes call to next spoof.
+        """
+        return self.next.heal(health)
+
+    def increases_max_hp(self, amount):
+        """
+        Passes call to next spoof.
+        """
+        return self.next.increases_max_hp(amount)
+
+
+class BlockDamageHealthSpoof(HealthSpoof):
     def __init__(self, block_ammount, variance, blocked_damage_types):
         super(BlockDamageHealthSpoof, self).__init__()
-        self.component_type = "health_modifier"
         self.block_ammount = block_ammount
         self.variance = variance
         self.blocked_damage_types = set(blocked_damage_types)
@@ -74,9 +103,3 @@ class BlockDamageHealthSpoof(Leaf):
         new_damage = max(damage - block_ammount, 0)
         return self.next.hurt(new_damage, damage_types=damage_types,
                               entity=entity)
-
-    def heal(self, health):
-        """
-        passes heal call to next spoof.
-        """
-        return self.next.heal(health)

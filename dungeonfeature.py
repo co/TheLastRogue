@@ -67,6 +67,26 @@ class Fountain(Composite):
         self.add_child(CharPrinter())
         self.add_child(Mover())
         self.add_child(IsDungeonFeature())
+        self.add_child(DrinkFromFountainAction())
+
+
+class DrinkFromFountainAction(action.Action):
+    def __init__(self):
+        super(DrinkFromFountainAction, self).__init__()
+        self.component_type = "descend_stairs_action"
+        self.name = "Drink (Fountain)"
+        self.display_order = 50
+
+    def act(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        target_entity.health_modifier.increases_max_hp(5)
+        self._dry_up_fountain()
+        self.add_energy_spent_to_entity(target_entity)
+
+    def _dry_up_fountain(self):
+        self.parent.graphic_char.symbol = symbol.FOUNTAIN_EMPTY
+        self.parent.graphic_char.color_fg = colors.GRAY_D
+        self.parent.remove_component(self)
 
 
 class IsDungeonFeature(Leaf):
@@ -82,12 +102,11 @@ class DescendStairsAction(action.Action):
     def __init__(self):
         super(DescendStairsAction, self).__init__()
         self.component_type = "descend_stairs_action"
-        self.name = "Descend Stairs"
+        self.name = "Descend (Stairs)"
         self.display_order = 50
 
     def act(self, **kwargs):
         target_entity = kwargs["target_entity"]
-        source_entity = kwargs["source_entity"]
         current_dungeon_level = target_entity.dungeon_level.value
         next_dungeon_level = current_dungeon_level.\
             dungeon.get_dungeon_level(current_dungeon_level.depth + 1)
@@ -95,4 +114,4 @@ class DescendStairsAction(action.Action):
             return False
         destination_position = next_dungeon_level.up_stairs[0].position.value
         target_entity.mover.try_move(destination_position, next_dungeon_level)
-        self.add_energy_spent_to_entity(source_entity)
+        self.add_energy_spent_to_entity(target_entity)

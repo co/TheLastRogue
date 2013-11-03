@@ -43,7 +43,7 @@ class Player(Composite):
         self.add_child(CharPrinter())
 
         self.add_child(Faction(Faction.PLAYER))
-        self.add_child(Health(10))
+        self.add_child(Health(20))
         self.add_child(HealthModifier())
         self.add_child(Strength(4))
         self.add_child(MovementSpeed(gametime.single_turn))

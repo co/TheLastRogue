@@ -3,6 +3,48 @@ import colors
 from compositecore import Leaf
 
 
+class GraphicChar(Leaf):
+    """
+    Composites holding this has a graphical representation as a char.
+    """
+    def __init__(self, color_bg, color_fg, symbol):
+        super(GraphicChar, self).__init__()
+        self.component_type = "graphic_char"
+        self._symbol = symbol
+        self._color_bg = color_bg
+        self._color_fg = color_fg
+
+    @property
+    def symbol(self):
+        return self._symbol
+
+    @symbol.setter
+    def symbol(self, value):
+        self._symbol = value
+
+    @property
+    def color_bg(self):
+        return self._color_bg
+
+    @color_bg.setter
+    def color_bg(self, value):
+        self._color_bg = value
+
+    @property
+    def color_fg(self):
+        return self._color_fg
+
+    @color_fg.setter
+    def color_fg(self, value):
+        self._color_fg = value
+
+    def copy(self):
+        """
+        Makes a copy of this component.
+        """
+        return GraphicChar(self.color_bg, self.color_fg, self.symbol)
+
+
 class CharPrinter(Leaf):
     def __init__(self):
         super(CharPrinter, self).__init__()
@@ -52,48 +94,6 @@ class CharPrinter(Leaf):
         the regular colors won't be drawn until the blink queue is empty.
         """
         self._blink_color_fg_queue = colors
-
-
-class GraphicChar(Leaf):
-    """
-    Composites holding this has a graphical representation as a char.
-    """
-    def __init__(self, color_bg, color_fg, symbol):
-        super(GraphicChar, self).__init__()
-        self.component_type = "graphic_char"
-        self._symbol = symbol
-        self._color_bg = color_bg
-        self._color_fg = color_fg
-
-    @property
-    def symbol(self):
-        return self._symbol
-
-    @symbol.setter
-    def symbol(self, value):
-        self._symbol = value
-
-    @property
-    def color_bg(self):
-        return self._color_bg
-
-    @color_bg.setter
-    def color_bg(self, value):
-        self._color_bg = value
-
-    @property
-    def color_fg(self):
-        return self._color_fg
-
-    @color_fg.setter
-    def color_fg(self, value):
-        self._color_fg = value
-
-    def copy(self):
-        """
-        Makes a copy of this component.
-        """
-        return GraphicChar(self.color_bg, self.color_fg, self.symbol)
 
 
 class GraphicCharTerrainCorners(GraphicChar):
