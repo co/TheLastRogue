@@ -97,7 +97,7 @@ class Component(object):
 
         False otherwise.
         """
-        if(self.parent is None):
+        if(self._parent is None):
             raise Exception("ERROR: Tries to find sibling {0} "
                             "of component {1} but it "
                             "has no parent!".format(str(component_type),
@@ -167,7 +167,7 @@ class Composite(Component):
                             "component: {1} to its children. "
                             "But component_type "
                             "was not set.".format(str(self), str(child)))
-        if(not child.parent is None):
+        if(not child._parent is None):
             raise Exception("Component {0} tried to add_child "
                             "component: {1} to its children. "
                             "But it already "

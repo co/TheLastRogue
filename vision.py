@@ -18,7 +18,8 @@ class Vision(Leaf):
         for entity in self.parent.dungeon_level.value.entities:
             if self.parent.dungeon_mask.can_see_point(entity.position.value):
                 seen_entities.append(entity)
-        return [entity for entity in seen_entities if not entity is self.parent]
+        return [entity for entity in seen_entities
+                if not entity is self.parent]
 
     def get_seen_entities_closest_first(self):
         """

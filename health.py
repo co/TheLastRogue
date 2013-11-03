@@ -64,6 +64,7 @@ class HealthModifier(Leaf):
 
 class HealthSpoof(Leaf):
     def __init__(self):
+        super(HealthSpoof, self).__init__()
         self.component_type = "health_modifier"
 
     def hurt(self, damage, damage_types=[], entity=None):
