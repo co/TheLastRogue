@@ -241,8 +241,9 @@ class PlayerStatusBar(RectangularUIElement):
 
         element_width = (self.width - style.interface_theme.margin[0] * 2)
         player_hp = player.health.hp
-        hp_bar = CounterBar(player_hp, element_width,
-                            colors.HP_BAR_FULL, colors.HP_BAR_EMPTY)
+        hp_bar = CounterBarWithNumbers(player_hp, element_width,
+                                       colors.HP_BAR_FULL, colors.HP_BAR_EMPTY,
+                                       colors.WHITE)
 
         self._rectangle_bg =\
             StyledRectangle(rect, style.interface_theme.rect_style)
@@ -359,6 +360,9 @@ class MessageDisplay(RectangularUIElement):
 
 
 class CounterBar(UIElement):
+    """
+    Draws a bar showing the ratio between the current and max value of counter.
+    """
     def __init__(self, counter, width, active_color, inactive_color,
                  margin=(0, 0), offset=geo.zero2d()):
         super(CounterBar, self).__init__(margin)
@@ -376,7 +380,10 @@ class CounterBar(UIElement):
     def width(self):
         return self._width
 
-    def draw(self, offset=geo.zero2d()):
+    def _draw_bar(self, offset=geo.zero2d()):
+        """
+        Draws the bar.
+        """
         tiles_active = int(math.ceil(self.counter.ratio_of_full() *
                                      self.width))
         x, y = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
@@ -386,6 +393,45 @@ class CounterBar(UIElement):
         for i in range(tiles_active, self.width):
             console.set_symbol((x + i, y), ' ')
             console.set_color_bg((x + i, y), self.inactive_color)
+
+    def draw(self, offset=geo.zero2d()):
+        """
+        Draws the bar.
+        """
+        self._draw_bar(offset)
+
+
+class CounterBarWithNumbers(CounterBar):
+    """
+    Will display current and max value of counter on the bar.
+    """
+    def __init__(self, counter, width, active_color, inactive_color,
+                 text_color, margin=(0, 0), offset=geo.zero2d()):
+        super(CounterBarWithNumbers, self).__init__(counter, width,
+                                                    active_color,
+                                                    inactive_color,
+                                                    margin, offset)
+        self.text_color = text_color
+
+    def draw(self, offset=geo.zero2d()):
+        """
+        Draws the bar with numbers.
+        """
+        self._draw_bar(offset)
+        console.set_default_color_fg(self.text_color)
+        self._draw_numbers(offset)
+
+    def _draw_numbers(self, offset):
+        """
+        Draws the numbers.
+        """
+        x, y = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
+        text = (str(self.counter.value) +
+                " (" + str(self.counter.max_value) + ")")
+        x_offset = (self.width - len(text)) / 2
+        position = (x + x_offset, y)
+
+        console.print_text(position, text)
 
 
 class TextBox(UIElement):
