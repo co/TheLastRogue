@@ -13,13 +13,10 @@ import style
 import symbol
 
 
-def main_menu(state_stack):
+def _main_menu(ui_state, current_stack):
     """
     Creates the first menu of the game.
     """
-    ui_elements = []
-    ui_state = state.UIState(gui.UIElementList(ui_elements))
-
     start_game_function =\
         lambda: ui_state.current_stack.push(gamestate.GameState())
     start_test_game_function =\
@@ -50,7 +47,7 @@ def main_menu(state_stack):
     border = 4
     temp_position = (-1, -1)
     main_menu = menu.StaticMenu(temp_position,
-                                menu_items, state_stack,
+                                menu_items, current_stack,
                                 margin=style.menu_theme.margin,
                                 vertical_space=1)
     main_menu_rect =\
@@ -59,11 +56,9 @@ def main_menu(state_stack):
     main_menu.offset = main_menu_rect.top_left
 
     background_rect =\
-        gui.StyledRectangle(main_menu_rect,
-                            style.menu_theme.rect_style)
-    ui_elements.append(background_rect)
-    ui_elements.append(main_menu)
-    return ui_state
+        gui.StyledRectangle(main_menu_rect, style.menu_theme.rect_style)
+    ui_elements = [background_rect, main_menu]
+    return ui_elements
 
 
 def inventory_menu(player, state_stack):
@@ -289,6 +284,38 @@ def game_over_screen(state_stack):
 
     ui_elements = [grayout_rect, game_over_stack_panel]
     ui_state = state.UIState(gui.UIElementList(ui_elements))
+    return ui_state
+
+
+def title_screen(state_stack):
+    title_stack_panel = gui.StackPanelVerticalCentering((0, 0))
+    line = gui.HorizontalLine(symbol.H_LINE, colors.GRAY,
+                              colors.WHITE, settings.WINDOW_WIDTH)
+    the_text = gui.TextBox("T H E", (0, 0), colors.BLACK, (0, 1))
+    last_text = gui.TextBox("L A S T", (0, 0), colors.BLACK, (0, 1))
+    rogue_text = gui.TextBox("R O G U E", (0, 0), colors.BLACK, (0, 1))
+
+    vspace = gui.VerticalSpace(15)
+
+    title_stack_panel.append(vspace)
+    title_stack_panel.append(line)
+    title_stack_panel.append(the_text)
+    title_stack_panel.append(last_text)
+    title_stack_panel.append(rogue_text)
+    title_stack_panel.append(line)
+
+    bg_rect = gui.FilledRectangle(rectfactory.full_screen_rect(),
+                                  colors.DARK_BLUE)
+
+    bg_sign_rect = gui.FilledRectangle(geo.Rect((0, 15),
+                                                settings.WINDOW_WIDTH, 11),
+                                       colors.WHITE)
+
+    ui_state = state.UIState(gui.UIElementList(None))
+    ui_elements = _main_menu(ui_state, state_stack)
+
+    ui_state.ui_element.elements = [bg_rect, bg_sign_rect,
+                                    title_stack_panel] + ui_elements
     return ui_state
 
 
