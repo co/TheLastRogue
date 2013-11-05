@@ -1,5 +1,5 @@
 from action import PickUpItemAction
-from attacker import Attacker
+from attacker import Attacker, Dodger
 from compositecore import Composite
 from dungeonmask import DungeonMask
 from entityeffect import EffectQueue
@@ -12,7 +12,7 @@ from mover import EntityMover
 from ondeathaction import DoNothingDeathAction
 from position import Position, DungeonLevel
 from stats import AttackSpeed, Faction, GameState, GamePieceType
-from stats import MovementSpeed, Strength, IsPlayer
+from stats import MovementSpeed, Strength, IsPlayer, Evasion, Hit
 from statusflags import StatusFlags
 from text import Description
 from vision import Vision, SightRadius
@@ -36,6 +36,9 @@ class Player(Composite):
 
         self.add_child(EntityMover())
         self.add_child(Attacker())
+        self.add_child(Dodger())
+        self.add_child(Evasion(12))
+        self.add_child(Hit(15))
 
         self.add_child(Description("CO", "The Brave"))
         self.add_child(GraphicChar(None, colors.WHITE,

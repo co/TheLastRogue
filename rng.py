@@ -6,8 +6,12 @@ def coin_flip():
 
 
 def random_variance(mid, var):
-    result = mid - var
-    for _ in range(var * 2):
+    return mid - var + sum_of_n_coin_flips(var * 2)
+
+
+def sum_of_n_coin_flips(n):
+    result = 0
+    for _ in range(n):
         if coin_flip():
             result += 1
     return result

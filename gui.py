@@ -1,4 +1,4 @@
-import messenger
+from messenger import messenger
 import math
 from console import console
 import colors
@@ -377,7 +377,7 @@ class MessageDisplay(RectangularUIElement):
     def update(self):
         messages_height = (self.height -
                            style.interface_theme.margin[0] * 2)
-        messages = messenger.messenger.tail(messages_height)
+        messages = messenger.tail(messages_height)
         self._message_stack_panel.clear()
         for message in messages:
             if(message.turn_created == turn.current_turn - 1):

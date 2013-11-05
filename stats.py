@@ -22,6 +22,26 @@ class IsPlayer(Leaf):
         self.component_type = "is_player"
 
 
+class Hit(Leaf):
+    """
+    A value determining how likely you are to hit something.
+    """
+    def __init__(self, hit):
+        super(Hit, self).__init__()
+        self.component_type = "hit"
+        self.value = hit
+
+
+class Evasion(Leaf):
+    """
+    High evasion means parent entity is harder to hit.
+    """
+    def __init__(self, evasion):
+        super(Evasion, self).__init__()
+        self.component_type = "evasion"
+        self.value = evasion
+
+
 class AttackSpeed(Leaf):
     """
     Composites holding this has the attack_speed attribute.

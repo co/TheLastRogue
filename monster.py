@@ -1,6 +1,6 @@
 from action import PickUpItemAction
 from actor import DoNothingActor
-from attacker import Attacker
+from attacker import Attacker, Dodger
 from compositecore import Composite, Leaf
 from damage import DamageTypes, Damage
 from dungeonmask import DungeonMask, Path
@@ -12,16 +12,14 @@ from monsteractor import ChasePlayerActor
 from mover import EntityMover, CanShareTileEntityMover
 from ondeathaction import EntityDeathAction
 from position import Position, DungeonLevel
-from stats import AttackSpeed, Faction, GameState
-from stats import MovementSpeed, Strength, GamePieceType
+from stats import AttackSpeed, Faction, GameState, Evasion
+from stats import MovementSpeed, Strength, GamePieceType, Hit
 from statusflags import StatusFlags
 from text import Description, EntityMessages
 from vision import Vision, SightRadius
 import colors
 import equipment
 import gametime
-import messenger
-import rng
 import symbol
 
 
@@ -41,19 +39,23 @@ class Ratman(Composite):
                                       "The ratman is beaten to a pulp."))
         self.add_child(Description("Ratman",
                                    "A Rat/Man hybrid it looks hostile."))
-        self.add_child(GraphicChar(None, colors.ORANGE,
-                                   symbol.RATMAN))
+        self.add_child(GraphicChar(None, colors.ORANGE, symbol.RATMAN))
         self.add_child(CharPrinter())
         self.add_child(EntityDeathAction())
 
         self.add_child(Faction(Faction.MONSTER))
-        self.add_child(Health(10))
-        self.add_child(HealthModifier())
-        self.add_child(Strength(2))
-        self.add_child(MovementSpeed(gametime.single_turn))
-        self.add_child(AttackSpeed(gametime.single_turn))
         self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
                                     StatusFlags.CAN_OPEN_DOORS]))
+        self.add_child(Health(10))
+        self.add_child(HealthModifier())
+        self.add_child(MovementSpeed(gametime.single_turn))
+
+        self.add_child(AttackSpeed(gametime.single_turn))
+        self.add_child(Strength(2))
+        self.add_child(Attacker())
+        self.add_child(Dodger())
+        self.add_child(Evasion(12))
+        self.add_child(Hit(15))
 
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())
@@ -66,14 +68,6 @@ class Ratman(Composite):
         self.add_child(equipment.Equipment())
         self.add_child(EffectQueue())
         self.add_child(PickUpItemAction())
-        self.add_child(Attacker())
-
-    def act(self):
-        self.step_looking_for_player()
-        if(rng.coin_flip() and self.can_see_player()):
-            message = "The rat-man looks at you."
-            messenger.messenger.message(message)
-        return gametime.single_turn
 
 
 class Jerico(Ratman):
@@ -117,6 +111,9 @@ class StoneStatue(Composite):
         self.add_child(AttackSpeed(gametime.single_turn))
         self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
                                     StatusFlags.CAN_OPEN_DOORS]))
+        self.add_child(Dodger())
+        self.add_child(Evasion(0))
+        self.add_child(Hit(0))
 
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())
@@ -162,6 +159,9 @@ class Slime(Composite):
         self.add_child(MovementSpeed(gametime.double_turn))
         self.add_child(AttackSpeed(gametime.single_turn))
         self.add_child(StatusFlags())
+        self.add_child(Dodger())
+        self.add_child(Evasion(7))
+        self.add_child(Hit(15))
 
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())

@@ -6,7 +6,7 @@ from health import BlockDamageHealthSpoof
 from missileaction import PlayerThrowItemAction
 from mover import Mover
 from position import Position, DungeonLevel
-from stats import GamePieceType
+from stats import GamePieceType, Hit
 from text import Description
 import action
 import colors
@@ -14,7 +14,7 @@ import damage
 import entityeffect
 import equipment
 import gametime
-import messenger
+from messenger import messenger
 import random
 import symbol
 
@@ -57,6 +57,7 @@ class Gun(Composite):
         self.add_child(PlayerThrowItemAction())
         self.add_child(ThrowerNonBreak())
         self.add_child(Weight(5))
+        self.add_child(Hit(11))
 
 
 class EquippedEffect(Leaf):
@@ -138,6 +139,7 @@ class Sword(Composite):
         self.add_child(PlayerThrowItemAction())
         self.add_child(ThrowerNonBreak())
         self.add_child(Weight(10))
+        self.add_child(Hit(17))
 
 
 class RingOfInvisibility(Leaf):
@@ -200,7 +202,7 @@ class Weight(Leaf):
 
     A heavier item can't be thrown as far.
     """
-    def __init__(self, weight=10):
+    def __init__(self, weight):
         super(Weight, self).__init__()
         self.component_type = "weight"
         self.value = weight
@@ -390,7 +392,7 @@ class PickUpItemAction(Action):
         pickup_succeded = source_entity.inventory.try_add(item)
         if(pickup_succeded):
             message = "Picked up: " + item.name
-            messenger.messenger.message(message)
+            messenger.message(message)
             source_entity.newly_spent_energy += gametime.single_turn
 
     def _get_item_on_floor(self, entity):
@@ -406,7 +408,7 @@ class PickUpItemAction(Action):
            not source_entity.inventory.has_room_for_item()):
             message = "Could not pick up: " + item.name +\
                 ", the inventory is full."
-            messenger.messenger.message(message)
+            messenger.message(message)
 
 
 class EquipmentType(Leaf):
@@ -426,9 +428,13 @@ class DamageProvider(Leaf):
     def __init__(self, damage, variance, types):
         super(DamageProvider, self).__init__()
         self.component_type = "damage_provider"
-        self._damage = Damage(damage, variance, types)
+        self.damage = damage
+        self.variance = variance
+        self.types = types
 
     def damage_entity(self, source_entity, target_entity):
+        self._damage = Damage(self.damage, self.variance,
+                              self.types, self.parent.hit.value)
         return self._damage.damage_entity(source_entity, target_entity)
 
 
@@ -495,7 +501,7 @@ class ThrowerNonBreak(Thrower):
         self.parent.mover.try_move(position, dungeon_level)
         message = "The " + self.parent.description.name.lower() +\
             " hits the ground with a thud."
-        messenger.messenger.message(message)
+        messenger.message(message)
 
 
 class ThrowerBreak(Thrower):
@@ -508,4 +514,4 @@ class ThrowerBreak(Thrower):
     def throw_effect(self, dungeon_level, position):
         message = "The " + self.name.lower() +\
             " smashes to the ground and breaks into pieces."
-        messenger.messenger.message(message)
+        messenger.message(message)

@@ -1,7 +1,7 @@
 from compositecore import Leaf
 from statusflags import StatusFlags
 import spawner
-from messenger import messenger, Message
+from messenger import messenger
 
 
 class OnDeathAction(Leaf):
@@ -30,7 +30,7 @@ class EntityDeathAction(OnDeathAction):
         if(self.parent.status_flags.has_status(StatusFlags.LEAVES_CORPSE)):
             spawner.spawn_corpse_of_entity(self.parent)
         self.parent.mover.try_remove_from_dungeon()
-        messenger.message(Message(self.parent.entity_messages.death))
+        messenger.message(self.parent.entity_messages.death)
 
 
 class DoNothingDeathAction(OnDeathAction):

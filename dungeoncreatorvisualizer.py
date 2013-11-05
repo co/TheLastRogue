@@ -2,17 +2,10 @@ import dungeongenerator as dgen
 import geometry as geo
 import camera
 from console import console
-import turn
 import direction
-import messenger
 import inputhandler
 import state
 import terrain
-
-
-def reset_globals():
-    turn.current_turn = 0
-    messenger.messenger = messenger.Messenger()
 
 
 class DungeonCreatorVisualizer(state.State):

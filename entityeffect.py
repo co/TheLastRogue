@@ -1,6 +1,6 @@
-import messenger
-from statusflags import StatusFlags
 from compositecore import Leaf
+from messenger import messenger
+from statusflags import StatusFlags
 import random
 
 
@@ -115,25 +115,34 @@ class Teleport(EntityEffect):
 
 class DamageEntityEffect(EntityEffect):
     def __init__(self, source_entity, damage,
-                 damage_types, time_to_live=1):
+                 damage_types, hit, time_to_live=1):
         super(DamageEntityEffect,
               self).__init__(source_entity=source_entity,
                              effect_type=EffectTypes.DAMAGE,
                              time_to_live=time_to_live)
+        self.hit = hit
         self.damage = damage
         self.damage_types = damage_types
+
+    def miss_message(self):
+        message = "%s misses %s." % (self.source_entity.description.name,
+                                     self.target_entity.description.name)
+        messenger.message(message)
 
     def message(self, damage_caused):
         message = "%s hits %s for %d damage." %\
             (self.source_entity.description.name,
              self.target_entity.description.name, damage_caused)
-        messenger.messenger.message(message)
+        messenger.message(message)
 
     def update(self, time_spent):
-        damage_caused =\
-            self.target_entity.health_modifier.hurt(self.damage,
-                                                    self.damage_types)
-        self.message(damage_caused)
+        if(self.target_entity.dodger.is_a_hit(self.hit)):
+            damage_caused =\
+                self.target_entity.health_modifier.hurt(self.damage,
+                                                        self.damage_types)
+            self.message(damage_caused)
+        else:
+            self.miss_message()
         self.tick(time_spent)
 
 
@@ -148,7 +157,7 @@ class Heal(EntityEffect):
         message = "%s heals %s for %d health." %\
             (self.source_entity.description.name,
              self.target_entity.description.name, self.health)
-        messenger.messenger.message(message)
+        messenger.message(message)
 
     def update(self, time_spent):
         self.target_entity.health_modifier.heal(self.health)
@@ -166,7 +175,7 @@ class Equip(EntityEffect):
     def message(self):
         message = "%s equips %s." % (self.source_entity.description.name,
                                      self.item.description.name)
-        messenger.messenger.message(message)
+        messenger.message(message)
 
     def update(self, time_spent):
         equipment = self.queue.target_entity.equipment
@@ -189,7 +198,7 @@ class Unequip(EntityEffect):
     def message(self):
         message = "%s unequips %s." % (self.source_entity.description.name,
                                        self.item.description.name)
-        messenger.messenger.message(message)
+        messenger.message(message)
 
     def update(self, time_spent):
         equipment = self.target_entity.equipment
@@ -212,7 +221,7 @@ class ReEquip(EntityEffect):
     def message(self):
         message = "%s equips %s." % (self.source_entity.description.name,
                                      self.item.description.name)
-        messenger.messenger.message(message)
+        messenger.message(message)
 
     def update(self, time_spent):
         old_item = None

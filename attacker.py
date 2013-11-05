@@ -1,11 +1,12 @@
-import damage
+import entityeffect
+import rng
 from compositecore import Leaf
 from equipment import EquipmentSlots
 
 
 class Attacker(Leaf):
     """
-    Component for moving and checking if a move is legal.
+    Component for attacking and checking if an attacking is legal.
     """
     def __init__(self):
         super(Attacker, self).__init__()
@@ -30,9 +31,10 @@ class Attacker(Leaf):
         """
         Makes entity to hit the target entity with the force of a thrown rock.
         """
-        damage_types = [damage.DamageTypes.BLUNT, damage.DamageTypes.PHYSICAL]
+        damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
         strength = self.parent.strength.value
-        thrown_damage = damage.Damage(strength / 2, strength / 3, damage_types)
+        thrown_damage = Damage(strength / 2, strength / 3,
+                               damage_types, self.parent.hit.value)
         thrown_damage.damage_entity(self.parent, target_entity)
 
     def hit(self, target_entity):
@@ -51,6 +53,50 @@ class Attacker(Leaf):
         Calculates an instance of damage
         caused by an unarmed hit by the entity.
         """
-        damage_types = [damage.DamageTypes.BLUNT, damage.DamageTypes.PHYSICAL]
+        damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
         strength = self.parent.strength.value
-        return damage.Damage(strength, strength / 2, damage_types)
+        return Damage(strength, strength / 2, damage_types,
+                      self.parent.hit.value)
+
+
+class Dodger(Leaf):
+    """
+    Component for calculating dodge.
+    """
+    def __init__(self):
+        super(Dodger, self).__init__()
+        self.component_type = "dodger"
+
+    def is_a_hit(self, hit):
+        """
+        Returns true if it is a hit, false otherwise.
+        """
+        return (rng.sum_of_n_coin_flips(hit) >=
+                rng.sum_of_n_coin_flips(self.parent.evasion.value))
+
+
+class DamageTypes(object):
+    PHYSICAL = 0
+    MAGIC = 1
+    BLUNT = 2
+    PIERCING = 3
+    CUTTING = 4
+    ACID = 5
+
+
+class Damage(object):
+    def __init__(self, strength, variance,
+                 damage_types, hit, damage_multiplier=1):
+        self.strength = strength
+        self.variance = variance
+        self.damage_multiplier = damage_multiplier
+        self.damage_types = damage_types
+        self.hit = hit
+
+    def damage_entity(self, source_entity, target_entity):
+        damage = rng.random_variance_no_negative(self.strength, self.variance)
+        damage_effect =\
+            entityeffect.DamageEntityEffect(source_entity,
+                                            damage * self.damage_multiplier,
+                                            self.damage_types, self.hit)
+        target_entity.effect_queue.add(damage_effect)
