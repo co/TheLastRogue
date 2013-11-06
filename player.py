@@ -11,11 +11,11 @@ from memorymap import MemoryMap
 from mover import EntityMover
 from ondeathaction import DoNothingDeathAction
 from position import Position, DungeonLevel
-from stats import AttackSpeed, Faction, GameState, GamePieceType
+from stats import AttackSpeed, Faction, GameState, GamePieceType, Stealth, Awareness
 from stats import MovementSpeed, Strength, IsPlayer, Evasion, Hit
 from statusflags import StatusFlags
 from text import Description
-from vision import Vision, SightRadius
+from vision import Vision, SightRadius, AwarenessChecker
 import colors
 import equipment
 import gametime
@@ -56,6 +56,9 @@ class Player(Composite):
         self.add_child(DungeonMask())
         self.add_child(SightRadius(6))
         self.add_child(Vision())
+        self.add_child(Stealth(6))
+        self.add_child(Awareness(5))
+        self.add_child(AwarenessChecker())
 
         self.add_child(MemoryMap())
         self.add_child(Inventory())

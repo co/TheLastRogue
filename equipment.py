@@ -113,7 +113,7 @@ class Equipment(Leaf):
         return len(self.get_open_slots_of_type(equipment_type)) < 1
 
     def can_equip(self, equipment):
-        if(self._all_slots_of_type_are_used(equipment.equipment_type.value)):
+        if self._all_slots_of_type_are_used(equipment.equipment_type.value):
             return False
         return True
 
@@ -130,7 +130,7 @@ class Equipment(Leaf):
 
     def _equip_into_slot(self, equipment, slot):
         self._equipment[slot] = equipment
-        if(equipment.has_child("on_equip_effect")):
+        if equipment.has_child("on_equip_effect"):
             equipment.on_equip_effect.effect(self.parent)
 
     def before_tick(self, time_spent):
@@ -138,13 +138,13 @@ class Equipment(Leaf):
 
     def execute_equip_effects(self):
         for equipment_slot in EquipmentSlots.ALL:
-            if(self.slot_is_equiped(equipment_slot)):
+            if self.slot_is_equiped(equipment_slot):
                 equipment = self._equipment[equipment_slot]
-                if(equipment.has_child("equipped_effect")):
+                if equipment.has_child("equipped_effect"):
                     equipment.equipped_effect.effect(self.parent)
 
     def print_equipment(self):
-        print "###############################"
+        print("###############################")
         for slot, content in self._equipment.iteritems():
-            print slot, content
-        print "###############################"
+            print(slot, content)
+        print("###############################")

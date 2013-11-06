@@ -1,4 +1,5 @@
 import geometry
+import random
 from compositecore import Leaf
 
 
@@ -6,6 +7,7 @@ class Vision(Leaf):
     """
     Holds functions that exposes what the parent entity can see.
     """
+
     def __init__(self):
         super(Vision, self).__init__()
         self.component_type = "vision"
@@ -35,7 +37,7 @@ class Vision(Leaf):
         Gets the closest of all seen entities not including self.
         """
         closest_seen_entities = self.get_seen_entities_closest_first()
-        if(len(closest_seen_entities) < 1):
+        if len(closest_seen_entities) < 1:
             return None
         return closest_seen_entities[0]  # The first is oneself.
 
@@ -44,7 +46,27 @@ class SightRadius(Leaf):
     """
     Composites holding this has the sight_radius attribute.
     """
+
     def __init__(self, sight_radius):
         super(SightRadius, self).__init__()
         self.component_type = "sight_radius"
         self.value = sight_radius
+
+
+class AwarenessChecker(Leaf):
+    """
+    Composites holding this can make awareness checks.
+    """
+
+    def __init__(self):
+        super(AwarenessChecker, self).__init__()
+        self.component_type = "awareness_checker"
+
+    def check(self, stealth):
+        """
+        Performs a notice check.
+        @param stealth: The stealth determines how hard it is to notice.
+        @return: True if the notice check is successful False otherwise.
+        """
+        return (random.randint(0, self.parent.awareness.value) >\
+                random.randint(0, stealth + 5))

@@ -111,7 +111,7 @@ class DungeonLevel(object):
 
     def get_tile_or_unknown(self, position):
         x, y = position
-        if(x < 0 or y < 0):
+        if x < 0 or y < 0:
             return tile.unknown_tile
         try:
             return self.tile_matrix[y][x]
@@ -139,7 +139,7 @@ class DungeonLevel(object):
             line = ""
             for x, tile in enumerate(row):
                 line += str(self.get_tile_or_unknown((x, y)).symbol)
-            print line
+            print(line)
 
     def get_walkable_positions(self, entity, position):
         return (self._walkable_destinations

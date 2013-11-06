@@ -42,7 +42,7 @@ class Attacker(Leaf):
         Causes the entity to hit the target entity.
         """
         equipment = self.parent.equipment
-        if(equipment.slot_is_equiped(EquipmentSlots.MELEE_WEAPON)):
+        if equipment.slot_is_equiped(EquipmentSlots.MELEE_WEAPON):
             weapon = self.parent.equipment.get(EquipmentSlots.MELEE_WEAPON)
             weapon.damage_provider.damage_entity(self.parent, target_entity)
         else:

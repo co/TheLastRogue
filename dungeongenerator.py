@@ -13,7 +13,7 @@ import tile
 
 def generate_dungeon_level(depth):
     dungeon_level = generate_terrain_dungeon_level(depth)
-    while(not place_up_down_stairs_at_center(dungeon_level)):
+    while not place_up_down_stairs_at_center(dungeon_level):
         dungeon_level = generate_terrain_dungeon_level(depth)
     return dungeon_level
 
@@ -345,6 +345,7 @@ class TileModifier(object):
 
 class ReplaceTerrain(TileModifier):
     def __init__(self, terrain_class):
+        super(ReplaceTerrain, self).__init__()
         self.terrain_class = terrain_class
 
     def modify(self, dungeon_level, position):

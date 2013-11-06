@@ -1,8 +1,7 @@
 from action import PickUpItemAction
 from actor import DoNothingActor
-from attacker import Attacker, Dodger
+from attacker import Attacker, Dodger, Damage, DamageTypes
 from compositecore import Composite, Leaf
-from damage import DamageTypes, Damage
 from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue
 from graphic import CharPrinter, GraphicChar
@@ -12,11 +11,11 @@ from monsteractor import ChasePlayerActor
 from mover import EntityMover, CanShareTileEntityMover
 from ondeathaction import EntityDeathAction
 from position import Position, DungeonLevel
-from stats import AttackSpeed, Faction, GameState, Evasion
+from stats import AttackSpeed, Faction, GameState, Evasion, Stealth, Awareness
 from stats import MovementSpeed, Strength, GamePieceType, Hit
 from statusflags import StatusFlags
 from text import Description, EntityMessages
-from vision import Vision, SightRadius
+from vision import Vision, SightRadius, AwarenessChecker
 import colors
 import equipment
 import gametime
@@ -27,6 +26,7 @@ class Ratman(Composite):
     """
     A composite component representing a Ratman monster.
     """
+
     def __init__(self, game_state):
         super(Ratman, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ENTITY))
@@ -60,6 +60,9 @@ class Ratman(Composite):
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())
         self.add_child(Vision())
+        self.add_child(Stealth(7))
+        self.add_child(Awareness(5))
+        self.add_child(AwarenessChecker())
 
         self.add_child(Inventory())
         self.add_child(Path())
@@ -83,6 +86,7 @@ class StoneStatue(Composite):
     """
     A composite component representing a Ratman monster.
     """
+
     def __init__(self, game_state):
         super(StoneStatue, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ENTITY))
@@ -118,6 +122,9 @@ class StoneStatue(Composite):
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())
         self.add_child(Vision())
+        self.add_child(Stealth(7))
+        self.add_child(Awareness(5))
+        self.add_child(AwarenessChecker())
 
         self.add_child(Inventory())
         self.add_child(Path())
@@ -133,6 +140,7 @@ class Slime(Composite):
     """
     A composite component representing a Ratman monster.
     """
+
     def __init__(self, game_state):
         super(Slime, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ENTITY))
@@ -143,7 +151,7 @@ class Slime(Composite):
 
         self.add_child(EntityMessages(("The slime seems to",
                                        "wobble with happiness."),
-                                      ("The slime melts away.")))
+                                      "The slime melts away."))
         self.add_child(Description("Slime",
                                    ("Slime, slime, slime. Ugh, I hate Slimes."
                                     "It seems to be looking at you...")))
@@ -162,10 +170,16 @@ class Slime(Composite):
         self.add_child(Dodger())
         self.add_child(Evasion(7))
         self.add_child(Hit(15))
+        self.add_child(Stealth(7))
+        self.add_child(Awareness(5))
+        self.add_child(AwarenessChecker())
 
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())
         self.add_child(Vision())
+        self.add_child(Stealth(7))
+        self.add_child(Awareness(5))
+        self.add_child(AwarenessChecker())
 
         self.add_child(Inventory())
         self.add_child(Path())
@@ -176,20 +190,21 @@ class Slime(Composite):
         self.add_child(PickUpItemAction())
 
         self.add_child(EntityShareTileEffect
-                       (DissolveEntitySlimeShareTileEffect()))
+            (DissolveEntitySlimeShareTileEffect()))
 
 
 class EntityShareTileEffect(Leaf):
     """
     Defines an effect that sharing tile with this parent entity will result in.
     """
+
     def __init__(self, effect):
         super(EntityShareTileEffect, self).__init__()
         self.component_type = "entity_share_tile_effect"
         self.effect = effect
 
     def share_tile_effect_tick(self, sharing_entity, time_spent):
-        if(not sharing_entity is self.parent):
+        if not sharing_entity is self.parent:
             self.effect(source_entity=self.parent,
                         target_entity=sharing_entity,
                         time=time_spent)
@@ -204,7 +219,7 @@ class DissolveEntitySlimeShareTileEffect(object):
         source_entity = kwargs["source_entity"]
         time = kwargs["time"]
         strength = source_entity.strength.value
-        damager = Damage(strength, strength / 3,
-                         [DamageTypes.ACID, DamageTypes.PHYSICAL],
-                         time / gametime.single_turn)
-        damager.damage_entity(source_entity, target_entity)
+        damage = Damage(strength, strength / 3,
+                        [DamageTypes.ACID, DamageTypes.PHYSICAL],
+                        time / gametime.single_turn)
+        damage.damage_entity(source_entity, target_entity)

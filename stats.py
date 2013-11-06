@@ -32,6 +32,26 @@ class Hit(Leaf):
         self.value = hit
 
 
+class Stealth(Leaf):
+    """
+    A value determining how good you are to go unnoticed.
+    """
+    def __init__(self, stealth):
+        super(Stealth, self).__init__()
+        self.component_type = "stealth"
+        self.value = stealth
+
+
+class Awareness(Leaf):
+    """
+    A value determining how good you are to noticing things.
+    """
+    def __init__(self, awareness):
+        super(Awareness, self).__init__()
+        self.component_type = "awareness"
+        self.value = awareness
+
+
 class Evasion(Leaf):
     """
     High evasion means parent entity is harder to hit.
@@ -76,7 +96,7 @@ class Faction(Leaf):
     """
     The faction attribute keeps track of the faction.
 
-    All other factions are concidered hostile.
+    All other factions are considered hostile.
     """
 
     PLAYER = 0

@@ -16,7 +16,7 @@ class PlayerMissileAction(Action):
                                                 max_missile_distance,
                                                 game_state)
 
-        if(path is None or path[-1] == source_entity.position.value):
+        if path is None or path[-1] == source_entity.position.value:
             return False
         dungeon_level = source_entity.dungeon_level.value
         hit_detector = shoot.MissileHitDetection(False, False)
@@ -32,10 +32,11 @@ class PlayerMissileAction(Action):
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         pass
 
-    def animate_flight(self, game_state, path, symbol, color_fg):
-        flight_animation =\
-            animation.MissileAnimation(game_state, symbol, color_fg, path)
-        flight_animation.run_animation()
+
+def animate_flight(game_state, path, symbol_char, color_fg):
+    flight_animation =\
+        animation.MissileAnimation(game_state, symbol_char, color_fg, path)
+    flight_animation.run_animation()
 
 
 class PlayerThrowItemAction(PlayerMissileAction):
@@ -66,8 +67,8 @@ class PlayerThrowItemAction(PlayerMissileAction):
         The final step of the throw.
         """
         self.remove_from_inventory(source_entity)
-        self.animate_flight(game_state, path, self.parent.graphic_char.symbol,
-                            self.parent.graphic_char.color_fg)
+        animate_flight(game_state, path, self.parent.graphic_char.symbol,
+                       self.parent.graphic_char.color_fg)
         self.parent.thrower.throw_effect(dungeon_level, path[-1])
 
 
@@ -81,15 +82,16 @@ class PlayerThrowRockAction(PlayerMissileAction):
         self.energy_cost = gametime.double_turn
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
-        self.animate_flight(game_state, path, self.symbol, self.color_fg)
+        animate_flight(game_state, path, self.symbol, self.color_fg)
         self.hit_position(dungeon_level, path[-1], source_entity)
 
     def can_act(self, **kwargs):
         return True
 
-    def hit_position(self, dungeon_level, position, source_entity):
+    @staticmethod
+    def hit_position(dungeon_level, position, source_entity):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
-        if(target_entity is None):
+        if target_entity is None:
             return
         source_entity.attacker.throw_rock_damage_entity(target_entity)
 
@@ -108,7 +110,7 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         self.color_fg = colors.WHITE
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
-        self.animate_flight(game_state, path, self.symbol, self.color_fg)
+        animate_flight(game_state, path, self.symbol, self.color_fg)
         self.hit_position(dungeon_level, path[-1], source_entity)
 
     def can_act(self, **kwargs):
@@ -116,7 +118,7 @@ class PlayerShootWeaponAction(PlayerMissileAction):
 
     def hit_position(self, dungeon_level, position, source_entity):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
-        if(target_entity is None):
+        if target_entity is None:
             return
         self.ranged_weapon.damage_provider.damage_entity(source_entity,
                                                          target_entity)

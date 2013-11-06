@@ -49,33 +49,30 @@ class CharPrinter(Leaf):
     def __init__(self):
         super(CharPrinter, self).__init__()
         self.component_type = "char_printer"
-        self._status_cycle_colors = []
-        self._blink_color_fg_queue = []
+        self._temp_animation_frames = []
 
-    def draw_no_effect(self, position):
+    @staticmethod
+    def _draw(position, graphic_char):
         """
         Draws the char on the given position on the console.
 
         Bypasses all effects.
         """
-        if(not self.parent.graphic_char.color_bg is None):
-            console.console.set_color_bg(position,
-                                         self.parent.graphic_char.color_bg)
-        if(not self.parent.graphic_char.color_fg is None):
-            console.console.set_color_fg(position,
-                                         self.parent.graphic_char.color_fg)
-        if(not self.parent.graphic_char.symbol is None):
-            console.console.set_symbol(position,
-                                       self.parent.graphic_char.symbol)
+        if not graphic_char.color_bg is None:
+            console.console.set_color_bg(position, graphic_char.color_bg)
+        if not graphic_char.color_fg is None:
+            console.console.set_color_fg(position, graphic_char.color_fg)
+        if not graphic_char.symbol is None:
+            console.console.set_symbol(position, graphic_char.symbol)
 
     def draw(self, position):
         """
         Draws the char on the given position on the console.
         """
-        self.draw_no_effect(position)
-        if(len(self._blink_color_fg_queue) > 0):
-            console.console.set_color_fg(position,
-                                         self._blink_color_fg_queue.pop())
+        if len(self._temp_animation_frames) > 0:
+            self._draw(position, self._temp_animation_frames.pop())
+        else:
+            self._draw(position, self.parent.graphic_char)
 
     def draw_unseen(self, screen_position):
         """
@@ -86,15 +83,26 @@ class CharPrinter(Leaf):
                                               colors.UNSEEN_BG,
                                               self.parent.graphic_char.symbol)
 
-    def set_fg_blink_colors(self, colors):
+    def append_graphic_char_temporary_frames(self, graphic_char_frames):
         """
-        Sets the foreground blink queue.
+        Appends frames to the graphic char animation frame queue.
 
-        These colors will be drawn as an effect,
-        the regular colors won't be drawn until the blink queue is empty.
+        These chars will be drawn as an effect,
+        the regular chars won't be drawn until the animation frame queue is empty.
         """
-        self._blink_color_fg_queue = colors
+        self._temp_animation_frames.extend(graphic_char_frames)
 
+    def append_fg_color_blink_frames(self, frame_colors):
+        """
+        Appends frames to  the graphic char animation frame queue. With only fg_color changed.
+
+        These chars will be drawn as an effect,
+        the regular chars won't be drawn until the animation frame queue is empty.
+        """
+        color_bg = self.parent.graphic_char.color_bg
+        symbol = self.parent.graphic_char.symbol
+        frames = [GraphicChar(color_bg, color, symbol) for color in frame_colors]
+        self.append_graphic_char_temporary_frames(frames)
 
 class GraphicCharTerrainCorners(GraphicChar):
     """

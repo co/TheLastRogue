@@ -7,7 +7,7 @@ class Messenger(object):
         self.__messages = []
 
     def message(self, new_message):
-        print "got message: ", new_message
+        print("got message: ", new_message)
         new_message = Message(new_message)
         current_turn = turn.current_turn
         old_message = next((message for message in self.__messages

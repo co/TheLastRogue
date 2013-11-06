@@ -35,7 +35,7 @@ class HealthModifier(Leaf):
         """
         self.parent.health.hp.decrease(damage)
         self._animate_hurt()
-        if(self.parent.health.is_dead()):
+        if self.parent.health.is_dead():
             self.parent.health.killer = entity
         return damage
 
@@ -43,8 +43,8 @@ class HealthModifier(Leaf):
         """
         Adds a blink animation to hurt entity.
         """
-        self.parent.char_printer.set_fg_blink_colors([colors.LIGHT_PINK,
-                                                      colors.RED])
+        self.parent.char_printer.append_fg_color_blink_frames([colors.LIGHT_PINK,
+                                                               colors.RED])
 
     def heal(self, health):
         """

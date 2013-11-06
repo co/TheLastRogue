@@ -1,6 +1,6 @@
 from action import Action
 from compositecore import Leaf, Composite
-from damage import Damage
+from attacker import Damage, DamageTypes
 from graphic import GraphicChar, CharPrinter
 from health import BlockDamageHealthSpoof
 from missileaction import PlayerThrowItemAction
@@ -10,7 +10,6 @@ from stats import GamePieceType, Hit
 from text import Description
 import action
 import colors
-import damage
 import entityeffect
 import equipment
 import gametime
@@ -50,8 +49,8 @@ class Gun(Composite):
                                    you see rust eating into the iron pipe."))
         self.add_child(GraphicChar(None, colors.WHITE, symbol.GUN))
         self.add_child(CharPrinter())
-        self.add_child(DamageProvider(15, 10, [damage.DamageTypes.PHYSICAL,
-                                               damage.DamageTypes.PIERCING]))
+        self.add_child(DamageProvider(15, 10, [DamageTypes.PHYSICAL,
+                                               DamageTypes.PIERCING]))
         self.add_child(WeaponRange(15))
         self.add_child(ReEquipAction())
         self.add_child(PlayerThrowItemAction())
@@ -90,8 +89,7 @@ class Armor(Composite):
                                    "protect you from some damage."))
         self.add_child(GraphicChar(None, colors.ORANGE_D, symbol.ARMOR))
         self.add_child(BlockDamageEquippedEffect(5, 3,
-                                                 [damage.DamageTypes.
-                                                  PHYSICAL]))
+                                                 [DamageTypes.PHYSICAL]))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
         self.add_child(PlayerThrowItemAction())
@@ -132,8 +130,8 @@ class Sword(Composite):
                                    "better days, it's as sharp as "
                                    "tough."))
         self.add_child(GraphicChar(None, colors.GRAY, symbol.SWORD))
-        self.add_child(DamageProvider(10, 3, [damage.DamageTypes.PHYSICAL,
-                                              damage.DamageTypes.CUTTING]))
+        self.add_child(DamageProvider(10, 3, [DamageTypes.PHYSICAL,
+                                              DamageTypes.CUTTING]))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
         self.add_child(PlayerThrowItemAction())

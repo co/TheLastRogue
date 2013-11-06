@@ -5,12 +5,11 @@ class Description(Leaf):
     """
     Composites holding this has some describing text and a name.
     """
-    def __init__(self, name="XXX_UNNAMED_XXX",
-                 description="XXX_Description_XXX"):
+    def __init__(self, name, description):
         super(Description, self).__init__()
+        self.component_type = "description"
         self.name = name
         self.description = description
-        self.component_type = "description"
 
     def copy(self):
         """
@@ -23,8 +22,8 @@ class EntityMessages(Leaf):
     """
     Holds the text messages that may be sent by the parent entity.
     """
-    def __init__(self, random, death):
+    def __init__(self, notice, death):
         super(EntityMessages, self).__init__()
         self.component_type = "entity_messages"
-        self.random = random
+        self.notice = notice
         self.death = death

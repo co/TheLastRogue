@@ -36,7 +36,7 @@ class EffectQueue(Leaf):
 
     def remove_status_adder_of_status(self, status_to_remove):
         for effect in self._effect_queue[EffectTypes.STATUS_ADDER]:
-            if(effect.status_flag == status_to_remove):
+            if effect.status_flag == status_to_remove:
                 self._effect_queue[EffectTypes.STATUS_ADDER].remove(effect)
 
     def on_tick(self, time_spent):
@@ -62,7 +62,7 @@ class EntityEffect(object):
 
     def tick(self, time_spent):
         self.time_to_live = self.time_to_live - time_spent
-        if(self.time_to_live < 1):
+        if self.time_to_live < 1:
             self.queue.remove(self)
 
 
@@ -136,7 +136,7 @@ class DamageEntityEffect(EntityEffect):
         messenger.message(message)
 
     def update(self, time_spent):
-        if(self.target_entity.dodger.is_a_hit(self.hit)):
+        if self.target_entity.dodger.is_a_hit(self.hit):
             damage_caused =\
                 self.target_entity.health_modifier.hurt(self.damage,
                                                         self.damage_types)
@@ -179,10 +179,10 @@ class Equip(EntityEffect):
 
     def update(self, time_spent):
         equipment = self.queue.target_entity.equipment
-        equip_succeded = equipment.try_equip(self.item)
-        if(equip_succeded):
+        equip_succeeded = equipment.try_equip(self.item)
+        if equip_succeeded:
             self.message()
-            if(self.queue.target_entity.inventory.has_item(self.item)):
+            if self.queue.target_entity.inventory.has_item(self.item):
                 self.queue.target_entity.inventory.remove_item(self.item)
         self.tick(time_spent)
 
@@ -196,16 +196,16 @@ class Unequip(EntityEffect):
         self.equipment_slot = equipment_slot
 
     def message(self):
-        message = "%s unequips %s." % (self.source_entity.description.name,
+        message = "%s puts away %s." % (self.source_entity.description.name,
                                        self.item.description.name)
         messenger.message(message)
 
     def update(self, time_spent):
         equipment = self.target_entity.equipment
-        if(equipment.can_unequip_to_inventory(self.equipment_slot)):
-            unequip_succeded =\
+        if equipment.can_unequip_to_inventory(self.equipment_slot):
+            underlip_succeeded =\
                 equipment.unequip_to_inventory(self.equipment_slot)
-            if(unequip_succeded):
+            if underlip_succeeded:
                 self.message()
         self.tick(time_spent)
 
@@ -225,17 +225,17 @@ class ReEquip(EntityEffect):
 
     def update(self, time_spent):
         old_item = None
-        if(self.source_entity.equipment.slot_is_equiped(self.equipment_slot)):
+        if self.source_entity.equipment.slot_is_equiped(self.equipment_slot):
             old_item =\
                 self.source_entity.equipment.unequip(self.equipment_slot)
 
         equipment = self.target_entity.equipment
-        equip_succeded = equipment.try_equip(self.item)
-        if(equip_succeded):
+        equip_succeeded = equipment.try_equip(self.item)
+        if equip_succeeded:
             self.message()
-            if(self.source_entity.inventory.has_item(self.item)):
+            if self.source_entity.inventory.has_item(self.item):
                 self.source_entity.inventory.remove_item(self.item)
 
-        if(not old_item is None):
+        if not old_item is None:
             self.source_entity.inventory.try_add(old_item)
         self.tick(time_spent)

@@ -1,17 +1,28 @@
 import random
+import colors
 import geometry as geo
+from graphic import GraphicChar
 import rng
 import direction
+from messenger import messenger
 from statusflags import StatusFlags
 from actor import Actor
+
+
+class MonsterActorState(object):
+    WANDERING = 0
+    HUNTING = 1
 
 
 class MonsterActor(Actor):
     """
     A set of methods useful to compose an AI Actor.
     """
+
     def __init__(self):
         super(MonsterActor, self).__init__()
+        self.actor_state = MonsterActorState.WANDERING
+
 
     def try_step_random_direction(self):
         """
@@ -32,9 +43,9 @@ class MonsterActor(Actor):
         dungeon_level = self.parent.dungeon_level.value
         position = self.parent.position.value
         entities_on_my_tile = (dungeon_level.get_tile(position).get_entities())
-        if(len(entities_on_my_tile) == 1):
+        if len(entities_on_my_tile) == 1:
             return None
-        if(len(entities_on_my_tile) != 2):
+        if len(entities_on_my_tile) != 2:
             raise
         return next(entity for entity in entities_on_my_tile
                     if not entity is self)
@@ -58,22 +69,31 @@ class MonsterActor(Actor):
     def get_player_if_seen(self):
         seen_entities = self.parent.vision.get_seen_entities()
         found_player = next((entity for entity in seen_entities
-                             if(entity.has_child("is_player"))), None)
-        if(not found_player is None and
-           not found_player.status_flags.has_status(StatusFlags.INVISIBILE)):
+                             if (entity.has_child("is_player"))), None)
+        if (not found_player is None and
+                not found_player.status_flags.has_status(StatusFlags.INVISIBILE)):
             return found_player
         return None
 
     def set_path_to_player_if_seen(self):
         player = self.get_player_if_seen()
-        if(player is None):
+        if player is None:
             return False
-        self.parent.path.compute_path(player.position.value)
+        if self.actor_state == MonsterActorState.HUNTING:
+            self.parent.path.compute_path(player.position.value)
+
+        elif self.parent.awareness_checker.check(self.parent.stealth.value):
+            self.parent.path.compute_path(player.position.value)
+            self.actor_state = MonsterActorState.HUNTING
+            found_gfx = GraphicChar(None, colors.BLUE, "!")
+            (self.parent.char_printer.
+             append_graphic_char_temporary_frames([found_gfx]))
+            messenger.message(self.parent.entity_messages.notice)
         return True
 
     def step_looking_for_player(self):
         self.set_path_to_player_if_seen()
-        if(not self.parent.path.has_path()):
+        if not self.parent.path.has_path():
             self.set_path_to_random_walkable_point()
         step_succeeded = self.parent.path.try_step_path()
         return step_succeeded
@@ -86,15 +106,16 @@ class MonsterActor(Actor):
     def get_walkable_positions_from_my_position(self):
         dungeon_level = self.parent.dungeon_level.value
         position = self.parent.position.value
-        return (dungeon_level.get_walkable_positions(self.parent, position))
+        return dungeon_level.get_walkable_positions(self.parent, position)
 
 
-class StepRandomDirectonActor(MonsterActor):
+class StepRandomDirectionActor(MonsterActor):
     """
     Standard Monster AI will chase the player.
     """
+
     def __init__(self):
-        super(StepRandomDirectonActor, self).__init__()
+        super(StepRandomDirectionActor, self).__init__()
 
     def act(self):
         self.try_step_random_direction()
@@ -105,6 +126,7 @@ class ChasePlayerActor(MonsterActor):
     """
     Standard Monster AI will chase the player.
     """
+
     def __init__(self):
         super(ChasePlayerActor, self).__init__()
 
