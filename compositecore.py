@@ -142,7 +142,7 @@ class Composite(Component):
                             "component: {1} to its children."
                             "But component_type"
                             "was not set.".format(str(self), str(child)))
-        if(not child._parent is None):
+        if not child._parent is None:
             raise Exception("Component {0} tried ta add_child"
                             "component: {1} to its children."
                             "But it already"
@@ -167,20 +167,20 @@ class Composite(Component):
                             "component: {1} to its children. "
                             "But component_type "
                             "was not set.".format(str(self), str(child)))
-        if(not child._parent is None):
+        if not child._parent is None:
             raise Exception("Component {0} tried to add_child "
                             "component: {1} to its children. "
                             "But it already "
                             "had parent: {2}.".format(str(self),
                                                       str(child),
                                                       str(child.parent)))
-        if(not child.component_type in self._children):
+        if not child.component_type in self._children:
             raise Exception("Component {0} tried to add_spoof_child"
                             "component: {1} to its spoofed_children."
                             "But there was no real "
                             "child of that type.".format(str(self),
                                                          str(child)))
-        if(not child.component_type in self._spoofed_children):
+        if not child.component_type in self._spoofed_children:
             self._spoofed_children[child.component_type] = []
         self._spoofed_children[child.component_type].append(child)
         child.parent = self

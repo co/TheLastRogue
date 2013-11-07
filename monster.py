@@ -114,7 +114,6 @@ class StoneStatue(Composite):
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(Health(30))
         self.add_child(HealthModifier())
-        self.add_child(BleedWhenDamaged())
 
         self.add_child(Strength(0))
         self.add_child(MovementSpeed(gametime.single_turn))

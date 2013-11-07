@@ -33,7 +33,7 @@ def spawn_corpse_of_entity(entity_killed):
 
 def spawn_corpse_on_position(position, dungeon_level):
     corpse = dungeontrash.Corpse()
-    spawn_succeded = corpse.mover.try_move(position, dungeon_level)
+    spawn_succeded = corpse.mover.replace_move(position, dungeon_level)
     if not spawn_succeded:
         logging.info("could not spawn corpse.")
         return False

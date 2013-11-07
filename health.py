@@ -138,7 +138,10 @@ class BleedWhenDamaged(DamageTakenEffect):
     """
     def __init__(self):
         super(BleedWhenDamaged, self).__init__()
-        self.component_type = "bleed_when_damaged"
+        self.component_type = "bleed_on_damaged"
+
+        # dictionary collision!?
+        #self.component_type = "bleed_when_damaged"
 
     def effect(self, damage, source_entity):
         dungeon_level = self.parent.dungeon_level.value

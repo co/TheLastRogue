@@ -36,7 +36,6 @@ class MonsterActorState(Leaf):
              append_graphic_char_temporary_frames([found_gfx]))
             messenger.message(self.parent.entity_messages.notice)
 
-        print "setting huntingstate: ", self.parent
         self._value = new_value
 
 
@@ -47,7 +46,6 @@ class MonsterActor(Actor):
 
     def __init__(self):
         super(MonsterActor, self).__init__()
-
 
     def try_step_random_direction(self):
         """
@@ -105,7 +103,6 @@ class MonsterActor(Actor):
         if player is None:
             return False
         if self.parent.monster_actor_state.value == MonsterActorState.HUNTING:
-            print "hunting!", player.position.value
             self.parent.path.compute_path(player.position.value)
 
         elif self.parent.awareness_checker.check(self.parent.stealth.value):
@@ -118,7 +115,6 @@ class MonsterActor(Actor):
         if not self.parent.path.has_path():
             self.set_path_to_random_walkable_point()
         step_succeeded = self.parent.path.try_step_path()
-        print("step success? ", step_succeeded)
         return step_succeeded
 
     def set_path_to_random_walkable_point(self):
