@@ -1,5 +1,6 @@
-import geometry
 import random
+
+import geometry
 from compositecore import Leaf
 
 

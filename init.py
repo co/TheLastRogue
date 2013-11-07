@@ -1,7 +1,8 @@
+import os
+
 import constants
 import settings
 import libtcodpy as libtcod
-import os
 
 
 def init_libtcod():

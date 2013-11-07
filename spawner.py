@@ -1,7 +1,8 @@
 import random
+import logging
+
 import dungeontrash
 import monster
-import logging
 
 
 def place_piece_on_random_tile(piece, dungeon_level):

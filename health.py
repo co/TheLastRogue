@@ -37,6 +37,7 @@ class HealthModifier(Leaf):
         self._animate_hurt()
         if self.parent.health.is_dead():
             self.parent.health.killer = entity
+        self._call_damage_taken_effect(damage, entity)
         return damage
 
     def _animate_hurt(self):
@@ -60,6 +61,16 @@ class HealthModifier(Leaf):
         hp = self.parent.health.hp
         hp.max_value = hp.max_value + amount
         hp.increase(amount)
+
+    def _call_damage_taken_effect(self, damage, entity):
+        """
+        Calls all on damage taken effects.
+        @param damage: The amount of damage taken.
+        @param entity: The entity that caused the damage.
+        """
+        effects = self.parent.get_children_with_tag("damage_taken_effect")
+        for effect in effects:
+            effect.effect(damage, entity)
 
 
 class HealthSpoof(Leaf):
@@ -104,3 +115,12 @@ class BlockDamageHealthSpoof(HealthSpoof):
         new_damage = max(damage - block_ammount, 0)
         return self.next.hurt(new_damage, damage_types=damage_types,
                               entity=entity)
+
+
+class DamageTakenEffect(Leaf):
+    def __init__(self):
+        super(DamageTakenEffect, self).__init__()
+        self.tags.add("damage_taken_effect")
+
+    def effect(self, damage, source_entity):
+        pass

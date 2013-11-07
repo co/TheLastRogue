@@ -1,5 +1,6 @@
-from messenger import messenger
 import math
+
+from messenger import messenger
 from console import console
 import colors
 import geometry as geo

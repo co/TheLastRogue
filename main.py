@@ -1,9 +1,10 @@
 #!/usr/bin/python
-import cProfile
-import init
 import logging
+
+import init
 import statestack
 import menufactory
+
 
 logging.basicConfig(filename="debug.log", level=logging.DEBUG, filemode="w")
 init.init_libtcod()

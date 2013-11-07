@@ -1,3 +1,5 @@
+import random
+
 from action import Action
 from compositecore import Leaf, Composite
 from attacker import Damage, DamageTypes
@@ -14,7 +16,6 @@ import entityeffect
 import equipment
 import gametime
 from messenger import messenger
-import random
 import symbol
 
 

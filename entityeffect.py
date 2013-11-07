@@ -1,7 +1,9 @@
+import random
+
 from compositecore import Leaf
 from messenger import messenger
 from statusflags import StatusFlags
-import random
+
 
 
 # Effect types in execution order
@@ -130,16 +132,17 @@ class DamageEntityEffect(EntityEffect):
         messenger.message(message)
 
     def message(self, damage_caused):
-        message = "%s hits %s for %d damage." %\
-            (self.source_entity.description.name,
-             self.target_entity.description.name, damage_caused)
+        message = "%s hits %s for %d damage." % \
+                  (self.source_entity.description.name,
+                   self.target_entity.description.name, damage_caused)
         messenger.message(message)
 
     def update(self, time_spent):
         if self.target_entity.dodger.is_a_hit(self.hit):
-            damage_caused =\
+            damage_caused = \
                 self.target_entity.health_modifier.hurt(self.damage,
-                                                        self.damage_types)
+                                                        self.damage_types,
+                                                        entity=self.source_entity)
             self.message(damage_caused)
         else:
             self.miss_message()
@@ -154,9 +157,9 @@ class Heal(EntityEffect):
         self.health = health
 
     def message(self):
-        message = "%s heals %s for %d health." %\
-            (self.source_entity.description.name,
-             self.target_entity.description.name, self.health)
+        message = "%s heals %s for %d health." % \
+                  (self.source_entity.description.name,
+                   self.target_entity.description.name, self.health)
         messenger.message(message)
 
     def update(self, time_spent):
@@ -197,13 +200,13 @@ class Unequip(EntityEffect):
 
     def message(self):
         message = "%s puts away %s." % (self.source_entity.description.name,
-                                       self.item.description.name)
+                                        self.item.description.name)
         messenger.message(message)
 
     def update(self, time_spent):
         equipment = self.target_entity.equipment
         if equipment.can_unequip_to_inventory(self.equipment_slot):
-            underlip_succeeded =\
+            underlip_succeeded = \
                 equipment.unequip_to_inventory(self.equipment_slot)
             if underlip_succeeded:
                 self.message()
@@ -226,7 +229,7 @@ class ReEquip(EntityEffect):
     def update(self, time_spent):
         old_item = None
         if self.source_entity.equipment.slot_is_equiped(self.equipment_slot):
-            old_item =\
+            old_item = \
                 self.source_entity.equipment.unequip(self.equipment_slot)
 
         equipment = self.target_entity.equipment

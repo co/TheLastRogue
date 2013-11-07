@@ -1,13 +1,14 @@
+import math
+import random
+
 import terrain
 import rng
-import math
 import graph
 import direction
 import dungeonlevel
 import dungeonfeature
 import shapegenerator
 import geometry as geo
-import random
 import tile
 
 

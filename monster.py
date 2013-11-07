@@ -7,7 +7,7 @@ from entityeffect import EffectQueue
 from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier
 from inventory import Inventory
-from monsteractor import ChasePlayerActor
+from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe
 from mover import EntityMover, CanShareTileEntityMover
 from ondeathaction import EntityDeathAction
 from position import Position, DungeonLevel
@@ -17,7 +17,7 @@ from statusflags import StatusFlags
 from text import Description, EntityMessages
 from vision import Vision, SightRadius, AwarenessChecker
 import colors
-import equipment
+from equipment import Equipment
 import gametime
 import symbol
 
@@ -64,11 +64,14 @@ class Ratman(Composite):
         self.add_child(Awareness(5))
         self.add_child(AwarenessChecker())
 
-        self.add_child(Inventory())
         self.add_child(Path())
         self.add_child(ChasePlayerActor())
+        self.add_child(MonsterActorState())
+        self.add_child(HuntPlayerIfHurtMe())
+
         self.add_child(GameState(game_state))
-        self.add_child(equipment.Equipment())
+        self.add_child(Equipment())
+        self.add_child(Inventory())
         self.add_child(EffectQueue())
         self.add_child(PickUpItemAction())
 
@@ -130,7 +133,7 @@ class StoneStatue(Composite):
         self.add_child(Path())
         self.add_child(DoNothingActor())
         self.add_child(GameState(game_state))
-        self.add_child(equipment.Equipment())
+        self.add_child(Equipment())
         self.add_child(EffectQueue())
         self.add_child(PickUpItemAction())
         self.add_child(Attacker())
@@ -184,8 +187,11 @@ class Slime(Composite):
         self.add_child(Inventory())
         self.add_child(Path())
         self.add_child(ChasePlayerActor())
+        self.add_child(MonsterActorState())
+        self.add_child(HuntPlayerIfHurtMe())
+
         self.add_child(GameState(game_state))
-        self.add_child(equipment.Equipment())
+        self.add_child(Equipment())
         self.add_child(EffectQueue())
         self.add_child(PickUpItemAction())
 

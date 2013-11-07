@@ -1,7 +1,9 @@
 import random
 import colors
+from compositecore import Leaf
 import geometry as geo
 from graphic import GraphicChar
+from health import DamageTakenEffect
 import rng
 import direction
 from messenger import messenger
@@ -9,9 +11,32 @@ from statusflags import StatusFlags
 from actor import Actor
 
 
-class MonsterActorState(object):
+class MonsterActorState(Leaf):
+    """
+    Holds the monster actor state of the parent. This value is used in AI decisions.
+    """
     WANDERING = 0
     HUNTING = 1
+
+    def __init__(self, state=WANDERING):
+        super(MonsterActorState, self).__init__()
+        self.component_type = "monster_actor_state"
+        self._value = state
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, new_value):
+        if (self._value != MonsterActorState.HUNTING and
+            MonsterActorState.HUNTING == new_value):
+            found_gfx = GraphicChar(None, colors.BLUE, "!")
+            (self.parent.char_printer.
+             append_graphic_char_temporary_frames([found_gfx]))
+            messenger.message(self.parent.entity_messages.notice)
+
+        self._value = new_value
 
 
 class MonsterActor(Actor):
@@ -21,7 +46,6 @@ class MonsterActor(Actor):
 
     def __init__(self):
         super(MonsterActor, self).__init__()
-        self.actor_state = MonsterActorState.WANDERING
 
 
     def try_step_random_direction(self):
@@ -79,16 +103,12 @@ class MonsterActor(Actor):
         player = self.get_player_if_seen()
         if player is None:
             return False
-        if self.actor_state == MonsterActorState.HUNTING:
+        if self.parent.monster_actor_state.value == MonsterActorState.HUNTING:
             self.parent.path.compute_path(player.position.value)
 
         elif self.parent.awareness_checker.check(self.parent.stealth.value):
             self.parent.path.compute_path(player.position.value)
-            self.actor_state = MonsterActorState.HUNTING
-            found_gfx = GraphicChar(None, colors.BLUE, "!")
-            (self.parent.char_printer.
-             append_graphic_char_temporary_frames([found_gfx]))
-            messenger.message(self.parent.entity_messages.notice)
+            self.parent.monster_actor_state.value = MonsterActorState.HUNTING
         return True
 
     def step_looking_for_player(self):
@@ -134,3 +154,13 @@ class ChasePlayerActor(MonsterActor):
         self.parent.dungeon_mask.update_fov()
         self.step_looking_for_player()
         return self.parent.movement_speed.value
+
+
+class HuntPlayerIfHurtMe(DamageTakenEffect):
+    def __init__(self):
+        super(HuntPlayerIfHurtMe, self).__init__()
+        self.component_type = "hunt_player_if_hurt_me"
+
+    def effect(self, _, source_entity):
+        if source_entity.has_child("is_player"):
+            self.parent.monster_actor_state.value = MonsterActorState.HUNTING

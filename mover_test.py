@@ -1,3 +1,5 @@
+import unittest
+
 from compositecore import Composite
 from mover import Mover
 from position import Position, DungeonLevel
@@ -5,7 +7,6 @@ from stats import GamePieceType
 from statusflags import StatusFlags
 import dungeonlevelfactory
 import terrain
-import unittest
 
 
 class TestComposition(unittest.TestCase):
