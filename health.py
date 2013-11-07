@@ -1,7 +1,10 @@
 from compositecore import Leaf
 import counter
 import colors
+import geometry
 import rng
+import shapegenerator
+import spawner
 
 
 class Health(Leaf):
@@ -118,9 +121,49 @@ class BlockDamageHealthSpoof(HealthSpoof):
 
 
 class DamageTakenEffect(Leaf):
+    """
+    Subclasses may define an effect that happens when parent takes damage.
+    """
     def __init__(self):
         super(DamageTakenEffect, self).__init__()
         self.tags.add("damage_taken_effect")
 
     def effect(self, damage, source_entity):
         pass
+
+
+class BleedWhenDamaged(DamageTakenEffect):
+    """
+    When parent takes damage, it will bleed pools of blood on the terrain.
+    """
+    def __init__(self):
+        super(BleedWhenDamaged, self).__init__()
+        self.component_type = "bleed_when_damaged"
+
+    def effect(self, damage, source_entity):
+        dungeon_level = self.parent.dungeon_level.value
+        if damage/float(self.parent.health.hp.max_value) > 0.2:
+            spawner.spawn_blood_on_position(self.parent.position.value, dungeon_level)
+
+        if damage/float(self.parent.health.hp.max_value) > 0.4:
+            point_behind = self._get_point_behind(source_entity.position.value, 1)
+            shape = shapegenerator.random_explosion(point_behind, 3)
+            for point in shape:
+                spawner.spawn_blood_on_position(point, dungeon_level)
+
+        if damage/float(self.parent.health.hp.max_value) > 0.8:
+            point_behind = self._get_point_behind(source_entity.position.value, 2)
+            shape = shapegenerator.random_explosion(point_behind, 8)
+            for point in shape:
+                spawner.spawn_blood_on_position(point, dungeon_level)
+
+    def _get_point_behind(self, enemy_position, distance):
+        """
+        Gets point right behind me seen from my enemy.
+        """
+        far_behind_point = geometry.sub_2d(self.parent.position.value, enemy_position)
+        right_behind_point_delta = geometry.element_wise_round(geometry.normalize(far_behind_point))
+        result = self.parent.position.value
+        for _ in range(distance):
+            result = geometry.add_2d(right_behind_point_delta, result)
+        return result

@@ -38,7 +38,7 @@ class DungeonCreatorVisualizer(state.State):
         end_condition = dgen.CountDownCondition(dungeon_level.width *
                                                 dungeon_level.height * 0.1)
         move_list = list(direction.AXIS_DIRECTIONS)
-        dgen.random_exlosion(dungeon_level, center_position, brush,
+        dgen.random_explosion(dungeon_level, center_position, brush,
                              end_condition, move_list)
 
     def drunkard_walk(self):

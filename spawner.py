@@ -34,7 +34,16 @@ def spawn_corpse_of_entity(entity_killed):
 def spawn_corpse_on_position(position, dungeon_level):
     corpse = dungeontrash.Corpse()
     spawn_succeded = corpse.mover.try_move(position, dungeon_level)
-    if(not spawn_succeded):
+    if not spawn_succeded:
         logging.info("could not spawn corpse.")
+        return False
+    return True
+
+
+def spawn_blood_on_position(position, dungeon_level):
+    corpse = dungeontrash.PoolOfBlood()
+    spawn_succeded = corpse.mover.try_move(position, dungeon_level)
+    if not spawn_succeded:
+        logging.info("could not spawn pool of blood.")
         return False
     return True

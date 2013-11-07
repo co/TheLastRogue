@@ -45,15 +45,20 @@ def length(vec):
     return math.sqrt(length_sqrd(vec))
 
 
-def normalize(vec):
+def normalize(point):
     '''
     Returns a new vector that has the same direction as vec,
     but has a length of one.
     '''
-    if(vec[0] == 0. and vec[1] == 0.):
+    if(point[0] == 0. and point[1] == 0.):
         return (0., 0.)
-    return vec / length(vec)
+    return (point[0] / length(point), point[1] / length(point))
 
+def element_wise_round(point):
+    """
+    Return new point with each element rounded to nearest int
+    """
+    return int(round(point[0])), int(round(point[1]))
 
 def dot(a, b):
     'Computes the dot product of a and b'

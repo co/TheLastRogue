@@ -104,11 +104,11 @@ def drunkard_walk(dungeon_level, start_pos, tile_brush, end_condition_func,
                          for _direction in move_list])
         unvisited_neighbors = neighbors - visited
         unvisited_positions = unvisited_positions | unvisited_neighbors
-        if(len(unvisited_neighbors) >= 1):
+        if (len(unvisited_neighbors) >= 1):
             position = random.sample(unvisited_neighbors, 1)[0]
         else:
             position = random.sample(unvisited_positions, 1)[0]
-        while(not dungeon_level.has_tile(position)):
+        while (not dungeon_level.has_tile(position)):
             position = random.sample(unvisited_positions, 1)[0]
 
 
@@ -126,7 +126,7 @@ def random_exlosion(dungeon_level, start_pos, tile_brush,
                          for _direction in move_list])
         unvisited_neighbors = neighbors - visited
         unvisited_positions = unvisited_positions | unvisited_neighbors
-        if(len(unvisited_positions) >= 1):
+        if (len(unvisited_positions) >= 1):
             position = random.sample(unvisited_positions, 1)[0]
         else:
             break
@@ -161,8 +161,8 @@ def cellular_automata(dungeon_level):
 
             solid_neighbors = 0
             for point in neighbors:
-                if(not dungeon_level.has_tile(point) or
-                   dungeon_level.get_tile(point).get_terrain().is_solid.value):
+                if (not dungeon_level.has_tile(point) or
+                        dungeon_level.get_tile(point).get_terrain().is_solid.value):
                     solid_neighbors += 1
             _apply_cellular_automata_rule_on_tile(dungeon_level, position,
                                                   solid_neighbors)
@@ -171,7 +171,7 @@ def cellular_automata(dungeon_level):
 def _apply_cellular_automata_rule_on_tile(dungeon_level, position,
                                           number_of_solid_neighbors):
     this_terrain = dungeon_level.get_tile(position).get_terrain()
-    solid_neighborhood_size =\
+    solid_neighborhood_size = \
         number_of_solid_neighbors + (1 if this_terrain.is_solid.value else 0)
     if solid_neighborhood_size >= 5:
         terrain.Wall().mover.replace_move(position, dungeon_level)
@@ -197,7 +197,7 @@ def generate_dungeon_exploded_rooms(open_area, depth):
         room_graph.add_point(room_position)
     while not room_graph.is_connected():
         edge = random.sample(room_positions, 2)
-        while(room_graph.has_edge(edge[0], edge[1])):
+        while room_graph.has_edge(edge[0], edge[1]):
             edge = random.sample(room_positions, 2)
         room_graph.add_edge(edge[0], edge[1])
         corridors_points.update(shapegenerator.manhattan_walker(edge[0],
@@ -205,9 +205,9 @@ def generate_dungeon_exploded_rooms(open_area, depth):
 
     open_points = corridors_points
     for position in room_positions:
-        room_points =\
-            shapegenerator.random_exlosion(position, room_area,
-                                           direction.AXIS_DIRECTIONS)
+        room_points = \
+            shapegenerator.random_explosion(position, room_area,
+                                            direction.AXIS_DIRECTIONS)
         open_points.update(room_points)
 
     level_shape = shapegenerator.Shape(open_points)
@@ -234,7 +234,7 @@ def generate_dungeon_cave_floor(size, depth):
     corridor_room_area_ratio = 0.25
     corridor_area = size * corridor_room_area_ratio
     corridors_directions = direction.AXIS_DIRECTIONS
-    corridors_shape =\
+    corridors_shape = \
         shapegenerator.dfs_tunnler_with_random_restart((0, 0), 10, 16,
                                                        corridor_area,
                                                        corridors_directions)
@@ -244,9 +244,9 @@ def generate_dungeon_cave_floor(size, depth):
     open_points = corridors_shape
     total_room_area = size * (1 - corridor_room_area_ratio)
     for position in room_positions:
-        room_points =\
-            shapegenerator.random_exlosion(position, total_room_area / rooms,
-                                           direction.AXIS_DIRECTIONS)
+        room_points = \
+            shapegenerator.random_explosion(position, total_room_area / rooms,
+                                            direction.AXIS_DIRECTIONS)
         open_points.update(room_points)
 
     frame = 2

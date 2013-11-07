@@ -5,7 +5,7 @@ from compositecore import Composite, Leaf
 from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue
 from graphic import CharPrinter, GraphicChar
-from health import Health, HealthModifier
+from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe
 from mover import EntityMover, CanShareTileEntityMover
@@ -49,6 +49,7 @@ class Ratman(Composite):
         self.add_child(Health(10))
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.single_turn))
+        self.add_child(BleedWhenDamaged())
 
         self.add_child(AttackSpeed(gametime.single_turn))
         self.add_child(Strength(2))
@@ -113,6 +114,8 @@ class StoneStatue(Composite):
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(Health(30))
         self.add_child(HealthModifier())
+        self.add_child(BleedWhenDamaged())
+
         self.add_child(Strength(0))
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(AttackSpeed(gametime.single_turn))
@@ -166,6 +169,7 @@ class Slime(Composite):
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(Health(20))
         self.add_child(HealthModifier())
+
         self.add_child(Strength(6))
         self.add_child(MovementSpeed(gametime.double_turn))
         self.add_child(AttackSpeed(gametime.single_turn))

@@ -149,7 +149,8 @@ class Path(Leaf):
         """
         Returns True if the entity has a path to walk.
         """
-        if(self.path is None or libtcod.path_is_empty(self.path)):
+        if self.path is None or libtcod.path_is_empty(self.path):
+            print "path:", self.path
             return False
         return True
 
@@ -157,13 +158,16 @@ class Path(Leaf):
         """
         Tries to step the entity along the path, relies on the mover module.
         """
-        if(not self.has_path()):
+        if not self.has_path():
+            print("no has path: ", self.parent)
             return False
         x, y = libtcod.path_walk(self.path, True)
         step_succeeded = self.parent.mover.try_move_or_bump((x, y))
+        print("good step?: ", step_succeeded)
         return step_succeeded
 
     def compute_path(self, destination):
+        print("setting new path:", self.parent.position.value, destination)
         sx, sy = self.parent.position.value
         dx, dy = destination
         libtcod.path_compute(self.path, sx, sy, dx, dy)

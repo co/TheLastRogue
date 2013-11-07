@@ -4,7 +4,7 @@ from compositecore import Composite
 from dungeonmask import DungeonMask
 from entityeffect import EffectQueue
 from graphic import CharPrinter, GraphicChar
-from health import Health, HealthModifier
+from health import Health, HealthModifier, BleedWhenDamaged
 from inputactor import InputActor
 from inventory import Inventory
 from memorymap import MemoryMap
@@ -45,9 +45,11 @@ class Player(Composite):
                                    symbol.GUNSLINGER_THIN))
         self.add_child(CharPrinter())
 
-        self.add_child(Faction(Faction.PLAYER))
         self.add_child(Health(20))
         self.add_child(HealthModifier())
+        self.add_child(BleedWhenDamaged())
+
+        self.add_child(Faction(Faction.PLAYER))
         self.add_child(Strength(4))
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(AttackSpeed(gametime.single_turn))

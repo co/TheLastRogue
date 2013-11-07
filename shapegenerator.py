@@ -60,7 +60,7 @@ def dfs_tunnler_with_random_restart(start_position, min_length, max_length,
     return visited
 
 
-def random_exlosion(start_pos, size, move_list=None):
+def random_explosion(start_pos, size, move_list=None):
     if move_list is None:
         move_list = direction.DIRECTIONS
     position = start_pos
