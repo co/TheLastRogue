@@ -117,11 +117,15 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         self.color_fg = colors.WHITE
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
+        self.remove_ammo_from_inventory(source_entity.inventory)
         animate_flight(game_state, path, self.symbol, self.color_fg)
         self.hit_position(dungeon_level, path[-1], source_entity)
 
     def can_act(self, **kwargs):
-        return True
+        source_entity = kwargs[SOURCE_ENTITY]
+        ammo_items = [item for item in source_entity.inventory.items
+                      if item.has_child("is_ammo")]
+        return len(ammo_items) > 0
 
     def hit_position(self, dungeon_level, position, source_entity):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
@@ -132,6 +136,11 @@ class PlayerShootWeaponAction(PlayerMissileAction):
 
     def max_missile_distance(self, **kwargs):
         return self.ranged_weapon.weapon_range.value
+
+    def remove_ammo_from_inventory(self, inventory):
+        ammo_items = [item for item in inventory.items if item.has_child("is_ammo")]
+        ammo_item_with_least_ammo = min(ammo_items, key=lambda e: e.stacker.size)
+        inventory.remove_one_item_from_stack(ammo_item_with_least_ammo)
 
 
 class MonsterThrowRockAction(Leaf):

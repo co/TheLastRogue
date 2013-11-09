@@ -29,6 +29,7 @@ ZERO = 121
 FIRE = 122
 PRINTSCREEN = 123
 TAB = 124
+STONE = 125
 
 #Aliases:
 UP = NORTH
@@ -80,6 +81,7 @@ controls = {
     libtcod.KEY_KP3: SOUTHEAST,  # down, right
 
     'f': FIRE,
+    's': STONE,
     '@': PRINTSCREEN,
 
     libtcod.KEY_ENTER: ENTER,

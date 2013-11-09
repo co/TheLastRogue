@@ -47,8 +47,8 @@ class InputActor(Actor):
             equipment = self.parent.equipment
             if(equipment.slot_is_equiped(EquipmentSlots.RANGED_WEAPON)):
                 self.shoot_weapon()
-            else:
-                self.throw_rock()
+        elif key == inputhandler.STONE:
+            self.throw_rock()
         elif key == inputhandler.ESCAPE:
             self.parent.health.hp.set_min()
             self.newly_spent_energy += gametime.single_turn

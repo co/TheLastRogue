@@ -1,4 +1,5 @@
 from compositecore import Leaf
+from item import Ammunition
 from libtcodpy import _CBsp
 
 ITEM_CAPACITY = 16
@@ -98,6 +99,19 @@ class Inventory(Leaf):
         Removes item from the inventory.
         """
         self._items.remove(item)
+
+    def remove_one_item_from_stack(self, item):
+        """
+        Removes one instance of an item from the inventory.
+
+        Works like remove_item but does not remove an entire stack of items.
+        """
+        if item.has_child("stacker"):
+            item.stacker.size -= 1
+            if item.stacker.size <= 0:
+                self._items.remove(item)
+        else:
+            self._items.remove(item)
 
     def has_item(self, item):
         """
