@@ -19,9 +19,9 @@ from messenger import messenger
 import symbol
 
 
-class ItemType(object):
+class ItemType(Leaf):
     """
-    Enumerator class denoting different item types.
+    Enumerator class denoting different item types. Inventory is sorted on ItemType.
     """
     POTION = 0
     WEAPON = 1
@@ -31,6 +31,10 @@ class ItemType(object):
 
     ALL = [POTION, WEAPON, ARMOR, AMMO]
 
+    def __init__(self, item_type):
+        super(ItemType, self).__init__()
+        self.component_type = "item_type"
+        self.value = item_type
 
 class Gun(Composite):
     """
@@ -40,6 +44,7 @@ class Gun(Composite):
         super(Gun, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ITEM))
         self.add_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
+        self.add_child(ItemType(ItemType.WEAPON))
         self.add_child(Position())
         self.add_child(DungeonLevel())
         self.add_child(Mover())
@@ -59,6 +64,51 @@ class Gun(Composite):
         self.add_child(Weight(5))
         self.add_child(Hit(11))
 
+
+class IsAmmo(Leaf):
+    """
+    Parent component holding this is some kind of ammo.
+    """
+    def __init__(self):
+        super(IsAmmo, self).__init__()
+        self.component_type = "is_ammo"
+
+
+class Stacker(Leaf):
+    """
+    Parent component is Stacker.
+
+    Should only be used for items where all instances are equal.
+    """
+    def __init__(self, stack_type, max_size, size=1):
+        super(Stacker, self).__init__()
+        self.component_type = "stacker"
+        self.stack_type = stack_type
+        self.max_size = max_size
+        self.size = size
+
+    def is_full(self):
+        return self.size >= self.max_size
+
+class Ammunition(Composite):
+    """
+    A composite component representing a gun ammunition item.
+    """
+    def __init__(self):
+        super(Ammunition, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ITEM))
+        self.add_child(ItemType(ItemType.AMMO))
+        self.add_child(Position())
+        self.add_child(IsAmmo())
+        self.add_child(Stacker("ammo", 10, 3))
+        self.add_child(DungeonLevel())
+        self.add_child(Mover())
+        self.add_child(Description("Gun Bullets",
+                                   "These bullets will fit in most guns."))
+        self.add_child(GraphicChar(None, colors.GRAY, ":"))
+        self.add_child(CharPrinter())
+        self.add_child(Weight(1))
+        self.add_child(Hit(17))
 
 class EquippedEffect(Leaf):
     """
@@ -81,6 +131,7 @@ class Armor(Composite):
         super(Armor, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ITEM))
         self.add_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
+        self.add_child(ItemType(ItemType.ARMOR))
         self.add_child(Position())
         self.add_child(DungeonLevel())
         self.add_child(Mover())
@@ -123,6 +174,7 @@ class Sword(Composite):
         super(Sword, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ITEM))
         self.add_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
+        self.add_child(ItemType(ItemType.WEAPON))
         self.add_child(Position())
         self.add_child(DungeonLevel())
         self.add_child(Mover())
@@ -148,6 +200,7 @@ class RingOfInvisibility(Leaf):
     def __init__(self):
         super(RingOfInvisibility, self).__init__()
         self.add_child(EquipmentType(equipment.EquipmentTypes.RING))
+        self.add_child(ItemType(ItemType.JEWELLRY))
         self.add_child(GamePieceType(GamePieceType.ITEM))
         self.add_child(Position())
         self.add_child(DungeonLevel())
@@ -182,6 +235,7 @@ class HealthPotion(Composite):
         Abstract class, subclasses of this class are potions,
         """
         super(HealthPotion, self).__init__()
+        self.add_child(ItemType(ItemType.POTION))
         self.add_child(GamePieceType(GamePieceType.ITEM))
         self.add_child(Position())
         self.add_child(DungeonLevel())
@@ -191,8 +245,12 @@ class HealthPotion(Composite):
                                    contained in a glass flask."))
         self.add_child(GraphicChar(None, colors.PINK, symbol.POTION))
         self.add_child(CharPrinter())
-        self.add_child(Stacker())
+        self.add_child(Stacker("health_potion", 3))
         self.add_child(HealingPotionDrinkAction())
+
+        self.add_child(ThrowerBreak())
+        self.add_child(Weight(4))
+        self.add_child(PlayerThrowItemAction())
 
 
 class Weight(Leaf):
@@ -233,23 +291,12 @@ class DropAction(Action):
         Attempts to drop the parent item at the entity's feet.
         """
         source_entity = kwargs[action.SOURCE_ENTITY]
-        if(not self.parent.inventory is None):
+        if not self.parent.inventory is None:
             drop_successful =\
                 self.parent.inventory.try_drop_item(self.parent)
-            if(drop_successful):
+            if drop_successful:
                 self.add_energy_spent_to_entity(source_entity)
         return
-
-
-class ThrowAction(Action):
-    """
-    An entity holding the parent item in its inventory should be able to throw
-    the item using this action.
-    """
-    def __init__(self):
-        super(ThrowAction,
-              self).__init__()
-        self.component_type = "throw_action"
 
 
 class ReEquipAction(Action):
@@ -379,6 +426,7 @@ class PickUpItemAction(Action):
         """
         source_entity = kwargs[action.SOURCE_ENTITY]
         item = self._get_item_on_floor(source_entity)
+        print "time to pickup", item
         return (not item is None and
                 source_entity.inventory.has_room_for_item())
 
@@ -389,12 +437,13 @@ class PickUpItemAction(Action):
         source_entity = kwargs[action.SOURCE_ENTITY]
         item = self._get_item_on_floor(source_entity)
         pickup_succeded = source_entity.inventory.try_add(item)
-        if(pickup_succeded):
+        if pickup_succeded:
             message = "Picked up: " + item.name
             messenger.message(message)
             source_entity.newly_spent_energy += gametime.single_turn
 
-    def _get_item_on_floor(self, entity):
+    @staticmethod
+    def _get_item_on_floor(entity):
         return entity.dungeon_level.get_tile(entity.position).get_first_item()
 
     def print_player_error(self, **kwargs):
@@ -455,18 +504,6 @@ class OnEquipEffect(Leaf):
         self.effect = effect_function
 
 
-class Stacker(Leaf):
-    """
-    Parent component is Stacker.
-
-    Should only be used for items where all instances are equal.
-    """
-    def __init__(self):
-        super(Stacker, self).__init__()
-        self.component_type = "stacker"
-        self.quantity = 1
-
-
 class Thrower(Leaf):
     """
     Items with this component can be thrown.
@@ -508,9 +545,9 @@ class ThrowerBreak(Thrower):
     Items with this component can be thrown, but will survive the fall.
     """
     def __init__(self):
-        super(ThrowerNonBreak, self).__init__()
+        super(ThrowerBreak, self).__init__()
 
     def throw_effect(self, dungeon_level, position):
-        message = "The " + self.name.lower() +\
+        message = "The " + self.parent.description.name.lower() +\
             " smashes to the ground and breaks into pieces."
         messenger.message(message)

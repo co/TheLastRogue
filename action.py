@@ -67,8 +67,9 @@ class PickUpItemAction(Action):
 
     def can_act(self, **kwargs):
         item = self._get_item_on_floor()
+        print "time to pickup", item
         return (not item is None and
-                self.parent.inventory.has_room_for_item())
+                self.parent.inventory.has_room_for_item(item))
 
     def act(self, **kwargs):
         item = self._get_item_on_floor()
@@ -85,8 +86,8 @@ class PickUpItemAction(Action):
 
     def print_player_error(self, **kwargs):
         item = self._get_item_on_floor()
-        if(item is None and
-           not self.parent.inventory.has_room_for_item()):
+        if(not item is None and
+           not self.parent.inventory.has_room_for_item(item)):
             message = "Could not pick up: " + item.description.name +\
                 ", the inventory is full."
             messenger.message(message)

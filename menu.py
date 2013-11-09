@@ -205,12 +205,18 @@ class InventoryMenu(Menu):
         item_rect = geo.Rect(self.parent.offset,
                              self.parent.width, self.parent.height)
         self._menu_items =\
-            [MenuOption(item.description.name,
+            [MenuOption(self._get_item_option_text(item),
                         [OpenItemActionMenuAction(self._state_stack,
                                                   item_rect, item,
                                                   self._player)],
                         (len(item.get_children_with_tag("user_action")) >= 1))
-             for item in self._player.inventory.items]
+             for item in sorted(self._player.inventory.items,
+                                key=lambda e: e.item_type.value)]
+
+    def _get_item_option_text(self, item):
+        if(item.has_child("stacker")):
+            return item.description.name + " (" + str(item.stacker.size) + ")"
+        return item.description.name
 
 
 class OpenItemActionMenuAction(object):

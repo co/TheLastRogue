@@ -127,6 +127,9 @@ class TestGameState(GameStateBase):
         jerico = monster.Jerico(self)
         jerico.mover.try_move((56, 14), self.dungeon_level)
 
+        for i in range(5):
+            ammo = item.Ammunition()
+            ammo.mover.try_move((21 + i, 13), self.dungeon_level)
 
 class GameState(GameStateBase):
     def __init__(self):
