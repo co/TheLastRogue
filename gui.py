@@ -1,4 +1,5 @@
 import math
+from item import Ammunition
 
 from messenger import messenger
 from console import console
@@ -109,45 +110,57 @@ class FilledRectangle(RectangularUIElement):
 
 
 class StyledRectangle(RectangularUIElement):
-    def __init__(self, rect, rect_style, margin=geo.zero2d()):
+    def __init__(self, rect, rect_style, title=None, margin=geo.zero2d()):
         super(StyledRectangle, self).__init__(rect, margin)
-        self.rect_style = rect_style
+        self.style = rect_style
+        self.title = title
 
     def draw(self, offset=geo.zero2d()):
         px, py = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
                                        self.margin))
         for y in range(py, self.height + py):
             for x in range(px, self.width + px):
-                char_visual = self.get_char_visual(x, y)
+                char_visual = self._get_char_visual(x, y)
                 StyledRectangle.draw_char(x, y, char_visual)
+        self._draw_title()
 
-    def get_char_visual(self, x, y):
-        if(x == self.rect.left):
-            if(y == self.rect.top):
-                return self.rect_style.top_left
-            elif(y == self.rect.bottom - 1):
-                return self.rect_style.bottom_left
+    def _get_char_visual(self, x, y):
+        if x == self.rect.left:
+            if y == self.rect.top:
+                return self.style.top_left
+            elif y == self.rect.bottom - 1:
+                return self.style.bottom_left
             else:
-                return self.rect_style.left
-        if(x == self.rect.right - 1):
-            if(y == self.rect.top):
-                return self.rect_style.top_right
-            elif(y == self.rect.bottom - 1):
-                return self.rect_style.bottom_right
+                return self.style.left
+        if x == self.rect.right - 1:
+            if y == self.rect.top:
+                return self.style.top_right
+            elif y == self.rect.bottom - 1:
+                return self.style.bottom_right
             else:
-                return self.rect_style.right
+                return self.style.right
         else:
-            if(y == self.rect.top):
-                return self.rect_style.top
-            elif(y == self.rect.bottom - 1):
-                return self.rect_style.bottom
+            if y == self.rect.top:
+                return self.style.top
+            elif y == self.rect.bottom - 1:
+                return self.style.bottom
             else:
-                return self.rect_style.center
+                return self.style.center
 
     @staticmethod
     def draw_char(x, y, char_visual):
         console.set_colors_and_symbol((x, y), char_visual.color_fg,
                                       char_visual.color_bg, char_visual.symbol)
+
+    def _draw_title(self):
+        if not self.title is None:
+            x_offset = self.rect.top_left + (self.width - self.title - 2) / 2
+            StyledRectangle.draw_char(x_offset, self.rect.top, self.style.title_separator_left)
+            x_offset += 1
+            console.print_text((x_offset, self.rect.top), self.title)
+            x_offset += len(self.title)
+            StyledRectangle.draw_char(x_offset, self.rect.top, self.style.title_separator_right)
+
 
 
 class RectangleChangeColor(FilledRectangle):

@@ -14,14 +14,19 @@ class MenuStyle(object):
 class RectangleStyle(object):
     def __init__(self):
         self.center = None
+
         self.top = None
         self.left = None
         self.bottom = None
         self.right = None
+
         self.top_left = None
         self.top_right = None
         self.bottom_left = None
         self.bottom_right = None
+
+        self.title_separator_left = None
+        self.title_separator_right = None
 
 
 class RectangleStyle3D(RectangleStyle):
@@ -41,6 +46,9 @@ class RectangleStyle3D(RectangleStyle):
         self.bottom_left = GFXChar(243, light, dark)
         self.bottom_right = GFXChar('\\', dark, very_dark)
 
+        self.title_separator_left = self.top
+        self.title_separator_right = self.top
+
 
 class FinalFantasyClassicStyle(RectangleStyle):
     def __init__(self):
@@ -56,6 +64,9 @@ class FinalFantasyClassicStyle(RectangleStyle):
         self.bottom_left = self.top_left
         self.bottom_right = self.top_left
 
+        self.title_separator_left = self.top
+        self.title_separator_right = self.top
+
 
 class MinimalClassicStyle(RectangleStyle):
     def __init__(self):
@@ -70,6 +81,10 @@ class MinimalClassicStyle(RectangleStyle):
         self.top_right = GFXChar(libtcod.CHAR_DNE, bg, fg)
         self.bottom_left = GFXChar(libtcod.CHAR_DSW, bg, fg)
         self.bottom_right = GFXChar(libtcod.CHAR_DSE, bg, fg)
+
+        self.title_separator_left = GFXChar(181, bg, fg)
+        self.title_separator_right = GFXChar(198, bg, fg)
+
 
 ff_blue_theme = MenuStyle(FinalFantasyClassicStyle(),
                           colors.GRAY, (2, 2))
