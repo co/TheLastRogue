@@ -140,7 +140,7 @@ class BleedWhenDamaged(DamageTakenEffect):
         super(BleedWhenDamaged, self).__init__()
         self.component_type = "bleed_on_damaged"
 
-        # dictionary collision!?
+        # Why does this key break the ratman!?
         #self.component_type = "bleed_when_damaged"
 
     def effect(self, damage, source_entity):

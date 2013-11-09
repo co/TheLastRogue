@@ -30,7 +30,7 @@ class MonsterActorState(Leaf):
     @value.setter
     def value(self, new_value):
         if (self._value != MonsterActorState.HUNTING and
-            MonsterActorState.HUNTING == new_value):
+                    MonsterActorState.HUNTING == new_value):
             found_gfx = GraphicChar(None, colors.BLUE, "!")
             (self.parent.char_printer.
              append_graphic_char_temporary_frames([found_gfx]))
@@ -73,17 +73,6 @@ class MonsterActor(Actor):
         return next(entity for entity in entities_on_my_tile
                     if not entity is self)
 
-    def try_to_escape_slime(self):
-        """
-        Assumes the entity is trapped by a slime,
-        if escape is successful return true otherwise false.
-        """
-        slime = self.get_entity_sharing_my_position()
-        if not slime is None:
-            self.parent.attacker.hit(slime)
-        escape_successful = rng.coin_flip() and rng.coin_flip()
-        return escape_successful
-
     def can_see_player(self):
         seen_entities = self.parent.vision.get_seen_entities()
         return any(entity.has_child("is_player")
@@ -104,18 +93,14 @@ class MonsterActor(Actor):
             return False
         if self.parent.monster_actor_state.value == MonsterActorState.HUNTING:
             self.parent.path.compute_path(player.position.value)
+            return True
+        return False
 
-        elif self.parent.awareness_checker.check(self.parent.stealth.value):
-            self.parent.path.compute_path(player.position.value)
-            self.parent.monster_actor_state.value = MonsterActorState.HUNTING
-        return True
-
-    def step_looking_for_player(self):
-        self.set_path_to_player_if_seen()
-        if not self.parent.path.has_path():
-            self.set_path_to_random_walkable_point()
-        step_succeeded = self.parent.path.try_step_path()
-        return step_succeeded
+    def notice_player_check(self):
+        player = self.get_player_if_seen()
+        if player is None:
+            return False
+        return self.parent.awareness_checker.check(player.stealth.value)
 
     def set_path_to_random_walkable_point(self):
         positions = self.get_walkable_positions_from_my_position()
@@ -126,6 +111,29 @@ class MonsterActor(Actor):
         dungeon_level = self.parent.dungeon_level.value
         position = self.parent.position.value
         return dungeon_level.get_walkable_positions(self.parent, position)
+
+    def do_range_attack(self):
+        """
+        Does the ranged attack, assumes that can_do_ranged_attack returned True.
+        """
+        player = self.get_player_if_seen()
+        if player is None:
+            return False
+        return self.parent.monster_range_attack_action.act(player.position.value)
+
+    def can_do_ranged_attack(self):
+        """
+        Returns true if it's possible for the monster to do a ranged attack at the player.
+        """
+        player = self.get_player_if_seen()
+        if (player is None or
+                    self.parent.monster_actor_state.value != MonsterActorState.HUNTING):
+            return False
+        if not self.parent.has_child("monster_range_attack_action"):
+            return False
+        range_attack = self.parent.monster_range_attack_action
+        return (range_attack.is_destination_within_range(player.position.value) and
+                not range_attack.is_something_blocking(player.position.value))
 
 
 class StepRandomDirectionActor(MonsterActor):
@@ -151,7 +159,22 @@ class ChasePlayerActor(MonsterActor):
 
     def act(self):
         self.parent.dungeon_mask.update_fov()
-        self.step_looking_for_player()
+
+        #  Perform Stealth Check
+        if self.notice_player_check():
+            self.parent.monster_actor_state.value = MonsterActorState.HUNTING
+
+        #  Set Path
+        self.set_path_to_player_if_seen()
+        if not self.parent.path.has_path():
+            self.set_path_to_random_walkable_point()
+
+        #  Do action
+        if self.can_do_ranged_attack():
+            self.do_range_attack()
+        else:
+            self.parent.path.try_step_path()
+
         return self.parent.movement_speed.value
 
 
@@ -163,3 +186,14 @@ class HuntPlayerIfHurtMe(DamageTakenEffect):
     def effect(self, _, source_entity):
         if source_entity.has_child("is_player"):
             self.parent.monster_actor_state.value = MonsterActorState.HUNTING
+
+#    def try_to_escape_slime(self):
+#        """
+#        Assumes the entity is trapped by a slime,
+#        if escape is successful return true otherwise false.
+#        """
+#        slime = self.get_entity_sharing_my_position()
+#        if not slime is None:
+#            self.parent.attacker.hit(slime)
+#        escape_successful = rng.coin_flip() and rng.coin_flip()
+#        return escape_successful

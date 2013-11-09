@@ -7,6 +7,7 @@ from entityeffect import EffectQueue
 from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
+from missileaction import MonsterThrowRockAction
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe
 from mover import EntityMover, CanShareTileEntityMover
 from ondeathaction import EntityDeathAction
@@ -69,6 +70,7 @@ class Ratman(Composite):
         self.add_child(ChasePlayerActor())
         self.add_child(MonsterActorState())
         self.add_child(HuntPlayerIfHurtMe())
+        self.add_child(MonsterThrowRockAction())
 
         self.add_child(GameState(game_state))
         self.add_child(Equipment())
