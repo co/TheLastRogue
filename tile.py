@@ -61,7 +61,7 @@ class Tile(object):
 
     def _draw_seen(self, screen_position, piece_list):
         piece = self._cycle_through_pieces(piece_list)
-        if(piece.graphic_char.color_bg is None):
+        if piece.graphic_char.color_bg is None:
             self.get_terrain().char_printer.draw(screen_position)
         piece.char_printer.draw(screen_position)
 

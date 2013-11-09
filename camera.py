@@ -1,5 +1,6 @@
 import constants
 import geometry as geo
+import settings
 
 
 class Camera(object):
@@ -10,8 +11,8 @@ class Camera(object):
     @property
     def screen_center_position(self):
         result = geo.add_2d(self.camera_offset,
-                            (constants.GAME_STATE_WIDTH / 2,
-                             constants.GAME_STATE_HEIGHT / 2))
+                            (settings.WINDOW_WIDTH / 2,
+                             settings.WINDOW_HEIGHT / 2))
         return result
 
     @property

@@ -1,4 +1,5 @@
 import math
+import symbol
 from item import Ammunition
 
 from messenger import messenger
@@ -154,13 +155,13 @@ class StyledRectangle(RectangularUIElement):
 
     def _draw_title(self):
         if not self.title is None:
-            x_offset = self.rect.top_left + (self.width - self.title - 2) / 2
+            title_length = (self.rect.width - len(self.title) - 2)
+            x_offset = self.rect.top_left[0] + title_length / 2
             StyledRectangle.draw_char(x_offset, self.rect.top, self.style.title_separator_left)
             x_offset += 1
             console.print_text((x_offset, self.rect.top), self.title)
             x_offset += len(self.title)
             StyledRectangle.draw_char(x_offset, self.rect.top, self.style.title_separator_right)
-
 
 
 class RectangleChangeColor(FilledRectangle):
@@ -288,32 +289,23 @@ class StackPanelVerticalCentering(StackPanelVertical):
 class PlayerStatusBar(RectangularUIElement):
     def __init__(self, rect, player, margin=geo.zero2d()):
         super(PlayerStatusBar, self).__init__(rect, margin)
-        self._status_stack_panel =\
-            StackPanelVertical(rect.top_left,
-                               margin=style.interface_theme.margin)
+        self._status_stack_panel = StackPanelVertical(rect.top_left, (1, 2))
 
-        player_name = player.description.name
-        name_text_box = TextBox(player_name, geo.zero2d(),
-                                colors.YELLOW,
-                                geo.zero2d())
-
-        player_description = player.description.description
-        description_text_box = TextBox(player_description, geo.zero2d(),
-                                       colors.YELLOW,
-                                       geo.zero2d())
-
-        element_width = (self.width - style.interface_theme.margin[0] * 2)
+        element_width = self.width - style.interface_theme.margin[0] * 2 - 2
         player_hp = player.health.hp
         hp_bar = CounterBarWithNumbers(player_hp, element_width,
                                        colors.HP_BAR_FULL, colors.HP_BAR_EMPTY,
                                        colors.WHITE)
+        heart = SymbolUIElement((0, 0), symbol.HEART, colors.RED)
+
+        self._hp_stack_panel = StackPanelHorizontal((0, 0), (0, 1), 1)
+        self._hp_stack_panel.append(heart)
+        self._hp_stack_panel.append(hp_bar)
 
         self._rectangle_bg =\
-            StyledRectangle(rect, style.interface_theme.rect_style)
+            StyledRectangle(rect, style.interface_theme.rect_style, player.description.name)
 
-        self._status_stack_panel.append(name_text_box)
-        self._status_stack_panel.append(description_text_box)
-        self._status_stack_panel.append(hp_bar)
+        self._status_stack_panel.append(self._hp_stack_panel)
 
     def update(self):
         self._status_stack_panel.update()
@@ -394,7 +386,7 @@ class MessageDisplay(RectangularUIElement):
         messages = messenger.tail(messages_height)
         self._message_stack_panel.clear()
         for message in messages:
-            if(message.turn_created == turn.current_turn - 1):
+            if message.turn_created == turn.current_turn - 1:
                 color = colors.TEXT_NEW
             else:
                 color = colors.TEXT_OLD
@@ -410,7 +402,7 @@ class MessageDisplay(RectangularUIElement):
                 else:
                     line += (" " + word)
 
-            if(len(line) >= 1):
+            if len(line) >= 1:
                 lines.append(line)
             for line in lines:
                 text_box = TextBox(str(line).ljust(message_width),
@@ -517,9 +509,9 @@ class TextBox(UIElement):
     def draw(self, offset=geo.zero2d()):
         x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
                                      self.margin))
-        if(x > settings.WINDOW_WIDTH):
+        if x > settings.WINDOW_WIDTH:
             return
-        if(x + len(self.text) > settings.WINDOW_WIDTH):
+        if x + len(self.text) > settings.WINDOW_WIDTH:
             max_width = settings.WINDOW_WIDTH - x
             show_text = self.text[:max_width - 3] + "..."
         else:

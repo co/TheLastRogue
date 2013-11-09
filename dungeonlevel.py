@@ -65,7 +65,7 @@ class DungeonLevel(object):
         screen_position = geo.add_2d(position, camera.screen_position)
         the_tile = self.get_tile_or_unknown(tile_position)
         memory_map = the_player.memory_map
-        if(the_player.dungeon_mask.can_see_point(tile_position)):
+        if the_player.dungeon_mask.can_see_point(tile_position):
             memory_map.update_memory_of_tile(the_tile, tile_position,
                                              self.depth)
             the_tile.draw(screen_position, True)

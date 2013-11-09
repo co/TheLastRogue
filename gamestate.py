@@ -28,8 +28,7 @@ class GameStateBase(state.State):
         self.player = Player(self)
         self._init_gui()
 
-        camera_position = (constants.MONSTER_STATUS_BAR_WIDTH, 0)
-        self.camera = camera.Camera(camera_position, geo.zero2d())
+        self.camera = camera.Camera((0, 0), (0, 0))
         self.has_won = False
         self._should_draw = True
         self.menu_prompt_stack = statestack.GameMenuStateStack(self)
@@ -71,10 +70,10 @@ class GameStateBase(state.State):
 
         self._update_gui()
 
-        if(self.player.health.is_dead()):
+        if self.player.health.is_dead():
             game_over_screen = menufactory.game_over_screen(self.current_stack)
             self.current_stack.push(game_over_screen)
-        if(self.has_won):
+        if self.has_won:
             victory_screen = menufactory.victory_screen(self.current_stack)
             self.current_stack.push(victory_screen)
 
@@ -92,9 +91,8 @@ class GameStateBase(state.State):
                                        constants.MONSTER_STATUS_BAR_WIDTH,
                                        constants.MONSTER_STATUS_BAR_HEIGHT)
 
-        self.monster_status_bar =\
-            gui.EntityStatusList(monster_status_rect,
-                                 vertical_space=1)
+        self.monster_status_bar = gui.EntityStatusList(monster_status_rect,
+                                                       vertical_space=1)
 
         self.message_bar =\
             gui.MessageDisplay(rectfactory.message_display_rect())

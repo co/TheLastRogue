@@ -87,3 +87,6 @@ NE_LINE = 191
 NW_LINE = 218
 SE_LINE = 217
 SW_LINE = 192
+
+#Symbols
+HEART = 3
