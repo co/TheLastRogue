@@ -141,6 +141,23 @@ class ChestStyle(RectangleStyle):
         self.title_separator_right = self.top
 
 
+class MinimalStyle(RectangleStyle):
+    def __init__(self):
+        bg = colors.INTERFACE_BG
+        fg = colors.INTERFACE_FG
+        self.center = GFXChar(' ', bg, bg)
+        self.top = GFXChar(' ', bg, fg)
+        self.left = GFXChar(' ', bg, fg)
+        self.bottom = self.top
+        self.right = self.left
+        self.top_left = GFXChar(libtcod.CHAR_NW, bg, fg)
+        self.top_right = GFXChar(libtcod.CHAR_NE, bg, fg)
+        self.bottom_left = GFXChar(libtcod.CHAR_SW, bg, fg)
+        self.bottom_right = GFXChar(libtcod.CHAR_SE, bg, fg)
+
+        self.title_separator_left = self.top
+        self.title_separator_right = self.top
+
 ff_blue_theme = MenuStyle(FinalFantasyClassicStyle(),
                           colors.GRAY, (2, 2))
 tlr_classic_3d_theme = MenuStyle(RectangleStyle3D(),

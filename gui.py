@@ -1,6 +1,7 @@
 import math
 from xmouse import geometry
 import constants
+from equipment import EquipmentSlots
 import symbol
 from item import Ammunition
 
@@ -73,11 +74,11 @@ class HorizontalLine(UIElement):
         """
         x, y = geo.add_2d(offset, self.margin)
         for i in range(self.width):
-            if(not self.symbol is None):
+            if (not self.symbol is None):
                 console.set_symbol((x + i, y), self.symbol)
-            if(not self.color_bg is None):
+            if (not self.color_bg is None):
                 console.set_color_bg((x + i, y), self.color_bg)
-            if(not self.color_fg is None):
+            if (not self.color_fg is None):
                 console.set_color_fg((x + i, y), self.color_fg)
 
 
@@ -236,7 +237,7 @@ class StackPanelHorizontal(StackPanel):
 
     @property
     def height(self):
-        if(len(self._elements) < 1):
+        if len(self._elements) < 1:
             return 0
         return max([element.total_height for element in self._elements])
 
@@ -279,7 +280,7 @@ class StackPanelVertical(StackPanel):
             element.draw(element_position)
             element_position = geo.add_2d(element_position,
                                           (0, element.total_height +
-                                           self.vertical_space))
+                                              self.vertical_space))
 
 
 class StackPanelVerticalCentering(StackPanelVertical):
@@ -311,13 +312,15 @@ class PlayerStatusBox(RectangularUIElement):
         self._hp_stack_panel.append(heart)
         self._hp_stack_panel.append(hp_bar)
 
-        self._rectangle_bg =\
+        self._rectangle_bg = \
             StyledRectangle(rect, style.interface_theme.rect_style,
                             player.description.name, player.graphic_char.color_fg)
 
         self._status_stack_panel.append(self._hp_stack_panel)
-        self._status_stack_panel.append(InventoryBox(player.inventory,
-                                                     geo.Rect((0, 0), 10, 6), margin=(2, 1)))
+        items_row = StackPanelHorizontal((0, 0), (2, 1), 1)
+        items_row.append(InventoryBox(player.inventory, geo.Rect((0, 0), 10, 6)))
+        items_row.append(EquipmentBox(player.equipment, geo.Rect((0, 0), 5, 6)))
+        self._status_stack_panel.append(items_row)
 
     def update(self):
         self._status_stack_panel.update()
@@ -327,6 +330,43 @@ class PlayerStatusBox(RectangularUIElement):
         self._rectangle_bg.draw(position)
         self._status_stack_panel.draw(position)
 
+
+class EquipmentBox(RectangularUIElement):
+    POSITIONS = {
+        EquipmentSlots.HEADGEAR: (2, 1),
+        EquipmentSlots.LEFT_RING: (1, 2),
+        EquipmentSlots.AMULET: (2, 2),
+        EquipmentSlots.RIGHT_RING: (3, 2),
+        EquipmentSlots.MELEE_WEAPON: (1, 3),
+        EquipmentSlots.ARMOR: (2, 3),
+        EquipmentSlots.RANGED_WEAPON: (3, 3),
+        EquipmentSlots.BOOTS: (2, 4)}
+
+    def __init__(self, equipment, rect, margin=geo.zero2d(), vertical_space=0):
+        super(EquipmentBox, self).__init__(rect, margin=margin)
+        self._equipment = equipment
+        self._bg_rect = StyledRectangle(rect, style.MinimalStyle())
+        self._equipment_slot_items = []
+
+    def update(self):
+        self._equipment_slot_items = []
+        for slot in EquipmentSlots.ALL:
+            if self._equipment.slot_is_equiped(slot):
+                item = self._equipment.get(slot)
+                graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot],
+                                               item.graphic_char.symbol,
+                                               item.graphic_char.color_fg)
+            else:
+                graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot],
+                                               slot.symbol, colors.BLUE_D)
+            self._equipment_slot_items.append(graphic_item)
+
+    def draw(self, offset=geo.zero2d()):
+        position = geo.add_2d(offset, self.margin)
+        self._bg_rect.draw(position)
+
+        for graphic_item in self._equipment_slot_items:
+            graphic_item.draw(position)
 
 class InventoryBox(RectangularUIElement):
     def __init__(self, inventory, rect, margin=geo.zero2d(), vertical_space=0):
@@ -351,12 +391,12 @@ class InventoryBox(RectangularUIElement):
         self._bg_rect.draw(position)
         for graphic_item in self.graphic_char_items:
             graphic_item.draw(geo.add_2d(position, (1, 1)))
-            
+
 
 class EntityStatusList(RectangularUIElement):
     def __init__(self, rect, margin=geo.zero2d(), vertical_space=0):
         super(EntityStatusList, self).__init__(rect, margin=margin)
-        self._entity_stack_panel =\
+        self._entity_stack_panel = \
             StackPanelVertical(rect.top_left, (0, 0),
                                vertical_space=vertical_space)
         self._offset = (0, 0)
@@ -388,7 +428,7 @@ class EntityStatus(UIElement):
                                         colors.HP_BAR_EMPTY)
 
         entity_symbol = SymbolUIElement((0, 0), entity.graphic_char.symbol,
-                                entity.graphic_char.color_fg)
+                                        entity.graphic_char.color_fg)
 
         self._hp_stack_panel = StackPanelHorizontal((0, 0), (1, 1), 1)
         self._hp_stack_panel.append(entity_symbol)
@@ -417,11 +457,11 @@ class EntityStatus(UIElement):
 class MessageDisplay(RectangularUIElement):
     def __init__(self, rect, margin=(0, 0), vertical_space=0):
         super(MessageDisplay, self).__init__(rect, margin=margin)
-        self._message_stack_panel =\
+        self._message_stack_panel = \
             StackPanelVertical(rect.top_left,
                                margin=style.interface_theme.margin,
                                vertical_space=vertical_space)
-        self._rectangle_bg =\
+        self._rectangle_bg = \
             StyledRectangle(rect, style.interface_theme.rect_style)
 
     def update(self):
@@ -462,6 +502,7 @@ class CounterBar(UIElement):
     """
     Draws a bar showing the ratio between the current and max value of counter.
     """
+
     def __init__(self, counter, width, active_color, inactive_color,
                  margin=(0, 0), offset=geo.zero2d()):
         super(CounterBar, self).__init__(margin)
@@ -504,6 +545,7 @@ class CounterBarWithNumbers(CounterBar):
     """
     Will display current and max value of counter on the bar.
     """
+
     def __init__(self, counter, width, active_color, inactive_color,
                  text_color, margin=(0, 0), offset=geo.zero2d()):
         super(CounterBarWithNumbers, self).__init__(counter, width,
@@ -566,11 +608,12 @@ class TextBox(UIElement):
 
 
 class SymbolUIElement(UIElement):
-    def __init__(self, offset, symbol, color_fg, margin=(0, 0)):
+    def __init__(self, offset, the_symbol, color_fg, color_bg=None, margin=(0, 0)):
         super(SymbolUIElement, self).__init__(margin)
         self.offset = offset
         self.color_fg = color_fg
-        self.symbol = symbol
+        self.color_bg = color_bg
+        self.symbol = the_symbol
 
     @property
     def height(self):
@@ -583,5 +626,8 @@ class SymbolUIElement(UIElement):
     def draw(self, offset=geo.zero2d()):
         x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
                                      self.margin))
-        console.set_color_fg((x, y), self.color_fg)
+        if not self.color_fg is None:
+            console.set_color_fg((x, y), self.color_fg)
+        if not self.color_bg is None:
+            console.set_color_bg((x, y), self.color_bg)
         console.set_symbol((x, y), self.symbol)
