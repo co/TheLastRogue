@@ -20,6 +20,9 @@ class Inventory(Leaf):
     def items(self):
         return self._items
 
+    def get_items_sorted(self):
+        return sorted(self.items, key=lambda e: e.item_type.value)
+
     def add_item_no_stack(self, item):
         if not item.dungeon_level.value is None:
             success = item.mover.try_remove_from_dungeon()

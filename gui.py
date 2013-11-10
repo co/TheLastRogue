@@ -295,9 +295,9 @@ class StackPanelVerticalCentering(StackPanelVertical):
             y = y + element.total_height + self.vertical_space
 
 
-class PlayerStatusBar(RectangularUIElement):
+class PlayerStatusBox(RectangularUIElement):
     def __init__(self, rect, player, margin=geo.zero2d()):
-        super(PlayerStatusBar, self).__init__(rect, margin)
+        super(PlayerStatusBox, self).__init__(rect, margin)
         self._status_stack_panel = StackPanelVertical(rect.top_left, (1, 2))
 
         element_width = self.width - style.interface_theme.margin[0] * 2 - 2
@@ -316,6 +316,8 @@ class PlayerStatusBar(RectangularUIElement):
                             player.description.name, player.graphic_char.color_fg)
 
         self._status_stack_panel.append(self._hp_stack_panel)
+        self._status_stack_panel.append(InventoryBox(player.inventory,
+                                                     geo.Rect((0, 0), 10, 6), margin=(2, 1)))
 
     def update(self):
         self._status_stack_panel.update()
@@ -325,6 +327,31 @@ class PlayerStatusBar(RectangularUIElement):
         self._rectangle_bg.draw(position)
         self._status_stack_panel.draw(position)
 
+
+class InventoryBox(RectangularUIElement):
+    def __init__(self, inventory, rect, margin=geo.zero2d(), vertical_space=0):
+        super(InventoryBox, self).__init__(rect, margin=margin)
+        self._inventory = inventory
+        self._inventory_width = rect.width - 2
+        self._inventory_height = rect.height - 2
+        self._bg_rect = StyledRectangle(rect, style.ChestStyle())
+        self.graphic_char_items = []
+
+    def update(self):
+        items = self._inventory.get_items_sorted()
+        self.graphic_char_items = []
+        for idx, item in enumerate(items):
+            offset = (idx % self._inventory_width, idx / self._inventory_width)
+            graphic_item = SymbolUIElement(offset, item.graphic_char.symbol,
+                                           item.graphic_char.color_fg)
+            self.graphic_char_items.append(graphic_item)
+
+    def draw(self, offset=geo.zero2d()):
+        position = geo.add_2d(offset, self.margin)
+        self._bg_rect.draw(position)
+        for graphic_item in self.graphic_char_items:
+            graphic_item.draw(geo.add_2d(position, (1, 1)))
+            
 
 class EntityStatusList(RectangularUIElement):
     def __init__(self, rect, margin=geo.zero2d(), vertical_space=0):

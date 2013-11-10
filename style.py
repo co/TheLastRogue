@@ -1,3 +1,4 @@
+import symbol
 import colors
 import libtcodpy as libtcod
 from console import GFXChar
@@ -120,6 +121,25 @@ class MinimalTopCard(RectangleStyle):
 
         self.title_separator_left = GFXChar(181, bg, fg)
         self.title_separator_right = GFXChar(198, bg, fg)
+
+
+class ChestStyle(RectangleStyle):
+    def __init__(self):
+        light = colors.RED_D
+        dark = colors.DARK_BROWN
+        self.center = GFXChar(symbol.BIG_CENTER_DOT, dark, light)
+        self.top = GFXChar(libtcod.CHAR_SUBP_N, light, dark)
+        self.left = GFXChar(libtcod.CHAR_SUBP_E, dark, light)
+        self.bottom = GFXChar(libtcod.CHAR_SUBP_N, dark, light)
+        self.right = GFXChar(libtcod.CHAR_SUBP_E, light, dark)
+        self.top_left = GFXChar(libtcod.CHAR_NW, light, dark)
+        self.top_right = GFXChar(libtcod.CHAR_NE, light, dark)
+        self.bottom_left = GFXChar(libtcod.CHAR_SW, light, dark)
+        self.bottom_right = GFXChar(libtcod.CHAR_SE, light, dark)
+
+        self.title_separator_left = self.top
+        self.title_separator_right = self.top
+
 
 ff_blue_theme = MenuStyle(FinalFantasyClassicStyle(),
                           colors.GRAY, (2, 2))

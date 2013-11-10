@@ -84,7 +84,7 @@ class GameStateBase(state.State):
     def _init_gui(self):
         player_status_rect = rectfactory.player_status_rect()
         self.player_status_bar =\
-            gui.PlayerStatusBar(player_status_rect, self.player)
+            gui.PlayerStatusBox(player_status_rect, self.player)
 
         monster_status_rect = geo.Rect(geo.zero2d(),
                                        constants.MONSTER_STATUS_BAR_WIDTH,
@@ -126,6 +126,10 @@ class TestGameState(GameStateBase):
         for i in range(5):
             ammo = item.Ammunition()
             ammo.mover.try_move((21 + i, 13), self.dungeon_level)
+
+        for i in range(10):
+            sword = item.Sword()
+            sword.mover.try_move((21 + i, 23), self.dungeon_level)
 
 class GameState(GameStateBase):
     def __init__(self):

@@ -210,8 +210,7 @@ class InventoryMenu(Menu):
                                                   item_rect, item,
                                                   self._player)],
                         (len(item.get_children_with_tag("user_action")) >= 1))
-             for item in sorted(self._player.inventory.items,
-                                key=lambda e: e.item_type.value)]
+             for item in self._player.inventory.get_items_sorted()]
 
     def _get_item_option_text(self, item):
         if(item.has_child("stacker")):
