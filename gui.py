@@ -299,6 +299,7 @@ class StackPanelVerticalCentering(StackPanelVertical):
 class PlayerStatusBox(RectangularUIElement):
     def __init__(self, rect, player, margin=geo.zero2d()):
         super(PlayerStatusBox, self).__init__(rect, margin)
+        self._player = player
         self._status_stack_panel = StackPanelVertical(rect.top_left, (1, 2))
 
         element_width = self.width - style.interface_theme.margin[0] * 2 - 2
@@ -322,8 +323,13 @@ class PlayerStatusBox(RectangularUIElement):
         items_row.append(EquipmentBox(player.equipment, geo.Rect((0, 0), 5, 6)))
         self._status_stack_panel.append(items_row)
 
+        self.depth_text_box = TextBox("", (2, 0), colors.BLUE_D)
+        self._status_stack_panel.append(self.depth_text_box)
+
     def update(self):
         self._status_stack_panel.update()
+        self.depth_text_box.text = ("Depth:" +
+                                    str(self._player.dungeon_level.value.depth + 1).rjust(4))
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(offset, self.margin)
@@ -367,6 +373,7 @@ class EquipmentBox(RectangularUIElement):
 
         for graphic_item in self._equipment_slot_items:
             graphic_item.draw(position)
+
 
 class InventoryBox(RectangularUIElement):
     def __init__(self, inventory, rect, margin=geo.zero2d(), vertical_space=0):

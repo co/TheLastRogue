@@ -380,7 +380,7 @@ class DrinkAction(Action):
         """
         Removes the parent item from the inventory.
         """
-        target_entity.inventory.remove_item(self.parent)
+        target_entity.inventory.remove_one_item_from_stack(self.parent)
 
     def _drink(self, target_entity):
         """
