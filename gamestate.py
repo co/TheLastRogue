@@ -84,18 +84,16 @@ class GameStateBase(state.State):
     def _init_gui(self):
         player_status_rect = rectfactory.player_status_rect()
         self.player_status_bar =\
-            gui.PlayerStatusBar(player_status_rect,
-                                self.player)
+            gui.PlayerStatusBar(player_status_rect, self.player)
 
         monster_status_rect = geo.Rect(geo.zero2d(),
                                        constants.MONSTER_STATUS_BAR_WIDTH,
                                        constants.MONSTER_STATUS_BAR_HEIGHT)
 
         self.monster_status_bar = gui.EntityStatusList(monster_status_rect,
-                                                       vertical_space=1)
+                                                       vertical_space=0)
 
-        self.message_bar =\
-            gui.MessageDisplay(rectfactory.message_display_rect())
+        self.message_bar = gui.MessageDisplay(rectfactory.message_display_rect())
 
 
 class TestGameState(GameStateBase):

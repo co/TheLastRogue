@@ -86,12 +86,49 @@ class MinimalClassicStyle(RectangleStyle):
         self.title_separator_right = GFXChar(198, bg, fg)
 
 
+class MinimalClassicStyle2(RectangleStyle):
+    def __init__(self):
+        bg = colors.INTERFACE_BG
+        fg = colors.INTERFACE_FG
+        self.center = GFXChar(' ', bg, bg)
+        self.top = GFXChar(libtcod.CHAR_DHLINE, bg, fg)
+        self.left = GFXChar(libtcod.CHAR_VLINE, bg, fg)
+        self.bottom = self.top
+        self.right = self.left
+        self.top_left = GFXChar(213, bg, fg)
+        self.top_right = GFXChar(184, bg, fg)
+        self.bottom_left = GFXChar(212, bg, fg)
+        self.bottom_right = GFXChar(190, bg, fg)
+
+        self.title_separator_left = GFXChar(181, bg, fg)
+        self.title_separator_right = GFXChar(198, bg, fg)
+
+
+class MinimalTopCard(RectangleStyle):
+    def __init__(self):
+        bg = colors.INTERFACE_BG
+        fg = colors.INTERFACE_FG
+        self.center = GFXChar(' ', bg, bg)
+        self.top = GFXChar(libtcod.CHAR_DHLINE, bg, fg)
+        self.left = GFXChar(libtcod.CHAR_VLINE, bg, fg)
+        self.bottom = self.center
+        self.right = self.left
+        self.top_left = GFXChar(213, bg, fg)
+        self.top_right = GFXChar(184, bg, fg)
+        self.bottom_left = self.left
+        self.bottom_right = self.right
+
+        self.title_separator_left = GFXChar(181, bg, fg)
+        self.title_separator_right = GFXChar(198, bg, fg)
+
 ff_blue_theme = MenuStyle(FinalFantasyClassicStyle(),
                           colors.GRAY, (2, 2))
 tlr_classic_3d_theme = MenuStyle(RectangleStyle3D(),
                                  colors.GRAY, (2, 2))
-rogue_classic_theme = MenuStyle(MinimalClassicStyle(),
+rogue_classic_theme = MenuStyle(MinimalClassicStyle2(),
                                 colors.GRAY, (2, 2))
+
+monster_list_card = MinimalTopCard()
 
 themes = {"ff_blue_theme": ff_blue_theme,
           "rogue_classic_theme": rogue_classic_theme,

@@ -1,4 +1,6 @@
 import math
+from xmouse import geometry
+import constants
 import symbol
 from item import Ammunition
 
@@ -111,19 +113,22 @@ class FilledRectangle(RectangularUIElement):
 
 
 class StyledRectangle(RectangularUIElement):
-    def __init__(self, rect, rect_style, title=None, margin=geo.zero2d()):
+    def __init__(self, rect, rect_style, title=None,
+                 title_color_fg=colors.GRAY_D, margin=geo.zero2d()):
         super(StyledRectangle, self).__init__(rect, margin)
         self.style = rect_style
         self.title = title
+        self.title_color_fg = title_color_fg
 
     def draw(self, offset=geo.zero2d()):
         px, py = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
                                        self.margin))
+
         for y in range(py, self.height + py):
             for x in range(px, self.width + px):
-                char_visual = self._get_char_visual(x, y)
+                char_visual = self._get_char_visual(x - offset[0], y - offset[1])
                 StyledRectangle.draw_char(x, y, char_visual)
-        self._draw_title()
+        self._draw_title(offset)
 
     def _get_char_visual(self, x, y):
         if x == self.rect.left:
@@ -153,15 +158,19 @@ class StyledRectangle(RectangularUIElement):
         console.set_colors_and_symbol((x, y), char_visual.color_fg,
                                       char_visual.color_bg, char_visual.symbol)
 
-    def _draw_title(self):
+    def _draw_title(self, offset=geo.zero2d()):
         if not self.title is None:
+            if len(self.title) % 2 == 1:
+                self.title += " "
+            y = offset[1] + self.rect.top
             title_length = (self.rect.width - len(self.title) - 2)
-            x_offset = self.rect.top_left[0] + title_length / 2
-            StyledRectangle.draw_char(x_offset, self.rect.top, self.style.title_separator_left)
+            x_offset = self.rect.top_left[0] + title_length / 2 + offset[0]
+            StyledRectangle.draw_char(x_offset, y, self.style.title_separator_left)
             x_offset += 1
-            console.print_text((x_offset, self.rect.top), self.title)
+            console.set_default_color_fg(self.title_color_fg)
+            console.print_text((x_offset, y), self.title)
             x_offset += len(self.title)
-            StyledRectangle.draw_char(x_offset, self.rect.top, self.style.title_separator_right)
+            StyledRectangle.draw_char(x_offset, y, self.style.title_separator_right)
 
 
 class RectangleChangeColor(FilledRectangle):
@@ -254,7 +263,7 @@ class StackPanelVertical(StackPanel):
 
     @property
     def width(self):
-        if(len(self._elements) < 1):
+        if len(self._elements) < 1:
             return 0
         return max([element.total_width for element in self._elements])
 
@@ -303,7 +312,8 @@ class PlayerStatusBar(RectangularUIElement):
         self._hp_stack_panel.append(hp_bar)
 
         self._rectangle_bg =\
-            StyledRectangle(rect, style.interface_theme.rect_style, player.description.name)
+            StyledRectangle(rect, style.interface_theme.rect_style,
+                            player.description.name, player.graphic_char.color_fg)
 
         self._status_stack_panel.append(self._hp_stack_panel)
 
@@ -320,54 +330,61 @@ class EntityStatusList(RectangularUIElement):
     def __init__(self, rect, margin=geo.zero2d(), vertical_space=0):
         super(EntityStatusList, self).__init__(rect, margin=margin)
         self._entity_stack_panel =\
-            StackPanelVertical(rect.top_left,
-                               margin=style.interface_theme.margin,
+            StackPanelVertical(rect.top_left, (0, 0),
                                vertical_space=vertical_space)
-
-        self._rectangle_bg =\
-            StyledRectangle(rect, style.interface_theme.rect_style)
+        self._offset = (0, 0)
 
     def update(self, entity):
-        seen_entities = entity.vision.get_seen_entities()
+        seen_entities = entity.vision.get_seen_entities_closest_first()
+        seen_entities.reverse()
         if entity in seen_entities:
             seen_entities.remove(entity)
         self._entity_stack_panel.clear()
-        entity_status_width = (self.width -
-                               style.interface_theme.margin[0] * 2)
+        rect = geo.Rect(geo.zero2d(), self.width, 3)
         for seen_entity in seen_entities:
-            entity_status = EntityStatus(seen_entity, geo.zero2d(),
-                                         entity_status_width)
+            entity_status = EntityStatus(seen_entity, rect)
             self._entity_stack_panel.append(entity_status)
+        self._offset = (0, settings.WINDOW_HEIGHT - self._entity_stack_panel.height - constants.STATUS_BAR_HEIGHT)
 
     def draw(self, offset=geo.zero2d()):
-        position = geo.add_2d(offset, self.margin)
-        self._rectangle_bg.draw(position)
+        position = geo.add_2d(geo.add_2d(offset, self.margin), self._offset)
         self._entity_stack_panel.draw(position)
 
 
 class EntityStatus(UIElement):
-    def __init__(self, entity, offset, width, margin=geo.zero2d()):
+    def __init__(self, entity, rect, margin=geo.zero2d()):
         super(EntityStatus, self).__init__(margin)
-        monster_name_text_box = TextBox(entity.description.name[:width],
-                                        geo.zero2d(), colors.TEXT_ACTIVE)
-        monster_health_bar = CounterBar(entity.health.hp, width,
+        self._width = rect.width
+        element_width = self.width - style.interface_theme.margin[0] * 2 - 2
+        monster_health_bar = CounterBar(entity.health.hp, element_width,
                                         colors.HP_BAR_FULL,
                                         colors.HP_BAR_EMPTY)
-        self._width = width
-        self.status_stack_panel = StackPanelVertical(offset, margin)
-        self.status_stack_panel.append(monster_name_text_box)
-        self.status_stack_panel.append(monster_health_bar)
+
+        entity_symbol = SymbolUIElement((0, 0), entity.graphic_char.symbol,
+                                entity.graphic_char.color_fg)
+
+        self._hp_stack_panel = StackPanelHorizontal((0, 0), (1, 1), 1)
+        self._hp_stack_panel.append(entity_symbol)
+        self._hp_stack_panel.append(monster_health_bar)
+
+        self._rectangle_bg = \
+            StyledRectangle(rect, style.monster_list_card,
+                            entity.description.name, entity.graphic_char.color_fg)
+
+        self._status_stack_panel = StackPanelVertical(rect.top_left, margin)
+        self._status_stack_panel.append(self._hp_stack_panel)
 
     @property
     def height(self):
-        return self.status_stack_panel.height
+        return self._status_stack_panel.height
 
     @property
     def width(self):
         return self._width
 
     def draw(self, offset=geo.zero2d()):
-        self.status_stack_panel.draw(offset)
+        self._rectangle_bg.draw(offset)
+        self._status_stack_panel.draw(offset)
 
 
 class MessageDisplay(RectangularUIElement):

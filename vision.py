@@ -30,8 +30,9 @@ class Vision(Leaf):
         """
         return sorted(self.get_seen_entities(),
                       key=lambda entity:
-                      geometry.chess_distance(self.parent.position.value,
-                                              entity.position.value))
+                      (geometry.chess_distance(self.parent.position.value,
+                                               entity.position.value),
+                       -entity.health.hp.ratio_of_full(), hash(entity)))
 
     def get_closest_seen_entity(self):
         """
@@ -69,5 +70,5 @@ class AwarenessChecker(Leaf):
         @param stealth: The stealth determines how hard it is to notice.
         @return: True if the notice check is successful False otherwise.
         """
-        return (random.randint(0, self.parent.awareness.value) >\
+        return (random.randint(0, self.parent.awareness.value) > \
                 random.randint(0, stealth + 5))
