@@ -2,15 +2,15 @@ import math
 
 
 def add_2d(point1, point2):
-    return (point1[0] + point2[0], point1[1] + point2[1])
+    return point1[0] + point2[0], point1[1] + point2[1]
 
 
 def sub_2d(point1, point2):
-    return (point1[0] - point2[0], point1[1] - point2[1])
+    return point1[0] - point2[0], point1[1] - point2[1]
 
 
 def int_2d(point):
-    return (int(point[0]), int(point[1]))
+    return int(point[0]), int(point[1])
 
 
 def distance_sqrd(point1, point2):
@@ -18,7 +18,7 @@ def distance_sqrd(point1, point2):
     Returns the distance between two points squared.
     Marginally faster than Distance()
     '''
-    return ((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
+    return (point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2
 
 
 def distance(point1, point2):

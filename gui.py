@@ -466,40 +466,36 @@ class MessageDisplay(RectangularUIElement):
             StackPanelVertical(rect.top_left,
                                margin=style.interface_theme.margin,
                                vertical_space=vertical_space)
-        self._rectangle_bg = \
-            StyledRectangle(rect, style.interface_theme.rect_style)
+        self._offset = (0, 0)
 
     def update(self):
-        messages_height = (self.height -
-                           style.interface_theme.margin[0] * 2)
-        messages = messenger.tail(messages_height)
-        self._message_stack_panel.clear()
-        for message in messages:
-            if message.turn_created == turn.current_turn - 1:
-                color = colors.TEXT_NEW
-            else:
-                color = colors.TEXT_OLD
-            message_width = (self.width -
-                             style.interface_theme.margin[0] * 2)
-            words = str(message).split()
-            lines = []
-            line = words[0]
-            for word in words[1:]:
-                if len(line) + len(" " + word) > message_width:
-                    lines.append(line)
-                    line = word
-                else:
-                    line += (" " + word)
+        if messenger.new_message:
+            messages_height = (self.height -
+                               style.interface_theme.margin[0] * 2)
+            messages = messenger.tail(messages_height)
+            self._message_stack_panel.clear()
+            for message in messages:
+                message_width = (self.width -
+                                 style.interface_theme.margin[0] * 2)
+                words = str(message).split()
+                lines = []
+                line = words[0]
+                for word in words[1:]:
+                    if len(line) + len(" " + word) > message_width:
+                        lines.append(line)
+                        line = word
+                    else:
+                        line += (" " + word)
 
-            if len(line) >= 1:
-                lines.append(line)
-            for line in lines:
-                text_box = TextBox(str(line).ljust(message_width),
-                                   geo.zero2d(), color, geo.zero2d())
-                self._message_stack_panel.append(text_box)
+                if len(line) >= 1:
+                    lines.append(line)
+                for line in lines:
+                    text_box = TextBox(str(line), geo.zero2d(), colors.TEXT_OLD, geo.zero2d())
+                    self._message_stack_panel.append(text_box)
+                self._offset = (0, constants.MESSAGES_BAR_HEIGHT - self._message_stack_panel.height - 4)
 
     def draw(self, offset=geo.zero2d()):
-        self._rectangle_bg.draw(offset)
+        offset = geo.add_2d(offset, self._offset)
         self._message_stack_panel.draw(offset)
 
 

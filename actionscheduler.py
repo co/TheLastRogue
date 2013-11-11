@@ -23,7 +23,6 @@ class ActionScheduler(object):
     def _actors_tick(self):
         if len(self._actors) > 0:
             actor = self._actors[0].actor
-            print "tick: ", actor
             actor.parent.before_tick(actor.energy_recovery)
             self.on_tick(actor)
             actor.parent.on_tick(actor.energy_recovery)
