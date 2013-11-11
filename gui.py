@@ -1,9 +1,7 @@
 import math
-from xmouse import geometry
 import constants
 from equipment import EquipmentSlots
 import symbol
-from item import Ammunition
 
 from messenger import messenger
 from console import console
