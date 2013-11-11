@@ -57,12 +57,16 @@ class GameStateBase(state.State):
         dungeon_level =\
             self.player.dungeon_level.value
         dungeon_level.draw(self.camera)
+        self.prepare_draw_gui()
+
+    def prepare_draw_gui(self):
         self.player_status_bar.draw()
-        self.message_bar.draw()
-        self.monster_status_bar.draw()
+        self.message_display.draw()
+        self.monster_status_stack.draw()
+        self.command_list_bar.draw()
 
     def update(self):
-        self.message_bar.update()
+        self.message_display.update()
 
         dungeon_level =\
             self.player.dungeon_level.value
@@ -78,8 +82,9 @@ class GameStateBase(state.State):
             self.current_stack.push(victory_screen)
 
     def _update_gui(self):
-        self.monster_status_bar.update(self.player)
+        self.monster_status_stack.update(self.player)
         self.player_status_bar.update()
+        self.command_list_bar.update()
 
     def _init_gui(self):
         player_status_rect = rectfactory.player_status_rect()
@@ -90,10 +95,12 @@ class GameStateBase(state.State):
                                        constants.MONSTER_STATUS_BAR_WIDTH,
                                        constants.MONSTER_STATUS_BAR_HEIGHT)
 
-        self.monster_status_bar = gui.EntityStatusList(monster_status_rect,
-                                                       vertical_space=0)
+        self.monster_status_stack = gui.EntityStatusList(monster_status_rect,
+                                                         vertical_space=0)
 
-        self.message_bar = gui.MessageDisplay(rectfactory.message_display_rect())
+        self.message_display = gui.MessageDisplay(rectfactory.message_display_rect())
+
+        self.command_list_bar = gui.CommandListPanel(rectfactory.right_side_menu_rect())
 
 
 class TestGameState(GameStateBase):

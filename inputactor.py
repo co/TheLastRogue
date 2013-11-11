@@ -21,13 +21,13 @@ class InputActor(Actor):
 
         self.newly_spent_energy = 0
         key = inputhandler.handler.get_keypress()
-        if(key is None):
+        if key is None:
             return 0
         if key in inputhandler.move_controls:
             dx, dy = inputhandler.move_controls[key]
             new_position = geo.add_2d(self.parent.position.value, (dx, dy))
             move_succeded = self.parent.mover.try_move_or_bump(new_position)
-            if(move_succeded):
+            if move_succeded:
                 self.newly_spent_energy += self.parent.movement_speed.value
         elif key == inputhandler.ENTER:
             context_menu =\
@@ -38,14 +38,18 @@ class InputActor(Actor):
 
         elif key == inputhandler.PRINTSCREEN:
             console.console.print_screen()
+        elif key == inputhandler.TAB:
+            command_list_state = self.parent.game_state.value.command_list_bar.active
+            self.parent.game_state.value.command_list_bar.active = not command_list_state
+
         elif key == inputhandler.PICKUP:  # Pick up
-            if(self.parent.pick_up_item_action.can_act()):
+            if self.parent.pick_up_item_action.can_act():
                 self.parent.pick_up_item_action.act()
             else:
                 self.parent.pick_up_item_action.print_player_error()
         elif key == inputhandler.FIRE:
             equipment = self.parent.equipment
-            if(equipment.slot_is_equiped(EquipmentSlots.RANGED_WEAPON)):
+            if equipment.slot_is_equiped(EquipmentSlots.RANGED_WEAPON):
                 self.shoot_weapon()
         elif key == inputhandler.STONE:
             self.throw_rock()
@@ -74,7 +78,7 @@ class InputActor(Actor):
             self.parent.game_state.value.start_prompt(destination_selector)
 
         elif key == inputhandler.INVENTORY:
-            if(not self.parent.inventory.is_empty()):
+            if not self.parent.inventory.is_empty():
                 menu = menufactory.inventory_menu(self.parent,
                                                   self.parent.game_state.
                                                   value.menu_prompt_stack)
@@ -122,7 +126,7 @@ class InputActor(Actor):
         weapon = self.parent.equipment.get(EquipmentSlots.RANGED_WEAPON)
         shooting = PlayerShootWeaponAction(weapon)
         game_state = self.parent.game_state.value
-        if(shooting.can_act(source_entity=self.parent, game_state=game_state)):
+        if shooting.can_act(source_entity=self.parent, game_state=game_state):
             shooting_succeded = shooting.act(source_entity=self.parent,
                                              game_state=game_state)
             if shooting_succeded:

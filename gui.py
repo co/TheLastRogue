@@ -1,6 +1,7 @@
 import math
 import constants
 from equipment import EquipmentSlots
+import inputhandler
 import symbol
 
 from messenger import messenger
@@ -292,6 +293,19 @@ class StackPanelVerticalCentering(StackPanelVertical):
             x = root_x + (self.width - element.width + 1) / 2
             element.draw((x, y))
             y = y + element.total_height + self.vertical_space
+
+
+class CommandListPanel(RectangularUIElement):
+    def __init__(self, rect, margin=geo.zero2d()):
+        super(CommandListPanel, self).__init__(rect, margin)
+        self._bg_rect = StyledRectangle(rect, style.MinimalClassicStyle2())
+        self._stack_panel = StackPanelVertical(rect.top_left)
+        self.active = True
+        self._stack_panel(TextBox(TextBox("Commands", (0, 0), colors.PINK_D)))
+
+    def draw(self, offset=geo.zero2d()):
+        if self.active:
+            self._bg_rect.draw(offset)
 
 
 class PlayerStatusBox(RectangularUIElement):
