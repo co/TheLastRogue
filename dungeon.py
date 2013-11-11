@@ -7,7 +7,7 @@ import spawner
 
 class Dungeon(object):
     def __init__(self, game_state):
-        level_count = 3
+        level_count = 5
         self._dungeon_levels = [None for _ in range(level_count)]
         self.game_state = game_state
 
@@ -16,7 +16,7 @@ class Dungeon(object):
         return len(self._dungeon_levels)
 
     def get_dungeon_level(self, depth):
-        if(depth >= self.level_count):
+        if depth >= self.level_count:
             self.game_state.has_won = True
             return None
         if self._dungeon_levels[depth] is None:
@@ -34,9 +34,17 @@ class Dungeon(object):
             potion = item.HealthPotion()
             spawner.place_piece_on_random_tile(potion, dungeon_level)
 
+        for _ in range(depth + 1):
+            potion = item.Ammunition()
+            spawner.place_piece_on_random_tile(potion, dungeon_level)
+
         if rng.coin_flip():
-            gun = item.Gun()
-            spawner.place_piece_on_random_tile(gun, dungeon_level)
+            if rng.coin_flip():
+                gun = item.Gun()
+                spawner.place_piece_on_random_tile(gun, dungeon_level)
+            else:
+                sword = item.Sword()
+                spawner.place_piece_on_random_tile(sword, dungeon_level)
 
         if depth == (len(self._dungeon_levels) - 1):
             jerico = monster.Jerico(self.game_state)
