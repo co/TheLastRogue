@@ -73,13 +73,41 @@ class HorizontalLine(UIElement):
         """
         x, y = geo.add_2d(offset, self.margin)
         for i in range(self.width):
-            if (not self.symbol is None):
+            if not self.symbol is None:
                 console.set_symbol((x + i, y), self.symbol)
-            if (not self.color_bg is None):
+            if not self.color_bg is None:
                 console.set_color_bg((x + i, y), self.color_bg)
-            if (not self.color_fg is None):
+            if not self.color_fg is None:
                 console.set_color_fg((x + i, y), self.color_fg)
 
+
+class VerticalLine(UIElement):
+    def __init__(self, symbol, color_fg, color_bg, height, margin=geo.zero2d()):
+        super(VerticalLine, self).__init__(margin)
+        self.symbol = symbol
+        self.color_bg = color_bg
+        self.color_fg = color_fg
+        self._height = height
+
+    @property
+    def height(self):
+        return self._height
+    @property
+    def width(self):
+        return 1
+
+    def draw(self, offset=geo.zero2d()):
+        """
+        Draws the line.
+        """
+        x, y = geo.add_2d(offset, self.margin)
+        for i in range(self.height):
+            if not self.symbol is None:
+                console.set_symbol((x, y + i), self.symbol)
+            if not self.color_bg is None:
+                console.set_color_bg((x, y + i), self.color_bg)
+            if not self.color_fg is None:
+                console.set_color_fg((x, y + i), self.color_fg)
 
 class RectangularUIElement(UIElement):
     def __init__(self, rect, margin=geo.zero2d()):
@@ -299,13 +327,41 @@ class CommandListPanel(RectangularUIElement):
     def __init__(self, rect, margin=geo.zero2d()):
         super(CommandListPanel, self).__init__(rect, margin)
         self._bg_rect = StyledRectangle(rect, style.MinimalClassicStyle2())
-        self._stack_panel = StackPanelVertical(rect.top_left)
+        self._stack_panel = StackPanelVertical(geo.add_2d(rect.top_left, (2, 2)), vertical_space=1)
         self.active = True
-        self._stack_panel(TextBox(TextBox("Commands", (0, 0), colors.PINK_D)))
+
+        self._stack_panel.append(VerticalSpace(2))
+        self._stack_panel.append(self.left_right_adjust("Commands", "Key"))
+        self._stack_panel.append(VerticalSpace(2))
+        self._stack_panel.append(self.left_right_adjust("Walk", "Numpad"))
+        self._stack_panel.append(self.left_right_adjust("Pick Up", "p"))
+        self._stack_panel.append(self.left_right_adjust("Fire Gun", "f"))
+        self._stack_panel.append(self.left_right_adjust("Throw Stone", "s"))
+        self._stack_panel.append(self.left_right_adjust("Wait/Rest", "r"))
+        self._stack_panel.append(self.left_right_adjust("Inventory", "i"))
+        self._stack_panel.append(self.left_right_adjust("Context menu", "Enter"))
+        self._stack_panel.append(VerticalSpace(2))
+        self._stack_panel.append(self.left_right_adjust("Print Screen", "@"))
+        self._stack_panel.append(self.left_right_adjust("Toggle View", "Tab"))
+        self._stack_panel.append(self.left_right_adjust("Quit", "Esc"))
+
+        self._inactive_line = VerticalLine(symbol.V_LINE, colors.BLACK, colors.BLUE_D,
+                                           settings.WINDOW_HEIGHT, (settings.WINDOW_WIDTH -1, 0))
+        text = "Press Tab to See Commands"
+        offset = (settings.WINDOW_WIDTH-1, (settings.WINDOW_HEIGHT - len(text)) / 2)
+        self._inactive_text = VerticalTextBox(text, offset, colors.LIGHT_BLUE)
+
+
+    def left_right_adjust(self, text1, text2):
+        return TextBox(text1 + text2.rjust(self.rect.width - len(text1) - 4),(0, 0), colors.GRAY)
 
     def draw(self, offset=geo.zero2d()):
         if self.active:
             self._bg_rect.draw(offset)
+            self._stack_panel.draw(offset)
+        else:
+            self._inactive_line.draw(offset)
+            self._inactive_text.draw(offset)
 
 
 class PlayerStatusBox(RectangularUIElement):
@@ -621,6 +677,26 @@ class TextBox(UIElement):
         console.set_default_color_fg(self.color_fg)
         console.print_text((x, y), show_text)
 
+
+class VerticalTextBox(UIElement):
+    def __init__(self, text, offset, color_fg, margin=(0, 0)):
+        super(VerticalTextBox, self).__init__(margin)
+        self.offset = offset
+        self.text = text
+        self.color_fg = color_fg
+
+    @property
+    def height(self):
+        return len(self.text)
+
+    @property
+    def width(self):
+        return 1
+
+    def draw(self, offset=geo.zero2d()):
+        x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
+        console.set_default_color_fg(self.color_fg)
+        console.print_text_vertical((x, y), self.text)
 
 class SymbolUIElement(UIElement):
     def __init__(self, offset, the_symbol, color_fg, color_bg=None, margin=(0, 0)):
