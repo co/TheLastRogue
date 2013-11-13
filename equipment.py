@@ -3,10 +3,10 @@ from compositecore import Leaf
 
 
 class EquipmentSlot(object):
-    def __init__(self, name, equipment_type, symbol):
+    def __init__(self, name, equipment_type, icon):
         self.name = name
         self.equipment_type = equipment_type
-        self.symbol = symbol
+        self.icon = icon
 
     def __hash__(self):
         return hash(self.name)

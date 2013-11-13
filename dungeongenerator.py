@@ -104,16 +104,16 @@ def drunkard_walk(dungeon_level, start_pos, tile_brush, end_condition_func,
                          for _direction in move_list])
         unvisited_neighbors = neighbors - visited
         unvisited_positions = unvisited_positions | unvisited_neighbors
-        if (len(unvisited_neighbors) >= 1):
+        if len(unvisited_neighbors) >= 1:
             position = random.sample(unvisited_neighbors, 1)[0]
         else:
             position = random.sample(unvisited_positions, 1)[0]
-        while (not dungeon_level.has_tile(position)):
+        while not dungeon_level.has_tile(position):
             position = random.sample(unvisited_positions, 1)[0]
 
 
-def random_exlosion(dungeon_level, start_pos, tile_brush,
-                    end_condition_func, move_list=None):
+def random_explosion(dungeon_level, start_pos, tile_brush,
+                     end_condition_func, move_list=None):
     if move_list is None:
         move_list = direction.DIRECTIONS
     position = start_pos
@@ -126,7 +126,7 @@ def random_exlosion(dungeon_level, start_pos, tile_brush,
                          for _direction in move_list])
         unvisited_neighbors = neighbors - visited
         unvisited_positions = unvisited_positions | unvisited_neighbors
-        if (len(unvisited_positions) >= 1):
+        if len(unvisited_positions) >= 1:
             position = random.sample(unvisited_positions, 1)[0]
         else:
             break

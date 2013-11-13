@@ -16,7 +16,7 @@ import entityeffect
 import equipment
 import gametime
 from messenger import messenger
-import symbol
+import icon
 
 
 class ItemType(Leaf):
@@ -53,7 +53,7 @@ class Gun(Composite):
                                    but age has torn it real bad.\n\
                                    The wooden handle is dry and gray, \
                                    you see rust eating into the iron pipe."))
-        self.add_child(GraphicChar(None, colors.WHITE, symbol.GUN))
+        self.add_child(GraphicChar(None, colors.WHITE, icon.GUN))
         self.add_child(CharPrinter())
         self.add_child(DamageProvider(15, 10, [DamageTypes.PHYSICAL,
                                                DamageTypes.PIERCING]))
@@ -139,7 +139,7 @@ class Armor(Composite):
                                    "A worn leather armor, "
                                    "it's old, but should still "
                                    "protect you from some damage."))
-        self.add_child(GraphicChar(None, colors.ORANGE_D, symbol.ARMOR))
+        self.add_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
         self.add_child(BlockDamageEquippedEffect(5, 3,
                                                  [DamageTypes.PHYSICAL]))
         self.add_child(CharPrinter())
@@ -182,7 +182,7 @@ class Sword(Composite):
                                    "This old blade has seen some, "
                                    "better days, it's as sharp as "
                                    "tough."))
-        self.add_child(GraphicChar(None, colors.GRAY, symbol.SWORD))
+        self.add_child(GraphicChar(None, colors.GRAY, icon.SWORD))
         self.add_child(DamageProvider(10, 3, [DamageTypes.PHYSICAL,
                                               DamageTypes.CUTTING]))
         self.add_child(CharPrinter())
@@ -208,7 +208,7 @@ class RingOfInvisibility(Leaf):
         self.add_child(Description("Ring of Invisibility",
                                    "The metal is warm to your skin, "
                                    "this ring will make you invisible"))
-        self.add_child(GraphicChar(None, colors.YELLOW, symbol.RING))
+        self.add_child(GraphicChar(None, colors.YELLOW, icon.RING))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
         self.add_child(EquippedEffect(SetInvisibilityFlagEquippedEffect()))
@@ -243,7 +243,7 @@ class HealthPotion(Composite):
         self.add_child(Description("Health Potion",
                                    "An unusual liquid\
                                    contained in a glass flask."))
-        self.add_child(GraphicChar(None, colors.PINK, symbol.POTION))
+        self.add_child(GraphicChar(None, colors.PINK, icon.POTION))
         self.add_child(CharPrinter())
         self.add_child(Stacker("health_potion", 3))
         self.add_child(HealingPotionDrinkAction())

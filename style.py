@@ -1,4 +1,4 @@
-import symbol
+import icon
 import colors
 import libtcodpy as libtcod
 from console import GFXChar
@@ -127,7 +127,7 @@ class ChestStyle(RectangleStyle):
     def __init__(self):
         light = colors.RED_D
         dark = colors.DARK_BROWN
-        self.center = GFXChar(symbol.BIG_CENTER_DOT, dark, light)
+        self.center = GFXChar(icon.BIG_CENTER_DOT, dark, light)
         self.top = GFXChar(libtcod.CHAR_SUBP_N, light, dark)
         self.left = GFXChar(libtcod.CHAR_SUBP_E, dark, light)
         self.bottom = GFXChar(libtcod.CHAR_SUBP_N, dark, light)

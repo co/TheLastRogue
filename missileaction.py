@@ -6,7 +6,7 @@ import libtcodpy as libtcod
 import shoot
 import animation
 import colors
-import symbol
+import icon
 
 
 class PlayerMissileAction(Action):
@@ -70,7 +70,7 @@ class PlayerThrowItemAction(PlayerMissileAction):
         The final step of the throw.
         """
         self.remove_from_inventory(source_entity)
-        animate_flight(game_state, path, self.parent.graphic_char.symbol,
+        animate_flight(game_state, path, self.parent.graphic_char.icon,
                        self.parent.graphic_char.color_fg)
         self.parent.thrower.throw_effect(dungeon_level, path[-1])
 
@@ -80,12 +80,12 @@ class PlayerThrowRockAction(PlayerMissileAction):
         super(PlayerThrowRockAction, self).__init__()
         self.name = "Throw Rock"
         self.display_order = 95
-        self.symbol = symbol.BIG_CENTER_DOT
+        self.icon = icon.STONE
         self.color_fg = colors.GRAY
         self.energy_cost = gametime.double_turn
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
-        animate_flight(game_state, path, self.symbol, self.color_fg)
+        animate_flight(game_state, path, self.icon, self.color_fg)
         rock_hit_position(dungeon_level, path[-1], source_entity)
 
     def can_act(self, **kwargs):
@@ -112,13 +112,13 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         super(PlayerShootWeaponAction, self).__init__()
         self.name = "Shoot"
         self.display_order = 85
-        self.symbol = symbol.BIG_CENTER_DOT
+        self.icon = icon.BIG_CENTER_DOT
         self.ranged_weapon = ranged_weapon
         self.color_fg = colors.WHITE
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         self.remove_ammo_from_inventory(source_entity.inventory)
-        animate_flight(game_state, path, self.symbol, self.color_fg)
+        animate_flight(game_state, path, self.icon, self.color_fg)
         self.hit_position(dungeon_level, path[-1], source_entity)
 
     def can_act(self, **kwargs):
@@ -147,7 +147,7 @@ class MonsterThrowRockAction(Leaf):
     def __init__(self):
         super(MonsterThrowRockAction, self).__init__()
         self.component_type = "monster_range_attack_action"
-        self.symbol = symbol.BIG_CENTER_DOT
+        self.icon = icon.STONE
         self.color_fg = colors.GRAY
 
     def act(self, destination):
@@ -186,5 +186,5 @@ class MonsterThrowRockAction(Leaf):
         return geometry.chess_distance(self.parent.position.value, destination) != len(path_taken)
 
     def send_missile(self, dungeon_level, path):
-        animate_flight(self.parent.game_state.value, path, self.symbol, self.color_fg)
+        animate_flight(self.parent.game_state.value, path, self.icon, self.color_fg)
         rock_hit_position(dungeon_level, path[-1], self.parent)

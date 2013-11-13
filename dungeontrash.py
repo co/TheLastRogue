@@ -1,11 +1,12 @@
+import random
 from compositecore import Composite
 from graphic import GraphicChar, CharPrinter
+import icon
 from mover import Mover
 from position import Position, DungeonLevel
 from stats import GamePieceType
 from text import Description
 import colors
-import symbol
 
 
 class Corpse(Composite):
@@ -21,7 +22,7 @@ class Corpse(Composite):
         self.add_child(Description("A rotting corpse.",
                                    "A rotting corpse."))
         self.add_child(GraphicChar(None, colors.WHITE,
-                                   symbol.CORPSE))
+                                   icon.CORPSE))
         self.add_child(CharPrinter())
         self.add_child(Mover())
 
@@ -39,6 +40,6 @@ class PoolOfBlood(Composite):
         self.add_child(Description("A pool of blood.",
                                    "A pool of blood."))
         self.add_child(GraphicChar(None, colors.RED,
-                                   symbol.BIG_CENTER_DOT))
+                                   random.choice(icon.BLOOD_ICONS)))
         self.add_child(CharPrinter())
         self.add_child(Mover())

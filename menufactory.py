@@ -10,7 +10,7 @@ import rectfactory
 import settings
 import state
 import style
-import symbol
+import icon
 
 
 def _main_menu(ui_state, current_stack):
@@ -28,17 +28,17 @@ def _main_menu(ui_state, current_stack):
 
     start_game_option =\
         menu.MenuOptionWithSymbols("Start Dungeon",
-                                   symbol.GUN, " ",
+                                   icon.GUN, " ",
                                    [start_game_function])
     start_test_game_option =\
         menu.MenuOptionWithSymbols("Start Test Dungeon",
-                                   symbol.GUN, " ",
+                                   icon.GUN, " ",
                                    [start_test_game_function])
     dungeon_creator_option =\
         menu.MenuOptionWithSymbols("Dungeon Creator",
-                                   symbol.GUN, " ",
+                                   icon.GUN, " ",
                                    [dungeon_visualizer_function])
-    quit_option = menu.MenuOptionWithSymbols("Quit", symbol.GUN,
+    quit_option = menu.MenuOptionWithSymbols("Quit", icon.GUN,
                                              " ", [quit_game_function])
 
     menu_items = [start_game_option, start_test_game_option,
@@ -140,8 +140,8 @@ def equipment_menu(player, state_stack):
         else:
             item_name = item_in_slot.description.name
         equipment_options.append(menu.MenuOptionWithSymbols(item_name,
-                                                            slot.symbol,
-                                                            slot.symbol,
+                                                            slot.icon,
+                                                            slot.icon,
                                                             [option_func]))
 
     resulting_menu = menu.StaticMenu(equipment_menu_rect.top_left,
@@ -256,7 +256,7 @@ def get_dungeon_feature_menu_options(dungeon_feature, state_stack, player):
 
 def game_over_screen(state_stack):
     game_over_stack_panel = gui.StackPanelVerticalCentering((0, 0))
-    red_line = gui.HorizontalLine(symbol.H_LINE, colors.RED,
+    red_line = gui.HorizontalLine(icon.H_LINE, colors.RED,
                                   colors.BLACK, settings.WINDOW_WIDTH)
     game_over_text = gui.TextBox("YOU DIED", (0, 0), colors.RED)
     insult_text = gui.TextBox("Like a bitch.", (0, 0), colors.DARK_BROWN)
@@ -289,7 +289,7 @@ def game_over_screen(state_stack):
 
 def title_screen(state_stack):
     title_stack_panel = gui.StackPanelVerticalCentering((0, 0))
-    line = gui.HorizontalLine(symbol.H_LINE, colors.GRAY,
+    line = gui.HorizontalLine(icon.H_LINE, colors.GRAY,
                               colors.WHITE, settings.WINDOW_WIDTH)
     the_text = gui.TextBox("T H E", (0, 0), colors.BLACK, (0, 1))
     last_text = gui.TextBox("L A S T", (0, 0), colors.BLACK, (0, 1))
@@ -321,7 +321,7 @@ def title_screen(state_stack):
 
 def victory_screen(state_stack):
     victory_stack_panel = gui.StackPanelVerticalCentering((0, 0))
-    line = gui.HorizontalLine(symbol.H_LINE, colors.YELLOW,
+    line = gui.HorizontalLine(icon.H_LINE, colors.YELLOW,
                               None, settings.WINDOW_WIDTH)
     victory_text = gui.TextBox("A WINNER IS YOU", (0, 0), colors.WHITE)
     ironic_text =\

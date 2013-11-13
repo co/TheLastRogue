@@ -20,7 +20,7 @@ from vision import Vision, SightRadius, AwarenessChecker
 import colors
 from equipment import Equipment
 import gametime
-import symbol
+import icon
 
 
 class Ratman(Composite):
@@ -40,7 +40,7 @@ class Ratman(Composite):
                                       "The ratman is beaten to a pulp."))
         self.add_child(Description("Ratman",
                                    "A Rat/Man hybrid it looks hostile."))
-        self.add_child(GraphicChar(None, colors.ORANGE, symbol.RATMAN))
+        self.add_child(GraphicChar(None, colors.ORANGE, icon.RATMAN))
         self.add_child(CharPrinter())
         self.add_child(EntityDeathAction())
 
@@ -109,7 +109,7 @@ class StoneStatue(Composite):
                                    ("A Statue made out of stone stands tall."
                                     "It seems to be looking at you...")))
         self.add_child(GraphicChar(None, colors.GRAY,
-                                   symbol.GOLEM))
+                                   icon.GOLEM))
         self.add_child(CharPrinter())
         self.add_child(EntityDeathAction())
 
@@ -163,7 +163,7 @@ class Slime(Composite):
                                    ("Slime, slime, slime. Ugh, I hate Slimes."
                                     "It seems to be looking at you...")))
         self.add_child(GraphicChar(None, colors.GREEN,
-                                   symbol.SLIME))
+                                   icon.SLIME))
         self.add_child(CharPrinter())
         self.add_child(EntityDeathAction())
 

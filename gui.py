@@ -1,14 +1,12 @@
 import math
+
 import constants
 from equipment import EquipmentSlots
-import inputhandler
-import symbol
-
+import icon
 from messenger import messenger
 from console import console
 import colors
 import geometry as geo
-import turn
 import style
 import settings
 
@@ -345,7 +343,7 @@ class CommandListPanel(RectangularUIElement):
         self._stack_panel.append(self.left_right_adjust("Toggle View", "Tab"))
         self._stack_panel.append(self.left_right_adjust("Quit", "Esc"))
 
-        self._inactive_line = VerticalLine(symbol.V_LINE, colors.BLACK, colors.BLUE_D,
+        self._inactive_line = VerticalLine(icon.V_LINE, colors.BLACK, colors.BLUE_D,
                                            settings.WINDOW_HEIGHT, (settings.WINDOW_WIDTH -1, 0))
         text = "Press Tab to See Commands"
         offset = (settings.WINDOW_WIDTH-1, (settings.WINDOW_HEIGHT - len(text)) / 2)
@@ -375,7 +373,7 @@ class PlayerStatusBox(RectangularUIElement):
         hp_bar = CounterBarWithNumbers(player_hp, element_width,
                                        colors.HP_BAR_FULL, colors.HP_BAR_EMPTY,
                                        colors.WHITE)
-        heart = SymbolUIElement((0, 0), symbol.HEART, colors.RED)
+        heart = SymbolUIElement((0, 0), icon.HEALTH_STAT, colors.RED)
 
         self._hp_stack_panel = StackPanelHorizontal((0, 0), (0, 1), 1)
         self._hp_stack_panel.append(heart)
@@ -432,7 +430,7 @@ class EquipmentBox(RectangularUIElement):
                                                item.graphic_char.color_fg)
             else:
                 graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot],
-                                               slot.symbol, colors.BLUE_D)
+                                               slot.icon, colors.BLUE_D)
             self._equipment_slot_items.append(graphic_item)
 
     def draw(self, offset=geo.zero2d()):

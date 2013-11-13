@@ -6,7 +6,7 @@ from stats import GamePieceType
 from text import Description
 import action
 import colors
-import symbol
+import icon
 
 
 class StairsDown(Composite):
@@ -22,7 +22,7 @@ class StairsDown(Composite):
                                    ("A dark pass way downward.",
                                     "Oh, what horrors awaits there?")))
         self.add_child(GraphicChar(None, colors.WHITE,
-                                   symbol.STAIRS_DOWN))
+                                   icon.STAIRS_DOWN))
 
         self.add_child(CharPrinter())
         self.add_child(DescendStairsAction())
@@ -43,7 +43,7 @@ class StairsUp(Composite):
                                    ("A way back, when the ",
                                     "nightmare becomes too real.")))
         self.add_child(GraphicChar(None, colors.WHITE,
-                                   symbol.STAIRS_UP))
+                                   icon.STAIRS_UP))
         self.add_child(CharPrinter())
         self.add_child(Mover())
         self.add_child(IsDungeonFeature())
@@ -63,7 +63,7 @@ class Fountain(Composite):
                                     "surely you will become more",
                                     "healthy by drinking this.")))
         self.add_child(GraphicChar(None, colors.CYAN,
-                                   symbol.FOUNTAIN_FULL))
+                                   icon.FOUNTAIN_FULL))
         self.add_child(CharPrinter())
         self.add_child(Mover())
         self.add_child(IsDungeonFeature())
@@ -84,7 +84,7 @@ class DrinkFromFountainAction(action.Action):
         self.add_energy_spent_to_entity(target_entity)
 
     def _dry_up_fountain(self):
-        self.parent.graphic_char.symbol = symbol.FOUNTAIN_EMPTY
+        self.parent.graphic_char.icon = icon.FOUNTAIN_EMPTY
         self.parent.graphic_char.color_fg = colors.GRAY_D
         self.parent.remove_component(self)
 

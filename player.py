@@ -19,7 +19,7 @@ from vision import Vision, SightRadius, AwarenessChecker
 import colors
 import equipment
 import gametime
-import symbol
+import icon
 
 
 class Player(Composite):
@@ -42,7 +42,7 @@ class Player(Composite):
 
         self.add_child(Description("CO", "The Brave"))
         self.add_child(GraphicChar(None, colors.WHITE,
-                                   symbol.GUNSLINGER_THIN))
+                                   icon.GUNSLINGER_THIN))
         self.add_child(CharPrinter())
 
         self.add_child(Health(20))

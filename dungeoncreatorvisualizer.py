@@ -31,7 +31,7 @@ class DungeonCreatorVisualizer(state.State):
         depth = 1
         self.dungeon_level = dgen.generate_dungeon_exploded_rooms(size, depth)
 
-    def random_exlosion(self):
+    def random_explosion(self):
         dungeon_level = self.dungeon_level
         center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
         brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
@@ -91,7 +91,7 @@ class DungeonCreatorVisualizer(state.State):
             self.cellular_cave()
 
         elif key == inputhandler.THREE:
-            self.random_exlosion()
+            self.random_explosion()
 
         elif key == inputhandler.FOUR:
             self.tunnler()
