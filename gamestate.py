@@ -110,6 +110,7 @@ class TestGameState(GameStateBase):
         start_position = (20, 10)
         self.dungeon_level = dungeon_level_from_file("test.level")
         self.player.mover.try_move(start_position, self.dungeon_level)
+        self.camera.center_on_entity(self.player)
 
         potion = item.HealthPotion()
         potion.mover.try_move((20, 12), self.dungeon_level)
@@ -151,5 +152,6 @@ class GameState(GameStateBase):
             move_succeded = self.player.mover.try_move(stairs.position.value,
                                                        first_level)
             if(move_succeded):
+                self.camera.center_on_entity(self.player)
                 return
         raise Exception("Could not put player at first up stairs.")
