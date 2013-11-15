@@ -18,11 +18,14 @@ class InputActor(Actor):
 
     def act(self):
         self.parent.game_state.value.force_draw()
-
         self.newly_spent_energy = 0
+        if len(self.parent.vision.get_seen_entities()) > 0:
+            self.parent.path.clear()
+        if self.parent.path.has_path():
+            self.parent.path.try_step_path()
+            self.newly_spent_energy += self.parent.movement_speed.value
+
         key = inputhandler.handler.get_keypress()
-        if key is None:
-            return 0
         if key in inputhandler.move_controls:
             dx, dy = inputhandler.move_controls[key]
             new_position = geo.add_2d(self.parent.position.value, (dx, dy))
@@ -30,7 +33,7 @@ class InputActor(Actor):
             if move_succeded:
                 self.newly_spent_energy += self.parent.movement_speed.value
         elif key == inputhandler.ENTER:
-            context_menu =\
+            context_menu = \
                 menufactory.context_menu(self.parent,
                                          self.parent.
                                          game_state.value.menu_prompt_stack)
@@ -60,32 +63,28 @@ class InputActor(Actor):
         elif key == inputhandler.REST:  # Rest
             self.newly_spent_energy += gametime.single_turn
 
-        elif key == inputhandler.EXAMINE:  # Rest
-            init_target = self.parent.vision.get_closest_seen_entity()
-            if init_target is None:
-                init_target = self.parent.position.value
-            else:
-                init_target = init_target.position.value
-            destination_selector =\
-                positionexaminer.\
-                MissileDestinationSelector(self.parent.game_state.
-                                           value.menu_prompt_stack,
-                                           self.parent.position.value,
-                                           self.parent,
-                                           self.parent.game_state.value,
-                                           self.parent.sight_radius.value,
-                                           init_target=init_target)
+        elif key == inputhandler.EXAMINE:
+            destination_selector = \
+                positionexaminer. \
+                    PositionSelector(self.parent.game_state.value.menu_prompt_stack,
+                                     self.parent.position.value,
+                                     self.parent.game_state.value)
             self.parent.game_state.value.start_prompt(destination_selector)
+            if not destination_selector.selected_position is None:
+                destination = destination_selector.selected_position
+                if self.parent.memory_map.has_seen_position(destination):
+                    self.parent.path.compute_path(destination)
+                else:
+                    self.parent.path.set_line_path(destination)
 
         elif key == inputhandler.INVENTORY:
             if not self.parent.inventory.is_empty():
-                menu = menufactory.inventory_menu(self.parent,
-                                                  self.parent.game_state.
-                                                  value.menu_prompt_stack)
+                menu = menufactory.inventory_menu(self.parent, self.parent.game_state.
+                value.menu_prompt_stack)
                 self.parent.game_state.value.start_prompt(menu)
 
         elif key == inputhandler.TWO:
-            self.parent.health_modifier.heal(1)
+            self.parent.health_modifier.heal(300)
 
         elif key == inputhandler.THREE:
             effect = Teleport(self.parent, time_to_live=1)
@@ -94,7 +93,7 @@ class InputActor(Actor):
 
         elif key == inputhandler.FOUR:
             invisibile_flag = StatusFlags.INVISIBILE
-            if(not self.parent.status_flags.has_status(invisibile_flag)):
+            if not self.parent.status_flags.has_status(invisibile_flag):
                 effect = StatusAdder(self.parent,
                                      invisibile_flag,
                                      time_to_live=float("inf"))
@@ -135,7 +134,7 @@ class InputActor(Actor):
     def throw_rock(self):
         rock_throwing = PlayerThrowRockAction()
         game_state = self.parent.game_state.value
-        if(rock_throwing.can_act(source_entity=self.parent,
-                                 game_state=game_state)):
+        if (rock_throwing.can_act(source_entity=self.parent,
+                                  game_state=game_state)):
             rock_throwing.act(source_entity=self.parent,
                               game_state=game_state)

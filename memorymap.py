@@ -1,5 +1,6 @@
 from compositecore import Leaf, CompositeMessage
 from dungeonlevelfactory import unknown_level_map
+import terrain
 
 
 class MemoryMap(Leaf):
@@ -15,14 +16,19 @@ class MemoryMap(Leaf):
         self.set_memory_map_if_not_set(dungeon_level)
         return self._memory_map[dungeon_level.depth]
 
+    def has_seen_position(self, position):
+        memory = self._memory_map[self.parent.dungeon_level.value.depth]
+        tile = memory.get_tile_or_unknown(position)
+        return not isinstance(tile.get_terrain(), terrain.Unknown)
+
     def set_memory_map_if_not_set(self, dungeon_level):
         """
         Lazily initiates unknown dungeon to the depth needed.
         """
         depth = dungeon_level.depth
-        while(len(self._memory_map) <= depth):
+        while len(self._memory_map) <= depth:
             self._memory_map.append(None)
-        if(self._memory_map[depth] is None):
+        if self._memory_map[depth] is None:
             self._memory_map[depth] =\
                 unknown_level_map(dungeon_level.width,
                                   dungeon_level.height,
@@ -32,7 +38,7 @@ class MemoryMap(Leaf):
         """
         Writes the entity memory of a tile, to the memory map.
         """
-        if (tile.get_first_entity() is self):
+        if tile.get_first_entity() is self:
             return  # No need to remember where you was, you are not there.
         self.set_memory_map_if_not_set(self.parent.dungeon_level.value)
         x, y = position

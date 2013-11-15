@@ -1,4 +1,7 @@
+import colors
 from compositecore import Leaf, CompositeMessage
+from console import console
+import geometry
 import libtcodpy as libtcod
 import turn
 
@@ -125,7 +128,7 @@ class DungeonMask(Leaf):
         """
         Handles recieved messages.
         """
-        if(message == CompositeMessage.DUNGEON_LEVEL_CHANGED):
+        if message == CompositeMessage.DUNGEON_LEVEL_CHANGED:
             self.init_dungeon_map_if_has_dungeon_level()
 
 
@@ -135,7 +138,8 @@ class Path(Leaf):
     """
     def __init__(self):
         super(Path, self).__init__()
-        self.path = None
+        self._path = None
+        self.path = []
         self.component_type = "path"
 
     def init_path(self):
@@ -143,15 +147,15 @@ class Path(Leaf):
         Initiates the path using the dungeon map, from the DungeonMask module.
         """
         dungeon_map = self.parent.dungeon_mask.dungeon_map
-        self.path = libtcod.path_new_using_map(dungeon_map, 1.0)
+        self._path = libtcod.path_new_using_map(dungeon_map, 1.0)
 
     def has_path(self):
         """
         Returns True if the entity has a path to walk.
         """
-        if self.path is None or libtcod.path_is_empty(self.path):
-            return False
-        return True
+        if len(self.path) > 0:
+            return True
+        return False
 
     def try_step_path(self):
         """
@@ -159,14 +163,39 @@ class Path(Leaf):
         """
         if not self.has_path():
             return False
-        x, y = libtcod.path_walk(self.path, True)
+        if not geometry.chess_distance(self.path[-1], self.parent.position.value) == 1:
+            self.set_line_path(self.path[-1])
+        x, y = self.path.pop()
         step_succeeded = self.parent.mover.try_move_or_bump((x, y))
+        if not step_succeeded:
+            self.path = []
         return step_succeeded
 
     def compute_path(self, destination):
         sx, sy = self.parent.position.value
         dx, dy = destination
-        libtcod.path_compute(self.path, sx, sy, dx, dy)
+        libtcod.path_compute(self._path, sx, sy, dx, dy)
+        self.path = []
+        x, y = libtcod.path_walk(self._path, True)
+        while not x is None:
+            self.path.insert(0, (x, y))
+            x, y = libtcod.path_walk(self._path, True)
+
+    def set_line_path(self, destination):
+        sx, sy = self.parent.position.value
+        dx, dy = destination
+        libtcod.line_init (sx, sy, dx, dy)
+        x, y = libtcod.line_step()
+        while not x is None:
+            self.path.insert(0, (x, y))
+            x, y = libtcod.line_step()
+
+    def clear(self):
+        self.path = []
+
+    def draw(self, camera):
+        for point in self.path:
+            console.set_color_bg(camera.dungeon_to_screen_position(point), colors.GRAY_D, libtcod.BKGND_ADD)
 
     def message(self, message):
         if message == CompositeMessage.DUNGEON_LEVEL_CHANGED:

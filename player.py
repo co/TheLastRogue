@@ -1,7 +1,7 @@
 from action import PickUpItemAction
 from attacker import Attacker, Dodger
 from compositecore import Composite
-from dungeonmask import DungeonMask
+from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue
 from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
@@ -65,6 +65,7 @@ class Player(Composite):
         self.add_child(MemoryMap())
         self.add_child(Inventory())
         self.add_child(InputActor())
+        self.add_child(Path())
         self.add_child(GameState(game_state))
         self.add_child(equipment.Equipment())
         self.add_child(EffectQueue())

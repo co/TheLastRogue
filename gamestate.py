@@ -57,6 +57,7 @@ class GameStateBase(state.State):
         dungeon_level =\
             self.player.dungeon_level.value
         dungeon_level.draw(self.camera)
+        self.player.path.draw(self.camera)
         self.prepare_draw_gui()
 
     def prepare_draw_gui(self):

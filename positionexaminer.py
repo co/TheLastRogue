@@ -12,6 +12,7 @@ class PositionExaminer(state.State):
         super(PositionExaminer, self).__init__()
         self._state_stack = state_stack
         self.cursor_position = position
+        self.start_position = position
         self.max_distance = max_distance
         self.camera = background_state.current_stack.get_game_state().camera
         self.cursor_symbol = 'X'
@@ -94,7 +95,6 @@ class MissileDestinationSelector(PositionSelector):
         super(MissileDestinationSelector,
               self).__init__(state_stack, position,
                              background_state, max_distance)
-        self.start_position = position
         self.entity = entity
         self.selected_path = None
         if not init_target is None:

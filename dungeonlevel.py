@@ -79,19 +79,19 @@ class DungeonLevel(object):
                     if entity.has_child("is_player")), None)
 
     def add_dungeon_feature_if_not_present(self, new_dungeon_feature):
-        if(not new_dungeon_feature in self.dungeon_features):
+        if not new_dungeon_feature in self.dungeon_features:
             self.dungeon_features.append(new_dungeon_feature)
 
     def remove_dungeon_feature_if_present(self, dungeon_feature_to_remove):
-        if(dungeon_feature_to_remove in self.dungeon_features):
+        if dungeon_feature_to_remove in self.dungeon_features:
             self.dungeon_features.remove(dungeon_feature_to_remove)
 
     def add_actor_if_not_present(self, new_actor):
-        if(not new_actor in self.actors):
+        if not new_actor in self.actors:
             self._add_actor(new_actor)
 
     def remove_actor_if_present(self, actor_to_remove):
-        if(actor_to_remove in self.actors):
+        if actor_to_remove in self.actors:
             self._remove_actor(actor_to_remove)
 
     def _add_actor(self, actor):
