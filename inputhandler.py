@@ -1,3 +1,4 @@
+import time
 import libtcodpy as libtcod
 
 NORTH = 0
@@ -110,12 +111,15 @@ controls = {
 
 class InputHandler(object):
     def __init__(self):
-        pass
+        self.mouse = libtcod.Mouse()
+        self.key = libtcod.Key()
+
+    def update_keys(self):
+        libtcod.sys_check_for_event(libtcod.EVENT_ANY, self.key, self.mouse)
 
     def get_keypress(self):
-        key = libtcod.console_check_for_keypress(True)
-        key_char = self._get_key_char(key)
-        if key_char in controls.keys() and key.pressed:
+        key_char = self._get_key_char(self.key)
+        if key_char in controls.keys() and self.key.pressed:
             return controls[key_char]
         return None
 
@@ -130,4 +134,12 @@ class InputHandler(object):
             return libtcod.console_is_key_pressed(special_key)
         return False
 
+    def get_mouse_position(self):
+        return self.mouse.cx, self.mouse.cy
+
+    def get_left_mouse_press(self):
+        return self.mouse.lbutton
+
 handler = InputHandler()
+
+

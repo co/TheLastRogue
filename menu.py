@@ -40,6 +40,7 @@ class Menu(gui.UIElement):
             self.try_set_index_to_valid_value()
         self._recreate_option_list()
 
+        inputhandler.handler.update_keys()
         key = inputhandler.handler.get_keypress()
         if key == inputhandler.UP:
             self.index_decrease()

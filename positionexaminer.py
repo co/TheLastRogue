@@ -20,6 +20,7 @@ class PositionExaminer(state.State):
         self._background_state = background_state
 
     def update(self):
+        inputhandler.handler.update_keys()
         key = inputhandler.handler.get_keypress()
         self._handle_directional_input(key)
         self._handle_escape(key)

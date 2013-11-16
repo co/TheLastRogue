@@ -16,29 +16,33 @@ class InputActor(Actor):
     def __init__(self):
         super(InputActor, self).__init__()
 
-    def act(self):
-        self.parent.game_state.value.force_draw()
-        self.newly_spent_energy = 0
-        if len(self.parent.vision.get_seen_entities()) > 0:
-            self.parent.path.clear()
-        if self.parent.path.has_path():
-            self.parent.path.try_step_path()
+    def set_path_destination(self, destination):
+        if not destination is None:
+            if self.parent.memory_map.has_seen_position(destination):
+                self.parent.path.compute_path(destination)
+            else:
+                self.parent.path.set_line_path(destination)
+
+    def handle_move_input(self, key):
+        dx, dy = inputhandler.move_controls[key]
+        new_position = geo.add_2d(self.parent.position.value, (dx, dy))
+        move_succeded = self.parent.mover.try_move_or_bump(new_position)
+        if move_succeded:
             self.newly_spent_energy += self.parent.movement_speed.value
 
+    def spawn_context_menu(self):
+        context_menu = \
+            menufactory.context_menu(self.parent,
+                                     self.parent.
+                                     game_state.value.menu_prompt_stack)
+        self.parent.game_state.value.start_prompt(context_menu)
+
+    def handle_keyboard_input(self):
         key = inputhandler.handler.get_keypress()
         if key in inputhandler.move_controls:
-            dx, dy = inputhandler.move_controls[key]
-            new_position = geo.add_2d(self.parent.position.value, (dx, dy))
-            move_succeded = self.parent.mover.try_move_or_bump(new_position)
-            if move_succeded:
-                self.newly_spent_energy += self.parent.movement_speed.value
+            self.handle_move_input(key)
         elif key == inputhandler.ENTER:
-            context_menu = \
-                menufactory.context_menu(self.parent,
-                                         self.parent.
-                                         game_state.value.menu_prompt_stack)
-            self.parent.game_state.value.start_prompt(context_menu)
-
+            self.spawn_context_menu()
         elif key == inputhandler.PRINTSCREEN:
             console.console.print_screen()
         elif key == inputhandler.TAB:
@@ -70,12 +74,8 @@ class InputActor(Actor):
                                      self.parent.position.value,
                                      self.parent.game_state.value)
             self.parent.game_state.value.start_prompt(destination_selector)
-            if not destination_selector.selected_position is None:
-                destination = destination_selector.selected_position
-                if self.parent.memory_map.has_seen_position(destination):
-                    self.parent.path.compute_path(destination)
-                else:
-                    self.parent.path.set_line_path(destination)
+            destination = destination_selector.selected_position
+            self.set_path_destination(destination)
 
         elif key == inputhandler.INVENTORY:
             if not self.parent.inventory.is_empty():
@@ -116,6 +116,29 @@ class InputActor(Actor):
 
         elif key == inputhandler.PRINTSCREEN:
             console.console.print_screen()
+
+    def handle_mouse_input(self):
+        inputhandler.handler.update_keys()
+        mouse_position = inputhandler.handler.get_mouse_position()
+        if not mouse_position is None:
+            if inputhandler.handler.get_left_mouse_press():
+                self.set_path_destination(self.parent.game_state.value.camera.
+                screen_to_dungeon_position(mouse_position))
+        if self.parent.path.has_path():
+            self.parent.path.try_step_path()
+            self.newly_spent_energy += self.parent.movement_speed.value
+
+    def act(self):
+        self.parent.game_state.value.force_draw()
+        self.newly_spent_energy = 0
+
+        self.handle_mouse_input()
+
+        if len(self.parent.vision.get_seen_entities()) > 0:
+            self.parent.path.clear()
+
+        if self.newly_spent_energy < 1:
+            self.handle_keyboard_input()
 
         if self.has_sibling("dungeon_mask"):
             self.parent.dungeon_mask.update_fov()

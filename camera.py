@@ -24,8 +24,11 @@ class Camera(object):
         return geo.add_2d(self.screen_position, self.camera_offset)
 
     def dungeon_to_screen_position(self, position):
-        print self.camera_offset, self.screen_position
         return geo.add_2d(geo.sub_2d(position, self.camera_offset),
+                          self.screen_position)
+
+    def screen_to_dungeon_position(self, position):
+        return geo.sub_2d(geo.add_2d(position, self.camera_offset),
                           self.screen_position)
 
     def scroll_graze_delta(self, position):
@@ -35,17 +38,10 @@ class Camera(object):
         x_delta -= max(0, position[0] - self.x_graze_edge[1])
         y_delta += max(0, self.y_graze_edge[0] - position[1])
         y_delta -= max(0, position[1] - self.y_graze_edge[1])
-        #y_delta += min(0, self.y_graze_edge[1] - position[1])
-        print "####"
-        print self.y_graze_edge[1], position[1]
-        #y_delta -= (self.y_graze_edge[1] - max(self.y_graze_edge[1], position[1]))
-        print y_delta
         return - x_delta, - y_delta
 
     def update(self, player):
         position = player.position.value
-        #screen_position = self.dungeon_to_screen_position(position)
-        #delta = geo.sub_2d(position, self.screen_center_position)
         delta = self.scroll_graze_delta(self.dungeon_to_screen_position(position))
         self.camera_offset = geo.add_2d(self.camera_offset, delta)
 
