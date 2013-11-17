@@ -27,12 +27,16 @@ class GameStateBase(state.State):
         reset_globals()
         self.player = Player(self)
         self._init_gui()
+        self._should_draw = True
+        self._last_dungeon_level = None
 
         self.camera = camera.Camera((0, 0), (0, 0))
         self.has_won = False
-        self._should_draw = True
         self.menu_prompt_stack = statestack.GameMenuStateStack(self)
         messenger.messenger.message("Welcome to: The Last Rogue!")
+
+    def signal_new_level(self):
+        self.camera.center_on_entity(self.player)
 
     def start_prompt(self, prompt_state):
         self.menu_prompt_stack.push(prompt_state)
@@ -71,6 +75,9 @@ class GameStateBase(state.State):
 
         dungeon_level =\
             self.player.dungeon_level.value
+        if not dungeon_level is self._last_dungeon_level:
+            self.signal_new_level()
+        self._last_dungeon_level = dungeon_level
         dungeon_level.tick()
 
         self._update_gui()
