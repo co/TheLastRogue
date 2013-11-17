@@ -15,9 +15,9 @@ class Mover(Leaf):
         """
         Checks if parent component can move to new position.
         """
-        if(new_dungeon_level is None):
+        if new_dungeon_level is None:
             new_dungeon_level = self.parent.dungeon_level.value
-        if(not new_dungeon_level.has_tile(new_position)):
+        if not new_dungeon_level.has_tile(new_position):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
         return (self._can_fit_on_tile(new_tile) and
@@ -29,9 +29,9 @@ class Mover(Leaf):
 
         Returns true if it is successful, false otherwise.
         """
-        if(new_dungeon_level is None):
+        if new_dungeon_level is None:
             new_dungeon_level = self.parent.dungeon_level.value
-        if(self.can_move(new_position, new_dungeon_level)):
+        if self.can_move(new_position, new_dungeon_level):
             self._move(new_position, new_dungeon_level)
             return True
         return False
@@ -43,7 +43,7 @@ class Mover(Leaf):
         self._remove_from_old_tile()
         dungeon_level.get_tile(new_position).add(self.parent)
         self.parent.position.value = new_position
-        if(not self.has_sibling("dungeon_level")):
+        if not self.has_sibling("dungeon_level"):
             self.parent.add_child(DungeonLevel())
         self.parent.dungeon_level.value = dungeon_level
 
@@ -51,9 +51,9 @@ class Mover(Leaf):
         """
         Moves parent to new position and replaces what was already there.
         """
-        if(new_dungeon_level is None):
+        if new_dungeon_level is None:
             new_dungeon_level = self.parent.dungeon_level.value
-        if(not new_dungeon_level.has_tile(new_position)):
+        if not new_dungeon_level.has_tile(new_position):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
         self._remove_from_old_tile()

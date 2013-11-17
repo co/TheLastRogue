@@ -55,7 +55,7 @@ class PositionExaminer(state.State):
         pass
 
     def _draw_background(self):
-        if(not self._background_state is None):
+        if not self._background_state is None:
             self._background_state.prepare_draw()
 
     def _draw_cursor(self):

@@ -10,6 +10,7 @@ class DungeonMask(Leaf):
     """
     Holds the visibility mask and solidity mask of the entity
     """
+
     def __init__(self):
         super(DungeonMask, self).__init__()
         self.dungeon_map = None
@@ -26,8 +27,8 @@ class DungeonMask(Leaf):
         """
         Initiates the dungeon map of a dungeon_level, if available.
         """
-        if(self.has_sibling("dungeon_level") and
-           not self.parent.dungeon_level.value is None):
+        if (self.has_sibling("dungeon_level") and
+                not self.parent.dungeon_level.value is None):
             self._init_dungeon_map(self.parent.dungeon_level.value)
             self.last_dungeon_map_update_timestamp = -1
 
@@ -64,7 +65,7 @@ class DungeonMask(Leaf):
         for y in range(libtcod.map_get_height(self.dungeon_map)):
             line = ""
             for x in range(libtcod.map_get_width(self.dungeon_map)):
-                if(libtcod.map_is_walkable(self.dungeon_map, x, y)):
+                if (libtcod.map_is_walkable(self.dungeon_map, x, y)):
                     line += " "
                 else:
                     line += "#"
@@ -104,8 +105,8 @@ class DungeonMask(Leaf):
         Updates the dungeon map it is older than the latest change.
         """
         dungeon_level = self.parent.dungeon_level.value
-        if(dungeon_level.terrain_changed_timestamp >
-           self.last_dungeon_map_update_timestamp):
+        if (dungeon_level.terrain_changed_timestamp >
+                self.last_dungeon_map_update_timestamp):
             self.update_dungeon_map()
 
     def update_dungeon_map(self):
@@ -115,7 +116,7 @@ class DungeonMask(Leaf):
         dungeon_level = self.parent.dungeon_level.value
         for y in range(dungeon_level.height):
             for x in range(dungeon_level.width):
-                terrain =\
+                terrain = \
                     dungeon_level.get_tile_or_unknown((x, y)).get_terrain()
                 libtcod.map_set_properties(self.dungeon_map, x, y,
                                            terrain.is_transparent.value,
@@ -136,6 +137,7 @@ class Path(Leaf):
     """
     Composites holding this has a path that it may step through.
     """
+
     def __init__(self):
         super(Path, self).__init__()
         self._path = None
@@ -163,19 +165,21 @@ class Path(Leaf):
         """
         if not self.has_path():
             return False
-        if not geometry.chess_distance(self.path[-1], self.parent.position.value) == 1:
-            self.set_line_path(self.path[-1])
-        x, y = self.path.pop()
-        step_succeeded = self.parent.mover.try_move_or_bump((x, y))
+        next_point = self.path.pop()
+        if not geometry.chess_distance(next_point, self.parent.position.value) == 1:
+            print "set_line", next_point, self.parent.position.value
+            self.set_line_path(next_point)
+        step_succeeded = self.parent.mover.try_move_or_bump(next_point)
         if not step_succeeded:
-            self.path = []
+            print "remove path"
+            self.clear()
         return step_succeeded
 
     def compute_path(self, destination):
         sx, sy = self.parent.position.value
         dx, dy = destination
         libtcod.path_compute(self._path, sx, sy, dx, dy)
-        self.path = []
+        self.clear()
         x, y = libtcod.path_walk(self._path, True)
         while not x is None:
             self.path.insert(0, (x, y))
@@ -184,7 +188,8 @@ class Path(Leaf):
     def set_line_path(self, destination):
         sx, sy = self.parent.position.value
         dx, dy = destination
-        libtcod.line_init (sx, sy, dx, dy)
+        libtcod.line_init(sx, sy, dx, dy)
+        self.clear()
         x, y = libtcod.line_step()
         while not x is None:
             self.path.insert(0, (x, y))
@@ -194,8 +199,14 @@ class Path(Leaf):
         self.path = []
 
     def draw(self, camera):
-        for point in self.path:
-            console.set_color_bg(camera.dungeon_to_screen_position(point), colors.GRAY_D, libtcod.BKGND_ADD)
+        points = list(self.path)
+        points.reverse()
+        for point in points:
+            if not self.parent.mover.can_pass_terrain(
+                    self.parent.dungeon_level.value.get_tile_or_unknown(point).get_terrain()):
+                break
+            console.set_symbol(camera.dungeon_to_screen_position(point), ":")
+            console.set_color_fg(camera.dungeon_to_screen_position(point), colors.WHITE)
 
     def message(self, message):
         if message == CompositeMessage.DUNGEON_LEVEL_CHANGED:
