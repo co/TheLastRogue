@@ -437,7 +437,7 @@ class PickUpItemAction(Action):
         item = self._get_item_on_floor(source_entity)
         print "time to pickup", item
         return (not item is None and
-                source_entity.inventory.has_room_for_item())
+                source_entity.inventory.has_room_for_item(item))
 
     def act(self, **kwargs):
         """
@@ -445,25 +445,27 @@ class PickUpItemAction(Action):
         """
         source_entity = kwargs[action.SOURCE_ENTITY]
         item = self._get_item_on_floor(source_entity)
-        pickup_succeded = source_entity.inventory.try_add(item)
+        if item is None:
+            raise Exception("Could not find item on floor.", source_entity, item)
+        pickup_succeded = self.parent.inventory.try_add(item)
         if pickup_succeded:
-            message = "Picked up: " + item.name
+            message = "Picked up: " + item.description.name
             messenger.message(message)
-            source_entity.newly_spent_energy += gametime.single_turn
+            self.parent.actor.newly_spent_energy += gametime.single_turn
 
-    @staticmethod
-    def _get_item_on_floor(entity):
-        return entity.dungeon_level.get_tile(entity.position).get_first_item()
+    def _get_item_on_floor(self, entity):
+        dungeon_level = entity.dungeon_level.value
+        position = entity.position.value
+        return dungeon_level.get_tile(position).get_first_item()
 
     def print_player_error(self, **kwargs):
         """
         Prints a message to the user explaining what went wrong.
         """
-        source_entity = kwargs[action.SOURCE_ENTITY]
-        item = self._get_item_on_floor(source_entity)
-        if(item is None and
-           not source_entity.inventory.has_room_for_item()):
-            message = "Could not pick up: " + item.name +\
+        item = self._get_item_on_floor()
+        if(not item is None and
+           not self.parent.inventory.has_room_for_item(item)):
+            message = "Could not pick up: " + item.description.name +\
                 ", the inventory is full."
             messenger.message(message)
 

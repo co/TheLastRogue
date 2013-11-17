@@ -1,4 +1,4 @@
-from action import PickUpItemAction
+from item import PickUpItemAction
 from attacker import Attacker, Dodger
 from compositecore import Composite
 from dungeonmask import DungeonMask, Path

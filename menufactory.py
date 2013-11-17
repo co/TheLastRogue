@@ -13,28 +13,28 @@ import style
 import icon
 
 
-def _main_menu(ui_state, current_stack):
+def _main_menu_ui_elements(ui_state, state_stack):
     """
     Creates the first menu of the game.
     """
-    start_game_function =\
+    start_game_function = \
         lambda: ui_state.current_stack.push(gamestate.GameState())
-    start_test_game_function =\
+    start_test_game_function = \
         lambda: ui_state.current_stack.push(gamestate.TestGameState())
     quit_game_function = lambda: ui_state.current_stack.pop()
-    dungeon_visualizer_function =\
+    dungeon_visualizer_function = \
         lambda: ui_state.current_stack.push(dungeoncreatorvisualizer.
-                                            DungeonCreatorVisualizer())
+        DungeonCreatorVisualizer())
 
-    start_game_option =\
+    start_game_option = \
         menu.MenuOptionWithSymbols("Start Dungeon",
                                    icon.GUN, " ",
                                    [start_game_function])
-    start_test_game_option =\
+    start_test_game_option = \
         menu.MenuOptionWithSymbols("Start Test Dungeon",
                                    icon.GUN, " ",
                                    [start_test_game_function])
-    dungeon_creator_option =\
+    dungeon_creator_option = \
         menu.MenuOptionWithSymbols("Dungeon Creator",
                                    icon.GUN, " ",
                                    [dungeon_visualizer_function])
@@ -47,18 +47,36 @@ def _main_menu(ui_state, current_stack):
     border = 4
     temp_position = (-1, -1)
     main_menu = menu.StaticMenu(temp_position,
-                                menu_items, current_stack,
+                                menu_items, state_stack,
                                 margin=style.menu_theme.margin,
                                 vertical_space=1)
-    main_menu_rect =\
+    main_menu_rect = \
         rectfactory.ratio_of_screen_rect(main_menu.width + border,
-                                         main_menu.height + border, 0.5, 0.8)
+                                         main_menu.height + border - 1, 0.5, 0.8)
     main_menu.offset = main_menu_rect.top_left
 
-    background_rect =\
+    background_rect = \
         gui.StyledRectangle(main_menu_rect, style.menu_theme.rect_style)
     ui_elements = [background_rect, main_menu]
     return ui_elements
+
+
+def get_menu_with_options(options, state_stack):
+    border = 4
+    temp_position = (-1, -1)
+    main_menu = menu.StaticMenu(temp_position,
+                                options, state_stack,
+                                margin=style.menu_theme.margin,
+                                vertical_space=1)
+    main_menu_rect = \
+        rectfactory.ratio_of_screen_rect(main_menu.width + border,
+                                         main_menu.height + border - 1, 0.5, 0.8)
+    main_menu.offset = main_menu_rect.top_left
+
+    background_rect = \
+        gui.StyledRectangle(main_menu_rect, style.menu_theme.rect_style)
+    ui_state = state.UIState(gui.UIElementList([background_rect, main_menu]))
+    return ui_state
 
 
 def inventory_menu(player, state_stack):
@@ -72,12 +90,12 @@ def inventory_menu(player, state_stack):
     inventory_menu_rect = geo.Rect(geo.zero2d(),
                                    right_side_menu_rect.width,
                                    right_side_menu_rect.height)
-    inventory_menu =\
+    inventory_menu = \
         menu.InventoryMenu(inventory_menu_rect.top_left, player, state_stack,
                            margin=style.menu_theme.margin)
     menu_stack_panel.append(inventory_menu)
 
-    inventory_menu_bg =\
+    inventory_menu_bg = \
         gui.StyledRectangle(right_side_menu_rect,
                             style.menu_theme.rect_style)
 
@@ -97,13 +115,13 @@ def item_actions_menu(item, player, state_stack):
     item_actions_menu_rect = geo.Rect(geo.zero2d(),
                                       right_side_menu_rect.width,
                                       right_side_menu_rect.height)
-    item_actions_menu =\
+    item_actions_menu = \
         menu.ItemActionsMenu(item_actions_menu_rect.top_left,
                              item, player, state_stack,
                              margin=style.menu_theme.margin)
     menu_stack_panel.append(item_actions_menu)
 
-    inventory_menu_bg =\
+    inventory_menu_bg = \
         gui.StyledRectangle(right_side_menu_rect,
                             style.menu_theme.rect_style)
 
@@ -124,18 +142,18 @@ def equipment_menu(player, state_stack):
                                    right_side_menu_rect.width,
                                    right_side_menu_rect.height)
 
-    equipment_menu_bg =\
+    equipment_menu_bg = \
         gui.StyledRectangle(right_side_menu_rect,
                             style.menu_theme.rect_style)
 
     equipment_options = []
     #slots_with_items = [slot for slot in equipment.EquipmentSlots.ALL
-                        #if not player.equipment.get(slot) is None]
+    #if not player.equipment.get(slot) is None]
     for slot in equipment.EquipmentSlots.ALL:
         slot_menu = equipment_slot_menu(player, slot, state_stack)
         option_func = DelayedStatePush(state_stack, slot_menu)
         item_in_slot = player.equipment.get(slot)
-        if(item_in_slot is None):
+        if (item_in_slot is None):
             item_name = "-"
         else:
             item_name = item_in_slot.description.name
@@ -170,11 +188,11 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
     equipment_menu_rect = geo.Rect(geo.zero2d(),
                                    right_side_menu_rect.width,
                                    right_side_menu_rect.height)
-    items =\
+    items = \
         player.inventory.items_of_equipment_type(equipment_slot.equipment_type)
     re_equip_options = []
     for item in items:
-        reequip_function =\
+        reequip_function = \
             item.reequip_action.delayed_call(source_entity=player,
                                              target_entity=player,
                                              equipment_slot=equipment_slot)
@@ -183,7 +201,7 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
         re_equip_options.append(menu.MenuOption(item.description.name,
                                                 functions))
 
-    unequip_function =\
+    unequip_function = \
         UnequipAction().delayed_call(source_entity=player,
                                      target_entity=player,
                                      equipment_slot=equipment_slot)
@@ -206,7 +224,7 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
 
 
 def context_menu(player, state_stack):
-    current_dungeon_feature =\
+    current_dungeon_feature = \
         (player.dungeon_level.value.
          get_tile(player.position.value).get_dungeon_feature())
     context_options = []
@@ -215,23 +233,23 @@ def context_menu(player, state_stack):
         context_options.extend(get_dungeon_feature_menu_options(player, stack_pop_function))
 
     inventory_menu_opt = inventory_menu(player, state_stack)
-    open_inventory_option =\
+    open_inventory_option = \
         menu.MenuOption("Inventory",
                         [lambda: state_stack.push(inventory_menu_opt)],
                         not player.inventory.is_empty())
     context_options.append(open_inventory_option)
 
     equipment_menu_opt = equipment_menu(player, state_stack)
-    open_equipment_option =\
+    open_equipment_option = \
         menu.MenuOption("Equipment",
                         [lambda: state_stack.push(equipment_menu_opt)])
     context_options.append(open_equipment_option)
 
-    context_menu_rect = rectfactory.center_of_screen_rect(30, 30)
+    context_menu_rect = rectfactory.center_of_screen_rect(16, 8)
     resulting_menu = menu.StaticMenu(context_menu_rect.top_left,
                                      context_options, state_stack,
                                      margin=style.menu_theme.margin)
-    background_rect =\
+    background_rect = \
         gui.StyledRectangle(context_menu_rect,
                             style.menu_theme.rect_style)
 
@@ -269,7 +287,7 @@ def game_over_screen(state_stack):
     game_over_text = gui.TextBox("YOU DIED", (0, 0), colors.RED)
     insult_text = gui.TextBox("Like a bitch.", (0, 0), colors.DARK_BROWN)
 
-    continue_option =\
+    continue_option = \
         menu.MenuOption("Press Enter to Accept Your Fate...",
                         [lambda: state_stack.pop_to_main_menu()], True)
 
@@ -320,7 +338,7 @@ def title_screen(state_stack):
                                        colors.WHITE)
 
     ui_state = state.UIState(gui.UIElementList(None))
-    ui_elements = _main_menu(ui_state, state_stack)
+    ui_elements = _main_menu_ui_elements(ui_state, state_stack)
 
     ui_state.ui_element.elements = [bg_rect, bg_sign_rect,
                                     title_stack_panel] + ui_elements
@@ -332,11 +350,11 @@ def victory_screen(state_stack):
     line = gui.HorizontalLine(icon.H_LINE, colors.YELLOW,
                               None, settings.WINDOW_WIDTH)
     victory_text = gui.TextBox("A WINNER IS YOU", (0, 0), colors.WHITE)
-    ironic_text =\
+    ironic_text = \
         gui.TextBox("Good job! No seriously, I bet it was real hard...",
                     (0, 0), colors.YELLOW_D)
 
-    continue_option =\
+    continue_option = \
         menu.MenuOption("Press Enter to Continue...",
                         [lambda: state_stack.pop_to_main_menu()], True)
 

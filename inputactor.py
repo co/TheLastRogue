@@ -45,18 +45,22 @@ class InputActor(Actor):
     def handle_context_action(self):
         context_menu_options = []
         player = self.parent
-        state_stack = player.game_state.value.current_stack
+        state_stack = player.game_state.value.menu_prompt_stack
         stack_pop_function = menu.BackToGameFunction(state_stack)
-        if player.pick_up_item_action.can_act():
+        if player.pick_up_item_action.can_act(source_entity=self.parent,
+                                              target_entity=self.parent,
+                                              game_state=self.parent.game_state.value):
             pickup_option = player.pick_up_item_action.delayed_call(source_entity=player,
                                                                     target_entity=player,
                                                                     game_state=player.game_state.value)
             functions = [pickup_option, stack_pop_function]
-            context_menu_options.append(menu.MenuOption(player.pick_up_item_action.name, functions,
-                                                        player.pick_up_item_action.can_act()))
+            context_menu_options.append(menu.MenuOption(player.pick_up_item_action.name, functions, True))
         context_menu_options.extend(menufactory.get_dungeon_feature_menu_options(player, stack_pop_function))
         if len(context_menu_options) == 1 and context_menu_options[0].can_activate:
             context_menu_options[0].activate()
+        elif len(context_menu_options) > 1:
+            tile_menu = menufactory.get_menu_with_options(context_menu_options, state_stack)
+            self.parent.game_state.value.start_prompt(tile_menu)
 
     def handle_keyboard_input(self):
         key = inputhandler.handler.get_keypress()
@@ -71,8 +75,12 @@ class InputActor(Actor):
         elif key == inputhandler.SPACE:
             self.handle_context_action()
         elif key == inputhandler.PICKUP:  # Pick up
-            if self.parent.pick_up_item_action.can_act():
-                self.parent.pick_up_item_action.act()
+            if self.parent.pick_up_item_action.can_act(source_entity=self.parent,
+                                                       target_entity=self.parent,
+                                                       game_state=self.parent.game_state.value):
+                self.parent.pick_up_item_action.act(source_entity=self.parent,
+                                                    target_entity=self.parent,
+                                                    game_state=self.parent.game_state.value)
             else:
                 self.parent.pick_up_item_action.print_player_error()
         elif key == inputhandler.FIRE:

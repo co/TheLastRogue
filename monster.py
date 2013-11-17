@@ -1,4 +1,3 @@
-from action import PickUpItemAction
 from actor import DoNothingActor
 from attacker import Attacker, Dodger, Damage, DamageTypes
 from compositecore import Composite, Leaf
@@ -76,7 +75,6 @@ class Ratman(Composite):
         self.add_child(Equipment())
         self.add_child(Inventory())
         self.add_child(EffectQueue())
-        self.add_child(PickUpItemAction())
 
 
 class Jerico(Ratman):
@@ -139,7 +137,6 @@ class StoneStatue(Composite):
         self.add_child(GameState(game_state))
         self.add_child(Equipment())
         self.add_child(EffectQueue())
-        self.add_child(PickUpItemAction())
         self.add_child(Attacker())
 
 
@@ -198,7 +195,6 @@ class Slime(Composite):
         self.add_child(GameState(game_state))
         self.add_child(Equipment())
         self.add_child(EffectQueue())
-        self.add_child(PickUpItemAction())
 
         self.add_child(EntityShareTileEffect
             (DissolveEntitySlimeShareTileEffect()))
