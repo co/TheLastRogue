@@ -50,9 +50,9 @@ class VerticalSpace(UIElement):
 
 
 class HorizontalLine(UIElement):
-    def __init__(self, symbol, color_fg, color_bg, width, margin=geo.zero2d()):
+    def __init__(self, icon, color_fg, color_bg, width, margin=geo.zero2d()):
         super(HorizontalLine, self).__init__(margin)
-        self.symbol = symbol
+        self.icon = icon
         self.color_bg = color_bg
         self.color_fg = color_fg
         self._width = width
@@ -71,8 +71,8 @@ class HorizontalLine(UIElement):
         """
         x, y = geo.add_2d(offset, self.margin)
         for i in range(self.width):
-            if not self.symbol is None:
-                console.set_symbol((x + i, y), self.symbol)
+            if not self.icon is None:
+                console.set_symbol((x + i, y), self.icon)
             if not self.color_bg is None:
                 console.set_color_bg((x + i, y), self.color_bg)
             if not self.color_fg is None:
@@ -80,9 +80,9 @@ class HorizontalLine(UIElement):
 
 
 class VerticalLine(UIElement):
-    def __init__(self, symbol, color_fg, color_bg, height, margin=geo.zero2d()):
+    def __init__(self, icon, color_fg, color_bg, height, margin=geo.zero2d()):
         super(VerticalLine, self).__init__(margin)
-        self.symbol = symbol
+        self.icon = icon
         self.color_bg = color_bg
         self.color_fg = color_fg
         self._height = height
@@ -100,8 +100,8 @@ class VerticalLine(UIElement):
         """
         x, y = geo.add_2d(offset, self.margin)
         for i in range(self.height):
-            if not self.symbol is None:
-                console.set_symbol((x, y + i), self.symbol)
+            if not self.icon is None:
+                console.set_symbol((x, y + i), self.icon)
             if not self.color_bg is None:
                 console.set_color_bg((x, y + i), self.color_bg)
             if not self.color_fg is None:
@@ -182,7 +182,7 @@ class StyledRectangle(RectangularUIElement):
     @staticmethod
     def draw_char(x, y, char_visual):
         console.set_colors_and_symbol((x, y), char_visual.color_fg,
-                                      char_visual.color_bg, char_visual.symbol)
+                                      char_visual.color_bg, char_visual.icon)
 
     def _draw_title(self, offset=geo.zero2d()):
         if not self.title is None:
@@ -426,7 +426,7 @@ class EquipmentBox(RectangularUIElement):
             if self._equipment.slot_is_equiped(slot):
                 item = self._equipment.get(slot)
                 graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot],
-                                               item.graphic_char.symbol,
+                                               item.graphic_char.icon,
                                                item.graphic_char.color_fg)
             else:
                 graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot],
@@ -455,7 +455,7 @@ class InventoryBox(RectangularUIElement):
         self.graphic_char_items = []
         for idx, item in enumerate(items):
             offset = (idx % self._inventory_width, idx / self._inventory_width)
-            graphic_item = SymbolUIElement(offset, item.graphic_char.symbol,
+            graphic_item = SymbolUIElement(offset, item.graphic_char.icon,
                                            item.graphic_char.color_fg)
             self.graphic_char_items.append(graphic_item)
 
@@ -500,7 +500,7 @@ class EntityStatus(UIElement):
                                         colors.HP_BAR_FULL,
                                         colors.HP_BAR_EMPTY)
 
-        entity_symbol = SymbolUIElement((0, 0), entity.graphic_char.symbol,
+        entity_symbol = SymbolUIElement((0, 0), entity.graphic_char.icon,
                                         entity.graphic_char.color_fg)
 
         self._hp_stack_panel = StackPanelHorizontal((0, 0), (1, 1), 1)
@@ -702,7 +702,7 @@ class SymbolUIElement(UIElement):
         self.offset = offset
         self.color_fg = color_fg
         self.color_bg = color_bg
-        self.symbol = the_symbol
+        self.icon = the_symbol
 
     @property
     def height(self):
@@ -719,4 +719,4 @@ class SymbolUIElement(UIElement):
             console.set_color_fg((x, y), self.color_fg)
         if not self.color_bg is None:
             console.set_color_bg((x, y), self.color_bg)
-        console.set_symbol((x, y), self.symbol)
+        console.set_symbol((x, y), self.icon)

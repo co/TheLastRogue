@@ -1,6 +1,7 @@
 from actor import Actor
 from entityeffect import Teleport, StatusAdder, StatusRemover
 from equipment import EquipmentSlots
+import menu
 from missileaction import PlayerShootWeaponAction, PlayerThrowRockAction
 from statusflags import StatusFlags
 import console
@@ -41,6 +42,22 @@ class InputActor(Actor):
                 self.set_path_destination(self.parent.game_state.value.camera.
                                           screen_to_dungeon_position(mouse_position))
 
+    def handle_context_action(self):
+        context_menu_options = []
+        player = self.parent
+        state_stack = player.game_state.value.current_stack
+        stack_pop_function = menu.BackToGameFunction(state_stack)
+        if player.pick_up_item_action.can_act():
+            pickup_option = player.pick_up_item_action.delayed_call(source_entity=player,
+                                                                    target_entity=player,
+                                                                    game_state=player.game_state.value)
+            functions = [pickup_option, stack_pop_function]
+            context_menu_options.append(menu.MenuOption(player.pick_up_item_action.name, functions,
+                                                        player.pick_up_item_action.can_act()))
+        context_menu_options.extend(menufactory.get_dungeon_feature_menu_options(player, stack_pop_function))
+        if len(context_menu_options) == 1 and context_menu_options[0].can_activate:
+            context_menu_options[0].activate()
+
     def handle_keyboard_input(self):
         key = inputhandler.handler.get_keypress()
         if key in inputhandler.move_controls:
@@ -51,6 +68,8 @@ class InputActor(Actor):
             console.console.print_screen()
         elif key == inputhandler.TAB:
             self.toggle_command_list()
+        elif key == inputhandler.SPACE:
+            self.handle_context_action()
         elif key == inputhandler.PICKUP:  # Pick up
             if self.parent.pick_up_item_action.can_act():
                 self.parent.pick_up_item_action.act()

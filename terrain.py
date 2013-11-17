@@ -147,7 +147,7 @@ class OpenDoorAction(Leaf):
     def open_door(self):
         self.parent.is_solid.value = False
         self.parent.is_transparent.value = True
-        self.parent.graphic_char.symbol = icon.DOOR_OPEN
+        self.parent.graphic_char.icon = icon.DOOR_OPEN
         self.parent.dungeon_level.value.signal_terrain_changed()
 
 

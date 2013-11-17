@@ -140,6 +140,7 @@ class TestGameState(GameStateBase):
             sword = item.Sword()
             sword.mover.try_move((21 + i, 23), self.dungeon_level)
 
+
 class GameState(GameStateBase):
     def __init__(self):
         super(GameState, self).__init__()

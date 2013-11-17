@@ -85,6 +85,7 @@ class DrinkFromFountainAction(action.Action):
 
     def _dry_up_fountain(self):
         self.parent.graphic_char.icon = icon.FOUNTAIN_EMPTY
+        print icon.FOUNTAIN_EMPTY, icon.FOUNTAIN_FULL
         self.parent.graphic_char.color_fg = colors.GRAY_D
         self.parent.remove_component(self)
 

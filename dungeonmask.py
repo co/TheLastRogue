@@ -167,11 +167,9 @@ class Path(Leaf):
             return False
         next_point = self.path.pop()
         if not geometry.chess_distance(next_point, self.parent.position.value) == 1:
-            print "set_line", next_point, self.parent.position.value
             self.set_line_path(next_point)
         step_succeeded = self.parent.mover.try_move_or_bump(next_point)
         if not step_succeeded:
-            print "remove path"
             self.clear()
         return step_succeeded
 

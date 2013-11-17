@@ -7,20 +7,20 @@ class GraphicChar(Leaf):
     """
     Composites holding this has a graphical representation as a char.
     """
-    def __init__(self, color_bg, color_fg, symbol):
+    def __init__(self, color_bg, color_fg, icon):
         super(GraphicChar, self).__init__()
         self.component_type = "graphic_char"
-        self._symbol = symbol
+        self._icon = icon
         self._color_bg = color_bg
         self._color_fg = color_fg
 
     @property
-    def symbol(self):
-        return self._symbol
+    def icon(self):
+        return self._icon
 
-    @symbol.setter
-    def symbol(self, value):
-        self._symbol = value
+    @icon.setter
+    def icon(self, value):
+        self._icon = value
 
     @property
     def color_bg(self):
@@ -42,7 +42,7 @@ class GraphicChar(Leaf):
         """
         Makes a copy of this component.
         """
-        return GraphicChar(self.color_bg, self.color_fg, self.symbol)
+        return GraphicChar(self.color_bg, self.color_fg, self.icon)
 
 
 class CharPrinter(Leaf):
@@ -62,8 +62,8 @@ class CharPrinter(Leaf):
             console.console.set_color_bg(position, graphic_char.color_bg)
         if not graphic_char.color_fg is None:
             console.console.set_color_fg(position, graphic_char.color_fg)
-        if not graphic_char.symbol is None:
-            console.console.set_symbol(position, graphic_char.symbol)
+        if not graphic_char.icon is None:
+            console.console.set_symbol(position, graphic_char.icon)
 
     def draw(self, position):
         """
@@ -81,7 +81,7 @@ class CharPrinter(Leaf):
         console.console.set_colors_and_symbol(screen_position,
                                               colors.UNSEEN_FG,
                                               colors.UNSEEN_BG,
-                                              self.parent.graphic_char.symbol)
+                                              self.parent.graphic_char.icon)
 
     def append_graphic_char_temporary_frames(self, graphic_char_frames):
         """
@@ -100,7 +100,7 @@ class CharPrinter(Leaf):
         the regular chars won't be drawn until the animation frame queue is empty.
         """
         color_bg = self.parent.graphic_char.color_bg
-        symbol = self.parent.graphic_char.symbol
+        symbol = self.parent.graphic_char.icon
         frames = [GraphicChar(color_bg, color, symbol) for color in frame_colors]
         self.append_graphic_char_temporary_frames(frames)
 
@@ -108,18 +108,18 @@ class GraphicCharTerrainCorners(GraphicChar):
     """
     Composites holding this has a graphical representation as a char.
     """
-    def __init__(self, color_bg, color_fg, symbol, sticky_terrain_classes):
+    def __init__(self, color_bg, color_fg, icon, sticky_terrain_classes):
         super(GraphicCharTerrainCorners, self).__init__(color_bg, color_fg,
-                                                        symbol)
+                                                        icon)
         self._sticky_terrain_classes = sticky_terrain_classes
-        self._wall_symbol_row = symbol
+        self._wall_symbol_row = icon
         self.has_calculated = False
 
     @property
-    def symbol(self):
+    def icon(self):
         if not self.has_calculated:
             self.calculate_wall_symbol()
-        return self._symbol
+        return self._icon
 
     def calculate_wall_symbol(self):
         neighbours_mask = 0
@@ -127,7 +127,7 @@ class GraphicCharTerrainCorners(GraphicChar):
             if(any([terrain is neighbour.__class__
                    for terrain in self._sticky_terrain_classes])):
                 neighbours_mask |= 2 ** index
-        self._symbol = self._wall_symbol_row + neighbours_mask
+        self._icon = self._wall_symbol_row + neighbours_mask
 
     def _get_neighbour_terrains(self):
         tiles = (self.parent.dungeon_level.value.
@@ -138,4 +138,4 @@ class GraphicCharTerrainCorners(GraphicChar):
         """
         Makes a copy of this component.
         """
-        return GraphicChar(self.color_bg, self.color_fg, self.symbol)
+        return GraphicChar(self.color_bg, self.color_fg, self.icon)

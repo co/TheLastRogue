@@ -143,7 +143,7 @@ class MenuOption(gui.UIElement):
         return gui.TextBox(self.text, geo.zero2d(), colors.TEXT_INACTIVE)
 
 
-#TODO MenuOption should probably have a graphic represtation object
+#TODO MenuOption should probably have a graphic representation object
 # this should not be solved by subclassing!
 class MenuOptionWithSymbols(MenuOption):
     def __init__(self, text, selected_symbol, unselected_symbol,

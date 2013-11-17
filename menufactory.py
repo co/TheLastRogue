@@ -210,9 +210,9 @@ def context_menu(player, state_stack):
         (player.dungeon_level.value.
          get_tile(player.position.value).get_dungeon_feature())
     context_options = []
-    if(not current_dungeon_feature is None):
-        context_options.extend(get_dungeon_feature_menu_options
-                               (current_dungeon_feature, state_stack, player))
+    stack_pop_function = menu.BackToGameFunction(state_stack)
+    if not current_dungeon_feature is None:
+        context_options.extend(get_dungeon_feature_menu_options(player, stack_pop_function))
 
     inventory_menu_opt = inventory_menu(player, state_stack)
     open_inventory_option =\
@@ -240,15 +240,23 @@ def context_menu(player, state_stack):
     return ui_state
 
 
-def get_dungeon_feature_menu_options(dungeon_feature, state_stack, player):
+def get_tile_actions(player):
+    tile = player.dungeon_level.value.get_tile(player.position.value)
+    dungeon_feature = tile.get_dungeon_feature()
+    actions = []
+    if not dungeon_feature is None:
+        actions = dungeon_feature.get_children_with_tag("user_action")
+    return actions
+
+
+def get_dungeon_feature_menu_options(player, stack_pop_function):
     feature_options = []
     game_state = player.game_state.value
-    for feature_action in dungeon_feature.get_children_with_tag("user_action"):
-        feat_function = feature_action.delayed_call(source_entity=player,
-                                                    target_entity=player,
-                                                    game_state=game_state)
-        stack_pop_function = menu.StackPopFunction(state_stack, 1)
-        functions = [feat_function, stack_pop_function]
+    for feature_action in get_tile_actions(player):
+        feature_option = feature_action.delayed_call(source_entity=player,
+                                                     target_entity=player,
+                                                     game_state=game_state)
+        functions = [feature_option, stack_pop_function]
         feature_options.append(menu.MenuOption(feature_action.name, functions,
                                                feature_action.can_act()))
     return feature_options

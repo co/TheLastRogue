@@ -139,7 +139,7 @@ class DungeonLevel(object):
         for y, row in enumerate(self.tile_matrix):
             line = ""
             for x, tile in enumerate(row):
-                line += str(self.get_tile_or_unknown((x, y)).symbol)
+                line += str(self.get_tile_or_unknown((x, y)).icon)
             print(line)
 
     def get_walkable_positions(self, entity, position):

@@ -7,7 +7,7 @@ import libtcodpy as libtcod
 class ConsoleVisual(object):
     def __init__(self, width, height):
         self._visual_char_matrix =\
-            [[GFXChar(' ', colors.BLACK, colors.BLACK)
+            [[GrahicChar(colors.BLACK, colors.BLACK, ' ')
               for _ in range(width)]
              for _ in range(height)]
         self._default_color_fg = colors.BLACK
@@ -23,7 +23,7 @@ class ConsoleVisual(object):
 
     def get_symbol(self, position):
         x, y = position
-        return self._visual_char_matrix[y][x].symbol
+        return self._visual_char_matrix[y][x].icon
 
     def get_default_color_fg(self):
         return self._default_color_fg
@@ -41,11 +41,11 @@ class ConsoleVisual(object):
             self._default_color_bg = color
             libtcod.console_set_default_background(None, color)
 
-    def set_symbol(self, position, symbol):
-        if not symbol == self.get_symbol(position):
+    def set_symbol(self, position, icon):
+        if not icon == self.get_symbol(position):
             x, y = position
-            self._visual_char_matrix[y][x].symbol = symbol
-            libtcod.console_set_char(0, x, y, symbol)
+            self._visual_char_matrix[y][x].icon = icon
+            libtcod.console_set_char(0, x, y, icon)
 
     def set_color_fg(self, position, color):
         if not color == self.get_color_fg(position):
@@ -71,17 +71,17 @@ class ConsoleVisual(object):
                               self.get_default_color_fg())
             self.set_symbol((position[0], position[1] + idx), char)
 
-    def set_colors_and_symbol(self, position, color_fg, color_bg, symbol):
+    def set_colors_and_symbol(self, position, color_fg, color_bg, icon):
         if(color_fg == self.get_color_fg(position) and
            color_bg == self.get_color_bg(position) and
-           symbol == self.get_symbol(position)):
+           icon == self.get_symbol(position)):
             return
         else:
             x, y = position
-            self._visual_char_matrix[y][x].symbol = symbol
+            self._visual_char_matrix[y][x].icon = icon
             self._visual_char_matrix[y][x].color_fg = color_fg
             self._visual_char_matrix[y][x].color_bg = color_bg
-            libtcod.console_put_char_ex(0, x, y, symbol, color_fg, color_bg)
+            libtcod.console_put_char_ex(0, x, y, icon, color_fg, color_bg)
 
     def flush(self):
         libtcod.console_flush()
@@ -91,13 +91,13 @@ class ConsoleVisual(object):
         libtcod.sys_save_screenshot()
 
 
-class GFXChar(object):
+class GrahicChar(object):
     """
     Composites holding this has a graphical representation as a char.
     """
-    def __init__(self, symbol, color_bg, color_fg):
-        super(GFXChar, self).__init__()
-        self.symbol = symbol
+    def __init__(self, color_bg, color_fg, icon):
+        super(GrahicChar, self).__init__()
+        self.icon = icon
         self.color_bg = color_bg
         self.color_fg = color_fg
 
