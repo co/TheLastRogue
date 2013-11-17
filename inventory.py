@@ -91,8 +91,8 @@ class Inventory(Leaf):
 
         Returns True on success otherwise False.
         """
-        drop_successful = item.mover.try_move(self.parent.position,
-                                              self.parent.dungeon_level)
+        drop_successful = item.mover.try_move(self.parent.position.value,
+                                              self.parent.dungeon_level.value)
         if drop_successful:
             self.remove_item(item)
         return drop_successful

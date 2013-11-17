@@ -36,6 +36,7 @@ class ItemType(Leaf):
         self.component_type = "item_type"
         self.value = item_type
 
+
 class Gun(Composite):
     """
     A composite component representing a Gun item.
@@ -59,6 +60,7 @@ class Gun(Composite):
                                                DamageTypes.PIERCING]))
         self.add_child(WeaponRange(15))
         self.add_child(ReEquipAction())
+        self.add_child(DropAction())
         self.add_child(PlayerThrowItemAction())
         self.add_child(ThrowerNonBreak())
         self.add_child(Weight(5))
@@ -90,6 +92,7 @@ class Stacker(Leaf):
     def is_full(self):
         return self.size >= self.max_size
 
+
 class Ammunition(Composite):
     """
     A composite component representing a gun ammunition item.
@@ -106,9 +109,11 @@ class Ammunition(Composite):
         self.add_child(Description("Gun Bullets",
                                    "These bullets will fit in most guns."))
         self.add_child(GraphicChar(None, colors.GRAY, ":"))
+        self.add_child(DropAction())
         self.add_child(CharPrinter())
         self.add_child(Weight(1))
         self.add_child(Hit(17))
+
 
 class EquippedEffect(Leaf):
     """
@@ -144,6 +149,7 @@ class Armor(Composite):
                                                  [DamageTypes.PHYSICAL]))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
+        self.add_child(DropAction())
         self.add_child(PlayerThrowItemAction())
         self.add_child(ThrowerNonBreak())
         self.add_child(Weight(10))
@@ -187,6 +193,7 @@ class Sword(Composite):
                                               DamageTypes.CUTTING]))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
+        self.add_child(DropAction())
         self.add_child(PlayerThrowItemAction())
         self.add_child(ThrowerNonBreak())
         self.add_child(Weight(10))
@@ -211,6 +218,7 @@ class RingOfInvisibility(Leaf):
         self.add_child(GraphicChar(None, colors.YELLOW, icon.RING))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
+        self.add_child(DropAction())
         self.add_child(EquippedEffect(SetInvisibilityFlagEquippedEffect()))
 
 
@@ -247,6 +255,7 @@ class HealthPotion(Composite):
         self.add_child(CharPrinter())
         self.add_child(Stacker("health_potion", 3))
         self.add_child(HealingPotionDrinkAction())
+        self.add_child(DropAction())
 
         self.add_child(ThrowerBreak())
         self.add_child(Weight(4))
@@ -291,9 +300,9 @@ class DropAction(Action):
         Attempts to drop the parent item at the entity's feet.
         """
         source_entity = kwargs[action.SOURCE_ENTITY]
-        if not self.parent.inventory is None:
+        if not source_entity.inventory is None:
             drop_successful =\
-                self.parent.inventory.try_drop_item(self.parent)
+                source_entity.inventory.try_drop_item(self.parent)
             if drop_successful:
                 self.add_energy_spent_to_entity(source_entity)
         return
