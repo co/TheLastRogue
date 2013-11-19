@@ -64,7 +64,7 @@ class Gun(Composite):
         self.add_child(PlayerThrowItemAction())
         self.add_child(ThrowerNonBreak())
         self.add_child(Weight(5))
-        self.add_child(Hit(11))
+        self.add_child(Hit(13))
 
 
 class IsAmmo(Leaf):

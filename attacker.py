@@ -1,3 +1,4 @@
+import random
 import entityeffect
 import rng
 from compositecore import Leaf
@@ -71,8 +72,8 @@ class Dodger(Leaf):
         """
         Returns true if it is a hit, false otherwise.
         """
-        return (rng.sum_of_n_coin_flips(hit) >=
-                rng.sum_of_n_coin_flips(self.parent.evasion.value))
+        return (random.randint(0, hit + 5) >=
+                random.randint(0, self.parent.evasion.value))
 
 
 class DamageTypes(object):

@@ -126,10 +126,10 @@ class MonsterActor(Actor):
         Returns true if it's possible for the monster to do a ranged attack at the player.
         """
         player = self.get_player_if_seen()
-        if (player is None or
-                    self.parent.monster_actor_state.value != MonsterActorState.HUNTING):
+        if player is None or MonsterActorState.HUNTING != self.parent.monster_actor_state.value:
             return False
-        if not self.parent.has_child("monster_range_attack_action"):
+        if (not self.parent.has_child("monster_range_attack_action") or
+                not self.parent.monster_range_attack_action.can_act(player.position.value)):
             return False
         range_attack = self.parent.monster_range_attack_action
         return (range_attack.is_destination_within_range(player.position.value) and

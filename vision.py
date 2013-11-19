@@ -70,5 +70,5 @@ class AwarenessChecker(Leaf):
         @param stealth: The stealth determines how hard it is to notice.
         @return: True if the notice check is successful False otherwise.
         """
-        return (random.randint(0, self.parent.awareness.value) > \
+        return (random.randint(0, self.parent.awareness.value) >=
                 random.randint(0, stealth + 5))

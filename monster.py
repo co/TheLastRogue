@@ -69,7 +69,7 @@ class Ratman(Composite):
         self.add_child(ChasePlayerActor())
         self.add_child(MonsterActorState())
         self.add_child(HuntPlayerIfHurtMe())
-        self.add_child(MonsterThrowRockAction())
+        self.add_child(MonsterThrowRockAction(30))
 
         self.add_child(GameState(game_state))
         self.add_child(Equipment())

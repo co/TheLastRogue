@@ -50,8 +50,5 @@ class Dungeon(object):
             jerico = monster.Jerico(self.game_state)
             spawner.place_piece_on_random_tile(jerico, dungeon_level)
 
-        statue = monster.StoneStatue(self.game_state)
-        spawner.place_piece_on_random_tile(statue, dungeon_level)
-
         dungeon_level.dungeon = self
         return dungeon_level

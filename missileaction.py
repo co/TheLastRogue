@@ -1,3 +1,4 @@
+import random
 from action import Action, SOURCE_ENTITY, GAME_STATE
 from compositecore import Leaf
 import gametime
@@ -144,11 +145,17 @@ class PlayerShootWeaponAction(PlayerMissileAction):
 
 
 class MonsterThrowRockAction(Leaf):
-    def __init__(self):
+    def __init__(self, skip_chance=0):
         super(MonsterThrowRockAction, self).__init__()
         self.component_type = "monster_range_attack_action"
         self.icon = icon.STONE
         self.color_fg = colors.GRAY
+        self.skip_chance = skip_chance
+
+    def can_act(self, destination):
+        if random.randrange(100) > self.skip_chance:
+            return False
+        return True
 
     def act(self, destination):
         path = self._get_path(destination)
