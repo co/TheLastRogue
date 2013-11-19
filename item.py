@@ -462,7 +462,8 @@ class PickUpItemAction(Action):
         """
         Prints a message to the user explaining what went wrong.
         """
-        item = self._get_item_on_floor()
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        item = self._get_item_on_floor(source_entity)
         if(not item is None and
            not self.parent.inventory.has_room_for_item(item)):
             message = "Could not pick up: " + item.description.name +\

@@ -82,7 +82,9 @@ class InputActor(Actor):
                                                     target_entity=self.parent,
                                                     game_state=self.parent.game_state.value)
             else:
-                self.parent.pick_up_item_action.print_player_error()
+                self.parent.pick_up_item_action.print_player_error(source_entity=self.parent,
+                                                                   target_entity=self.parent,
+                                                                   game_state=self.parent.game_state.value)
         elif key == inputhandler.FIRE:
             equipment = self.parent.equipment
             if equipment.slot_is_equiped(EquipmentSlots.RANGED_WEAPON):
