@@ -180,17 +180,18 @@ def _apply_cellular_automata_rule_on_tile(dungeon_level, position,
 
 
 def generate_dungeon_exploded_rooms(open_area, depth):
-    rooms = random.randrange(4, 8)
-    room_area = open_area / rooms
+    rooms = random.randrange(3, 12)
+    room_area = open_area * 0.8 / rooms
     aprox_room_radius = math.sqrt(room_area)
 
-    room_distance = aprox_room_radius * 1.2
+    room_distance = aprox_room_radius
 
     grid_side = int(max(rooms / 2 + 1, math.sqrt(rooms + 1) + 1))
     triangle_points = shapegenerator.triangle_points(room_distance,
                                                      grid_side, grid_side)
 
     room_positions = random.sample(triangle_points, rooms)
+    minor_room_positions = set()
     room_graph = graph.Graph()
     corridors_points = set()
     for room_position in room_positions:
@@ -200,13 +201,21 @@ def generate_dungeon_exploded_rooms(open_area, depth):
         while room_graph.has_edge(edge[0], edge[1]):
             edge = random.sample(room_positions, 2)
         room_graph.add_edge(edge[0], edge[1])
-        corridors_points.update(shapegenerator.manhattan_walker(edge[0],
-                                                                edge[1]))
+        mid_point = random.sample(shapegenerator.get_opposite_rectangle_corners(edge[0], edge[1]), 1)[0]
+        minor_room_positions.add(mid_point)
+        corridor = shapegenerator.three_point_rectangle_draw(edge[0], mid_point, edge[1])
+        corridors_points.update(corridor)
 
     open_points = corridors_points
     for position in room_positions:
         room_points = \
             shapegenerator.random_explosion(position, room_area,
+                                            direction.AXIS_DIRECTIONS)
+        open_points.update(room_points)
+
+    for position in minor_room_positions:
+        room_points = \
+            shapegenerator.random_explosion(position, room_area / 4,
                                             direction.AXIS_DIRECTIONS)
         open_points.update(room_points)
 
@@ -247,7 +256,7 @@ def generate_dungeon_cave_floor(size, depth):
         room_points = \
             shapegenerator.random_explosion(position, total_room_area / rooms,
                                             direction.AXIS_DIRECTIONS)
-        open_points.update(room_points)
+        #open_points.update(room_points)
 
     frame = 2
     level_shape = shapegenerator.Shape(open_points)

@@ -27,7 +27,7 @@ class DungeonCreatorVisualizer(state.State):
         self.handle_input()
 
     def generate_dungeon_level(self):
-        size = 1200
+        size = 700
         depth = 1
         self.dungeon_level = dgen.generate_dungeon_exploded_rooms(size, depth)
 
@@ -39,7 +39,7 @@ class DungeonCreatorVisualizer(state.State):
                                                 dungeon_level.height * 0.1)
         move_list = list(direction.AXIS_DIRECTIONS)
         dgen.random_explosion(dungeon_level, center_position, brush,
-                             end_condition, move_list)
+                              end_condition, move_list)
 
     def drunkard_walk(self):
         dungeon_level = self.dungeon_level
@@ -75,6 +75,7 @@ class DungeonCreatorVisualizer(state.State):
         dgen.cellular_automata(self.dungeon_level)
 
     def handle_input(self):
+        inputhandler.handler.update_keys()
         key = inputhandler.handler.get_keypress()
         if key in inputhandler.move_controls:
             delta = inputhandler.move_controls[key]

@@ -92,6 +92,34 @@ def triangle_points(distance, width, height):
     return points
 
 
+def get_opposite_rectangle_corners(point1, point2):
+    return [(point1[0], point2[1]), (point2[0], point1[1])]
+
+
+def orthogonal_tunnler(start_point, end_point):
+    mid_point = random.sample(get_opposite_rectangle_corners(start_point, end_point), 1)[0]
+    return three_point_rectangle_draw(start_point, mid_point, end_point)
+
+
+def three_point_rectangle_draw(point1, point2, point3):
+    tunnel1 = get_rectangle_shape(point1, point2)
+    tunnel2 = get_rectangle_shape(point2, point3)
+    return tunnel1 | tunnel2
+
+
+def get_rectangle_shape(corner1, corner2):
+    start_x = min(corner1[0], corner2[0])
+    end_x = max(corner1[0], corner2[0]) + 1
+
+    start_y = min(corner1[1], corner2[1])
+    end_y = max(corner1[1], corner2[1]) + 1
+    shape = []
+    for x in range(start_x, end_x):
+        for y in range(start_y, end_y):
+            shape.append((x, y))
+    return set(shape)
+
+
 def manhattan_walker(start_point, end_point):
     return _manhattan_walker_recursive(start_point, end_point, set())
 
@@ -103,12 +131,12 @@ def _manhattan_walker_recursive(start_point, end_point, points):
     start_x = start_point[0]
     start_y = start_point[1]
 
-    if(delta_x == 0):
+    if delta_x == 0:
         step = 1 if delta_y >= 0 else -1
         for y in range(start_y, int(delta_y) + start_y, step):
             points.add((start_x, y))
         return points
-    elif(delta_y == 0):
+    elif delta_y == 0:
         step = 1 if delta_x >= 0 else -1
         for x in range(start_x, int(delta_x) + start_x, step):
             points.add((x, start_y))
