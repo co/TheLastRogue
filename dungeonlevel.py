@@ -49,9 +49,32 @@ class DungeonLevel(object):
                 the_tile = self.get_tile_or_unknown(tile_position)
                 the_tile.draw(position, True)
 
-    def draw(self, camera):
+    def draw_close_to_player(self, camera):
         the_player = self._get_player_if_available()
-        if(the_player is None):
+        if the_player is None:
+            raise Exception(("Tried to access the player, "
+                             "from DungeonLevel: " + str(self) +
+                             ", but the player is not in the dungeon."))
+        grace_radius = 2
+        square_side = (the_player.sight_radius.value + grace_radius) * 2
+        rect_pos = geo.sub_2d(camera.dungeon_to_screen_position(the_player.position.value), (square_side / 2, square_side / 2))
+        draw_rectangle = geo.Rect(rect_pos, square_side, square_side)
+        self.draw_rectangle(camera, draw_rectangle)
+
+    def draw_rectangle(self, camera, rectangle):
+        the_player = self._get_player_if_available()
+        if the_player is None:
+            raise Exception(("Tried to access the player, "
+                             "from DungeonLevel: " + str(self) +
+                             ", but the player is not in the dungeon."))
+        for y in range(rectangle.top, rectangle.bottom):
+            for x in range(rectangle.left, rectangle.right):
+                position = (x, y)
+                self._draw_tile(camera, position, the_player)
+
+    def draw_all_within_screen(self, camera):
+        the_player = self._get_player_if_available()
+        if the_player is None:
             raise Exception(("Tried to access the player, "
                              "from DungeonLevel: " + str(self) +
                              ", but the player is not in the dungeon."))

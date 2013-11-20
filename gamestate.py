@@ -30,10 +30,11 @@ class GameStateBase(state.State):
         self._should_draw = True
         self._last_dungeon_level = None
 
-        self.camera = camera.Camera((0, 0), (0, 0))
+        self.camera = camera.Camera((0, 0), (0, 0), self)
         self.has_won = False
         self.menu_prompt_stack = statestack.GameMenuStateStack(self)
         messenger.messenger.message("Welcome to: The Last Rogue!")
+        self.dungeon_needs_redraw = True
 
     def signal_new_level(self):
         self.camera.center_on_entity(self.player)
@@ -51,6 +52,12 @@ class GameStateBase(state.State):
     def draw(self):
         pass
 
+    def signal_camera_scrolled(self):
+        """
+        When the camera has scrolled the entire game screen needs to be redrawn.
+        """
+        self.dungeon_needs_redraw = True
+
     def force_draw(self):
         self.camera.update(self.player)
         self.prepare_draw()
@@ -58,9 +65,14 @@ class GameStateBase(state.State):
         console.console.flush()
 
     def prepare_draw(self):
-        dungeon_level =\
-            self.player.dungeon_level.value
-        dungeon_level.draw(self.camera)
+        dungeon_level = self.player.dungeon_level.value
+        if self.dungeon_needs_redraw:
+            print "all"
+            dungeon_level.draw_all_within_screen(self.camera)
+            self.dungeon_needs_redraw = False
+        else:
+            print "small"
+            dungeon_level.draw_close_to_player(self.camera)
         self.player.path.draw(self.camera)
         self.prepare_draw_gui()
 
@@ -160,7 +172,7 @@ class GameState(GameStateBase):
         for stairs in first_level.up_stairs:
             move_succeded = self.player.mover.try_move(stairs.position.value,
                                                        first_level)
-            if(move_succeded):
+            if move_succeded:
                 self.camera.center_on_entity(self.player)
                 return
         raise Exception("Could not put player at first up stairs.")

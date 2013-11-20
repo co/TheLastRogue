@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import cProfile
 import logging
 
 import init
@@ -12,5 +13,5 @@ init.init_libtcod()
 main_state_stack = statestack.StateStack()
 main_menu = menufactory.title_screen(main_state_stack)
 main_state_stack.push(main_menu)
-main_state_stack.main_loop()
-#cProfile.run(main_state_stack.main_loop())
+#main_state_stack.main_loop()
+cProfile.run(main_state_stack.main_loop())

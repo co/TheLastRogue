@@ -6,11 +6,12 @@ import settings
 
 
 class Camera(object):
-    def __init__(self, screen_position, camera_offset):
+    def __init__(self, screen_position, camera_offset, game_state):
         self.screen_position = screen_position
-        self.camera_offset = camera_offset
+        self._camera_offset = camera_offset
         self.x_graze_edge = [30, settings.WINDOW_WIDTH - 30]
         self.y_graze_edge = [15, settings.WINDOW_HEIGHT - 15]
+        self.game_state = game_state
 
     @property
     def screen_center_position(self):
@@ -22,6 +23,16 @@ class Camera(object):
     @property
     def offset(self):
         return geo.add_2d(self.screen_position, self.camera_offset)
+
+    @property
+    def camera_offset(self):
+        return self._camera_offset
+
+    @camera_offset.setter
+    def camera_offset(self, value):
+        if not value == self._camera_offset:
+            self.signal_camera_scrolled()
+            self._camera_offset = value
 
     def dungeon_to_screen_position(self, position):
         return geo.add_2d(geo.sub_2d(position, self.camera_offset),
@@ -57,3 +68,7 @@ class Camera(object):
         for y in range(self.y_graze_edge[0], self.y_graze_edge[1]):
             console.set_color_bg((self.x_graze_edge[0], y), colors.YELLOW)
             console.set_color_bg((self.x_graze_edge[1], y), colors.YELLOW)
+
+    def signal_camera_scrolled(self):
+        print "signal!"
+        self.game_state.signal_camera_scrolled()
