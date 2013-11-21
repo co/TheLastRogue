@@ -143,30 +143,43 @@ class BleedWhenDamaged(DamageTakenEffect):
         # Why does this key break the ratman!?
         #self.component_type = "bleed_when_damaged"
 
+    def put_blood_on_tile(self, dungeon_level, position):
+        terrain = dungeon_level.get_tile_or_unknown(position).get_terrain()
+        if terrain.is_solid.value:
+            terrain.graphic_char.color_fg = colors.RED
+        else:
+            spawner.spawn_blood_on_position(position, dungeon_level)
+
     def effect(self, damage, source_entity):
         dungeon_level = self.parent.dungeon_level.value
         if damage/float(self.parent.health.hp.max_value) > 0.2:
-            spawner.spawn_blood_on_position(self.parent.position.value, dungeon_level)
+            self.put_blood_on_tile(dungeon_level, self.parent.position.value)
 
         if damage/float(self.parent.health.hp.max_value) > 0.4:
-            point_behind = self._get_point_behind(source_entity.position.value, 1)
-            shape = shapegenerator.random_explosion(point_behind, 3)
+            point_behind = self._get_point_behind_unless_solid(source_entity.position.value, 1, dungeon_level)
+            shape = shapegenerator.random_explosion_not_through_solid(point_behind, 3, dungeon_level)
             for point in shape:
-                spawner.spawn_blood_on_position(point, dungeon_level)
+                self.put_blood_on_tile(dungeon_level, point)
 
         if damage/float(self.parent.health.hp.max_value) > 0.8:
-            point_behind = self._get_point_behind(source_entity.position.value, 2)
-            shape = shapegenerator.random_explosion(point_behind, 8)
+            point_behind = self._get_point_behind_unless_solid(source_entity.position.value, 2, dungeon_level)
+            shape = shapegenerator.random_explosion_not_through_solid(point_behind, 8, dungeon_level)
             for point in shape:
-                spawner.spawn_blood_on_position(point, dungeon_level)
+                self.put_blood_on_tile(dungeon_level, point)
 
-    def _get_point_behind(self, enemy_position, distance):
+    def _get_point_behind_unless_solid(self, enemy_position, distance, dungeon_level):
         """
         Gets point right behind me seen from my enemy.
         """
         far_behind_point = geometry.sub_2d(self.parent.position.value, enemy_position)
         right_behind_point_delta = geometry.element_wise_round(geometry.normalize(far_behind_point))
-        result = self.parent.position.value
+        last_result = self.parent.position.value
         for _ in range(distance):
-            result = geometry.add_2d(right_behind_point_delta, result)
+            result = geometry.add_2d(right_behind_point_delta, last_result)
+            if position_is_solid(result, dungeon_level):
+                return last_result
+            last_result = result
         return result
+
+def position_is_solid(position, dungeon_level):
+    return dungeon_level.get_tile_or_unknown(position).get_terrain().is_solid.value

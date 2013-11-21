@@ -26,9 +26,9 @@ class Tile(object):
 
     def _update_top_level(self):
         try:
-            piece_type = next(pice_type for pice_type in
+            piece_type = next(piece_type for piece_type in
                               self.game_pieces.keys()
-                              if self.has_piece_of_type(pice_type))
+                              if self.has_piece_of_type(piece_type))
             self._top_level = piece_type
         except StopIteration:
             self._top_level = GamePieceType.TERRAIN
@@ -39,7 +39,7 @@ class Tile(object):
         create a cycle through each one of them.
         """
         number_of_pieces = len(piece_list)
-        if (number_of_pieces > 0):
+        if number_of_pieces > 0:
             animation_length = 3
             cycle_length = number_of_pieces * animation_length
             current_animation_frame = frame.current_frame % cycle_length
@@ -53,7 +53,7 @@ class Tile(object):
 
     def remove(self, piece):
         piece_type = piece.game_piece_type.value
-        if(piece in self.game_pieces[piece_type]):
+        if piece in self.game_pieces[piece_type]:
             self.game_pieces[piece_type].remove(piece)
             self._update_top_level()
             return True

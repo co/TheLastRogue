@@ -72,11 +72,35 @@ def random_explosion(start_pos, size, move_list=None):
                          for _direction in move_list])
         unvisited_neighbors = neighbors - visited
         unvisited_positions = unvisited_positions | unvisited_neighbors
-        if(len(unvisited_positions) >= 1):
+        if len(unvisited_positions) >= 1:
             position = random.sample(unvisited_positions, 1)[0]
         else:
             break
     return visited
+
+
+def random_explosion_not_through_solid(start_pos, size, dungeon_level, move_list=None):
+    if move_list is None:
+        move_list = direction.DIRECTIONS
+    position = start_pos
+    visited = set()
+    unvisited_positions = set()
+    while len(visited) < size:
+        visited.add(position)
+        neighbors = set([geo.add_2d(position, _direction)
+                         for _direction in move_list])
+        unvisited_neighbors = set([neighbor for neighbor in neighbors - visited
+                                   if position_is_solid(neighbor, dungeon_level)])
+        unvisited_positions = unvisited_positions | unvisited_neighbors
+        if len(unvisited_positions) >= 1:
+            position = random.sample(unvisited_positions, 1)[0]
+        else:
+            break
+    return visited
+
+
+def position_is_solid(position, dungeon_level):
+    return dungeon_level.get_tile_or_unknown(position).get_terrain().is_solid.value
 
 
 def triangle_points(distance, width, height):

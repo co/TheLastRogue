@@ -116,6 +116,7 @@ class GameStateBase(state.State):
         self._update_gui()
 
         if self.player.health.is_dead():
+            self.force_draw()
             game_over_screen = menufactory.game_over_screen(self.current_stack)
             self.current_stack.push(game_over_screen)
         if self.has_won:

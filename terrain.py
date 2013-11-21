@@ -59,8 +59,8 @@ class Water(Composite):
         self.add_child(Mover())
         self.add_child(Position())
         self.add_child(DungeonLevel())
-        self.add_child(GraphicChar(colors.BLUE,
-                                   colors.BLUE_D,
+        self.add_child(GraphicChar(colors.BLUE_D,
+                                   colors.BLUE,
                                    icon.WATER))
         self.add_child(CharPrinter())
         self.add_child(IsSolid(False))
