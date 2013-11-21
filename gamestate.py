@@ -130,6 +130,7 @@ class GameStateBase(state.State):
         self._monster_status_stack.update(self.player)
         self._player_status_bar.update()
         self.command_list_bar.update()
+
     def _draw_bg(self):
         libtcodpy.console_blit(self._background_console, 0, 0, constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT,
                                0, 0, 0)

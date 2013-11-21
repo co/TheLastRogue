@@ -452,6 +452,10 @@ class PickUpItemAction(Action):
             message = "Picked up: " + item.description.name
             messenger.message(message)
             self.parent.actor.newly_spent_energy += gametime.single_turn
+            self._item_flash_animation(source_entity, item)
+
+    def _item_flash_animation(self, entity, item):
+        entity.char_printer.append_graphic_char_temporary_frames([item.graphic_char])
 
     def _get_item_on_floor(self, entity):
         dungeon_level = entity.dungeon_level.value

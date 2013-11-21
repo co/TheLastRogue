@@ -1,6 +1,8 @@
 WINDOW_WIDTH = 110
 WINDOW_HEIGHT = 60
 
+ANIMATION_DELAY = 2
+
 # only draw state if player has moved.
 lazy_draw = True
 
