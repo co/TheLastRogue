@@ -31,33 +31,28 @@ class ConsoleVisual(object):
     def get_default_color_bg(self):
         return self._default_color_bg
 
-    def set_default_color_fg(self, color):
-        if not color == self.get_default_color_fg():
-            self._default_color_fg = color
-            libtcod.console_set_default_foreground(None, color)
+    def set_default_color_fg(self, color, console=0):
+        self._default_color_fg = color
+        libtcod.console_set_default_foreground(console, color)
 
-    def set_default_color_bg(self, color):
-        if not color == self.get_default_color_bg():
-            self._default_color_bg = color
-            libtcod.console_set_default_background(None, color)
+    def set_default_color_bg(self, color, console=0):
+        self._default_color_bg = color
+        libtcod.console_set_default_background(console, color)
 
-    def set_symbol(self, position, icon):
-        if not icon == self.get_symbol(position):
-            x, y = position
-            self._visual_char_matrix[y][x].icon = icon
-            libtcod.console_set_char(0, x, y, icon)
+    def set_symbol(self, position, icon, console=0):
+        x, y = position
+        self._visual_char_matrix[y][x].icon = icon
+        libtcod.console_set_char(console, x, y, icon)
 
-    def set_color_fg(self, position, color):
-        if not color == self.get_color_fg(position):
-            x, y = position
-            self._visual_char_matrix[y][x].color_fg = color
-            libtcod.console_set_char_foreground(0, x, y, color)
+    def set_color_fg(self, position, color, console=0):
+        x, y = position
+        self._visual_char_matrix[y][x].color_fg = color
+        libtcod.console_set_char_foreground(console, x, y, color)
 
-    def set_color_bg(self, position, color, effect=libtcod.BKGND_SET):
-        if not color == self.get_color_bg(position):
-            x, y = position
-            self._visual_char_matrix[y][x].color_bg = color
-            libtcod.console_set_char_background(0, x, y, color, effect)
+    def set_color_bg(self, position, color, effect=libtcod.BKGND_SET, console=0):
+        x, y = position
+        self._visual_char_matrix[y][x].color_bg = color
+        libtcod.console_set_char_background(console, x, y, color, effect)
 
     def print_text(self, position, text):
         for idx, char in enumerate(text):
@@ -71,17 +66,9 @@ class ConsoleVisual(object):
                               self.get_default_color_fg())
             self.set_symbol((position[0], position[1] + idx), char)
 
-    def set_colors_and_symbol(self, position, color_fg, color_bg, icon):
-        if(color_fg == self.get_color_fg(position) and
-           color_bg == self.get_color_bg(position) and
-           icon == self.get_symbol(position)):
-            return
-        else:
-            x, y = position
-            self._visual_char_matrix[y][x].icon = icon
-            self._visual_char_matrix[y][x].color_fg = color_fg
-            self._visual_char_matrix[y][x].color_bg = color_bg
-            libtcod.console_put_char_ex(0, x, y, icon, color_fg, color_bg)
+    def set_colors_and_symbol(self, position, color_fg, color_bg, icon, console=0):
+        x, y = position
+        libtcod.console_put_char_ex(console, x, y, icon, color_fg, color_bg)
 
     def flush(self):
         libtcod.console_flush()

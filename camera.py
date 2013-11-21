@@ -31,7 +31,6 @@ class Camera(object):
     @camera_offset.setter
     def camera_offset(self, value):
         if not value == self._camera_offset:
-            self.signal_camera_scrolled()
             self._camera_offset = value
 
     def dungeon_to_screen_position(self, position):
@@ -69,6 +68,3 @@ class Camera(object):
             console.set_color_bg((self.x_graze_edge[0], y), colors.YELLOW)
             console.set_color_bg((self.x_graze_edge[1], y), colors.YELLOW)
 
-    def signal_camera_scrolled(self):
-        print "signal!"
-        self.game_state.signal_camera_scrolled()

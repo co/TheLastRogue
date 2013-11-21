@@ -1,6 +1,6 @@
 import settings
 
-FPS = 60
+FPS = 20
 
 RIGHT_SIDE_MENU_WIDTH = 24
 

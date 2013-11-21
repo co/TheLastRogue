@@ -52,36 +52,37 @@ class CharPrinter(Leaf):
         self._temp_animation_frames = []
 
     @staticmethod
-    def _draw(position, graphic_char):
+    def _draw(position, graphic_char, the_console=0):
         """
         Draws the char on the given position on the console.
 
         Bypasses all effects.
         """
         if not graphic_char.color_bg is None:
-            console.console.set_color_bg(position, graphic_char.color_bg)
+            console.console.set_color_bg(position, graphic_char.color_bg, console=the_console)
         if not graphic_char.color_fg is None:
-            console.console.set_color_fg(position, graphic_char.color_fg)
+            console.console.set_color_fg(position, graphic_char.color_fg, console=the_console)
         if not graphic_char.icon is None:
-            console.console.set_symbol(position, graphic_char.icon)
+            console.console.set_symbol(position, graphic_char.icon, console=the_console)
 
-    def draw(self, position):
+    def draw(self, position, the_console=0):
         """
         Draws the char on the given position on the console.
         """
         if len(self._temp_animation_frames) > 0:
-            self._draw(position, self._temp_animation_frames.pop())
+            self._draw(position, self._temp_animation_frames.pop(), the_console)
         else:
-            self._draw(position, self.parent.graphic_char)
+            self._draw(position, self.parent.graphic_char, the_console)
 
-    def draw_unseen(self, screen_position):
+    def draw_unseen(self, screen_position, the_console=0):
         """
         Draws the char as it looks like outside the field of view.
         """
         console.console.set_colors_and_symbol(screen_position,
                                               colors.UNSEEN_FG,
                                               colors.UNSEEN_BG,
-                                              self.parent.graphic_char.icon)
+                                              self.parent.graphic_char.icon,
+                                              console=the_console)
 
     def append_graphic_char_temporary_frames(self, graphic_char_frames):
         """
@@ -103,6 +104,7 @@ class CharPrinter(Leaf):
         symbol = self.parent.graphic_char.icon
         frames = [GraphicChar(color_bg, color, symbol) for color in frame_colors]
         self.append_graphic_char_temporary_frames(frames)
+
 
 class GraphicCharTerrainCorners(GraphicChar):
     """

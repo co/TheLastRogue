@@ -12,7 +12,7 @@ class DungeonCreatorVisualizer(state.State):
     def __init__(self):
         super(DungeonCreatorVisualizer, self).__init__()
         self.dungeon_level = dgen.get_full_wall_dungeon(70, 55, 0)
-        self.camera = camera.Camera(geo.zero2d(), geo.zero2d())
+        self.camera = camera.Camera(geo.zero2d(), geo.zero2d(), self)
 
     def fill_dungeon(self):
         width = self.dungeon_level.width
@@ -108,3 +108,6 @@ class DungeonCreatorVisualizer(state.State):
 
         elif key == inputhandler.PRINTSCREEN:
             console.print_screen()
+
+    def signal_camera_scrolled(self):
+        pass

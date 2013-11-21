@@ -1,5 +1,7 @@
+import colors
 from dungeon import Dungeon
 from dungeonlevelfactory import dungeon_level_from_file
+import libtcodpy
 from player import Player
 import camera
 import console
@@ -35,6 +37,32 @@ class GameStateBase(state.State):
         self.menu_prompt_stack = statestack.GameMenuStateStack(self)
         messenger.messenger.message("Welcome to: The Last Rogue!")
         self.dungeon_needs_redraw = True
+        self._background_console = self._console = libtcodpy.console_new(constants.GAME_STATE_WIDTH,
+                                                                         constants.GAME_STATE_HEIGHT)
+        self._init_bg()
+
+    def _init_gui(self):
+        player_status_rect = rectfactory.player_status_rect()
+        self._player_status_bar = \
+            gui.PlayerStatusBox(player_status_rect, self.player)
+
+        monster_status_rect = geo.Rect(geo.zero2d(),
+                                       constants.MONSTER_STATUS_BAR_WIDTH,
+                                       constants.MONSTER_STATUS_BAR_HEIGHT)
+
+        self._monster_status_stack = gui.EntityStatusList(monster_status_rect,
+                                                          vertical_space=0)
+
+        self._message_display = gui.MessageDisplay(rectfactory.message_display_rect())
+
+        self.command_list_bar = gui.CommandListPanel(rectfactory.right_side_menu_rect())
+
+    def _init_bg(self):
+        for x in range(constants.GAME_STATE_WIDTH):
+            for y in range(constants.GAME_STATE_WIDTH):
+                console.console.set_colors_and_symbol((x, y), colors.UNSEEN_FG, colors.UNSEEN_BG, " ",
+                                                      console=self._background_console)
+
 
     def signal_new_level(self):
         self.camera.center_on_entity(self.player)
@@ -52,12 +80,6 @@ class GameStateBase(state.State):
     def draw(self):
         pass
 
-    def signal_camera_scrolled(self):
-        """
-        When the camera has scrolled the entire game screen needs to be redrawn.
-        """
-        self.dungeon_needs_redraw = True
-
     def force_draw(self):
         self.camera.update(self.player)
         self.prepare_draw()
@@ -66,26 +88,25 @@ class GameStateBase(state.State):
 
     def prepare_draw(self):
         dungeon_level = self.player.dungeon_level.value
+        self._draw_bg()
         if self.dungeon_needs_redraw:
-            print "all"
             dungeon_level.draw_all_within_screen(self.camera)
             self.dungeon_needs_redraw = False
         else:
-            print "small"
             dungeon_level.draw_close_to_player(self.camera)
         self.player.path.draw(self.camera)
         self.prepare_draw_gui()
 
     def prepare_draw_gui(self):
-        self.player_status_bar.draw()
-        self.message_display.draw()
-        self.monster_status_stack.draw()
+        self._player_status_bar.draw()
+        self._message_display.draw()
+        self._monster_status_stack.draw()
         self.command_list_bar.draw()
 
     def update(self):
-        self.message_display.update()
+        self._message_display.update()
 
-        dungeon_level =\
+        dungeon_level = \
             self.player.dungeon_level.value
         if not dungeon_level is self._last_dungeon_level:
             self.signal_new_level()
@@ -101,26 +122,16 @@ class GameStateBase(state.State):
             victory_screen = menufactory.victory_screen(self.current_stack)
             self.current_stack.push(victory_screen)
 
+    def draw_bg(self):
+        pass
+
     def _update_gui(self):
-        self.monster_status_stack.update(self.player)
-        self.player_status_bar.update()
+        self._monster_status_stack.update(self.player)
+        self._player_status_bar.update()
         self.command_list_bar.update()
-
-    def _init_gui(self):
-        player_status_rect = rectfactory.player_status_rect()
-        self.player_status_bar =\
-            gui.PlayerStatusBox(player_status_rect, self.player)
-
-        monster_status_rect = geo.Rect(geo.zero2d(),
-                                       constants.MONSTER_STATUS_BAR_WIDTH,
-                                       constants.MONSTER_STATUS_BAR_HEIGHT)
-
-        self.monster_status_stack = gui.EntityStatusList(monster_status_rect,
-                                                         vertical_space=0)
-
-        self.message_display = gui.MessageDisplay(rectfactory.message_display_rect())
-
-        self.command_list_bar = gui.CommandListPanel(rectfactory.right_side_menu_rect())
+    def _draw_bg(self):
+        libtcodpy.console_blit(self._background_console, 0, 0, constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT,
+                               0, 0, 0)
 
 
 class TestGameState(GameStateBase):
