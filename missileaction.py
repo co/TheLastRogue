@@ -144,18 +144,20 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         inventory.remove_one_item_from_stack(ammo_item_with_least_ammo)
 
 
-class MonsterThrowRockAction(Leaf):
-    def __init__(self, skip_chance=0):
-        super(MonsterThrowRockAction, self).__init__()
+class MonsterThrowStoneAction(Leaf):
+    def __init__(self, skip_chance=0, icon=icon.STONE, color_fg=colors.GRAY):
+        super(MonsterThrowStoneAction, self).__init__()
         self.component_type = "monster_range_attack_action"
-        self.icon = icon.STONE
-        self.color_fg = colors.GRAY
+        self.icon = icon
+        print icon
+        print color_fg
+        self.color_fg = color_fg
         self.skip_chance = skip_chance
 
     def can_act(self, destination):
         if random.randrange(100) > self.skip_chance:
-            return False
-        return True
+            return True
+        return False
 
     def act(self, destination):
         path = self._get_path(destination)

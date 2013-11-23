@@ -6,7 +6,7 @@ from entityeffect import EffectQueue
 from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
-from missileaction import MonsterThrowRockAction
+from missileaction import MonsterThrowStoneAction
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe
 from mover import EntityMover, CanShareTileEntityMover
 from ondeathaction import EntityDeathAction
@@ -69,7 +69,62 @@ class Ratman(Composite):
         self.add_child(ChasePlayerActor())
         self.add_child(MonsterActorState())
         self.add_child(HuntPlayerIfHurtMe())
-        self.add_child(MonsterThrowRockAction(30))
+        self.add_child(MonsterThrowStoneAction(30))
+
+        self.add_child(GameState(game_state))
+        self.add_child(Equipment())
+        self.add_child(Inventory())
+        self.add_child(EffectQueue())
+
+
+class Cyclops(Composite):
+    """
+    A composite component representing a Cyclops monster.
+    """
+
+    def __init__(self, game_state):
+        super(Cyclops, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ENTITY))
+
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(EntityMover())
+
+        self.add_child(EntityMessages("The cyclops looks at you.",
+                                      "The cyclops is mangled to the floor."))
+        self.add_child(Description("Cyclops",
+                                   "A Giant with a single disgusting eye, it's looking for prey."))
+        self.add_child(GraphicChar(None, colors.CYAN, icon.CYCLOPS))
+        self.add_child(CharPrinter())
+        self.add_child(EntityDeathAction())
+
+        self.add_child(Faction(Faction.MONSTER))
+        self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
+                                    StatusFlags.CAN_OPEN_DOORS]))
+        self.add_child(Health(35))
+        self.add_child(HealthModifier())
+        self.add_child(MovementSpeed(gametime.one_and_half_turn))
+        self.add_child(BleedWhenDamaged())
+
+        self.add_child(AttackSpeed(gametime.single_turn))
+        self.add_child(Strength(12))
+        self.add_child(Attacker(0.7, 1.5))
+        self.add_child(Dodger())
+        self.add_child(Evasion(5))
+        self.add_child(Hit(10))
+
+        self.add_child(SightRadius(6))
+        self.add_child(DungeonMask())
+        self.add_child(Vision())
+        self.add_child(Stealth(7))
+        self.add_child(Awareness(3))
+        self.add_child(AwarenessChecker())
+
+        self.add_child(Path())
+        self.add_child(ChasePlayerActor())
+        self.add_child(MonsterActorState())
+        self.add_child(HuntPlayerIfHurtMe())
+        self.add_child(MonsterThrowStoneAction(10, icon=icon.DUNGEON_WALLS_ROW))
 
         self.add_child(GameState(game_state))
         self.add_child(Equipment())

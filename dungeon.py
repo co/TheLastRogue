@@ -30,6 +30,10 @@ class Dungeon(object):
         for _ in range(2 * (depth + 1) + 1):
             spawner.spawn_rat_man(dungeon_level, self.game_state)
 
+        for _ in range(max(rng.random_variance(depth - 2, 3), 0)):
+            cyclops = monster.Cyclops(self.game_state)
+            spawner.place_piece_on_random_tile(cyclops, dungeon_level)
+
         for _ in range(depth + 3):
             potion = item.HealthPotion()
             spawner.place_piece_on_random_tile(potion, dungeon_level)

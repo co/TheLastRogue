@@ -9,9 +9,11 @@ class Attacker(Leaf):
     """
     Component for attacking and checking if an attacking is legal.
     """
-    def __init__(self):
+    def __init__(self, melee_damage_modifier=1.0, rock_damage_modifier=1.0):
         super(Attacker, self).__init__()
         self.component_type = "attacker"
+        self.melee_damage_modifier = melee_damage_modifier
+        self.rock_damage_modifier = rock_damage_modifier
 
     def try_hit(self, position):
         """
@@ -33,8 +35,8 @@ class Attacker(Leaf):
         Makes entity to hit the target entity with the force of a thrown rock.
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
-        strength = self.parent.strength.value
-        thrown_damage = Damage(strength / 2, strength / 3,
+        damage_strength = int(self.parent.strength.value * self.rock_damage_modifier)
+        thrown_damage = Damage(damage_strength / 2, damage_strength / 3,
                                damage_types, self.parent.hit.value)
         thrown_damage.damage_entity(self.parent, target_entity)
 
@@ -55,8 +57,8 @@ class Attacker(Leaf):
         caused by an unarmed hit by the entity.
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
-        strength = self.parent.strength.value
-        return Damage(strength, strength / 2, damage_types,
+        damage_strength = int(self.parent.strength.value * self.melee_damage_modifier)
+        return Damage(damage_strength, damage_strength / 2, damage_types,
                       self.parent.hit.value)
 
 

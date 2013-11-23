@@ -79,13 +79,15 @@ def random_explosion(start_pos, size, move_list=None):
     return visited
 
 
-def random_explosion_not_through_solid(start_pos, size, dungeon_level, move_list=None):
+def random_explosion_not_through_solid(start_pos, size, dungeon_level, move_list=None, max_iteration=30):
     if move_list is None:
         move_list = direction.DIRECTIONS
     position = start_pos
     visited = set()
     unvisited_positions = set()
-    while len(visited) < size:
+    iteration = 0
+    while len(visited) < size and iteration < max_iteration:
+        iteration += 1
         visited.add(position)
         neighbors = set([geo.add_2d(position, _direction)
                          for _direction in move_list])
