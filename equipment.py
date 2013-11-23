@@ -93,8 +93,9 @@ class Equipment(Leaf):
         return equipment
 
     def can_unequip_to_inventory(self, equipment_slot):
-        return (self.parent.inventory.has_room_for_item() and
-                self.slot_is_equiped(equipment_slot))
+        item = self.get(equipment_slot)
+        return (self.slot_is_equiped(equipment_slot) and
+                self.parent.inventory.has_room_for_item(item))
 
     def unequip_to_inventory(self, equipment_slot):
         equipment = self.unequip(equipment_slot)

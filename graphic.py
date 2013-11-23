@@ -82,27 +82,25 @@ class CharPrinter(Leaf):
             return self._draw(position, frame, the_console)
         self._draw(position, self.parent.graphic_char, the_console)
 
-
     def draw_unseen(self, screen_position, the_console=0):
         """
-            Draws the char as it looks like outside the field of view.
-            """
+        Draws the char as it looks like outside the field of view.
+        """
         console.console.set_colors_and_symbol(screen_position,
                                               colors.UNSEEN_FG,
                                               colors.UNSEEN_BG,
                                               self.parent.graphic_char.icon,
                                               console=the_console)
 
-
     def append_graphic_char_temporary_frames(self, graphic_char_frames):
         """
-            Appends frames to the graphic char animation frame queue.
+        Appends frames to the graphic char animation frame queue.
 
-            These chars will be drawn as an effect,
-            the regular chars won't be drawn until the animation frame queue is empty.
-            """
+        These chars will be drawn as an effect,
+        the regular chars won't be drawn until the animation frame queue is empty.
+        """
+        print "haha"
         self._temp_animation_frames.extend(graphic_char_frames)
-
 
     def append_fg_color_blink_frames(self, frame_colors):
         """

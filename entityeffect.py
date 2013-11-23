@@ -236,9 +236,14 @@ class ReEquip(EntityEffect):
         equip_succeeded = equipment.try_equip(self.item)
         if equip_succeeded:
             self.message()
+            self._item_flash_animation(self.target_entity, self.item)
             if self.source_entity.inventory.has_item(self.item):
                 self.source_entity.inventory.remove_item(self.item)
 
         if not old_item is None:
             self.source_entity.inventory.try_add(old_item)
         self.tick(time_spent)
+
+    def _item_flash_animation(self, entity, item):
+        entity.char_printer.append_graphic_char_temporary_frames([item.graphic_char])
+

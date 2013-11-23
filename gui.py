@@ -372,7 +372,8 @@ class PlayerStatusBox(RectangularUIElement):
         player_hp = player.health.hp
         hp_bar = CounterBarWithNumbers(player_hp, element_width,
                                        colors.HP_BAR_FULL, colors.HP_BAR_EMPTY,
-                                       colors.WHITE)
+                                       colors.WHITE, colors.PINK, colors.HP_BAR_EMPTY,
+                                       colors.CYAN, colors.BLACK)
         heart = SymbolUIElement((0, 0), icon.HEALTH_STAT, colors.RED)
 
         self._hp_stack_panel = StackPanelHorizontal((0, 0), (0, 1), 1)
@@ -573,13 +574,23 @@ class CounterBar(UIElement):
     """
 
     def __init__(self, counter, width, active_color, inactive_color,
+                 inc_color=None, dec_color=None, max_inc_color=None, max_dec_color=None,
                  margin=(0, 0), offset=geo.zero2d()):
         super(CounterBar, self).__init__(margin)
         self.offset = offset
         self.counter = counter
+        self._width = width
+
         self.active_color = active_color
         self.inactive_color = inactive_color
-        self._width = width
+
+        self.inc_color = inc_color
+        self.dec_color = dec_color
+        self.max_inc_color = max_inc_color
+        self.max_dec_color = max_dec_color
+
+        self.last_value = self.counter.value
+        self.last_max_value = self.counter.max_value
 
     @property
     def height(self):
@@ -589,7 +600,29 @@ class CounterBar(UIElement):
     def width(self):
         return self._width
 
-    def _draw_bar(self, offset=geo.zero2d()):
+    def draw(self, offset=geo.zero2d()):
+        """
+        Draws the bar.
+        """
+        self._draw_bar(self._get_active_color(), self.inactive_color, offset)
+
+    def _get_active_color(self):
+        if self.last_max_value < self.counter.max_value:
+            self.last_max_value = self.counter.max_value
+            return self.max_inc_color
+        elif self.last_max_value > self.counter.max_value:
+            self.last_max_value = self.counter.max_value
+            return self.max_dec_color
+        elif self.last_value < self.counter.value:
+            self.last_value = self.counter.value
+            return self.inc_color
+        elif self.last_value > self.counter.value:
+            self.last_value = self.counter.value
+            return self.dec_color
+        else:
+            return self.active_color
+
+    def _draw_bar(self, active_color, inactive_color, offset=geo.zero2d()):
         """
         Draws the bar.
         """
@@ -598,16 +631,10 @@ class CounterBar(UIElement):
         x, y = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         for i in range(tiles_active):
             console.set_symbol((x + i, y), ' ')
-            console.set_color_bg((x + i, y), self.active_color)
+            console.set_color_bg((x + i, y), active_color)
         for i in range(tiles_active, self.width):
             console.set_symbol((x + i, y), ' ')
-            console.set_color_bg((x + i, y), self.inactive_color)
-
-    def draw(self, offset=geo.zero2d()):
-        """
-        Draws the bar.
-        """
-        self._draw_bar(offset)
+            console.set_color_bg((x + i, y), inactive_color)
 
 
 class CounterBarWithNumbers(CounterBar):
@@ -615,11 +642,13 @@ class CounterBarWithNumbers(CounterBar):
     Will display current and max value of counter on the bar.
     """
 
-    def __init__(self, counter, width, active_color, inactive_color,
-                 text_color, margin=(0, 0), offset=geo.zero2d()):
+    def __init__(self, counter, width, active_color, inactive_color, text_color,
+                 inc_color=None, dec_color=None, max_inc_color=None, max_dec_color=None,
+                 margin=(0, 0), offset=geo.zero2d()):
         super(CounterBarWithNumbers, self).__init__(counter, width,
                                                     active_color,
                                                     inactive_color,
+                                                    inc_color, dec_color, max_inc_color, max_dec_color,
                                                     margin, offset)
         self.text_color = text_color
 
@@ -627,7 +656,7 @@ class CounterBarWithNumbers(CounterBar):
         """
         Draws the bar with numbers.
         """
-        self._draw_bar(offset)
+        self._draw_bar(self._get_active_color(), self.inactive_color, offset)
         console.set_default_color_fg(self.text_color)
         self._draw_numbers(offset)
 
@@ -695,6 +724,7 @@ class VerticalTextBox(UIElement):
         x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
         console.set_default_color_fg(self.color_fg)
         console.print_text_vertical((x, y), self.text)
+
 
 class SymbolUIElement(UIElement):
     def __init__(self, offset, the_symbol, color_fg, color_bg=None, margin=(0, 0)):

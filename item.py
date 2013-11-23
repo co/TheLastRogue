@@ -383,7 +383,11 @@ class DrinkAction(Action):
         source_entity = kwargs[action.SOURCE_ENTITY]
         self._drink(target_entity)
         self.remove_from_inventory(target_entity)
+        self._item_flash_animation(source_entity, self.parent)
         self.add_energy_spent_to_entity(source_entity)
+
+    def _item_flash_animation(self, entity, item):
+        entity.char_printer.append_graphic_char_temporary_frames([item.graphic_char])
 
     def remove_from_inventory(self, target_entity):
         """
