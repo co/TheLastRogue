@@ -51,7 +51,7 @@ class Ratman(Composite):
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(BleedWhenDamaged())
 
-        self.add_child(AttackSpeed(gametime.single_turn))
+        self.add_child(AttackSpeed())
         self.add_child(Strength(2))
         self.add_child(Attacker())
         self.add_child(Dodger())
@@ -106,9 +106,9 @@ class Cyclops(Composite):
         self.add_child(MovementSpeed(gametime.one_and_half_turn))
         self.add_child(BleedWhenDamaged())
 
-        self.add_child(AttackSpeed(gametime.single_turn))
+        self.add_child(AttackSpeed(gametime.single_turn, throw_speed=gametime.double_turn))
         self.add_child(Strength(12))
-        self.add_child(Attacker(0.7, 1.5))
+        self.add_child(Attacker(0.6, 1.5))
         self.add_child(Dodger())
         self.add_child(Evasion(5))
         self.add_child(Hit(10))

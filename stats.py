@@ -1,4 +1,5 @@
 from compositecore import Leaf
+import gametime
 
 
 class Strength(Leaf):
@@ -66,9 +67,11 @@ class AttackSpeed(Leaf):
     """
     Composites holding this has the attack_speed attribute.
     """
-    def __init__(self, attack_speed):
+    def __init__(self, melee_speed=gametime.single_turn, throw_speed=gametime.single_turn, shoot_speed=gametime.single_turn):
         super(AttackSpeed, self).__init__()
-        self.attack_speed = attack_speed
+        self.melee = melee_speed
+        self.throw = throw_speed
+        self.shoot = shoot_speed
         self.component_type = "attack_speed"
 
 

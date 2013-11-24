@@ -22,7 +22,11 @@ class Action(Leaf):
         self.tags.add("user_action")
         self.name = "XXX_Action_Name_XX"
         self.display_order = 100
-        self.energy_cost = gametime.single_turn
+        self._energy_cost = gametime.single_turn
+
+    @property
+    def energy_cost(self):
+        return self._energy_cost
 
     def __call__(self, *args, **kwargs):
         self.act(*args, **kwargs)

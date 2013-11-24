@@ -1,6 +1,7 @@
 import random
 import colors
 from compositecore import Leaf
+import gametime
 import geometry as geo
 from graphic import GraphicChar
 from health import DamageTakenEffect
@@ -118,7 +119,7 @@ class MonsterActor(Actor):
         """
         player = self.get_player_if_seen()
         if player is None:
-            return False
+            return 0
         return self.parent.monster_range_attack_action.act(player.position.value)
 
     def can_do_ranged_attack(self):
@@ -145,8 +146,7 @@ class StepRandomDirectionActor(MonsterActor):
         super(StepRandomDirectionActor, self).__init__()
 
     def act(self):
-        self.try_step_random_direction()
-        return self.parent.movement_speed.value
+        return self.try_step_random_direction()
 
 
 class ChasePlayerActor(MonsterActor):
@@ -159,6 +159,7 @@ class ChasePlayerActor(MonsterActor):
 
     def act(self):
         self.parent.dungeon_mask.update_fov()
+        self.newly_spent_energy = 0
 
         #  Perform Stealth Check
         if self.notice_player_check():
@@ -170,13 +171,13 @@ class ChasePlayerActor(MonsterActor):
             self.set_path_to_random_walkable_point()
 
         #  Do action
-        if self.can_do_ranged_attack():
+        if self.newly_spent_energy <= 0 and self.can_do_ranged_attack():
             self.do_range_attack()
-        else:
+        if self.newly_spent_energy <= 0 and self.parent.path.has_path():
             self.parent.path.try_step_path()
-
-        return self.parent.movement_speed.value
-
+        if self.newly_spent_energy <= 0: #  If no action was taken skip turn.
+            self.newly_spent_energy += gametime.single_turn
+        return self.newly_spent_energy
 
 class HuntPlayerIfHurtMe(DamageTakenEffect):
     def __init__(self):

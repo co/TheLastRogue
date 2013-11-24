@@ -79,11 +79,17 @@ class PlayerThrowItemAction(PlayerMissileAction):
 class PlayerThrowRockAction(PlayerMissileAction):
     def __init__(self):
         super(PlayerThrowRockAction, self).__init__()
+        self.component_type = "throw_stone_action"
         self.name = "Throw Rock"
         self.display_order = 95
         self.icon = icon.STONE
         self.color_fg = colors.GRAY
-        self.energy_cost = gametime.double_turn
+
+    def add_energy_spent_to_entity(self, entity):
+        """
+        Help method for spending energy for the act performing entity.
+        """
+        entity.actor.newly_spent_energy += entity.attack_speed.throw
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         animate_flight(game_state, path, self.icon, self.color_fg)
@@ -117,6 +123,12 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         self.ranged_weapon = ranged_weapon
         self.color_fg = colors.WHITE
 
+    def add_energy_spent_to_entity(self, entity):
+        """
+        Help method for spending energy for the act performing entity.
+        """
+        entity.actor.newly_spent_energy += entity.attack_speed.shoot
+
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         self.remove_ammo_from_inventory(source_entity.inventory)
         animate_flight(game_state, path, self.icon, self.color_fg)
@@ -144,15 +156,19 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         inventory.remove_one_item_from_stack(ammo_item_with_least_ammo)
 
 
-class MonsterThrowStoneAction(Leaf):
+class MonsterThrowStoneAction(Action):
     def __init__(self, skip_chance=0, icon=icon.STONE, color_fg=colors.GRAY):
         super(MonsterThrowStoneAction, self).__init__()
         self.component_type = "monster_range_attack_action"
         self.icon = icon
-        print icon
-        print color_fg
         self.color_fg = color_fg
         self.skip_chance = skip_chance
+
+    def add_energy_spent_to_entity(self, entity):
+        """
+        Help method for spending energy for the act performing entity.
+        """
+        entity.actor.newly_spent_energy += entity.attack_speed.throw
 
     def can_act(self, destination):
         if random.randrange(100) > self.skip_chance:
@@ -169,7 +185,7 @@ class MonsterThrowStoneAction(Leaf):
         if path_taken is None or len(path_taken) < 1:
             return False
         self.send_missile(dungeon_level, path_taken)
-        return True
+        self.add_energy_spent_to_entity(self.parent)
 
     def _get_path(self, destination):
         result = []

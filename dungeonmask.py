@@ -168,10 +168,10 @@ class Path(Leaf):
         next_point = self.path.pop()
         if not geometry.chess_distance(next_point, self.parent.position.value) == 1:
             self.set_line_path(next_point)
-        step_succeeded = self.parent.mover.try_move_or_bump(next_point)
-        if not step_succeeded:
+        energy_spent = self.parent.mover.try_move_or_bump(next_point)
+        if energy_spent <= 0:
             self.clear()
-        return step_succeeded
+        return energy_spent
 
     def compute_path(self, destination):
         sx, sy = self.parent.position.value

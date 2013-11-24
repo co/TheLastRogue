@@ -439,7 +439,6 @@ class PickUpItemAction(Action):
         """
         source_entity = kwargs[action.SOURCE_ENTITY]
         item = self._get_item_on_floor(source_entity)
-        print "time to pickup", item
         return (not item is None and
                 source_entity.inventory.has_room_for_item(item))
 

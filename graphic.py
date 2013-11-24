@@ -99,7 +99,6 @@ class CharPrinter(Leaf):
         These chars will be drawn as an effect,
         the regular chars won't be drawn until the animation frame queue is empty.
         """
-        print "haha"
         self._temp_animation_frames.extend(graphic_char_frames)
 
     def append_fg_color_blink_frames(self, frame_colors):

@@ -6,7 +6,11 @@ def coin_flip():
 
 
 def random_variance(mid, var):
-    return mid - var + sum_of_n_coin_flips(var * 2)
+    print mid, var
+    if var == 0:
+        return mid
+    else:
+        return mid - var + random.randrange(var) + random.randrange(var)
 
 
 def sum_of_n_coin_flips(n):

@@ -129,9 +129,7 @@ class InputActor(Actor):
 
     def step_path(self):
         if self.parent.path.has_path():
-            step_succeeded = self.parent.path.try_step_path()
-            if step_succeeded:
-                self.newly_spent_energy += self.parent.movement_speed.value
+            self.newly_spent_energy = self.parent.path.try_step_path()
 
     def set_path_destination(self, destination):
         if not destination is None:
@@ -143,9 +141,7 @@ class InputActor(Actor):
     def handle_move_input(self, key):
         dx, dy = inputhandler.move_controls[key]
         new_position = geo.add_2d(self.parent.position.value, (dx, dy))
-        move_succeded = self.parent.mover.try_move_or_bump(new_position)
-        if move_succeded:
-            self.newly_spent_energy += self.parent.movement_speed.value
+        self.newly_spent_energy += self.parent.mover.try_move_or_bump(new_position)
 
     def spawn_context_menu(self):
         context_menu = \
@@ -199,7 +195,7 @@ class InputActor(Actor):
                 self.newly_spent_energy += gametime.single_turn
 
     def throw_rock(self):
-        rock_throwing = PlayerThrowRockAction()
+        rock_throwing = self.parent.throw_stone_action
         game_state = self.parent.game_state.value
         if (rock_throwing.can_act(source_entity=self.parent,
                                   game_state=game_state)):

@@ -128,25 +128,27 @@ class EntityMover(Mover):
 
         Args:
             position (int, int): The position the entity tries to move to.
+        Returns:
+            Energy spent
         """
 
         if(self.parent.status_flags.
            has_status(StatusFlags.SWALLOWED_BY_SLIME)):
             #escape_successful = self.try_to_escape_slime(position)
             #if(not escape_successful):
-            return True
+            return self.parent.movement_speed.value
         terrain_to_step =\
             self.parent.dungeon_level.value.get_tile(position).get_terrain()
         if(terrain_to_step.has_child("bump_action") and
            terrain_to_step.bump_action.can_bump(self.parent)):
             terrain_to_step.bump_action.bump(self.parent)
-            return True
+            return self.parent.movement_speed.value
         if(self.parent.has_child("attacker") and
            self.parent.attacker.try_hit(position)):
-            return True
-        if(self.try_move(position)):
-            return True
-        return False
+            return self.parent.attack_speed.melee
+        if self.try_move(position):
+            return self.parent.movement_speed.value
+        return 0
 
 
 class CanShareTileEntityMover(EntityMover):

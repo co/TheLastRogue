@@ -8,6 +8,7 @@ from health import Health, HealthModifier, BleedWhenDamaged
 from inputactor import InputActor
 from inventory import Inventory
 from memorymap import MemoryMap
+from missileaction import PlayerThrowRockAction
 from mover import EntityMover
 from ondeathaction import DoNothingDeathAction
 from position import Position, DungeonLevel
@@ -52,7 +53,8 @@ class Player(Composite):
         self.add_child(Faction(Faction.PLAYER))
         self.add_child(Strength(4))
         self.add_child(MovementSpeed(gametime.single_turn))
-        self.add_child(AttackSpeed(gametime.single_turn))
+        self.add_child(AttackSpeed())
+        self.add_child(PlayerThrowRockAction())
         self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
 
         self.add_child(DungeonMask())
