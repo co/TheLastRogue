@@ -11,14 +11,14 @@ def clamp(n, minn, maxn):
 
 class Menu(gui.UIElement):
     def __init__(self, offset, state_stack,
-                 margin=geo.zero2d(), vertical_space=1):
+                 margin=geo.zero2d(), vertical_space=1, may_escape=True):
         super(Menu, self).__init__(margin)
         self._menu_items = []
         self._state_stack = state_stack
         self._selected_index = 0
         self.offset = offset
         self._wrap = True
-        self.may_escape = True
+        self.may_escape = may_escape
         self._item_stack_panel =\
             gui.StackPanelVertical(geo.zero2d(), vertical_space=vertical_space)
 
@@ -186,9 +186,10 @@ class MenuOptionWithSymbols(MenuOption):
 
 class StaticMenu(Menu):
     def __init__(self, offset, menu_items, state_stack,
-                 margin=geo.zero2d(), vertical_space=1):
+                 margin=geo.zero2d(), vertical_space=1, may_escape=True):
         super(StaticMenu, self).__init__(offset, state_stack, margin=margin,
-                                         vertical_space=vertical_space)
+                                         vertical_space=vertical_space,
+                                         may_escape=may_escape)
         self._menu_items = menu_items
         self.try_set_index_to_valid_value()
         self._recreate_option_list()
@@ -196,9 +197,9 @@ class StaticMenu(Menu):
 
 class InventoryMenu(Menu):
     def __init__(self, offset, player, state_stack,
-                 margin=geo.zero2d(), vertical_space=1):
+                 margin=geo.zero2d(), vertical_space=1, may_escape=True):
         super(InventoryMenu, self).__init__(offset, state_stack, margin=margin,
-                                            vertical_space=vertical_space)
+                                            vertical_space=vertical_space, may_escape=may_escape)
         self._player = player
         self.try_set_index_to_valid_value()
 
@@ -235,10 +236,10 @@ class OpenItemActionMenuAction(object):
 
 class ItemActionsMenu(Menu):
     def __init__(self, offset, item, player, state_stack,
-                 margin=geo.zero2d(), vertical_space=1):
+                 margin=geo.zero2d(), vertical_space=1, may_escape=True):
         super(ItemActionsMenu, self).__init__(offset, state_stack,
-                                              margin=margin,
-                                              vertical_space=vertical_space)
+                                              margin=margin, vertical_space=vertical_space,
+                                              may_escape=True)
         self._actions =\
             sorted(item.get_children_with_tag("user_action"),
                    key=lambda action: action.display_order)

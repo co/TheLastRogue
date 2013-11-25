@@ -280,39 +280,6 @@ def get_dungeon_feature_menu_options(player, stack_pop_function):
     return feature_options
 
 
-def game_over_screen(state_stack):
-    game_over_stack_panel = gui.StackPanelVerticalCentering((0, 0))
-    red_line = gui.HorizontalLine(icon.H_LINE, colors.RED,
-                                  colors.BLACK, settings.WINDOW_WIDTH)
-    game_over_text = gui.TextBox("YOU DIED", (0, 0), colors.RED)
-    insult_text = gui.TextBox("Like a bitch.", (0, 0), colors.DARK_BROWN)
-
-    continue_option = \
-        menu.MenuOption("Press Enter to Accept Your Fate...",
-                        [lambda: state_stack.pop_to_main_menu()], True)
-
-    continue_menu = menu.StaticMenu((0, 0), [continue_option], state_stack,
-                                    margin=style.menu_theme.margin)
-
-    short_vspace = gui.VerticalSpace(7)
-    long_vspace = gui.VerticalSpace(settings.WINDOW_HEIGHT - 18)
-
-    game_over_stack_panel.append(short_vspace)
-    game_over_stack_panel.append(red_line)
-    game_over_stack_panel.append(game_over_text)
-    game_over_stack_panel.append(red_line)
-    game_over_stack_panel.append(insult_text)
-    game_over_stack_panel.append(long_vspace)
-    game_over_stack_panel.append(continue_menu)
-
-    grayout_rect = gui.RectangleChangeColor(rectfactory.full_screen_rect(),
-                                            colors.BLACK, colors.DARK_PURPLE)
-
-    ui_elements = [grayout_rect, game_over_stack_panel]
-    ui_state = state.UIState(gui.UIElementList(ui_elements))
-    return ui_state
-
-
 def title_screen(state_stack):
     title_stack_panel = gui.StackPanelVerticalCentering((0, 0))
     line = gui.HorizontalLine(icon.H_LINE, colors.GRAY,
@@ -359,7 +326,7 @@ def victory_screen(state_stack):
                         [lambda: state_stack.pop_to_main_menu()], True)
 
     continue_menu = menu.StaticMenu((0, 0), [continue_option], state_stack,
-                                    margin=style.menu_theme.margin)
+                                    margin=style.menu_theme.margin, may_escape=False)
 
     short_vspace = gui.VerticalSpace(7)
     long_vspace = gui.VerticalSpace(settings.WINDOW_HEIGHT - 18)
@@ -376,6 +343,39 @@ def victory_screen(state_stack):
                                             colors.DARK_BROWN, colors.YELLOW_D)
 
     ui_elements = [grayout_rect, victory_stack_panel]
+    ui_state = state.UIState(gui.UIElementList(ui_elements))
+    return ui_state
+
+
+def game_over_screen(state_stack):
+    game_over_stack_panel = gui.StackPanelVerticalCentering((0, 0))
+    red_line = gui.HorizontalLine(icon.H_LINE, colors.RED,
+                                  colors.BLACK, settings.WINDOW_WIDTH)
+    game_over_text = gui.TextBox("YOU DIED", (0, 0), colors.RED)
+    insult_text = gui.TextBox("Like a bitch.", (0, 0), colors.DARK_BROWN)
+
+    continue_option = \
+        menu.MenuOption("Press Enter to Accept Your Fate...",
+                        [lambda: state_stack.pop_to_main_menu()], True)
+
+    continue_menu = menu.StaticMenu((0, 0), [continue_option], state_stack,
+                                    margin=style.menu_theme.margin, may_escape=False)
+
+    short_vspace = gui.VerticalSpace(7)
+    long_vspace = gui.VerticalSpace(settings.WINDOW_HEIGHT - 18)
+
+    game_over_stack_panel.append(short_vspace)
+    game_over_stack_panel.append(red_line)
+    game_over_stack_panel.append(game_over_text)
+    game_over_stack_panel.append(red_line)
+    game_over_stack_panel.append(insult_text)
+    game_over_stack_panel.append(long_vspace)
+    game_over_stack_panel.append(continue_menu)
+
+    grayout_rect = gui.RectangleChangeColor(rectfactory.full_screen_rect(),
+                                            colors.BLACK, colors.DARK_PURPLE)
+
+    ui_elements = [grayout_rect, game_over_stack_panel]
     ui_state = state.UIState(gui.UIElementList(ui_elements))
     return ui_state
 

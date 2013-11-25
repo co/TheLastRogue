@@ -1,3 +1,4 @@
+from ttk import Treeview
 import colors
 from dungeon import Dungeon
 from dungeonlevelfactory import dungeon_level_from_file
@@ -63,9 +64,9 @@ class GameStateBase(state.State):
                 console.console.set_colors_and_symbol((x, y), colors.UNSEEN_FG, colors.UNSEEN_BG, " ",
                                                       console=self._background_console)
 
-
     def signal_new_level(self):
         self.camera.center_on_entity(self.player)
+        self.dungeon_needs_redraw = True
 
     def start_prompt(self, prompt_state):
         self.menu_prompt_stack.push(prompt_state)
