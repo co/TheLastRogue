@@ -46,7 +46,7 @@ class Ratman(Composite):
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
                                     StatusFlags.CAN_OPEN_DOORS]))
-        self.add_child(Health(10))
+        self.add_child(Health(6))
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(BleedWhenDamaged())
@@ -55,7 +55,7 @@ class Ratman(Composite):
         self.add_child(Strength(2))
         self.add_child(Attacker())
         self.add_child(Dodger())
-        self.add_child(Evasion(12))
+        self.add_child(Evasion(16))
         self.add_child(Hit(15))
 
         self.add_child(SightRadius(6))
@@ -69,7 +69,7 @@ class Ratman(Composite):
         self.add_child(ChasePlayerActor())
         self.add_child(MonsterActorState())
         self.add_child(HuntPlayerIfHurtMe())
-        self.add_child(MonsterThrowStoneAction(30))
+        self.add_child(MonsterThrowStoneAction(40))
 
         self.add_child(GameState(game_state))
         self.add_child(Equipment())

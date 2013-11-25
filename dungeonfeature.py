@@ -20,7 +20,7 @@ class StairsDown(Composite):
         self.add_child(DungeonLevel())
         self.add_child(Description("Stairs Down",
                                    ("A dark pass way downward.",
-                                    "Oh, what horrors awaits there?")))
+                                    "what horrors awaits there?")))
         self.add_child(GraphicChar(None, colors.WHITE,
                                    icon.STAIRS_DOWN))
 

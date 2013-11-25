@@ -38,7 +38,7 @@ class Player(Composite):
         self.add_child(EntityMover())
         self.add_child(Attacker())
         self.add_child(Dodger())
-        self.add_child(Evasion(12))
+        self.add_child(Evasion(14))
         self.add_child(Hit(15))
 
         self.add_child(Description("CO", "The Brave"))

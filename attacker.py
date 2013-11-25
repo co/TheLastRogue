@@ -36,7 +36,7 @@ class Attacker(Leaf):
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
         damage_strength = int(self.parent.strength.value * self.rock_damage_modifier)
-        thrown_damage = Damage(damage_strength / 2, damage_strength / 3,
+        thrown_damage = Damage(2 * damage_strength / 3, damage_strength / 2,
                                damage_types, self.parent.hit.value)
         thrown_damage.damage_entity(self.parent, target_entity)
 
@@ -58,7 +58,7 @@ class Attacker(Leaf):
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
         damage_strength = int(self.parent.strength.value * self.melee_damage_modifier)
-        return Damage(damage_strength, damage_strength / 2, damage_types,
+        return Damage(damage_strength, damage_strength / 4, damage_types,
                       self.parent.hit.value)
 
 

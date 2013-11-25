@@ -145,8 +145,7 @@ class Armor(Composite):
                                    "it's old, but should still "
                                    "protect you from some damage."))
         self.add_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
-        self.add_child(BlockDamageEquippedEffect(5, 3,
-                                                 [DamageTypes.PHYSICAL]))
+        self.add_child(BlockDamageEquippedEffect(0, 3, [DamageTypes.PHYSICAL]))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
         self.add_child(DropAction())
@@ -189,7 +188,7 @@ class Sword(Composite):
                                    "better days, it's as sharp as "
                                    "tough."))
         self.add_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-        self.add_child(DamageProvider(10, 3, [DamageTypes.PHYSICAL,
+        self.add_child(DamageProvider(7, 5, [DamageTypes.PHYSICAL,
                                               DamageTypes.CUTTING]))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
