@@ -88,12 +88,13 @@ def random_explosion_not_through_solid(start_pos, size, dungeon_level, move_list
     iteration = 0
     while len(visited) < size and iteration < max_iteration:
         iteration += 1
+        print "i", iteration
         visited.add(position)
-        neighbors = set([geo.add_2d(position, _direction)
-                         for _direction in move_list])
-        unvisited_neighbors = set([neighbor for neighbor in neighbors - visited
-                                   if position_is_solid(neighbor, dungeon_level)])
-        unvisited_positions = unvisited_positions | unvisited_neighbors
+        if not position_is_solid(position, dungeon_level):
+            neighbors = set([geo.add_2d(position, _direction)
+                             for _direction in move_list])
+            unvisited_neighbors = set([neighbor for neighbor in neighbors - visited])
+            unvisited_positions = unvisited_positions | unvisited_neighbors
         if len(unvisited_positions) >= 1:
             position = random.sample(unvisited_positions, 1)[0]
         else:
