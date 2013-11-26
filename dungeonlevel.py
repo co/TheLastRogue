@@ -140,9 +140,24 @@ class DungeonLevel(object):
 
 class DungeonLevelScreen(object):
     def __init__(self, dungeon_level):
-        self._console = libtcodpy.console_new(max(dungeon_level.width, constants.GAME_STATE_WIDTH),
-                                              max(dungeon_level.height, constants.GAME_STATE_HEIGHT))
         self.dungeon_level = dungeon_level
+        self._console = None
+
+    @property
+    def console(self):
+        if self._console is None:
+            self._console = libtcodpy.console_new(max(self.dungeon_level.width, constants.GAME_STATE_WIDTH),
+                                                  max(self.dungeon_level.height, constants.GAME_STATE_HEIGHT))
+        return self._console
+
+    def __getstate__(self):
+        state = dict(self.__dict__)
+        del state["_console"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._console = None
 
     def draw_everything(self, camera, tile_matrix):
         for y in range(settings.WINDOW_HEIGHT):
@@ -150,7 +165,7 @@ class DungeonLevelScreen(object):
                 position = (x, y)
                 tile_position = geo.add_2d(position, camera.camera_offset)
                 the_tile = get_tile_or_unknown(tile_position, tile_matrix)
-                the_tile.draw(self._console, position, True)
+                the_tile.draw(self.console, position, True)
 
     def draw_rectangle_seen_by_entity(self, rectangle, tile_matrix, entity):
         for y in range(rectangle.top, rectangle.bottom):
@@ -168,14 +183,14 @@ class DungeonLevelScreen(object):
         if entity.dungeon_mask.can_see_point(position):
             the_tile = get_tile_or_unknown(position, tile_matrix)
             entity.memory_map.update_memory_of_tile(the_tile, position, self.dungeon_level.depth)
-            the_tile.draw(self._console, position, True)
+            the_tile.draw(self.console, position, True)
         else:
             the_tile = entity.memory_map.get_memory_of_map(self.dungeon_level).get_tile_or_unknown(position)
-            the_tile.draw(self._console, position, False)
+            the_tile.draw(self.console, position, False)
 
     def blit(self, source_position):
         src_x, src_y = source_position
-        libtcodpy.console_blit(self._console, src_x, src_y, constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT, 0,
+        libtcodpy.console_blit(self.console, src_x, src_y, constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT, 0,
                                0, 0)
 
 

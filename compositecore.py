@@ -127,6 +127,20 @@ class Composite(Component):
         self._spoofed_children = {}
         self._children = {}
 
+    def __getinitargs__(self):
+        return ()
+
+#    def __getstate__(self):
+#        state = {
+#            "_spoofed_children": self._spoofed_children,
+#            "_children": self._children
+#        }
+#        return state
+#
+#    def __setstate__(self, state):
+#        self._spoofed_children = state["_spoofed_children"]
+#        self._children = state["_children"]
+#
     def add_child(self, child):
         """
         Adds a child component to this component.
@@ -235,15 +249,20 @@ class Composite(Component):
         map(lambda x: x.message(message), self._children.values())
 
     def __getattr__(self, component_type):
+        if component_type == "_spoofed_children" or component_type == "_children":
+            raise AttributeError("Tried to access field {0} from composite {1} "
+                                 "But it doesn't exist.".format(str(component_type),
+                                                                str(self)))
         try:
             if(component_type in self._spoofed_children and
                len(self._spoofed_children[component_type]) > 0):
                 return self._spoofed_children[component_type][0]
             return self._children[component_type]
         except KeyError:
-            raise Exception("Tried to access component {0} from composite {1} "
-                            "But it doesn't exist.".format(str(component_type),
-                                                           str(self)))
+            raise AttributeError("Tried to access component {0} from composite {1} "
+                                 "But it doesn't exist.".format(str(component_type),
+                                                                str(self)))
+
 
     def get_original_child(self, component_type):
         """

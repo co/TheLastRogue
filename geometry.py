@@ -14,29 +14,33 @@ def int_2d(point):
 
 
 def distance_sqrd(point1, point2):
-    '''
+    """
     Returns the distance between two points squared.
     Marginally faster than Distance()
-    '''
+    """
     return (point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2
 
 
 def distance(point1, point2):
-    'Returns the distance between two points'
+    """
+    Returns the distance between two points
+    """
     return math.sqrt(distance_sqrd(point1, point2))
 
 
 def chess_distance(point1, point2):
-    'Returns the chess distance between two points'
+    """
+    Returns the chess distance between two points
+    """
     return max(abs(point1[0] - point2[0]),
                abs(point1[1] - point2[1]))
 
 
 def length_sqrd(vec):
-    '''
+    """
     Returns the length of a vector2D sqaured.
     Faster than Length(), but only marginally
-    '''
+    """
     return vec[0] ** 2 + vec[1] ** 2
 
 
@@ -46,13 +50,14 @@ def length(vec):
 
 
 def normalize(point):
-    '''
+    """
     Returns a new vector that has the same direction as vec,
     but has a length of one.
-    '''
+    """
     if(point[0] == 0. and point[1] == 0.):
         return (0., 0.)
     return (point[0] / length(point), point[1] / length(point))
+
 
 def element_wise_round(point):
     """
@@ -60,13 +65,18 @@ def element_wise_round(point):
     """
     return int(round(point[0])), int(round(point[1]))
 
+
 def dot(a, b):
-    'Computes the dot product of a and b'
+    """
+    Computes the dot product of a and b
+    """
     return a[0] * b[0] + a[1] * b[1]
 
 
 def project_onto(w, v):
-    'Projects w onto v.'
+    """
+    Projects w onto v.
+    """
     return v * dot(w, v) / length_sqrd(v)
 
 
@@ -114,12 +124,12 @@ class Rect(object):
     @property
     def top_left(self):
         """Return the top-left corner as a tuple."""
-        return (self.left, self.top)
+        return self.left, self.top
 
     @property
     def bottom_right(self):
         """Return the bottom-right corner as a tuple."""
-        return (self.right, self.bottom)
+        return self.right, self.bottom
 
     def expanded_by(self, n):
         """Return a rectangle with extended borders.

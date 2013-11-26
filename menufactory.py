@@ -17,14 +17,21 @@ def _main_menu_ui_elements(ui_state, state_stack):
     """
     Creates the first menu of the game.
     """
+    continue_game_function = \
+        lambda: ui_state.current_stack.push(gamestate.load_first_game())
     start_game_function = \
         lambda: ui_state.current_stack.push(gamestate.GameState())
     start_test_game_function = \
         lambda: ui_state.current_stack.push(gamestate.TestGameState())
     quit_game_function = lambda: ui_state.current_stack.pop()
     dungeon_visualizer_function = \
-        lambda: ui_state.current_stack.push(dungeoncreatorvisualizer.
-        DungeonCreatorVisualizer())
+        lambda: ui_state.current_stack.push(dungeoncreatorvisualizer.DungeonCreatorVisualizer())
+
+    continue_game_option = \
+        menu.MenuOptionWithSymbols("Continue",
+                                   icon.GUN, " ",
+                                   [continue_game_function],
+                                   gamestate.is_there_a_saved_game())
 
     start_game_option = \
         menu.MenuOptionWithSymbols("Start Dungeon",
@@ -41,7 +48,7 @@ def _main_menu_ui_elements(ui_state, state_stack):
     quit_option = menu.MenuOptionWithSymbols("Quit", icon.GUN,
                                              " ", [quit_game_function])
 
-    menu_items = [start_game_option, start_test_game_option,
+    menu_items = [continue_game_option, start_game_option, start_test_game_option,
                   dungeon_creator_option, quit_option]
 
     border = 4

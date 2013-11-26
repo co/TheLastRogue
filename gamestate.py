@@ -1,4 +1,6 @@
-from ttk import Treeview
+from os.path import isfile
+from os import listdir, getcwd
+import cPickle as pickle
 import colors
 from dungeon import Dungeon
 from dungeonlevelfactory import dungeon_level_from_file
@@ -27,8 +29,16 @@ def reset_globals():
 class GameStateBase(state.State):
     def __init__(self):
         super(GameStateBase, self).__init__()
-        reset_globals()
+        self.dungeon = Dungeon(self)
         self.player = Player(self)
+        self._init_caches_and_flags()
+        messenger.messenger.message("Welcome to: The Last Rogue!")
+
+    def _init_caches_and_flags(self):
+        """
+        Sets up all variables for a new gamestate instance
+        """
+        reset_globals()
         self._init_gui()
         self._should_draw = True
         self._last_dungeon_level = None
@@ -36,15 +46,26 @@ class GameStateBase(state.State):
         self.camera = camera.Camera((0, 0), (0, 0), self)
         self.has_won = False
         self.menu_prompt_stack = statestack.GameMenuStateStack(self)
-        messenger.messenger.message("Welcome to: The Last Rogue!")
         self.dungeon_needs_redraw = True
         self._background_console = self._console = libtcodpy.console_new(constants.GAME_STATE_WIDTH,
                                                                          constants.GAME_STATE_HEIGHT)
         self._init_bg()
 
+    def __getstate__(self):
+        state = {
+            "player": self.player,
+            "dungeon": self.dungeon
+        }
+        return state
+
+    def __setstate__(self, state):
+        self.player = state["player"]
+        self.dungeon = state["dungeon"]
+        self._init_caches_and_flags()
+
     def _init_gui(self):
         player_status_rect = rectfactory.player_status_rect()
-        self._player_status_bar = \
+        self._player_status_box = \
             gui.PlayerStatusBox(player_status_rect, self.player)
 
         monster_status_rect = geo.Rect(geo.zero2d(),
@@ -99,7 +120,7 @@ class GameStateBase(state.State):
         self.prepare_draw_gui()
 
     def prepare_draw_gui(self):
-        self._player_status_bar.draw()
+        self._player_status_box.draw()
         self._message_display.draw()
         self._monster_status_stack.draw()
         self.command_list_bar.draw()
@@ -112,9 +133,10 @@ class GameStateBase(state.State):
         if not dungeon_level is self._last_dungeon_level:
             self.signal_new_level()
         self._last_dungeon_level = dungeon_level
-        dungeon_level.tick()
 
         self._update_gui()
+        dungeon_level.tick()
+
 
         if self.player.health.is_dead():
             self.force_draw()
@@ -129,7 +151,7 @@ class GameStateBase(state.State):
 
     def _update_gui(self):
         self._monster_status_stack.update(self.player)
-        self._player_status_bar.update()
+        self._player_status_box.update()
         self.command_list_bar.update()
 
     def _draw_bg(self):
@@ -190,3 +212,31 @@ class GameState(GameStateBase):
                 self.camera.center_on_entity(self.player)
                 return
         raise Exception("Could not put player at first up stairs.")
+
+
+def save(game_state):
+    hero_name = game_state.player.description.name
+    save_file_ending = ".sav"
+
+    save_file = open(hero_name + save_file_ending, 'w')
+    pickler = pickle.Pickler(save_file)
+    pickler.dump(game_state)
+
+
+def get_save_files():
+    directory = getcwd()
+    return [f for f in listdir(directory)
+            if isfile(f) and f.endswith(".sav")]
+
+
+def is_there_a_saved_game():
+    return get_save_files() > 0
+
+
+def load_first_game():
+    print get_save_files()[0]
+    save_file = open(get_save_files()[0], 'r')
+    print save_file
+
+    game_state = pickle.load(save_file)
+    return game_state

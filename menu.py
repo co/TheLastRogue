@@ -36,7 +36,7 @@ class Menu(gui.UIElement):
 
     def update(self):
         self._recreate_option_list()
-        if(not self.has_valid_option_selected()):
+        if not self.has_valid_option_selected():
             self.try_set_index_to_valid_value()
         self._recreate_option_list()
 
@@ -52,10 +52,10 @@ class Menu(gui.UIElement):
             self._state_stack.pop()
 
     def try_set_index_to_valid_value(self):
-        if(not any(menu_item.can_activate for menu_item in self._menu_items)):
+        if not any(menu_item.can_activate for menu_item in self._menu_items):
             self._selected_index = None
         self._selected_index = 0
-        if(not self.has_valid_option_selected()):
+        if not self.has_valid_option_selected():
             self.index_increase()
 
     def has_valid_option_selected(self):
@@ -69,9 +69,9 @@ class Menu(gui.UIElement):
         self._update_menu_items()
         self._item_stack_panel.clear()
         for index, item in enumerate(self._menu_items):
-            if(index == self._selected_index):
+            if index == self._selected_index:
                 menu_item = item.selected_ui_representation()
-            elif(item.can_activate):
+            elif item.can_activate:
                 menu_item = item.unselected_ui_representation()
             else:
                 menu_item = item.inactive_ui_representation()
@@ -82,7 +82,7 @@ class Menu(gui.UIElement):
                 self._menu_items[self._selected_index].can_activate)
 
     def activate(self):
-        if(self.can_activate()):
+        if self.can_activate():
             selected_option = self._menu_items[self._selected_index]
             selected_option.activate()
 
@@ -92,7 +92,7 @@ class Menu(gui.UIElement):
             self._selected_index = None
             return
         self._offset_index(1)
-        if(not self._menu_items[self._selected_index].can_activate):
+        if not self._menu_items[self._selected_index].can_activate:
             self.index_increase()
 
     def index_decrease(self):
@@ -101,13 +101,13 @@ class Menu(gui.UIElement):
             self._selected_index = None
             return
         self._offset_index(-1)
-        if(not self._menu_items[self._selected_index].can_activate):
+        if not self._menu_items[self._selected_index].can_activate:
             self.index_decrease()
 
     def _offset_index(self, offset):
-        if(len(self._menu_items) == 0 or self._selected_index is None):
+        if len(self._menu_items) == 0 or self._selected_index is None:
             return
-        if(self._wrap):
+        if self._wrap:
             # Will behave strangely for when offset is less than -menu_size
             self._selected_index =\
                 (offset + self._selected_index + len(self._menu_items))\
@@ -215,7 +215,7 @@ class InventoryMenu(Menu):
              for item in self._player.inventory.get_items_sorted()]
 
     def _get_item_option_text(self, item):
-        if(item.has_child("stacker")):
+        if item.has_child("stacker"):
             return item.description.name + " (" + str(item.stacker.size) + ")"
         return item.description.name
 

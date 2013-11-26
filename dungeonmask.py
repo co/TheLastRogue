@@ -13,15 +13,30 @@ class DungeonMask(Leaf):
 
     def __init__(self):
         super(DungeonMask, self).__init__()
-        self.dungeon_map = None
+        self._dungeon_map = None
+        print "dm: none"
         self.last_dungeon_map_update_timestamp = -1
         self.component_type = "dungeon_mask"
 
-    def on_parent_changed(self):
-        """
-        A method hook called when the parent changes.
-        """
-        self.init_dungeon_map_if_has_dungeon_level()
+    @property
+    def dungeon_map(self):
+        if self._dungeon_map is None:
+            self.init_dungeon_map_if_has_dungeon_level()
+        return self._dungeon_map
+
+    @dungeon_map.setter
+    def dungeon_map(self, value):
+        self._dungeon_map = value
+
+    def __getstate__(self):
+        state = dict(self.__dict__)
+        del state["_dungeon_map"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.last_dungeon_map_update_timestamp = -1
+        self.dungeon_map = None
 
     def init_dungeon_map_if_has_dungeon_level(self):
         """
@@ -29,15 +44,15 @@ class DungeonMask(Leaf):
         """
         if (self.has_sibling("dungeon_level") and
                 not self.parent.dungeon_level.value is None):
-            self._init_dungeon_map(self.parent.dungeon_level.value)
+            self._init_dungeon_map()
             self.last_dungeon_map_update_timestamp = -1
 
-    def _init_dungeon_map(self, dungeon_level):
+    def _init_dungeon_map(self):
         """
         Initiates the dungeon map of a dungeon_level.
         """
-        self.dungeon_map = libtcod.map_new(dungeon_level.width,
-                                           dungeon_level.height)
+        self.dungeon_map = libtcod.map_new(self.parent.dungeon_level.value.width,
+                                           self.parent.dungeon_level.value.height)
 
     def can_see_point(self, point):
         """
@@ -107,6 +122,7 @@ class DungeonMask(Leaf):
         dungeon_level = self.parent.dungeon_level.value
         if (dungeon_level.terrain_changed_timestamp >
                 self.last_dungeon_map_update_timestamp):
+            print "time to update"
             self.update_dungeon_map()
 
     def update_dungeon_map(self):
@@ -114,6 +130,7 @@ class DungeonMask(Leaf):
         Updates the dungeon map.
         """
         dungeon_level = self.parent.dungeon_level.value
+        print dungeon_level
         for y in range(dungeon_level.height):
             for x in range(dungeon_level.width):
                 terrain = \
@@ -124,10 +141,11 @@ class DungeonMask(Leaf):
                                            mover.can_pass_terrain(terrain))
         self.last_dungeon_map_update_timestamp = turn.current_turn
         self.update_fov()
+        self.print_visible_map()
 
     def message(self, message):
         """
-        Handles recieved messages.
+        Handles received messages.
         """
         if message == CompositeMessage.DUNGEON_LEVEL_CHANGED:
             self.init_dungeon_map_if_has_dungeon_level()
@@ -141,8 +159,23 @@ class Path(Leaf):
     def __init__(self):
         super(Path, self).__init__()
         self._path = None
-        self.path = []
+        self.position_list = []
         self.component_type = "path"
+
+    def __getstate__(self):
+        state = dict(self.__dict__)
+        del state["_path"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._path = None
+
+    @property
+    def path(self):
+        if self._path is None:
+            self.init_path()
+        return self._path
 
     def init_path(self):
         """
@@ -155,7 +188,7 @@ class Path(Leaf):
         """
         Returns True if the entity has a path to walk.
         """
-        if len(self.path) > 0:
+        if len(self.position_list) > 0:
             return True
         return False
 
@@ -165,7 +198,7 @@ class Path(Leaf):
         """
         if not self.has_path():
             return False
-        next_point = self.path.pop()
+        next_point = self.position_list.pop()
         if not geometry.chess_distance(next_point, self.parent.position.value) == 1:
             self.set_line_path(next_point)
         energy_spent = self.parent.mover.try_move_or_bump(next_point)
@@ -176,12 +209,12 @@ class Path(Leaf):
     def compute_path(self, destination):
         sx, sy = self.parent.position.value
         dx, dy = destination
-        libtcod.path_compute(self._path, sx, sy, dx, dy)
+        libtcod.path_compute(self.path, sx, sy, dx, dy)
         self.clear()
-        x, y = libtcod.path_walk(self._path, True)
+        x, y = libtcod.path_walk(self.path, True)
         while not x is None:
-            self.path.insert(0, (x, y))
-            x, y = libtcod.path_walk(self._path, True)
+            self.position_list.insert(0, (x, y))
+            x, y = libtcod.path_walk(self.path, True)
 
     def set_line_path(self, destination):
         sx, sy = self.parent.position.value
@@ -190,14 +223,14 @@ class Path(Leaf):
         self.clear()
         x, y = libtcod.line_step()
         while not x is None:
-            self.path.insert(0, (x, y))
+            self.position_list.insert(0, (x, y))
             x, y = libtcod.line_step()
 
     def clear(self):
-        self.path = []
+        self.position_list = []
 
     def draw(self, camera):
-        points = list(self.path)
+        points = list(self.position_list)
         points.reverse()
         for point in points:
             if not self.parent.mover.can_pass_terrain(

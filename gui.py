@@ -332,7 +332,7 @@ class CommandListPanel(RectangularUIElement):
         self._stack_panel.append(self.left_right_adjust("Commands", "Key"))
         self._stack_panel.append(VerticalSpace(2))
         self._stack_panel.append(self.left_right_adjust("Walk", "Numpad"))
-        self._stack_panel.append(self.left_right_adjust("Pick Up", "p"))
+        self._stack_panel.append(self.left_right_adjust("Pick Up/Use", "Space"))
         self._stack_panel.append(self.left_right_adjust("Fire Gun", "f"))
         self._stack_panel.append(self.left_right_adjust("Throw Stone", "s"))
         self._stack_panel.append(self.left_right_adjust("Wait/Rest", "r"))

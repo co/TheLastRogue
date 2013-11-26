@@ -1,6 +1,7 @@
 from actor import Actor
 from entityeffect import Teleport, StatusAdder, StatusRemover
 from equipment import EquipmentSlots
+import gamestate
 import menu
 from missileaction import PlayerShootWeaponAction, PlayerThrowRockAction
 from statusflags import StatusFlags
@@ -92,9 +93,7 @@ class InputActor(Actor):
         elif key == inputhandler.STONE:
             self.throw_rock()
         elif key == inputhandler.ESCAPE:
-            self.parent.health.hp.set_min()
-            self.newly_spent_energy += gametime.single_turn
-
+            self.save_and_quit()
         elif key == inputhandler.REST:  # Rest
             self.newly_spent_energy += gametime.single_turn
 
@@ -201,3 +200,10 @@ class InputActor(Actor):
                                   game_state=game_state)):
             rock_throwing.act(source_entity=self.parent,
                               game_state=game_state)
+
+    def save_and_quit(self):
+        current_game_state = self.parent.game_state.value
+        gamestate.save(current_game_state)
+        self.parent.game_state.value.current_stack.pop()
+        #  Is needed to break out of loop, won't effect the saved state.
+        self.newly_spent_energy += gametime.single_turn
