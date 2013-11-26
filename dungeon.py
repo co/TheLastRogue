@@ -24,7 +24,7 @@ class Dungeon(object):
         return self._dungeon_levels[depth]
 
     def _generate_dungeon_level(self, depth):
-        size = 700
+        size = 800
         dungeon_level = dungeongenerator.generate_dungeon_exploded_rooms(size,
                                                                          depth)
         for _ in range(2 * (depth + 1) + 1):

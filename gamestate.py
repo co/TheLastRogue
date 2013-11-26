@@ -1,3 +1,4 @@
+import os
 from os.path import isfile
 from os import listdir, getcwd
 import cPickle as pickle
@@ -88,6 +89,7 @@ class GameStateBase(state.State):
     def signal_new_level(self):
         self.camera.center_on_entity(self.player)
         self.dungeon_needs_redraw = True
+        save(self)
 
     def start_prompt(self, prompt_state):
         self.menu_prompt_stack.push(prompt_state)
@@ -141,9 +143,11 @@ class GameStateBase(state.State):
         if self.player.health.is_dead():
             self.force_draw()
             game_over_screen = menufactory.game_over_screen(self.current_stack)
+            delete_save_file_of_game_state(self)
             self.current_stack.push(game_over_screen)
         if self.has_won:
             victory_screen = menufactory.victory_screen(self.current_stack)
+            delete_save_file_of_game_state(self)
             self.current_stack.push(victory_screen)
 
     def draw_bg(self):
@@ -237,10 +241,11 @@ def get_save_files():
 
 def delete_save_file_of_game_state(game_state):
     file_name = get_save_file_name(game_state)
+    if os.path.isfile(file_name):
+        os.remove(file_name)
 
 def is_there_a_saved_game():
     return len(get_save_files()) > 0
-
 
 def load_first_game():
     save_file = open(get_save_files()[0], 'r')

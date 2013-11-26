@@ -29,7 +29,6 @@ def generate_terrain_dungeon_level(depth):
     move_list = list(direction.DIRECTIONS)
     drunkard_walk(center_position, dungeon_level, brush,
                   end_condition_func, move_list)
-    #cellular_automata(dungeon_level)
     return dungeon_level
 
 
@@ -180,13 +179,16 @@ def _apply_cellular_automata_rule_on_tile(dungeon_level, position,
 
 
 def generate_dungeon_exploded_rooms(open_area, depth):
-    rooms = random.randrange(3, 12)
+    rooms = random.randrange(4, 12)
     room_area = open_area * 0.8 / rooms
-    aprox_room_radius = math.sqrt(room_area)
+    aprox_room_radius = math.sqrt(room_area) * 1.2
+    print "rooms ", rooms
+    print "room_radius ", aprox_room_radius
 
     room_distance = aprox_room_radius
 
     grid_side = int(max(rooms / 2 + 1, math.sqrt(rooms + 1) + 1))
+    print "grid_side ", grid_side
     triangle_points = shapegenerator.triangle_points(room_distance,
                                                      grid_side, grid_side)
 
