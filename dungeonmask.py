@@ -14,7 +14,6 @@ class DungeonMask(Leaf):
     def __init__(self):
         super(DungeonMask, self).__init__()
         self._dungeon_map = None
-        print "dm: none"
         self.last_dungeon_map_update_timestamp = -1
         self.component_type = "dungeon_mask"
 
@@ -122,7 +121,6 @@ class DungeonMask(Leaf):
         dungeon_level = self.parent.dungeon_level.value
         if (dungeon_level.terrain_changed_timestamp >
                 self.last_dungeon_map_update_timestamp):
-            print "time to update"
             self.update_dungeon_map()
 
     def update_dungeon_map(self):
@@ -130,7 +128,6 @@ class DungeonMask(Leaf):
         Updates the dungeon map.
         """
         dungeon_level = self.parent.dungeon_level.value
-        print dungeon_level
         for y in range(dungeon_level.height):
             for x in range(dungeon_level.width):
                 terrain = \
@@ -141,7 +138,6 @@ class DungeonMask(Leaf):
                                            mover.can_pass_terrain(terrain))
         self.last_dungeon_map_update_timestamp = turn.current_turn
         self.update_fov()
-        self.print_visible_map()
 
     def message(self, message):
         """

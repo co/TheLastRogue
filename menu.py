@@ -46,13 +46,13 @@ class Menu(gui.UIElement):
             self.index_decrease()
         if key == inputhandler.DOWN:
             self.index_increase()
-        if key == inputhandler.ENTER:
+        if key == inputhandler.ENTER or key == inputhandler.SPACE:
             self.activate()
         if key == inputhandler.ESCAPE and self.may_escape:
             self._state_stack.pop()
 
     def try_set_index_to_valid_value(self):
-        if not any(menu_item.can_activate for menu_item in self._menu_items):
+        if not any(menu_item.can_activate() for menu_item in self._menu_items):
             self._selected_index = None
         self._selected_index = 0
         if not self.has_valid_option_selected():
@@ -60,7 +60,7 @@ class Menu(gui.UIElement):
 
     def has_valid_option_selected(self):
         return (0 <= self._selected_index < len(self._menu_items) and
-                self._menu_items[self._selected_index].can_activate)
+                self._menu_items[self._selected_index].can_activate())
 
     def _update_menu_items(self):
         pass
@@ -71,7 +71,7 @@ class Menu(gui.UIElement):
         for index, item in enumerate(self._menu_items):
             if index == self._selected_index:
                 menu_item = item.selected_ui_representation()
-            elif item.can_activate:
+            elif item.can_activate():
                 menu_item = item.unselected_ui_representation()
             else:
                 menu_item = item.inactive_ui_representation()
@@ -79,7 +79,7 @@ class Menu(gui.UIElement):
 
     def can_activate(self):
         return (not self._selected_index is None and
-                self._menu_items[self._selected_index].can_activate)
+                self._menu_items[self._selected_index].can_activate())
 
     def activate(self):
         if self.can_activate():
@@ -87,21 +87,21 @@ class Menu(gui.UIElement):
             selected_option.activate()
 
     def index_increase(self):
-        if(not any(item.can_activate for item in self._menu_items) or
+        if(not any(item.can_activate() for item in self._menu_items) or
            self._selected_index is None):
             self._selected_index = None
             return
         self._offset_index(1)
-        if not self._menu_items[self._selected_index].can_activate:
+        if not self._menu_items[self._selected_index].can_activate():
             self.index_increase()
 
     def index_decrease(self):
-        if(not any(item.can_activate for item in self._menu_items) or
+        if(not any(item.can_activate() for item in self._menu_items) or
            self._selected_index is None):
             self._selected_index = None
             return
         self._offset_index(-1)
-        if not self._menu_items[self._selected_index].can_activate:
+        if not self._menu_items[self._selected_index].can_activate():
             self.index_decrease()
 
     def _offset_index(self, offset):
@@ -123,7 +123,7 @@ class Menu(gui.UIElement):
 
 
 class MenuOption(gui.UIElement):
-    def __init__(self, text, functions, can_activate=True):
+    def __init__(self, text, functions, can_activate=(lambda: True)):
         self.text = text
         self._functions = functions
         self.can_activate = can_activate
@@ -147,9 +147,8 @@ class MenuOption(gui.UIElement):
 # this should not be solved by subclassing!
 class MenuOptionWithSymbols(MenuOption):
     def __init__(self, text, selected_symbol, unselected_symbol,
-                 functions, can_activate=True):
-        super(MenuOptionWithSymbols, self).__init__(text, functions,
-                                                    can_activate)
+                 functions, can_activate=(lambda: True)):
+        super(MenuOptionWithSymbols, self).__init__(text, functions, can_activate)
         self.selected_symbol = selected_symbol
         self.unselected_symbol = unselected_symbol
 
@@ -211,7 +210,7 @@ class InventoryMenu(Menu):
                         [OpenItemActionMenuAction(self._state_stack,
                                                   item_rect, item,
                                                   self._player)],
-                        (len(item.get_children_with_tag("user_action")) >= 1))
+                        (lambda: (len(item.get_children_with_tag("user_action")) >= 1)))
              for item in self._player.inventory.get_items_sorted()]
 
     def _get_item_option_text(self, item):
@@ -259,8 +258,8 @@ class ItemActionsMenu(Menu):
             functions = [action_function, back_to_game_function]
             option =\
                 MenuOption(item_action.name, functions,
-                           item_action.can_act(source_entity=self._player,
-                                               target_entity=self._player))
+                           (lambda: item_action.can_act(source_entity=self._player,
+                                                        target_entity=self._player)))
             self._menu_items.append(option)
 
 

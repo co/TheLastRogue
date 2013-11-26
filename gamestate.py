@@ -214,11 +214,14 @@ class GameState(GameStateBase):
         raise Exception("Could not put player at first up stairs.")
 
 
-def save(game_state):
+def get_save_file_name(game_state):
     hero_name = game_state.player.description.name
     save_file_ending = ".sav"
+    return hero_name + save_file_ending
 
-    save_file = open(hero_name + save_file_ending, 'w')
+
+def save(game_state):
+    save_file = open(get_save_file_name(game_state), 'w')
     pickler = pickle.Pickler(save_file)
     pickler.dump(game_state)
 
@@ -229,8 +232,12 @@ def get_save_files():
             if isfile(f) and f.endswith(".sav")]
 
 
+def delete_save_file_of_game_state(game_state):
+    file_name = get_save_file_name(game_state)
+
 def is_there_a_saved_game():
-    return get_save_files() > 0
+    print get_save_files()
+    return len(get_save_files()) > 0
 
 
 def load_first_game():

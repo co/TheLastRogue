@@ -31,7 +31,7 @@ def _main_menu_ui_elements(ui_state, state_stack):
         menu.MenuOptionWithSymbols("Continue",
                                    icon.GUN, " ",
                                    [continue_game_function],
-                                   gamestate.is_there_a_saved_game())
+                                   (lambda: gamestate.is_there_a_saved_game()))
 
     start_game_option = \
         menu.MenuOptionWithSymbols("Start Dungeon",
@@ -243,7 +243,7 @@ def context_menu(player, state_stack):
     open_inventory_option = \
         menu.MenuOption("Inventory",
                         [lambda: state_stack.push(inventory_menu_opt)],
-                        not player.inventory.is_empty())
+                        (lambda: not player.inventory.is_empty()))
     context_options.append(open_inventory_option)
 
     equipment_menu_opt = equipment_menu(player, state_stack)
@@ -283,7 +283,7 @@ def get_dungeon_feature_menu_options(player, stack_pop_function):
                                                      game_state=game_state)
         functions = [feature_option, stack_pop_function]
         feature_options.append(menu.MenuOption(feature_action.name, functions,
-                                               feature_action.can_act()))
+                                               (lambda: feature_action.can_act())))
     return feature_options
 
 
@@ -330,7 +330,7 @@ def victory_screen(state_stack):
 
     continue_option = \
         menu.MenuOption("Press Enter to Continue...",
-                        [lambda: state_stack.pop_to_main_menu()], True)
+                        [lambda: state_stack.pop_to_main_menu()])
 
     continue_menu = menu.StaticMenu((0, 0), [continue_option], state_stack,
                                     margin=style.menu_theme.margin, may_escape=False)
@@ -363,7 +363,7 @@ def game_over_screen(state_stack):
 
     continue_option = \
         menu.MenuOption("Press Enter to Accept Your Fate...",
-                        [lambda: state_stack.pop_to_main_menu()], True)
+                        [lambda: state_stack.pop_to_main_menu()])
 
     continue_menu = menu.StaticMenu((0, 0), [continue_option], state_stack,
                                     margin=style.menu_theme.margin, may_escape=False)

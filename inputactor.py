@@ -55,7 +55,7 @@ class InputActor(Actor):
                                                                     target_entity=player,
                                                                     game_state=player.game_state.value)
             functions = [pickup_option, stack_pop_function]
-            context_menu_options.append(menu.MenuOption(player.pick_up_item_action.name, functions, True))
+            context_menu_options.append(menu.MenuOption(player.pick_up_item_action.name, functions))
         context_menu_options.extend(menufactory.get_dungeon_feature_menu_options(player, stack_pop_function))
         if len(context_menu_options) == 1 and context_menu_options[0].can_activate:
             context_menu_options[0].activate()
