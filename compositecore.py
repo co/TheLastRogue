@@ -263,7 +263,6 @@ class Composite(Component):
                                  "But it doesn't exist.".format(str(component_type),
                                                                 str(self)))
 
-
     def get_original_child(self, component_type):
         """
         Gets the "real" child of the composite.

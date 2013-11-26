@@ -171,6 +171,9 @@ class TestGameState(GameStateBase):
         potion = item.HealthPotion()
         potion.mover.try_move((20, 12), self.dungeon_level)
 
+        device = item.Device()
+        device.mover.try_move((24, 12), self.dungeon_level)
+
         gun = item.Gun()
         gun.mover.try_move((20, 13), self.dungeon_level)
         sword = item.Sword()
@@ -191,9 +194,9 @@ class TestGameState(GameStateBase):
             ammo = item.Ammunition()
             ammo.mover.try_move((21 + i, 13), self.dungeon_level)
 
-        for i in range(10):
-            sword = item.Sword()
-            sword.mover.try_move((21 + i, 23), self.dungeon_level)
+        for i in range(18):
+            knife = item.Knife()
+            knife.mover.try_move((16 + i, 23), self.dungeon_level)
 
 
 class GameState(GameStateBase):
@@ -236,14 +239,11 @@ def delete_save_file_of_game_state(game_state):
     file_name = get_save_file_name(game_state)
 
 def is_there_a_saved_game():
-    print get_save_files()
     return len(get_save_files()) > 0
 
 
 def load_first_game():
-    print get_save_files()[0]
     save_file = open(get_save_files()[0], 'r')
-    print save_file
 
     game_state = pickle.load(save_file)
     return game_state

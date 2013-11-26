@@ -10,7 +10,8 @@ def random_variance(mid, var):
     if var == 0:
         return mid
     else:
-        return mid - var + random.randrange(var) + random.randrange(var)
+        print "rng", var, random.randrange(var + 1)
+        return mid - var + random.randrange(var + 1) + random.randrange(var + 1)
 
 
 def sum_of_n_coin_flips(n):

@@ -24,12 +24,13 @@ class ItemType(Leaf):
     Enumerator class denoting different item types. Inventory is sorted on ItemType.
     """
     POTION = 0
-    WEAPON = 1
-    ARMOR = 2
-    JEWELLRY = 3
-    AMMO = 4
+    MACHINE = 1
+    WEAPON = 2
+    ARMOR = 3
+    JEWELLRY = 4
+    AMMO = 5
 
-    ALL = [POTION, WEAPON, ARMOR, AMMO]
+    ALL = [POTION, MACHINE, WEAPON, ARMOR, JEWELLRY, AMMO]
 
     def __init__(self, item_type):
         super(ItemType, self).__init__()
@@ -41,6 +42,7 @@ class Gun(Composite):
     """
     A composite component representing a Gun item.
     """
+
     def __init__(self):
         super(Gun, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ITEM))
@@ -67,10 +69,76 @@ class Gun(Composite):
         self.add_child(Hit(13))
 
 
+class Device(Composite):
+    """
+    A composite component representing a Gun item.
+    """
+
+    def __init__(self):
+        super(Device, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ITEM))
+        self.add_child(ItemType(ItemType.MACHINE))
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(Mover())
+        self.add_child(Description("Ancient Device",
+                                   "An anchient device, its creators are "
+                                   "long dead. But what is it for?\n"))
+        self.add_child(GraphicChar(None, colors.GREEN, icon.MACHINE))
+        self.add_child(CharPrinter())
+        self.add_child(DropAction())
+        self.add_child(PlayerThrowItemAction())
+        self.add_child(ThrowerNonBreak())
+        self.add_child(Weight(5))
+        self.add_child(DarknessDeviceAction())
+
+
+class ActivateDeviceAction(Action):
+    def __init__(self):
+        super(ActivateDeviceAction, self).__init__()
+        self.name = "Activate"
+        self.display_order = 90
+
+    def act(self, **kwargs):
+        """
+        Performs the drink action, subclasses should not override this.
+        """
+        target_entity = kwargs[action.TARGET_ENTITY]
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        self._activate(source_entity)
+        _item_flash_animation(source_entity, self.parent)
+        self.add_energy_spent_to_entity(source_entity)
+
+    def _activate(self, source_entity):
+        """
+        The activate action subclasses should override
+        and define the activate action here.
+        """
+        pass
+
+
+class DarknessDeviceAction(ActivateDeviceAction):
+    """
+    Defines the device activate action.
+    """
+    def __init__(self):
+        super(DarknessDeviceAction, self).__init__()
+        self.component_type = "darkness_device_activate_action"
+
+    def _activate(self, source_entity):
+        """
+        The activate action subclasses should override
+        and define the activate action here.
+        """
+        entities = source_entity.dungeon_level.value.entities
+        for entitiy in entities:
+            entity.entity_queue = add()
+
 class IsAmmo(Leaf):
     """
     Parent component holding this is some kind of ammo.
     """
+
     def __init__(self):
         super(IsAmmo, self).__init__()
         self.component_type = "is_ammo"
@@ -82,6 +150,7 @@ class Stacker(Leaf):
 
     Should only be used for items where all instances are equal.
     """
+
     def __init__(self, stack_type, max_size, size=1):
         super(Stacker, self).__init__()
         self.component_type = "stacker"
@@ -97,6 +166,7 @@ class Ammunition(Composite):
     """
     A composite component representing a gun ammunition item.
     """
+
     def __init__(self):
         super(Ammunition, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ITEM))
@@ -120,6 +190,7 @@ class EquippedEffect(Leaf):
     Parent items with this component has a
     effect that happens while item is equipped.
     """
+
     def __init__(self):
         super(EquippedEffect, self).__init__()
         self.component_type = "equipped_effect"
@@ -132,6 +203,7 @@ class Armor(Composite):
     """
     A composite component representing a Armor item.
     """
+
     def __init__(self):
         super(Armor, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ITEM))
@@ -165,16 +237,16 @@ class BlockDamageEquippedEffect(EquippedEffect):
         """
         Causes the entity that to block some damage.
         """
-        entity.add_spoof_child(BlockDamageHealthSpoof
-                               (self.block,
-                                self.block_variance,
-                                self.blocked_damage_types))
+        entity.add_spoof_child(BlockDamageHealthSpoof (self.block,
+                                                       self.block_variance,
+                                                       self.blocked_damage_types))
 
 
 class Sword(Composite):
     """
     A composite component representing a Sword item.
     """
+
     def __init__(self):
         super(Sword, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ITEM))
@@ -189,7 +261,7 @@ class Sword(Composite):
                                    "tough."))
         self.add_child(GraphicChar(None, colors.GRAY, icon.SWORD))
         self.add_child(DamageProvider(7, 5, [DamageTypes.PHYSICAL,
-                                              DamageTypes.CUTTING]))
+                                             DamageTypes.CUTTING]))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
         self.add_child(DropAction())
@@ -199,10 +271,28 @@ class Sword(Composite):
         self.add_child(Hit(17))
 
 
+class Knife(Sword):
+    """
+    A composite component representing a Sword item.
+    """
+
+    def __init__(self):
+        super(Knife, self).__init__()
+        self.description.name = "Knife"
+        self.description.description = "A trusty knife," \
+                                       "small and precise but will only inflict small wounds."
+        self.graphic_char.icon = icon.KNIFE
+        self.weight.value = 6
+        self.hit.value = 21
+        self.damage_provider.damage = 3
+        self.damage_provider.variance = 1
+
+
 class RingOfInvisibility(Leaf):
     """
     The Ring of Invisibility will make the entity who equips it invisible.
     """
+
     def __init__(self):
         super(RingOfInvisibility, self).__init__()
         self.add_child(EquipmentType(equipment.EquipmentTypes.RING))
@@ -230,7 +320,7 @@ class SetInvisibilityFlagEquippedEffect(EquippedEffect):
         Causes the entity that equips this item to become invisible.
         """
         invisibile_flag = entity.StatusFlags.INVISIBILE
-        invisibility_effect = entityeffect.\
+        invisibility_effect = entityeffect. \
             StatusAdder(self.parent, self.parent,
                         invisibile_flag, time_to_live=1)
         self.parent.effect_queue.add(invisibility_effect)
@@ -267,6 +357,7 @@ class Weight(Leaf):
 
     A heavier item can't be thrown as far.
     """
+
     def __init__(self, weight):
         super(Weight, self).__init__()
         self.component_type = "weight"
@@ -277,6 +368,7 @@ class WeaponRange(Leaf):
     """
     Limits how far the parent weapon can reach.
     """
+
     def __init__(self, range=5):
         super(WeaponRange, self).__init__()
         self.component_type = "weapon_range"
@@ -288,6 +380,7 @@ class DropAction(Action):
     An entity holding the parent item in its inventory should be able to drop
     the item using this action.
     """
+
     def __init__(self):
         super(DropAction, self).__init__()
         self.component_type = "drop_action"
@@ -300,7 +393,7 @@ class DropAction(Action):
         """
         source_entity = kwargs[action.SOURCE_ENTITY]
         if not source_entity.inventory is None:
-            drop_successful =\
+            drop_successful = \
                 source_entity.inventory.try_drop_item(self.parent)
             if drop_successful:
                 self.add_energy_spent_to_entity(source_entity)
@@ -314,6 +407,7 @@ class ReEquipAction(Action):
     If an item is already in that
     equipment slot that item will be unequipped first.
     """
+
     def __init__(self):
         super(ReEquipAction, self).__init__()
         self.component_type = "reequip_action"
@@ -325,15 +419,15 @@ class ReEquipAction(Action):
         Will attempt to equip the parent item to the given entity.
         """
         source_entity = kwargs[action.SOURCE_ENTITY]
-        if(action.EQUIPMENT_SLOT in kwargs):
+        if (action.EQUIPMENT_SLOT in kwargs):
             equipment_slot = kwargs[action.EQUIPMENT_SLOT]
         else:
             equipment_slot = self.get_equipment_slot(source_entity)
         old_item = None
-        if(source_entity.equipment.slot_is_equiped(equipment_slot)):
+        if (source_entity.equipment.slot_is_equiped(equipment_slot)):
             old_item = source_entity.equipment.unequip(equipment_slot)
         self._re_equip(source_entity, equipment_slot)
-        if(not old_item is None):
+        if (not old_item is None):
             source_entity.inventory.try_add(old_item)
         self.add_energy_spent_to_entity(source_entity)
 
@@ -342,12 +436,12 @@ class ReEquipAction(Action):
         Finds the right equipment slot.
         """
         open_slots = (source_entity.equipment.get_open_slots_of_type
-                      (self.parent.equipment_type.value))
-        if(len(open_slots) > 0):
+                          (self.parent.equipment_type.value))
+        if (len(open_slots) > 0):
             return open_slots[0]
         else:
             return (source_entity.equipment.get_slots_of_type
-                    (self.parent.equipment_type.value))[0]
+                        (self.parent.equipment_type.value))[0]
 
     def can_act(self, **kwargs):
         """
@@ -359,7 +453,7 @@ class ReEquipAction(Action):
         """
         Performs the actual reequip.
         """
-        re_equip_effect =\
+        re_equip_effect = \
             entityeffect.ReEquip(target_entity, equipment_slot, self.parent)
         target_entity.effect_queue.add(re_equip_effect)
         target_entity.inventory.remove_item(self.parent)
@@ -369,6 +463,7 @@ class DrinkAction(Action):
     """
     Abstract class, drink actions should inherit from this class.
     """
+
     def __init__(self):
         super(DrinkAction, self).__init__()
         self.name = "Drink"
@@ -382,11 +477,8 @@ class DrinkAction(Action):
         source_entity = kwargs[action.SOURCE_ENTITY]
         self._drink(target_entity)
         self.remove_from_inventory(target_entity)
-        self._item_flash_animation(source_entity, self.parent)
+        _item_flash_animation(source_entity, self.parent)
         self.add_energy_spent_to_entity(source_entity)
-
-    def _item_flash_animation(self, entity, item):
-        entity.char_printer.append_graphic_char_temporary_frames([item.graphic_char])
 
     def remove_from_inventory(self, target_entity):
         """
@@ -401,11 +493,11 @@ class DrinkAction(Action):
         """
         pass
 
-
 class HealingPotionDrinkAction(DrinkAction):
     """
     Defines the healing potion drink action.
     """
+
     def __init__(self):
         super(HealingPotionDrinkAction, self).__init__()
         self.component_type = "health_potion_drink_action"
@@ -425,6 +517,7 @@ class PickUpItemAction(Action):
     """
     An entity will be able to pick up items.
     """
+
     def __init__(self):
         super(PickUpItemAction, self).__init__()
         self.component_type = "pick_up_item_action"
@@ -454,10 +547,7 @@ class PickUpItemAction(Action):
             message = "Picked up: " + item.description.name
             messenger.message(message)
             self.parent.actor.newly_spent_energy += gametime.single_turn
-            self._item_flash_animation(source_entity, item)
-
-    def _item_flash_animation(self, entity, item):
-        entity.char_printer.append_graphic_char_temporary_frames([item.graphic_char])
+            _item_flash_animation(source_entity, item)
 
     def _get_item_on_floor(self, entity):
         dungeon_level = entity.dungeon_level.value
@@ -470,17 +560,19 @@ class PickUpItemAction(Action):
         """
         source_entity = kwargs[action.SOURCE_ENTITY]
         item = self._get_item_on_floor(source_entity)
-        if(not item is None and
-           not self.parent.inventory.has_room_for_item(item)):
-            message = "Could not pick up: " + item.description.name +\
-                ", the inventory is full."
+        if (not item is None and
+                not self.parent.inventory.has_room_for_item(item)):
+            message = "Could not pick up: " + item.description.name + \
+                      ", the inventory is full."
             messenger.message(message)
+
 
 
 class EquipmentType(Leaf):
     """
     Holds the equipment type of a equipment item.
     """
+
     def __init__(self, equipment_type):
         super(EquipmentType, self).__init__()
         self.component_type = "equipment_type"
@@ -491,6 +583,7 @@ class DamageProvider(Leaf):
     """
     The provides holds damage, actual damage will be calculated on use.
     """
+
     def __init__(self, damage, variance, types):
         super(DamageProvider, self).__init__()
         self.component_type = "damage_provider"
@@ -499,15 +592,17 @@ class DamageProvider(Leaf):
         self.types = types
 
     def damage_entity(self, source_entity, target_entity):
-        self._damage = Damage(self.damage, self.variance,
-                              self.types, self.parent.hit.value)
-        return self._damage.damage_entity(source_entity, target_entity)
+        damage_strength = self.damage + source_entity.strength.value / 2
+        damage = Damage(damage_strength, self.variance,
+                        self.types, self.parent.hit.value)
+        return damage.damage_entity(source_entity, target_entity)
 
 
 class OnUnequipEffect(Leaf):
     """
     Parent items with this component has a effect that happens on equipping.
     """
+
     def __init__(self, effect_function):
         self.component_type = "on_unequip_effect"
         self.effect = effect_function
@@ -517,6 +612,7 @@ class OnEquipEffect(Leaf):
     """
     Parent items with this component has a effect that happens on equipping.
     """
+
     def __init__(self, effect_function):
         self.component_type = "on_equip_effect"
         self.effect = effect_function
@@ -526,6 +622,7 @@ class Thrower(Leaf):
     """
     Items with this component can be thrown.
     """
+
     def __init__(self):
         super(Thrower, self).__init__()
         self.component_type = "thrower"
@@ -543,6 +640,7 @@ class ThrowerNonBreak(Thrower):
     """
     Items with this component can be thrown, but will survive the fall.
     """
+
     def __init__(self):
         super(ThrowerNonBreak, self).__init__()
 
@@ -553,8 +651,8 @@ class ThrowerNonBreak(Thrower):
         position: The point at which the item hits the ground.
         """
         self.parent.mover.try_move(position, dungeon_level)
-        message = "The " + self.parent.description.name.lower() +\
-            " hits the ground with a thud."
+        message = "The " + self.parent.description.name.lower() + \
+                  " hits the ground with a thud."
         messenger.message(message)
 
 
@@ -562,10 +660,15 @@ class ThrowerBreak(Thrower):
     """
     Items with this component can be thrown, but will survive the fall.
     """
+
     def __init__(self):
         super(ThrowerBreak, self).__init__()
 
     def throw_effect(self, dungeon_level, position):
-        message = "The " + self.parent.description.name.lower() +\
-            " smashes to the ground and breaks into pieces."
+        message = "The " + self.parent.description.name.lower() + \
+                  " smashes to the ground and breaks into pieces."
         messenger.message(message)
+
+
+def _item_flash_animation(entity, item):
+    entity.char_printer.append_graphic_char_temporary_frames([item.graphic_char])

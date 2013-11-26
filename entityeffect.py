@@ -1,6 +1,7 @@
 import random
 
 from compositecore import Leaf
+import gametime
 from messenger import messenger
 from statusflags import StatusFlags
 
@@ -11,12 +12,13 @@ class EffectTypes(object):
     STATUS_REMOVER = 0
     BLOCKER = 1
     STATUS_ADDER = 2
-    TELEPORT = 3
-    HEAL = 4
-    DAMAGE = 5
-    EQUIPMENT = 6
+    VISION = 3
+    TELEPORT = 4
+    HEAL = 5
+    DAMAGE = 6
+    EQUIPMENT = 7
 
-    ALLTYPES = [STATUS_REMOVER, BLOCKER, STATUS_ADDER,
+    ALLTYPES = [STATUS_REMOVER, BLOCKER, STATUS_ADDER, VISION,
                 TELEPORT, HEAL, DAMAGE, EQUIPMENT]
 
 
@@ -167,6 +169,21 @@ class Heal(EntityEffect):
         self.message()
         self.tick(time_spent)
 
+class Darkness(EntityEffect):
+    def __init__(self, source_entity, darkness_amount, time_to_live=gametime.single_turn):
+        super(Heal, self).__init__(source_entity=source_entity,
+                                   effect_type=EffectTypes.VISION,
+                                   time_to_live=time_to_live)
+        self.darkness_amount = darkness_amount
+
+    def message(self):
+        message = "A strange darkness embraces you."
+        messenger.message(message)
+
+    def update(self, time_spent):
+        self.target_entity.health_modifier.heal(self.health)
+        self.message()
+        self.tick(time_spent)
 
 class Equip(EntityEffect):
     def __init__(self, source_entity, item):
