@@ -73,7 +73,6 @@ class CharPrinter(Leaf):
         Draws the char on the given position on the console.
         """
         if len(self._temp_animation_frames) > 0:
-            print self.parent, self._temp_animation_frames
             if self._current_frame <= 0:
                 frame = self._temp_animation_frames.pop()
                 self._current_frame = settings.ANIMATION_DELAY

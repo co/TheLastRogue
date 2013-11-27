@@ -151,7 +151,6 @@ class DarknessDeviceAction(ActivateDeviceAction):
         ttl = gametime.single_turn * rng.random_variance(10, 5)
         entities = source_entity.dungeon_level.value.entities
         for entity in entities:
-            print entity
             darkness_effect = entityeffect.AddSpoofChild(source_entity, SightRadius(1), time_to_live=ttl)
             entity.effect_queue.add(darkness_effect)
 
@@ -174,6 +173,8 @@ class HeartStopDeviceAction(ActivateDeviceAction):
         entities = source_entity.dungeon_level.value.entities
         if source_entity in entities:
             entities.remove(source_entity)
+        if len(entities) < 1:
+            return
         target = random.sample(entities, 1)[0]
         heart_stop_effect = entityeffect.HeartStop(source_entity, time_to_live=ttl)
         target.effect_queue.add(heart_stop_effect)
