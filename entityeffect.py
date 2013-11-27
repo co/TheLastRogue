@@ -10,15 +10,15 @@ from statusflags import StatusFlags
 # Effect types in execution order
 class EffectTypes(object):
     STATUS_REMOVER = 0
-    BLOCKER = 1
-    STATUS_ADDER = 2
-    VISION = 3
+    ADD_SPOOF_CHILD = 1
+    BLOCKER = 2
+    STATUS_ADDER = 3
     TELEPORT = 4
     HEAL = 5
     DAMAGE = 6
     EQUIPMENT = 7
 
-    ALLTYPES = [STATUS_REMOVER, BLOCKER, STATUS_ADDER, VISION,
+    ALLTYPES = [STATUS_REMOVER, ADD_SPOOF_CHILD, BLOCKER, STATUS_ADDER,
                 TELEPORT, HEAL, DAMAGE, EQUIPMENT]
 
 
@@ -43,7 +43,7 @@ class EffectQueue(Leaf):
             if effect.status_flag == status_to_remove:
                 self._effect_queue[EffectTypes.STATUS_ADDER].remove(effect)
 
-    def on_tick(self, time_spent):
+    def before_tick(self, time_spent):
         for effect_type_queue in EffectTypes.ALLTYPES:
             for effect in self._effect_queue[effect_type_queue]:
                 effect.update(time_spent)
@@ -169,21 +169,19 @@ class Heal(EntityEffect):
         self.message()
         self.tick(time_spent)
 
-class Darkness(EntityEffect):
-    def __init__(self, source_entity, darkness_amount, time_to_live=gametime.single_turn):
-        super(Heal, self).__init__(source_entity=source_entity,
-                                   effect_type=EffectTypes.VISION,
-                                   time_to_live=time_to_live)
-        self.darkness_amount = darkness_amount
 
-    def message(self):
-        message = "A strange darkness embraces you."
-        messenger.message(message)
+class AddSpoofChild(EntityEffect):
+    def __init__(self, source_entity, spoof_child, time_to_live=gametime.single_turn):
+        super(AddSpoofChild, self).__init__(source_entity=source_entity,
+                                   effect_type=EffectTypes.ADD_SPOOF_CHILD,
+                                   time_to_live=time_to_live)
+        self.spoof_child = spoof_child
 
     def update(self, time_spent):
-        self.target_entity.health_modifier.heal(self.health)
-        self.message()
+        self.target_entity.add_spoof_child(self.spoof_child)
+        print "added", self.spoof_child
         self.tick(time_spent)
+
 
 class Equip(EntityEffect):
     def __init__(self, source_entity, item):

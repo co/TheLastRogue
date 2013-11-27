@@ -51,8 +51,7 @@ class DungeonLevel(object):
             raise Exception(("Tried to access the player, "
                              "from DungeonLevel: " + str(self) +
                              ", but the player is not in the dungeon."))
-        grace_radius = 2
-        square_side = (the_player.sight_radius.value + grace_radius) * 2
+        square_side = 16  # Should be enough
         rect_pos = geo.sub_2d(the_player.position.value, (square_side / 2, square_side / 2))
         draw_rectangle = geo.Rect(rect_pos, square_side, square_side)
         self._dungeon_level_screen.draw_rectangle_seen_by_entity(draw_rectangle, self.tile_matrix, the_player)

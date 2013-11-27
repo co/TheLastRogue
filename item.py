@@ -8,6 +8,7 @@ from health import BlockDamageHealthSpoof
 from missileaction import PlayerThrowItemAction
 from mover import Mover
 from position import Position, DungeonLevel
+import rng
 from stats import GamePieceType, Hit
 from text import Description
 import action
@@ -17,6 +18,7 @@ import equipment
 import gametime
 from messenger import messenger
 import icon
+from vision import SightRadius
 
 
 class ItemType(Leaf):
@@ -130,9 +132,13 @@ class DarknessDeviceAction(ActivateDeviceAction):
         The activate action subclasses should override
         and define the activate action here.
         """
+        ttl = gametime.single_turn * rng.random_variance(10, 5)
         entities = source_entity.dungeon_level.value.entities
-        for entitiy in entities:
-            entity.entity_queue = add()
+        for entity in entities:
+            print entity
+            darkness_effect = entityeffect.AddSpoofChild(entity, SightRadius(1), time_to_live=ttl)
+            entity.effect_queue.add(darkness_effect)
+
 
 class IsAmmo(Leaf):
     """

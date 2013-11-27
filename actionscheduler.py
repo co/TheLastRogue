@@ -23,11 +23,15 @@ class ActionScheduler(object):
     def _actors_tick(self):
         if len(self._actors) > 0:
             actor = self._actors[0].actor
+            print "start!"
             actor.parent.before_tick(actor.energy_recovery)
+            print "before tick done!"
             self.on_tick(actor)
+            actor.tick()
+            print "tick done!"
             actor.parent.on_tick(actor.energy_recovery)
             actor.parent.after_tick(actor.energy_recovery)
-            actor.tick()
+            print "after tick done!"
             self._actors.rotate()
 
     def on_tick(self, current_actor):
@@ -39,7 +43,7 @@ class ActionScheduler(object):
             tile = (current_piece.dungeon_level.value.
                     get_tile(current_piece.position.value))
             for piece in tile.get_all_pieces():
-                if(piece.has_child("entity_share_tile_effect")):
+                if piece.has_child("entity_share_tile_effect"):
                     (piece.entity_share_tile_effect.
                      share_tile_effect_tick(current_piece,
                                             gametime.normal_energy_gain))

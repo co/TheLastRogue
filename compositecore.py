@@ -29,7 +29,8 @@ class Component(object):
     @parent.setter
     def parent(self, value):
         self._parent = value
-        self.on_parent_changed()
+        if not value is None:
+            self.on_parent_changed()
 
     def has_parent(self):
         return not self._parent is None
@@ -203,6 +204,9 @@ class Composite(Component):
         """
         Removes all spoofed children.
         """
+        for child_type in self._spoofed_children.values():
+            for child in child_type:
+                child.parent = None
         self._spoofed_children = {}
 
     def remove_component(self, component):

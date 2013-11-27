@@ -15,6 +15,7 @@ class DungeonMask(Leaf):
         super(DungeonMask, self).__init__()
         self._dungeon_map = None
         self.last_dungeon_map_update_timestamp = -1
+        self.last_sight_radius = -1
         self.component_type = "dungeon_mask"
 
     @property
@@ -63,6 +64,13 @@ class DungeonMask(Leaf):
         x, y = point
         return libtcod.map_is_in_fov(self.dungeon_map, x, y)
 
+    def on_tick(self, _):
+        sight_radius = self.parent.sight_radius.value
+        print "fov calc: ", sight_radius, self.last_sight_radius
+        if not self.last_sight_radius == sight_radius:
+            print "fov changed!"
+            self.update_fov()
+
     def update_fov(self):
         """
         Calculates the Field of Vision from the dungeon_map.
@@ -71,6 +79,7 @@ class DungeonMask(Leaf):
         sight_radius = self.parent.sight_radius.value
         libtcod.map_compute_fov(self.dungeon_map, x, y,
                                 sight_radius, True)
+        self.last_sight_radius = sight_radius
 
     def print_walkable_map(self):
         """
