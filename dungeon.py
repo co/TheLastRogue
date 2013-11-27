@@ -3,6 +3,7 @@ import monster
 import rng
 import item
 import spawner
+from tools import time_it
 
 
 class Dungeon(object):
@@ -23,10 +24,17 @@ class Dungeon(object):
             self._dungeon_levels[depth] = self._generate_dungeon_level(depth)
         return self._dungeon_levels[depth]
 
+    def remove_dungeon_level(self, depth):
+        """
+        Hack to improve save speed, I don't think I need past levels anyway...
+        """
+        self._dungeon_levels[depth] = None
+
     def _generate_dungeon_level(self, depth):
-        size = 800
-        dungeon_level = dungeongenerator.generate_dungeon_exploded_rooms(size,
-                                                                         depth)
+        size = 700
+
+        dungeon_level = time_it("dungeon_level_generation",
+                                (lambda: dungeongenerator.generate_dungeon_exploded_rooms(size, depth)))
         for _ in range(2 * (depth + 1) + 1):
             spawner.spawn_rat_man(dungeon_level, self.game_state)
 

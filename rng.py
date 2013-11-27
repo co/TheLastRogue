@@ -6,11 +6,9 @@ def coin_flip():
 
 
 def random_variance(mid, var):
-    print mid, var
     if var == 0:
         return mid
     else:
-        print "rng", var, random.randrange(var + 1)
         return mid - var + random.randrange(var + 1) + random.randrange(var + 1)
 
 

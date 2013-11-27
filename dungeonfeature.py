@@ -109,9 +109,10 @@ class DescendStairsAction(action.Action):
 
     def act(self, **kwargs):
         target_entity = kwargs["target_entity"]
-        current_dungeon_level = target_entity.dungeon_level.value
-        next_dungeon_level = current_dungeon_level.\
-            dungeon.get_dungeon_level(current_dungeon_level.depth + 1)
+        current_depth = target_entity.dungeon_level.value.depth
+        dungeon = target_entity.dungeon_level.value.dungeon
+        next_dungeon_level = dungeon.get_dungeon_level(current_depth + 1)
+        dungeon.remove_dungeon_level(current_depth)
         if(next_dungeon_level is None):
             self.add_energy_spent_to_entity(target_entity)
             return

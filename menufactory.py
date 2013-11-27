@@ -21,6 +21,8 @@ def _main_menu_ui_elements(ui_state, state_stack):
         lambda: ui_state.current_stack.push(gamestate.load_first_game())
     start_game_function = \
         lambda: ui_state.current_stack.push(gamestate.GameState())
+    save_game_function = \
+        lambda: gamestate.save(ui_state.current_stack.get_game_state())
     start_test_game_function = \
         lambda: ui_state.current_stack.push(gamestate.TestGameState())
     quit_game_function = lambda: ui_state.current_stack.pop()
@@ -36,7 +38,7 @@ def _main_menu_ui_elements(ui_state, state_stack):
     start_game_option = \
         menu.MenuOptionWithSymbols("Start Dungeon",
                                    icon.GUN, " ",
-                                   [start_game_function])
+                                   [start_game_function, save_game_function])
     start_test_game_option = \
         menu.MenuOptionWithSymbols("Start Test Dungeon",
                                    icon.GUN, " ",

@@ -8,6 +8,25 @@ import colors
 import icon
 
 
+class TerrainFactory(object):
+    def __init__(self):
+        self.wall = None
+        self.floor = None
+
+    def get_wall(self):
+        if self.wall is None:
+            self.wall = Wall()
+        return self.wall
+
+    def get_floor(self):
+        if self.floor is None:
+            self.floor = Floor()
+        return self.floor
+
+
+terrain_factory = TerrainFactory()
+
+
 class IsSolid(Leaf):
     def __init__(self, is_solid=True):
         super(IsSolid, self).__init__()

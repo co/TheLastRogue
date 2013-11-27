@@ -19,6 +19,7 @@ import monster
 import rectfactory
 import state
 import statestack
+from tools import time_it
 import turn
 
 
@@ -50,6 +51,7 @@ class GameStateBase(state.State):
         self.dungeon_needs_redraw = True
         self._background_console = self._console = libtcodpy.console_new(constants.GAME_STATE_WIDTH,
                                                                          constants.GAME_STATE_HEIGHT)
+        self.first_round = True
         self._init_bg()
 
     def __getstate__(self):
@@ -89,7 +91,8 @@ class GameStateBase(state.State):
     def signal_new_level(self):
         self.camera.center_on_entity(self.player)
         self.dungeon_needs_redraw = True
-        save(self)
+        if not self.first_round:
+            save(self)
 
     def start_prompt(self, prompt_state):
         self.menu_prompt_stack.push(prompt_state)
@@ -139,7 +142,6 @@ class GameStateBase(state.State):
         self._update_gui()
         dungeon_level.tick()
 
-
         if self.player.health.is_dead():
             self.force_draw()
             game_over_screen = menufactory.game_over_screen(self.current_stack)
@@ -149,6 +151,8 @@ class GameStateBase(state.State):
             victory_screen = menufactory.victory_screen(self.current_stack)
             delete_save_file_of_game_state(self)
             self.current_stack.push(victory_screen)
+
+        self.first_round = False
 
     def draw_bg(self):
         pass
@@ -228,10 +232,10 @@ def get_save_file_name(game_state):
 
 
 def save(game_state):
-    save_file = open(get_save_file_name(game_state), 'w')
-    pickler = pickle.Pickler(save_file)
-    pickler.dump(game_state)
 
+    save_file = open(get_save_file_name(game_state), 'wb')
+    time_it("save", lambda: pickle.dump(game_state, save_file, -1))
+    save_file.close()
 
 def get_save_files():
     directory = getcwd()
@@ -244,11 +248,13 @@ def delete_save_file_of_game_state(game_state):
     if os.path.isfile(file_name):
         os.remove(file_name)
 
+
 def is_there_a_saved_game():
     return len(get_save_files()) > 0
 
-def load_first_game():
-    save_file = open(get_save_files()[0], 'r')
 
-    game_state = pickle.load(save_file)
+def load_first_game():
+    save_file = open(get_save_files()[0], 'rb')
+    game_state = time_it("load", (lambda: pickle.load(save_file)))
+    save_file.close()
     return game_state
