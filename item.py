@@ -92,7 +92,22 @@ class Device(Composite):
         self.add_child(PlayerThrowItemAction())
         self.add_child(ThrowerNonBreak())
         self.add_child(Weight(5))
+
+
+class DarknessDevice(Device):
+    def __init__(self):
+        super(DarknessDevice, self).__init__()
+        self.description.name = "Ancient Device of Darkness"
+        self.graphic_char.color_fg = colors.GREEN
         self.add_child(DarknessDeviceAction())
+
+
+class HeartStopDevice(Device):
+    def __init__(self):
+        super(HeartStopDevice, self).__init__()
+        self.description.name = "Ancient Device of Heart Stop"
+        self.graphic_char.color_fg = colors.BLUE
+        self.add_child(HeartStopDeviceAction())
 
 
 class ActivateDeviceAction(Action):
@@ -123,6 +138,7 @@ class DarknessDeviceAction(ActivateDeviceAction):
     """
     Defines the device activate action.
     """
+
     def __init__(self):
         super(DarknessDeviceAction, self).__init__()
         self.component_type = "darkness_device_activate_action"
@@ -136,8 +152,31 @@ class DarknessDeviceAction(ActivateDeviceAction):
         entities = source_entity.dungeon_level.value.entities
         for entity in entities:
             print entity
-            darkness_effect = entityeffect.AddSpoofChild(entity, SightRadius(1), time_to_live=ttl)
+            darkness_effect = entityeffect.AddSpoofChild(source_entity, SightRadius(1), time_to_live=ttl)
             entity.effect_queue.add(darkness_effect)
+
+
+class HeartStopDeviceAction(ActivateDeviceAction):
+    """
+    Defines the device activate action.
+    """
+
+    def __init__(self):
+        super(HeartStopDeviceAction, self).__init__()
+        self.component_type = "heart_stop_device_activate_action"
+
+    def _activate(self, source_entity):
+        """
+        The activate action subclasses should override
+        and define the activate action here.
+        """
+        ttl = gametime.single_turn * (random.randrange(3) + 2)
+        entities = source_entity.dungeon_level.value.entities
+        if source_entity in entities:
+            entities.remove(source_entity)
+        target = random.sample(entities, 1)[0]
+        heart_stop_effect = entityeffect.HeartStop(source_entity, time_to_live=ttl)
+        target.effect_queue.add(heart_stop_effect)
 
 
 class IsAmmo(Leaf):
@@ -243,9 +282,9 @@ class BlockDamageEquippedEffect(EquippedEffect):
         """
         Causes the entity that to block some damage.
         """
-        entity.add_spoof_child(BlockDamageHealthSpoof (self.block,
-                                                       self.block_variance,
-                                                       self.blocked_damage_types))
+        entity.add_spoof_child(BlockDamageHealthSpoof(self.block,
+                                                      self.block_variance,
+                                                      self.blocked_damage_types))
 
 
 class Sword(Composite):
@@ -499,6 +538,7 @@ class DrinkAction(Action):
         """
         pass
 
+
 class HealingPotionDrinkAction(DrinkAction):
     """
     Defines the healing potion drink action.
@@ -571,7 +611,6 @@ class PickUpItemAction(Action):
             message = "Could not pick up: " + item.description.name + \
                       ", the inventory is full."
             messenger.message(message)
-
 
 
 class EquipmentType(Leaf):

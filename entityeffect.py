@@ -1,7 +1,11 @@
 import random
+import colors
 
 from compositecore import Leaf
+from dungeonlevelfactory import terrain_matrix_from_lines
 import gametime
+from graphic import GraphicChar
+import icon
 from messenger import messenger
 from statusflags import StatusFlags
 
@@ -56,6 +60,7 @@ class EntityEffect(object):
         self.effect_type = effect_type
         self.is_blocked = False
         self.queue = None
+        self.time_alive = 0
 
     def update(self, time_spent):
         pass
@@ -64,25 +69,46 @@ class EntityEffect(object):
     def target_entity(self):
         return self.queue.parent
 
+    def is_new_round(self, time_spent):
+        turns_alive = int(self.time_alive / gametime.single_turn)
+        new_turns_alive = int((self.time_alive + time_spent) / gametime.single_turn)
+        return new_turns_alive > turns_alive
+
     def tick(self, time_spent):
         self.time_to_live = self.time_to_live - time_spent
+        self.time_alive += time_spent
         if self.time_to_live < 1:
+            self._on_remove_effect()
             self.queue.remove(self)
+
+    def _on_remove_effect(self):
+        pass
 
 
 class StatusRemover(EntityEffect):
-    def __init__(self, source_entity,
-                 status_type_to_remove, time_to_live=1):
-        super(StatusRemover,
-              self).__init__(source_entity,
-                             time_to_live,
-                             EffectTypes.STATUS_REMOVER)
+    def __init__(self, source_entity, status_type_to_remove, time_to_live=1):
+        super(StatusRemover, self).__init__(source_entity,
+                                            time_to_live,
+                                            EffectTypes.STATUS_REMOVER)
         self.status_type_to_remove = status_type_to_remove
 
     def update(self, time_spent):
         self.queue.remove_status_adder_of_status(self.status_type_to_remove)
         self.tick(time_spent)
 
+
+class HeartStop(EntityEffect):
+    def __init__(self, source_entity, time_to_live=1):
+        super(HeartStop, self).__init__(source_entity, time_to_live, EffectTypes.STATUS_REMOVER)
+
+    def update(self, time_spent):
+        if self.is_new_round(time_spent):
+            gray_heart = GraphicChar(None, colors.GRAY, icon.HEART)
+            self.target_entity.char_printer.append_graphic_char_temporary_frames([gray_heart])
+        self.tick(time_spent)
+
+    def _on_remove_effect(self):
+        self.target_entity.health_modifier.kill()
 
 class StatusAdder(EntityEffect):
     def __init__(self, source_entity, status_flag, time_to_live=1):
@@ -179,7 +205,6 @@ class AddSpoofChild(EntityEffect):
 
     def update(self, time_spent):
         self.target_entity.add_spoof_child(self.spoof_child)
-        print "added", self.spoof_child
         self.tick(time_spent)
 
 

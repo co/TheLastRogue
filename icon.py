@@ -106,6 +106,8 @@ SANITY_STAT = ICON_ROW
 HEALTH_STAT = ICON_ROW + 1
 ARMOR_STAT = ICON_ROW + 2
 
+HEART = 3
+
 ##################
 #Blood
 ##################

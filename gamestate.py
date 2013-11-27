@@ -179,8 +179,11 @@ class TestGameState(GameStateBase):
         potion = item.HealthPotion()
         potion.mover.try_move((20, 12), self.dungeon_level)
 
-        device = item.Device()
-        device.mover.try_move((24, 12), self.dungeon_level)
+        device1 = item.DarknessDevice()
+        device1.mover.try_move((24, 12), self.dungeon_level)
+
+        device2 = item.HeartStopDevice()
+        device2.mover.try_move((25, 12), self.dungeon_level)
 
         gun = item.Gun()
         gun.mover.try_move((20, 13), self.dungeon_level)

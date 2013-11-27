@@ -66,9 +66,7 @@ class DungeonMask(Leaf):
 
     def on_tick(self, _):
         sight_radius = self.parent.sight_radius.value
-        print "fov calc: ", sight_radius, self.last_sight_radius
         if not self.last_sight_radius == sight_radius:
-            print "fov changed!"
             self.update_fov()
 
     def update_fov(self):

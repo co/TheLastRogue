@@ -75,6 +75,11 @@ class HealthModifier(Leaf):
         for effect in effects:
             effect.effect(damage, entity)
 
+    def kill(self):
+        """
+        Removes all hp, this kills the entity.
+        """
+        self.parent.health.hp.set_min()
 
 class HealthSpoof(Leaf):
     def __init__(self):
@@ -98,6 +103,12 @@ class HealthSpoof(Leaf):
         Passes call to next spoof.
         """
         return self.next.increases_max_hp(amount)
+
+    def kill(self):
+        """
+        Removes all hp, this kills the entity.
+        """
+        self.next.kill()
 
 
 class BlockDamageHealthSpoof(HealthSpoof):
