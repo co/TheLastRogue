@@ -86,7 +86,7 @@ class DungeonMask(Leaf):
         for y in range(libtcod.map_get_height(self.dungeon_map)):
             line = ""
             for x in range(libtcod.map_get_width(self.dungeon_map)):
-                if (libtcod.map_is_walkable(self.dungeon_map, x, y)):
+                if libtcod.map_is_walkable(self.dungeon_map, x, y):
                     line += " "
                 else:
                     line += "#"

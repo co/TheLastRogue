@@ -70,4 +70,4 @@ class AwarenessChecker(Leaf):
         @return: True if the notice check is successful False otherwise.
         """
         return (random.randint(0, self.parent.awareness.value) >=
-                random.randint(0, stealth + 5))
+                random.randint(0, stealth))

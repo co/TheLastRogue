@@ -81,6 +81,7 @@ class HealthModifier(Leaf):
         """
         self.parent.health.hp.set_min()
 
+
 class HealthSpoof(Leaf):
     def __init__(self):
         super(HealthSpoof, self).__init__()
@@ -168,13 +169,13 @@ class BleedWhenDamaged(DamageTakenEffect):
 
         if damage/float(self.parent.health.hp.max_value) > 0.4:
             point_behind = self._get_point_behind_unless_solid(source_entity.position.value, 1, dungeon_level)
-            shape = shapegenerator.random_explosion_not_through_solid(point_behind, 3, dungeon_level)
+            shape = shapegenerator.random_explosion_not_through_solid(point_behind, 2, dungeon_level)
             for point in shape:
                 self.put_blood_on_tile(dungeon_level, point)
 
         if damage/float(self.parent.health.hp.max_value) > 0.8:
             point_behind = self._get_point_behind_unless_solid(source_entity.position.value, 2, dungeon_level)
-            shape = shapegenerator.random_explosion_not_through_solid(point_behind, 8, dungeon_level)
+            shape = shapegenerator.random_explosion_not_through_solid(point_behind, max(damage / 2, 7), dungeon_level)
             for point in shape:
                 self.put_blood_on_tile(dungeon_level, point)
 

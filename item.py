@@ -9,7 +9,7 @@ from missileaction import PlayerThrowItemAction
 from mover import Mover
 from position import Position, DungeonLevel
 import rng
-from stats import GamePieceType, Hit
+from stats import GamePieceType, Hit, DataPointBonusSpoof
 from text import Description
 import action
 import colors
@@ -334,27 +334,55 @@ class Knife(Sword):
         self.damage_provider.variance = 1
 
 
-class RingOfInvisibility(Leaf):
+class Ring(Composite):
     """
     The Ring of Invisibility will make the entity who equips it invisible.
     """
 
     def __init__(self):
-        super(RingOfInvisibility, self).__init__()
+        super(Ring, self).__init__()
         self.add_child(EquipmentType(equipment.EquipmentTypes.RING))
         self.add_child(ItemType(ItemType.JEWELLRY))
         self.add_child(GamePieceType(GamePieceType.ITEM))
         self.add_child(Position())
         self.add_child(DungeonLevel())
         self.add_child(Mover())
-        self.add_child(Description("Ring of Invisibility",
-                                   "The metal is warm to your skin, "
-                                   "this ring will make you invisible"))
         self.add_child(GraphicChar(None, colors.YELLOW, icon.RING))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
         self.add_child(DropAction())
-        self.add_child(EquippedEffect(SetInvisibilityFlagEquippedEffect()))
+
+
+class RingOfInvisibility(Ring):
+    def __init__(self):
+        super(RingOfInvisibility, self).__init__()
+        self.graphic_char.color_fg = colors.CYAN
+        self.add_child(SetInvisibilityFlagEquippedEffect())
+        self.add_child(Description("Ring of Invisibility",
+                                   "The metal is warm to your skin, "
+                                   "this ring will make you invisible"))
+
+
+class RingOfEvasion(Ring):
+    def __init__(self):
+        super(RingOfEvasion, self).__init__()
+        self.graphic_char.color_fg = colors.GREEN
+        self.add_child(DodgeBonusEquipEffect(3))
+        self.add_child(Description("Ring of Evasion",
+                                   "The ring is light on your finger, "
+                                   "Its magic powers makes it easier for you to dodge attacks."))
+
+
+class DodgeBonusEquipEffect(EquippedEffect):
+    def __init__(self, dodge_bonus=3):
+        super(DodgeBonusEquipEffect, self).__init__()
+        self.dodge_bonus = dodge_bonus
+
+    def effect(self, entity):
+        """
+        Causes the entity that equips this item to become invisible.
+        """
+        entity.add_spoof_child(DataPointBonusSpoof("evasion", self.dodge_bonus))
 
 
 class SetInvisibilityFlagEquippedEffect(EquippedEffect):

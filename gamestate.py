@@ -179,6 +179,9 @@ class TestGameState(GameStateBase):
         potion = item.HealthPotion()
         potion.mover.try_move((20, 12), self.dungeon_level)
 
+        ring1 = item.RingOfEvasion()
+        ring1.mover.try_move((24, 11), self.dungeon_level)
+
         device1 = item.DarknessDevice()
         device1.mover.try_move((24, 12), self.dungeon_level)
 

@@ -269,8 +269,7 @@ class ReEquip(EntityEffect):
     def update(self, time_spent):
         old_item = None
         if self.source_entity.equipment.slot_is_equiped(self.equipment_slot):
-            old_item = \
-                self.source_entity.equipment.unequip(self.equipment_slot)
+            old_item = self.source_entity.equipment.unequip(self.equipment_slot)
 
         equipment = self.target_entity.equipment
         equip_succeeded = equipment.try_equip(self.item)
@@ -286,4 +285,3 @@ class ReEquip(EntityEffect):
 
     def _item_flash_animation(self, entity, item):
         entity.char_printer.append_graphic_char_temporary_frames([item.graphic_char])
-
