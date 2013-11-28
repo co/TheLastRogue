@@ -36,6 +36,10 @@ class HealthModifier(Leaf):
         """
         Damages the entity by reducing hp by damage.
         """
+        if damage == 0 and rng.coin_flip():
+            damage = 1  # You should never be completely safe
+        if damage == 0:
+            return damage
         self.parent.health.hp.decrease(damage)
         self._animate_hurt()
         if self.parent.health.is_dead():
@@ -113,9 +117,9 @@ class HealthSpoof(Leaf):
 
 
 class BlockDamageHealthSpoof(HealthSpoof):
-    def __init__(self, block_ammount, variance, blocked_damage_types):
+    def __init__(self, block_amount, variance, blocked_damage_types):
         super(BlockDamageHealthSpoof, self).__init__()
-        self.block_ammount = block_ammount
+        self.block_amount = block_amount
         self.variance = variance
         self.blocked_damage_types = set(blocked_damage_types)
 
@@ -123,11 +127,10 @@ class BlockDamageHealthSpoof(HealthSpoof):
         """
         Reduces damage done to parent entity.
         """
-        block_ammount = 0
-        if(len(set(damage_types) & self.blocked_damage_types) > 0):
-            block_ammount = rng.random_variance(self.block_ammount,
-                                                self.variance)
-        new_damage = max(damage - block_ammount, 0)
+        block_amount = 0
+        if len(set(damage_types) & self.blocked_damage_types) > 0:
+            block_amount = rng.random_variance_no_negative(self.block_amount, self.variance)
+        new_damage = max(damage - block_amount, 0)
         return self.next.hurt(new_damage, damage_types=damage_types,
                               entity=entity)
 

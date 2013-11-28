@@ -253,17 +253,10 @@ class Armor(Composite):
     def __init__(self):
         super(Armor, self).__init__()
         self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
         self.add_child(ItemType(ItemType.ARMOR))
         self.add_child(Position())
         self.add_child(DungeonLevel())
         self.add_child(Mover())
-        self.add_child(Description("Leather Armor",
-                                   "A worn leather armor, "
-                                   "it's old, but should still "
-                                   "protect you from some damage."))
-        self.add_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
-        self.add_child(BlockDamageEquippedEffect(0, 3, [DamageTypes.PHYSICAL]))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
         self.add_child(DropAction())
@@ -271,6 +264,52 @@ class Armor(Composite):
         self.add_child(ThrowerNonBreak())
         self.add_child(Weight(10))
 
+
+class LeatherArmor(Armor):
+    """
+    A composite component representing a Armor item.
+    """
+
+    def __init__(self):
+        super(LeatherArmor, self).__init__()
+        self.add_child(Description("Leather Armor",
+                                   "A worn leather armor, "
+                                   "it's old, but should still "
+                                   "protect you from some damage."))
+        self.add_child(Weight(10))
+        self.add_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
+        self.add_child(BlockDamageEquippedEffect(1, 3, [DamageTypes.PHYSICAL]))
+        self.add_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
+
+
+class LeatherBoots(Armor):
+    """
+    A composite component representing a Armor item.
+    """
+
+    def __init__(self):
+        super(LeatherBoots, self).__init__()
+        self.add_child(Description("Leather Boots",
+                                   "A worn pair of boots, mud covers most of the leather.."))
+        self.add_child(Weight(4))
+        self.add_child(GraphicChar(None, colors.ORANGE_D, icon.BOOTS))
+        self.add_child(BlockDamageEquippedEffect(1, 2, [DamageTypes.PHYSICAL]))
+        self.add_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
+
+
+class LeatherCap(Armor):
+    """
+    A composite component representing a Armor item.
+    """
+
+    def __init__(self):
+        super(LeatherCap, self).__init__()
+        self.add_child(Description("Leather Cap",
+                                   "An old cap made out of leather, this should keep some harm away."))
+        self.add_child(Weight(4))
+        self.add_child(GraphicChar(None, colors.ORANGE_D, icon.HELM))
+        self.add_child(BlockDamageEquippedEffect(1, 2, [DamageTypes.PHYSICAL]))
+        self.add_child(EquipmentType(equipment.EquipmentTypes.HEADGEAR))
 
 class BlockDamageEquippedEffect(EquippedEffect):
     def __init__(self, block, block_variance, blocked_damage_types):
@@ -304,7 +343,7 @@ class Sword(Composite):
         self.add_child(Description("Iron Sword",
                                    "This old blade has seen some, "
                                    "better days, it's as sharp as "
-                                   "tough."))
+                                   "ever tough."))
         self.add_child(GraphicChar(None, colors.GRAY, icon.SWORD))
         self.add_child(DamageProvider(7, 5, [DamageTypes.PHYSICAL,
                                              DamageTypes.CUTTING]))
