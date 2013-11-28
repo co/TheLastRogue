@@ -1,8 +1,8 @@
 import dungeongenerator
+import spawner
 import monster
 import rng
 import item
-import spawner
 from tools import time_it
 
 
@@ -35,32 +35,18 @@ class Dungeon(object):
 
         dungeon_level = time_it("dungeon_level_generation",
                                 (lambda: dungeongenerator.generate_dungeon_exploded_rooms(size, depth)))
-        for _ in range(2 * (depth + 1) + 1):
+        for _ in range(2 * (depth + 2) + 1):
             spawner.spawn_rat_man(dungeon_level, self.game_state)
 
-        for _ in range(max(rng.random_variance(depth - 2, 3), 0)):
+        for _ in range(min(rng.random_variance_no_negative(depth - 2, 3), depth - 1)):
             cyclops = monster.Cyclops(self.game_state)
             spawner.place_piece_on_random_tile(cyclops, dungeon_level)
-
-        for _ in range(depth + 3):
-            potion = item.HealthPotion()
-            spawner.place_piece_on_random_tile(potion, dungeon_level)
-
-        for _ in range(depth + 1):
-            potion = item.Ammunition()
-            spawner.place_piece_on_random_tile(potion, dungeon_level)
-
-        if rng.coin_flip():
-            if rng.coin_flip():
-                gun = item.Gun()
-                spawner.place_piece_on_random_tile(gun, dungeon_level)
-            else:
-                sword = item.Sword()
-                spawner.place_piece_on_random_tile(sword, dungeon_level)
 
         if depth == (len(self._dungeon_levels) - 1):
             jerico = monster.Jerico(self.game_state)
             spawner.place_piece_on_random_tile(jerico, dungeon_level)
+
+        spawner.place_items_in_dungeon(dungeon_level)
 
         dungeon_level.dungeon = self
         return dungeon_level

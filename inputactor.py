@@ -3,8 +3,9 @@ from entityeffect import Teleport, StatusAdder, StatusRemover
 from equipment import EquipmentSlots
 import gamestate
 from item import RangeWeaponType
+import spawner
 import menu
-from missileaction import PlayerShootWeaponAction, PlayerThrowStoneAction, PlayerSlingStoneAction
+from missileaction import PlayerShootWeaponAction, PlayerSlingStoneAction
 from statusflags import StatusFlags
 import console
 import gametime
@@ -12,7 +13,6 @@ import geometry as geo
 import inputhandler
 import menufactory
 import positionexaminer
-import spawner
 
 
 class InputActor(Actor):

@@ -1,6 +1,6 @@
 from compositecore import Leaf
-from statusflags import StatusFlags
 import spawner
+from statusflags import StatusFlags
 from messenger import messenger
 
 

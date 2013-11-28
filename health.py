@@ -1,10 +1,11 @@
+import logging
 from compositecore import Leaf
 import counter
 import colors
+import dungeontrash
 import geometry
 import rng
 import shapegenerator
-import spawner
 
 
 class Health(Leaf):
@@ -163,7 +164,7 @@ class BleedWhenDamaged(DamageTakenEffect):
         if terrain.is_solid.value:
             terrain.graphic_char.color_fg = colors.RED
         else:
-            spawner.spawn_blood_on_position(position, dungeon_level)
+            spawn_blood_on_position(position, dungeon_level)
 
     def effect(self, damage, source_entity):
         dungeon_level = self.parent.dungeon_level.value
@@ -198,3 +199,12 @@ class BleedWhenDamaged(DamageTakenEffect):
 
 def position_is_solid(position, dungeon_level):
     return dungeon_level.get_tile_or_unknown(position).get_terrain().is_solid.value
+
+def spawn_blood_on_position(position, dungeon_level):
+    corpse = dungeontrash.PoolOfBlood()
+    spawn_succeded = corpse.mover.try_move(position, dungeon_level)
+    if not spawn_succeded:
+        logging.info("could not spawn pool of blood.")
+        return False
+    return True
+
