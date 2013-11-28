@@ -185,6 +185,9 @@ class TestGameState(GameStateBase):
         ring2 = item.RingOfStealth()
         ring2.mover.try_move((25, 11), self.dungeon_level)
 
+        ring3 = item.RingOfStrength()
+        ring3.mover.try_move((26, 11), self.dungeon_level)
+
         device1 = item.DarknessDevice()
         device1.mover.try_move((24, 12), self.dungeon_level)
 

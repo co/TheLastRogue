@@ -175,7 +175,7 @@ class BleedWhenDamaged(DamageTakenEffect):
 
         if damage/float(self.parent.health.hp.max_value) > 0.8:
             point_behind = self._get_point_behind_unless_solid(source_entity.position.value, 2, dungeon_level)
-            shape = shapegenerator.random_explosion_not_through_solid(point_behind, max(damage / 2, 7), dungeon_level)
+            shape = shapegenerator.random_explosion_not_through_solid(point_behind, min(damage / 2, 7), dungeon_level)
             for point in shape:
                 self.put_blood_on_tile(dungeon_level, point)
 

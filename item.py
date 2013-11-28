@@ -382,6 +382,16 @@ class RingOfStealth(Ring):
                                    "The ring is smooth to your skin, "
                                    "Its magic powers makes it easier for you to sneak past enemies."))
 
+
+class RingOfStrength(Ring):
+    def __init__(self):
+        super(RingOfStrength, self).__init__()
+        self.graphic_char.color_fg = colors.ORANGE
+        self.add_child(StrengthBonusEquipEffect(3))
+        self.add_child(Description("Ring of Strength",
+                                   "The ring feels unnaturally heavy, "
+                                   "Its magic powers makes you stronger."))
+
 class DodgeBonusEquipEffect(EquippedEffect):
     def __init__(self, dodge_bonus=3):
         super(DodgeBonusEquipEffect, self).__init__()
@@ -393,6 +403,17 @@ class DodgeBonusEquipEffect(EquippedEffect):
         """
         entity.add_spoof_child(DataPointBonusSpoof("evasion", self.dodge_bonus))
 
+
+class StrengthBonusEquipEffect(EquippedEffect):
+    def __init__(self, strength_bonus=3):
+        super(StrengthBonusEquipEffect, self).__init__()
+        self.strength_bonus = strength_bonus
+
+    def effect(self, entity):
+        """
+        Causes the entity that equips this item dodge more often.
+        """
+        entity.add_spoof_child(DataPointBonusSpoof("strength", self.strength_bonus))
 
 class StealthEquipEffect(EquippedEffect):
     def __init__(self, stealth_bonus=3):
