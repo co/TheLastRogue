@@ -9,7 +9,7 @@ from missileaction import PlayerThrowItemAction
 from mover import Mover
 from position import Position, DungeonLevel
 import rng
-from stats import GamePieceType, Hit, DataPointBonusSpoof
+from stats import GamePieceType, Hit, DataPointBonusSpoof, DataPoint
 from text import Description
 import action
 import colors
@@ -50,6 +50,7 @@ class Gun(Composite):
         self.add_child(GamePieceType(GamePieceType.ITEM))
         self.add_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
         self.add_child(ItemType(ItemType.WEAPON))
+        self.add_child(RangeWeaponType(RangeWeaponType.GUN))
         self.add_child(Position())
         self.add_child(DungeonLevel())
         self.add_child(Mover())
@@ -70,6 +71,46 @@ class Gun(Composite):
         self.add_child(Weight(5))
         self.add_child(Hit(13))
 
+
+class Sling(Composite):
+    """
+    A composite component representing a Sling item.
+    """
+    def __init__(self):
+        super(Sling, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ITEM))
+        self.add_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
+        self.add_child(ItemType(ItemType.WEAPON))
+        self.add_child(RangeWeaponType(RangeWeaponType.SLING))
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(Mover())
+        self.add_child(Description("Sling",
+                                   "This weapon propels rocks more effectively than throwing them would."))
+        self.add_child(GraphicChar(None, colors.ORANGE, icon.SLING))
+        self.add_child(CharPrinter())
+        self.add_child(WeaponRange(4))
+        self.add_child(ReEquipAction())
+        self.add_child(DropAction())
+        self.add_child(PlayerThrowItemAction())
+        self.add_child(ThrowerNonBreak())
+        self.add_child(DamageProvider(1, 3, [DamageTypes.PHYSICAL,
+                                             DamageTypes.PIERCING]))
+        self.add_child(Weight(3))
+        self.add_child(Hit(5))
+
+
+class RangeWeaponType(DataPoint):
+    GUN = 0
+    SLING = 1
+
+    """
+    Component that marks a weapon as a .
+
+    Only the player should have this component.
+    """
+    def __init__(self, range_weapon_type):
+        super(RangeWeaponType, self).__init__("range_weapon_type", range_weapon_type)
 
 class Device(Composite):
     """
@@ -97,7 +138,7 @@ class Device(Composite):
 class DarknessDevice(Device):
     def __init__(self):
         super(DarknessDevice, self).__init__()
-        self.description.name = "Ancient Device of Darkness"
+        self.description.name = "Device of Darkness"
         self.graphic_char.color_fg = colors.GREEN
         self.add_child(DarknessDeviceAction())
 
@@ -105,7 +146,7 @@ class DarknessDevice(Device):
 class HeartStopDevice(Device):
     def __init__(self):
         super(HeartStopDevice, self).__init__()
-        self.description.name = "Ancient Device of Heart Stop"
+        self.description.name = "Device of Heart Stop"
         self.graphic_char.color_fg = colors.BLUE
         self.add_child(HeartStopDeviceAction())
 
@@ -228,7 +269,6 @@ class Ammunition(Composite):
         self.add_child(DropAction())
         self.add_child(CharPrinter())
         self.add_child(Weight(1))
-        self.add_child(Hit(17))
 
 
 class EquippedEffect(Leaf):
@@ -746,11 +786,12 @@ class DamageProvider(Leaf):
         self.variance = variance
         self.types = types
 
-    def damage_entity(self, source_entity, target_entity):
+    def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
         damage_strength = self.damage + source_entity.strength.value / 2
         damage = Damage(damage_strength, self.variance,
                         self.types, self.parent.hit.value)
-        return damage.damage_entity(source_entity, target_entity)
+        return damage.damage_entity(source_entity, target_entity,
+                                    bonus_damage=bonus_damage, bonus_hit=bonus_hit)
 
 
 class OnUnequipEffect(Leaf):

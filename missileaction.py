@@ -76,11 +76,11 @@ class PlayerThrowItemAction(PlayerMissileAction):
         self.parent.thrower.throw_effect(dungeon_level, path[-1])
 
 
-class PlayerThrowRockAction(PlayerMissileAction):
+class PlayerThrowStoneAction(PlayerMissileAction):
     def __init__(self):
-        super(PlayerThrowRockAction, self).__init__()
+        super(PlayerThrowStoneAction, self).__init__()
         self.component_type = "throw_stone_action"
-        self.name = "Throw Rock"
+        self.name = "Throw Stone"
         self.display_order = 95
         self.icon = icon.STONE
         self.color_fg = colors.GRAY
@@ -112,6 +112,42 @@ def rock_hit_position(dungeon_level, position, source_entity):
 
 def max_throw_distance(strength):
     return strength + 1
+
+
+class PlayerSlingStoneAction(PlayerMissileAction):
+    def __init__(self, sling_weapon):
+        super(PlayerSlingStoneAction, self).__init__()
+        self.component_type = "sling_stone_action"
+        self.name = "Throw Stone"
+        self.display_order = 95
+        self.icon = icon.STONE
+        self.color_fg = colors.GRAY
+        self.sling_weapon = sling_weapon
+
+    def add_energy_spent_to_entity(self, entity):
+        """
+        Help method for spending energy for the act performing entity.
+        """
+        entity.actor.newly_spent_energy += entity.attack_speed.shoot
+
+    def send_missile(self, dungeon_level, path, game_state, source_entity):
+        animate_flight(game_state, path, self.icon, self.color_fg)
+        self.hit_position(dungeon_level, path[-1], source_entity)
+
+    def hit_position(self, dungeon_level, position, source_entity):
+        target_entity = dungeon_level.get_tile(position).get_first_entity()
+        if target_entity is None:
+            return
+        self.sling_weapon.damage_provider.damage_entity(source_entity, target_entity,
+                                                        bonus_damage=source_entity.attacker.throw_rock_mean_damage,
+                                                        bonus_hit=source_entity.hit.value)
+
+    def can_act(self, **kwargs):
+        return True
+
+    def max_missile_distance(self, **kwargs):
+        source_entity = kwargs[SOURCE_ENTITY]
+        return max_throw_distance(source_entity.strength.value) + self.sling_weapon.weapon_range.value
 
 
 class PlayerShootWeaponAction(PlayerMissileAction):

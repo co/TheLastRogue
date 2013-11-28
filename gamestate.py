@@ -196,6 +196,10 @@ class TestGameState(GameStateBase):
 
         gun = item.Gun()
         gun.mover.try_move((20, 13), self.dungeon_level)
+
+        sling = item.Sling()
+        sling.mover.try_move((20, 14), self.dungeon_level)
+
         sword = item.Sword()
         sword.mover.try_move((19, 13), self.dungeon_level)
 

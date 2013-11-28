@@ -2,8 +2,9 @@ from actor import Actor
 from entityeffect import Teleport, StatusAdder, StatusRemover
 from equipment import EquipmentSlots
 import gamestate
+from item import RangeWeaponType
 import menu
-from missileaction import PlayerShootWeaponAction, PlayerThrowRockAction
+from missileaction import PlayerShootWeaponAction, PlayerThrowStoneAction, PlayerSlingStoneAction
 from statusflags import StatusFlags
 import console
 import gametime
@@ -183,8 +184,7 @@ class InputActor(Actor):
             self.parent.effect_queue.add(effect)
             self.newly_spent_energy += gametime.single_turn
 
-    def shoot_weapon(self):
-        weapon = self.parent.equipment.get(EquipmentSlots.RANGED_WEAPON)
+    def shoot_gun(self, weapon):
         shooting = PlayerShootWeaponAction(weapon)
         game_state = self.parent.game_state.value
         if shooting.can_act(source_entity=self.parent, game_state=game_state):
@@ -192,6 +192,24 @@ class InputActor(Actor):
                                              game_state=game_state)
             if shooting_succeded:
                 self.newly_spent_energy += gametime.single_turn
+
+    def shoot_sling(self, weapon):
+        shooting = PlayerSlingStoneAction(weapon)
+        game_state = self.parent.game_state.value
+        if shooting.can_act(source_entity=self.parent, game_state=game_state):
+            shooting_succeded = shooting.act(source_entity=self.parent,
+                                             game_state=game_state)
+            if shooting_succeded:
+                self.newly_spent_energy += gametime.single_turn
+
+    def shoot_weapon(self):
+        weapon = self.parent.equipment.get(EquipmentSlots.RANGED_WEAPON)
+        if weapon.range_weapon_type.value == RangeWeaponType.GUN:
+            self.shoot_gun(weapon)
+        elif weapon.range_weapon_type.value == RangeWeaponType.SLING:
+            self.shoot_sling(weapon)
+        else:
+            raise Exception("Tried to shoot weapon without range_weapon_type")
 
     def throw_rock(self):
         rock_throwing = self.parent.throw_stone_action

@@ -15,6 +15,14 @@ class Attacker(Leaf):
         self.melee_damage_modifier = melee_damage_modifier
         self.rock_damage_modifier = rock_damage_modifier
 
+    @property
+    def throw_rock_mean_damage(self):
+        return int(2 * self.parent.strength.value * self.rock_damage_modifier / 3)
+
+    @property
+    def throw_rock_damage_variance(self):
+        return int(self.throw_rock_mean_damage / 2)
+
     def try_hit(self, position):
         """
         Tries to hit an entity at a position.
@@ -35,8 +43,7 @@ class Attacker(Leaf):
         Makes entity to hit the target entity with the force of a thrown rock.
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
-        damage_strength = int(self.parent.strength.value * self.rock_damage_modifier)
-        thrown_damage = Damage(2 * damage_strength / 3, damage_strength / 2,
+        thrown_damage = Damage(self.throw_rock_mean_damage, self.throw_rock_damage_variance,
                                damage_types, self.parent.hit.value)
         thrown_damage.damage_entity(self.parent, target_entity)
 
@@ -88,18 +95,18 @@ class DamageTypes(object):
 
 
 class Damage(object):
-    def __init__(self, strength, variance,
+    def __init__(self, damage, variance,
                  damage_types, hit, damage_multiplier=1):
-        self.strength = strength
+        self.damage = damage
         self.variance = variance
         self.damage_multiplier = damage_multiplier
         self.damage_types = damage_types
         self.hit = hit
 
-    def damage_entity(self, source_entity, target_entity):
-        damage = rng.random_variance_no_negative(self.strength, self.variance)
+    def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
+        damage = rng.random_variance_no_negative(self.damage + bonus_damage, self.variance)
         damage_effect =\
             entityeffect.DamageEntityEffect(source_entity,
                                             damage * self.damage_multiplier,
-                                            self.damage_types, self.hit)
+                                            self.damage_types, self.hit + bonus_hit)
         target_entity.effect_queue.add(damage_effect)

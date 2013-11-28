@@ -24,7 +24,6 @@ class DataPointBonusSpoof(Leaf):
 
     @property
     def value(self):
-        print self.component_type, self.bonus_value
         return self.next.value + self.bonus_value
 
     @value.setter
