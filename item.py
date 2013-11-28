@@ -373,6 +373,15 @@ class RingOfEvasion(Ring):
                                    "Its magic powers makes it easier for you to dodge attacks."))
 
 
+class RingOfStealth(Ring):
+    def __init__(self):
+        super(RingOfStealth, self).__init__()
+        self.graphic_char.color_fg = colors.BLUE
+        self.add_child(StealthEquipEffect(3))
+        self.add_child(Description("Ring of Stealth",
+                                   "The ring is smooth to your skin, "
+                                   "Its magic powers makes it easier for you to sneak past enemies."))
+
 class DodgeBonusEquipEffect(EquippedEffect):
     def __init__(self, dodge_bonus=3):
         super(DodgeBonusEquipEffect, self).__init__()
@@ -380,10 +389,22 @@ class DodgeBonusEquipEffect(EquippedEffect):
 
     def effect(self, entity):
         """
-        Causes the entity that equips this item to become invisible.
+        Causes the entity that equips this item dodge more often.
         """
         entity.add_spoof_child(DataPointBonusSpoof("evasion", self.dodge_bonus))
 
+
+class StealthEquipEffect(EquippedEffect):
+    def __init__(self, stealth_bonus=3):
+        super(StealthEquipEffect, self).__init__()
+        self.stealth_bonus = stealth_bonus
+
+    def effect(self, entity):
+        """
+        Causes the entity that equips this item stealth more often.
+        """
+        print "new stealth!"
+        entity.add_spoof_child(DataPointBonusSpoof("stealth", self.stealth_bonus))
 
 class SetInvisibilityFlagEquippedEffect(EquippedEffect):
     def __init__(self):

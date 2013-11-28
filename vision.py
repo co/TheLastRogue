@@ -54,6 +54,7 @@ class SightRadius(Leaf):
         self.component_type = "sight_radius"
         self.value = sight_radius
 
+
 class AwarenessChecker(Leaf):
     """
     Composites holding this can make awareness checks.

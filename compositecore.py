@@ -131,17 +131,6 @@ class Composite(Component):
     def __getinitargs__(self):
         return ()
 
-#    def __getstate__(self):
-#        state = {
-#            "_spoofed_children": self._spoofed_children,
-#            "_children": self._children
-#        }
-#        return state
-#
-#    def __setstate__(self, state):
-#        self._spoofed_children = state["_spoofed_children"]
-#        self._children = state["_children"]
-#
     def add_child(self, child):
         """
         Adds a child component to this component.
@@ -229,6 +218,7 @@ class Composite(Component):
         """
         Runs before_tick on all child components.
         """
+        self.reset_spoofed_children()
         map(lambda x: x.before_tick(time), self._children.values())
 
     def on_tick(self, time):
@@ -243,7 +233,6 @@ class Composite(Component):
 
         It also resets all spoofed children.
         """
-        self.reset_spoofed_children()
         map(lambda x: x.after_tick(time), self._children.values())
 
     def message(self, message):
