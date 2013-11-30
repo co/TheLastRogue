@@ -1,4 +1,5 @@
 from compositecore import Leaf
+import geometry
 from position import DungeonLevel
 from statusflags import StatusFlags
 
@@ -75,9 +76,9 @@ class Mover(Leaf):
         """
         Checks if the parent can move through a terrain.
         """
-        if(terrain_to_pass is None or not terrain_to_pass.is_solid.value):
+        if terrain_to_pass is None or not terrain_to_pass.is_solid.value:
             return True
-        if(self.has_sibling("status_flags")):
+        if self.has_sibling("status_flags"):
             status_flags = self.parent.status_flags
             if(status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
                terrain_to_pass.has_child("is_door")):
@@ -109,14 +110,18 @@ class Mover(Leaf):
         return tile_i_might_be_on.remove(self.parent)
 
 
-class EntityMover(Mover):
+class Stepper(Leaf):
     """
     Component for moving and checking if a move is legal.
 
     will also interact with what it bumps into.
     """
     def __init__(self):
-        super(EntityMover, self).__init__()
+        super(Stepper, self).__init__()
+        self.component_type = "stepper"
+
+    def try_step_in_direction(self, direction):
+        return self.try_move_or_bump(geometry.add_2d(self.parent.position.value, direction))
 
     def try_move_or_bump(self, position):
         """
@@ -146,12 +151,21 @@ class EntityMover(Mover):
         if(self.parent.has_child("attacker") and
            self.parent.attacker.try_hit(position)):
             return self.parent.attack_speed.melee
-        if self.try_move(position):
+        if self.parent.mover.try_move(position):
             return self.parent.movement_speed.value
         return 0
 
 
-class CanShareTileEntityMover(EntityMover):
+class ImmobileStepper(Stepper):
+    def __init__(self):
+        super(ImmobileStepper, self).__init__()
+        self.component_type = "stepper"
+
+    def try_move_or_bump(self, position):
+        return self.parent.movement_speed.value
+
+
+class CanShareTileEntityMover(Mover):
     """
     Parent entities with this mover may enter tiles of other entities.
     """
@@ -167,6 +181,6 @@ class CanShareTileEntityMover(EntityMover):
         """
         piece_type = self.parent.game_piece_type.value
         entities_on_tile = tile.game_pieces[piece_type]
-        if(len(entities_on_tile) > 1):
+        if len(entities_on_tile) > 1:
             return False
         return True

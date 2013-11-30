@@ -2,6 +2,7 @@ import random
 
 import geometry
 from compositecore import Leaf
+import rng
 
 
 class Vision(Leaf):
@@ -70,5 +71,4 @@ class AwarenessChecker(Leaf):
         @param stealth: The stealth determines how hard it is to notice.
         @return: True if the notice check is successful False otherwise.
         """
-        return (random.randint(0, self.parent.awareness.value) >=
-                random.randint(0, stealth))
+        return rng.stat_check(self.parent.awareness.value, stealth)

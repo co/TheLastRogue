@@ -81,8 +81,7 @@ class Dodger(Leaf):
         """
         Returns true if it is a hit, false otherwise.
         """
-        return (random.randint(0, hit + 5) >=
-                random.randint(0, self.parent.evasion.value))
+        return rng.stat_check(hit + 5, self.parent.evasion.value)
 
 
 class DamageTypes(object):

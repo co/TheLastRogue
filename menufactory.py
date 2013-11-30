@@ -338,7 +338,7 @@ def victory_screen(state_stack):
                                     margin=style.menu_theme.margin, may_escape=False)
 
     short_vspace = gui.VerticalSpace(7)
-    long_vspace = gui.VerticalSpace(settings.WINDOW_HEIGHT - 18)
+    long_vspace = gui.VerticalSpace(settings.WINDOW_HEIGHT - 22)
 
     victory_stack_panel.append(short_vspace)
     victory_stack_panel.append(line)
@@ -371,7 +371,7 @@ def game_over_screen(state_stack):
                                     margin=style.menu_theme.margin, may_escape=False)
 
     short_vspace = gui.VerticalSpace(7)
-    long_vspace = gui.VerticalSpace(settings.WINDOW_HEIGHT - 18)
+    long_vspace = gui.VerticalSpace(settings.WINDOW_HEIGHT - 22)
 
     game_over_stack_panel.append(short_vspace)
     game_over_stack_panel.append(red_line)

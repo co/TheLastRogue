@@ -9,7 +9,7 @@ from inputactor import InputActor
 from inventory import Inventory
 from memorymap import MemoryMap
 from missileaction import PlayerThrowStoneAction
-from mover import EntityMover
+from mover import Mover, Stepper
 from ondeathaction import DoNothingDeathAction
 from position import Position, DungeonLevel
 from stats import AttackSpeed, Faction, GameState, GamePieceType, Stealth, Awareness
@@ -35,7 +35,8 @@ class Player(Composite):
         self.add_child(Position())
         self.add_child(DungeonLevel())
 
-        self.add_child(EntityMover())
+        self.add_child(Mover())
+        self.add_child(Stepper())
         self.add_child(Attacker())
         self.add_child(Dodger())
         self.add_child(Evasion(14))

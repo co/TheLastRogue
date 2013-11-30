@@ -1,3 +1,4 @@
+import random
 import dungeongenerator
 import spawner
 import monster
@@ -38,9 +39,15 @@ class Dungeon(object):
         for _ in range(2 * (depth + 2) + 1):
             spawner.spawn_rat_man(dungeon_level, self.game_state)
 
-        for _ in range(min(rng.random_variance_no_negative(depth - 2, 3), depth - 1)):
-            cyclops = monster.Cyclops(self.game_state)
-            spawner.place_piece_on_random_tile(cyclops, dungeon_level)
+        for _ in range(random.randrange(depth + 2)):
+            if rng.coin_flip() and rng.coin_flip():
+                cyclops = monster.Cyclops(self.game_state)
+                spawner.place_piece_on_random_tile(cyclops, dungeon_level)
+
+        for _ in range(random.randrange(depth + 2)):
+            if rng.coin_flip():
+                slime = monster.Slime(self.game_state)
+                spawner.place_piece_on_random_tile(slime, dungeon_level)
 
         if depth == (len(self._dungeon_levels) - 1):
             jerico = monster.Jerico(self.game_state)

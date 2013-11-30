@@ -139,9 +139,8 @@ class InputActor(Actor):
                 self.parent.path.set_line_path(destination)
 
     def handle_move_input(self, key):
-        dx, dy = inputhandler.move_controls[key]
-        new_position = geo.add_2d(self.parent.position.value, (dx, dy))
-        self.newly_spent_energy += self.parent.mover.try_move_or_bump(new_position)
+        direction = inputhandler.move_controls[key]
+        self.newly_spent_energy += self.parent.stepper.try_step_in_direction(direction)
 
     def spawn_context_menu(self):
         context_menu = \

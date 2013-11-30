@@ -23,3 +23,16 @@ def sum_of_n_coin_flips(n):
 def random_variance_no_negative(mid, var):
     result = random_variance(mid, var)
     return max(result, 0)
+
+
+def stat_check(stat1, stat2):
+    """
+    Checks if stat1 wins over stat2 in competitive stat check.
+    """
+    roll1 = random.randrange(stat1)
+    roll2 = random.randrange(stat2)
+    if roll1 >= roll2:
+        return True
+    else:
+        return False
+

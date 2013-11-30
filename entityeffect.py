@@ -34,7 +34,19 @@ class EffectQueue(Leaf):
         for effect_type in EffectTypes.ALLTYPES:
             self._effect_queue[effect_type] = []
 
+    @property
+    def effects(self):
+        return [effect for effect_group in self._effect_queue for effect in effect_group]
+
     def add(self, effect):
+        if effect.no_stack_id:
+            if not any(effect.no_stack_id == e.no_stack_id for e in self.effects):
+                self._add(effect)
+        else:
+            self._add(effect)
+
+
+    def _add(self, effect):
         self._effect_queue[effect.effect_type].append(effect)
         effect.queue = self
 
@@ -54,11 +66,12 @@ class EffectQueue(Leaf):
 
 
 class EntityEffect(object):
-    def __init__(self, source_entity, time_to_live, effect_type):
+    def __init__(self, source_entity, time_to_live, effect_type, no_stack_id=None):
         self.source_entity = source_entity
         self.time_to_live = time_to_live
         self.effect_type = effect_type
         self.is_blocked = False
+        self.no_stack_id = no_stack_id
         self.queue = None
         self.time_alive = 0
 
@@ -177,6 +190,39 @@ class DamageEntityEffect(EntityEffect):
         self.tick(time_spent)
 
 
+class StuckInPlaceEffect(EntityEffect):
+    pass
+
+
+class DissolveDamageEffect(EntityEffect):
+    def __init__(self, source_entity, damage, damage_types, time_to_live):
+        super(DissolveDamageEffect, self).__init__(source_entity=source_entity,
+                                                   effect_type=EffectTypes.DAMAGE,
+                                                   time_to_live=time_to_live,
+                                                   no_stack_id="dissolve_damage")
+        self.damage = damage
+        self.damage_types = damage_types
+
+    def miss_message(self):
+        message = "%s misses %s." % (self.source_entity.description.name,
+                                     self.target_entity.description.name)
+        messenger.message(message)
+
+    def message(self, damage_caused):
+        message = "%s dissolves %s for %d damage." % \
+                  (self.source_entity.description.name,
+                   self.target_entity.description.name, damage_caused)
+        messenger.message(message)
+
+    def update(self, time_spent):
+        if self.time_alive == 0:
+            damage_caused = self.target_entity.health_modifier.hurt(self.damage,
+                                                                    self.damage_types,
+                                                                    entity=self.source_entity)
+            self.message(damage_caused)
+        self.tick(time_spent)
+
+
 class Heal(EntityEffect):
     def __init__(self, source_entity, health, time_to_live=1):
         super(Heal, self).__init__(source_entity=source_entity,
@@ -229,6 +275,27 @@ class Equip(EntityEffect):
                 self.queue.target_entity.inventory.remove_item(self.item)
         self.tick(time_spent)
 
+
+class StepEffect(EntityEffect):
+    def __init__(self, source_entity, item):
+        super(StepEffect, self).__init__(source_entity=source_entity,
+                                         effect_type=EffectTypes.EQUIPMENT,
+                                         time_to_live=1)
+        self.item = item
+
+    def message(self):
+        message = "%s equips %s." % (self.source_entity.description.name,
+                                     self.item.description.name)
+        messenger.message(message)
+
+    def update(self, time_spent):
+        equipment = self.queue.target_entity.equipment
+        equip_succeeded = equipment.try_equip(self.item)
+        if equip_succeeded:
+            self.message()
+            if self.queue.target_entity.inventory.has_item(self.item):
+                self.queue.target_entity.inventory.remove_item(self.item)
+        self.tick(time_spent)
 
 class Unequip(EntityEffect):
     def __init__(self, source_entity, equipment_slot):

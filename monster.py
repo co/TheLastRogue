@@ -1,16 +1,17 @@
 from actor import DoNothingActor
-from attacker import Attacker, Dodger, Damage, DamageTypes
+from attacker import Attacker, Dodger, DamageTypes
 from compositecore import Composite, Leaf
 from dungeonmask import DungeonMask, Path
-from entityeffect import EffectQueue
+from entityeffect import EffectQueue, DissolveDamageEffect, AddSpoofChild
 from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
 from missileaction import MonsterThrowStoneAction
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe
-from mover import EntityMover, CanShareTileEntityMover
+from mover import Mover, Stepper, CanShareTileEntityMover, ImmobileStepper
 from ondeathaction import EntityDeathAction
 from position import Position, DungeonLevel
+import rng
 from stats import AttackSpeed, Faction, GameState, Evasion, Stealth, Awareness
 from stats import MovementSpeed, Strength, GamePieceType, Hit
 from statusflags import StatusFlags
@@ -33,7 +34,8 @@ class Ratman(Composite):
 
         self.add_child(Position())
         self.add_child(DungeonLevel())
-        self.add_child(EntityMover())
+        self.add_child(Mover())
+        self.add_child(Stepper())
 
         self.add_child(EntityMessages("The ratman looks at you.",
                                       "The ratman is beaten to a pulp."))
@@ -46,7 +48,7 @@ class Ratman(Composite):
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
                                     StatusFlags.CAN_OPEN_DOORS]))
-        self.add_child(Health(6))
+        self.add_child(Health(8))
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(BleedWhenDamaged())
@@ -56,7 +58,7 @@ class Ratman(Composite):
         self.add_child(Attacker())
         self.add_child(Dodger())
         self.add_child(Evasion(16))
-        self.add_child(Hit(15))
+        self.add_child(Hit(13))
 
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())
@@ -69,7 +71,7 @@ class Ratman(Composite):
         self.add_child(ChasePlayerActor())
         self.add_child(MonsterActorState())
         self.add_child(HuntPlayerIfHurtMe())
-        self.add_child(MonsterThrowStoneAction(40))
+        self.add_child(MonsterThrowStoneAction(30))
 
         self.add_child(GameState(game_state))
         self.add_child(Equipment())
@@ -88,7 +90,8 @@ class Cyclops(Composite):
 
         self.add_child(Position())
         self.add_child(DungeonLevel())
-        self.add_child(EntityMover())
+        self.add_child(Mover())
+        self.add_child(Stepper())
 
         self.add_child(EntityMessages("The cyclops looks at you.",
                                       "The cyclops is mangled to the floor."))
@@ -152,7 +155,8 @@ class StoneStatue(Composite):
 
         self.add_child(Position())
         self.add_child(DungeonLevel())
-        self.add_child(EntityMover())
+        self.add_child(Mover())
+        self.add_child(Stepper())
 
         self.add_child(EntityMessages(("The stone statue casts a"
                                        "long shadow on the floor."),
@@ -206,6 +210,7 @@ class Slime(Composite):
 
         self.add_child(Position())
         self.add_child(DungeonLevel())
+        self.add_child(Stepper())
         self.add_child(CanShareTileEntityMover())
 
         self.add_child(EntityMessages(("The slime seems to",
@@ -220,11 +225,11 @@ class Slime(Composite):
         self.add_child(EntityDeathAction())
 
         self.add_child(Faction(Faction.MONSTER))
-        self.add_child(Health(20))
+        self.add_child(Health(35))
         self.add_child(HealthModifier())
 
-        self.add_child(Strength(6))
-        self.add_child(MovementSpeed(gametime.double_turn))
+        self.add_child(Strength(3))
+        self.add_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
         self.add_child(AttackSpeed(gametime.single_turn))
         self.add_child(StatusFlags())
         self.add_child(Dodger())
@@ -279,9 +284,34 @@ class DissolveEntitySlimeShareTileEffect(object):
     def __call__(self, **kwargs):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
-        time = kwargs["time"]
         strength = source_entity.strength.value
-        damage = Damage(strength, strength / 3,
-                        [DamageTypes.ACID, DamageTypes.PHYSICAL],
-                        time / gametime.single_turn)
-        damage.damage_entity(source_entity, target_entity)
+        damage = rng.random_variance(strength, strength/2)
+
+        dissolve_effect = DissolveDamageEffect(source_entity, damage, [DamageTypes.ACID, DamageTypes.PHYSICAL],
+                                               gametime.single_turn)
+        target_entity.effect_queue.add(dissolve_effect)
+
+        stuck_in_slime_step_spoof = StuckInSlimeStepperSpoof(source_entity)
+        add_spoof_effect = AddSpoofChild(source_entity, stuck_in_slime_step_spoof, time_to_live=1)
+        target_entity.effect_queue.add(add_spoof_effect)
+
+
+class StuckInSlimeStepperSpoof(Stepper):
+    def __init__(self, slime):
+        super(StuckInSlimeStepperSpoof, self).__init__()
+        self.component_type = "stepper"
+        self._slime = slime
+
+    def try_move_or_bump(self, position):
+        my_strength = self.parent.strength.value
+        slime_strength = self._slime.strength.value
+        self.parent.attacker.hit(self._slime)
+        if rng.stat_check(my_strength, slime_strength + 2):
+            self._make_slime_skip_turn()
+            return self.next.try_move_or_bump(position)
+        return self.parent.movement_speed.value
+
+    def _make_slime_skip_turn(self):
+        immobile_stepper = ImmobileStepper()
+        add_spoof_effect = AddSpoofChild(self.parent, immobile_stepper)
+        self._slime.effect_queue.add(add_spoof_effect)

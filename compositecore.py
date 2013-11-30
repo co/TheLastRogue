@@ -41,7 +41,7 @@ class Component(object):
         Gets the next sibling of the same type,
         allows components to decorate components of the same type.
         """
-        if(self.parent.get_original_child(self.component_type) is self):
+        if self.parent.get_original_child(self.component_type) is self:
             return None
         siblings =\
             self.parent.get_spoofed_children_of_type(self.component_type)

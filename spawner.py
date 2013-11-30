@@ -93,5 +93,3 @@ def place_piece_on_random_tile_not_on_item_or_feature(piece, dungeon_level):
         if move_succeeded:
             return True
     return False
-
-

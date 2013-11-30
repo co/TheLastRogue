@@ -40,9 +40,8 @@ class ActionScheduler(object):
                     get_tile(current_piece.position.value))
             for piece in tile.get_all_pieces():
                 if piece.has_child("entity_share_tile_effect"):
-                    (piece.entity_share_tile_effect.
-                     share_tile_effect_tick(current_piece,
-                                            gametime.normal_energy_gain))
+                    piece.entity_share_tile_effect. share_tile_effect_tick(current_piece,
+                                                                           gametime.normal_energy_gain)
 
     def tick(self):
         self._actors_tick()

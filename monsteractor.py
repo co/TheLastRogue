@@ -54,8 +54,7 @@ class MonsterActor(Actor):
         If the step succeeds True is return otherwise False.
         """
         random_direction = random.sample(list(direction.DIRECTIONS), 1)[0]
-        new_position = geo.add_2d(self.parent.position.value, random_direction)
-        return self.parent.mover.try_move_or_bump(new_position)
+        return self.parent.stepper.try_step_in_direction(random_direction)
 
     def get_entity_sharing_my_position(self):
         """
@@ -167,17 +166,23 @@ class ChasePlayerActor(MonsterActor):
 
         #  Set Path
         self.set_path_to_player_if_seen()
-        if not self.parent.path.has_path():
+        if not self.parent.path.has_path() and not self._is_standing_on_player():
             self.set_path_to_random_walkable_point()
 
         #  Do action
         if self.newly_spent_energy <= 0 and self.can_do_ranged_attack():
             self.do_range_attack()
         if self.newly_spent_energy <= 0 and self.parent.path.has_path():
-            self.parent.path.try_step_path()
+            self.newly_spent_energy += self.parent.path.try_step_path()
         if self.newly_spent_energy <= 0: #  If no action was taken skip turn.
             self.newly_spent_energy += gametime.single_turn
         return self.newly_spent_energy
+
+    def _is_standing_on_player(self):
+        player = self.get_player_if_seen()
+        if player is None:
+            return False
+        return self.parent.position.value == player.position.value
 
 class HuntPlayerIfHurtMe(DamageTakenEffect):
     def __init__(self):
