@@ -10,7 +10,7 @@ from inventory import Inventory
 from memorymap import MemoryMap
 from missileaction import PlayerThrowStoneAction
 from mover import Mover, Stepper
-from ondeathaction import DoNothingDeathAction
+from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
 from stats import AttackSpeed, Faction, GameState, GamePieceType, Stealth, Awareness
 from stats import MovementSpeed, Strength, IsPlayer, Evasion, Hit
@@ -73,4 +73,5 @@ class Player(Composite):
         self.add_child(equipment.Equipment())
         self.add_child(EffectQueue())
         self.add_child(PickUpItemAction())
-        self.add_child(DoNothingDeathAction())
+
+        self.add_child(LeaveCorpseOnDeath())

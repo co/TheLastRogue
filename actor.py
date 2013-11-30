@@ -18,6 +18,9 @@ class Actor(Leaf):
         The actor will act if it isn't in an energy debt.
         It also receives some energy.
         """
+        if self.parent.health.is_dead():
+            self.energy - gametime.single_turn
+            return
         self.energy += self.energy_recovery
         while self.energy > 0:
             self.energy -= self.act()

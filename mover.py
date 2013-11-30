@@ -136,12 +136,6 @@ class Stepper(Leaf):
         Returns:
             Energy spent
         """
-
-        if(self.parent.status_flags.
-           has_status(StatusFlags.SWALLOWED_BY_SLIME)):
-            #escape_successful = self.try_to_escape_slime(position)
-            #if(not escape_successful):
-            return self.parent.movement_speed.value
         terrain_to_step =\
             self.parent.dungeon_level.value.get_tile(position).get_terrain()
         if(terrain_to_step.has_child("bump_action") and

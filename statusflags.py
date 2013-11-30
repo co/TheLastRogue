@@ -10,8 +10,7 @@ class StatusFlags(Leaf):
     FLYING = 2
     HAS_MIND = 3
     CAN_OPEN_DOORS = 4
-    SWALLOWED_BY_SLIME = 5
-    LEAVES_CORPSE = 6
+    LEAVES_CORPSE = 5
 
     def __init__(self, status_flags=[]):
         super(StatusFlags, self).__init__()
@@ -23,8 +22,7 @@ class StatusFlags(Leaf):
         """
         Returns True if parent entity has the status given.
         """
-        next = self.next
-        if(not next is None):
+        if not self.next is None:
             return (status in self._status_flags or
                     status in self._temp_status_flags or
                     next.has_status(status))

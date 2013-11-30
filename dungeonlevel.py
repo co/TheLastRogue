@@ -115,12 +115,6 @@ class DungeonLevel(object):
 
     def tick(self):
         self.actor_scheduler.tick()
-        self._remove_dead_monsters()
-
-    def _remove_dead_monsters(self):
-        dead_entities = [entity for entity in self.entities if entity.health.is_dead()]
-        for entity in dead_entities:
-            entity.on_death_action.act()
 
     def signal_terrain_changed(self):
         self.terrain_changed_timestamp = turn.current_turn

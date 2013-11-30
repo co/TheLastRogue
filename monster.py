@@ -9,7 +9,7 @@ from inventory import Inventory
 from missileaction import MonsterThrowStoneAction
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe
 from mover import Mover, Stepper, CanShareTileEntityMover, ImmobileStepper
-from ondeathaction import EntityDeathAction
+from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
 import rng
 from stats import AttackSpeed, Faction, GameState, Evasion, Stealth, Awareness
@@ -43,7 +43,6 @@ class Ratman(Composite):
                                    "A Rat/Man hybrid it looks hostile."))
         self.add_child(GraphicChar(None, colors.ORANGE, icon.RATMAN))
         self.add_child(CharPrinter())
-        self.add_child(EntityDeathAction())
 
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
@@ -78,6 +77,10 @@ class Ratman(Composite):
         self.add_child(Inventory())
         self.add_child(EffectQueue())
 
+        self.add_child(PrintDeathMessageOnDeath())
+        self.add_child(LeaveCorpseOnDeath())
+        self.add_child(RemoveEntityOnDeath())
+
 
 class Cyclops(Composite):
     """
@@ -99,7 +102,6 @@ class Cyclops(Composite):
                                    "A Giant with a single disgusting eye, it's looking for prey."))
         self.add_child(GraphicChar(None, colors.CYAN, icon.CYCLOPS))
         self.add_child(CharPrinter())
-        self.add_child(EntityDeathAction())
 
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
@@ -133,6 +135,10 @@ class Cyclops(Composite):
         self.add_child(Equipment())
         self.add_child(Inventory())
         self.add_child(EffectQueue())
+
+        self.add_child(PrintDeathMessageOnDeath())
+        self.add_child(LeaveCorpseOnDeath())
+        self.add_child(RemoveEntityOnDeath())
 
 
 class Jerico(Ratman):
@@ -168,7 +174,6 @@ class StoneStatue(Composite):
         self.add_child(GraphicChar(None, colors.GRAY,
                                    icon.GOLEM))
         self.add_child(CharPrinter())
-        self.add_child(EntityDeathAction())
 
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(Health(30))
@@ -198,6 +203,9 @@ class StoneStatue(Composite):
         self.add_child(EffectQueue())
         self.add_child(Attacker())
 
+        self.add_child(PrintDeathMessageOnDeath())
+        self.add_child(LeaveCorpseOnDeath())
+        self.add_child(RemoveEntityOnDeath())
 
 class Slime(Composite):
     """
@@ -222,7 +230,6 @@ class Slime(Composite):
         self.add_child(GraphicChar(None, colors.GREEN,
                                    icon.SLIME))
         self.add_child(CharPrinter())
-        self.add_child(EntityDeathAction())
 
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(Health(35))
@@ -258,6 +265,9 @@ class Slime(Composite):
 
         self.add_child(EntityShareTileEffect
             (DissolveEntitySlimeShareTileEffect()))
+
+        self.add_child(PrintDeathMessageOnDeath())
+        self.add_child(RemoveEntityOnDeath())
 
 
 class EntityShareTileEffect(Leaf):
