@@ -47,7 +47,7 @@ class Player(Composite):
                                    icon.GUNSLINGER_THIN))
         self.add_child(CharPrinter())
 
-        self.add_child(Health(20))
+        self.add_child(Health(25))
         self.add_child(HealthModifier())
         self.add_child(BleedWhenDamaged())
 

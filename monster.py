@@ -7,7 +7,7 @@ from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
 from missileaction import MonsterThrowStoneAction
-from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe
+from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor
 from mover import Mover, Stepper, CanShareTileEntityMover, ImmobileStepper
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
@@ -190,7 +190,7 @@ class Ghost(Composite):
         self.add_child(AwarenessChecker())
 
         self.add_child(Path())
-        self.add_child(ChasePlayerActor())
+        self.add_child(KeepPlayerAtDistanceActor(5))
         self.add_child(MonsterActorState())
         self.add_child(HuntPlayerIfHurtMe())
 

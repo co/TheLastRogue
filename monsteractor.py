@@ -184,6 +184,59 @@ class ChasePlayerActor(MonsterActor):
             return False
         return self.parent.position.value == player.position.value
 
+
+class KeepPlayerAtDistanceActor(MonsterActor):
+    """
+    Standard Monster AI will chase the player.
+    """
+    def __init__(self, optimal_distance):
+        super(KeepPlayerAtDistanceActor, self).__init__()
+        self.optimal_distance = optimal_distance
+
+    def act(self):
+        self.parent.dungeon_mask.update_fov()
+        self.newly_spent_energy = 0
+
+        #  Perform Stealth Check
+        if self.notice_player_check():
+            self.parent.monster_actor_state.value = MonsterActorState.HUNTING
+
+        if not self._keep_player_at_distance():
+            self.try_step_random_direction()
+
+        if self.newly_spent_energy == 0:
+            self.newly_spent_energy = gametime.single_turn
+        return self.newly_spent_energy
+
+    def distance_to_optimal_distance(self, position1, position2):
+        return abs(geo.chess_distance(position1, position2) - self.optimal_distance)
+
+    def _keep_player_at_distance(self):
+        player = self.get_player_if_seen()
+        if player is None:
+            return False
+
+        if not self.parent.monster_actor_state.value == MonsterActorState.HUNTING:
+            return False
+
+        current_distance_to_optimal = self.distance_to_optimal_distance(self.parent.position.value,
+                                                                        player.position.value)
+        if current_distance_to_optimal == 0:
+            return True
+
+        directions = direction.DIRECTIONS
+        random.shuffle(directions)
+        for d in directions:
+            possible_step = geo.add_2d(d, self.parent.position.value)
+            if (self.distance_to_optimal_distance(possible_step, player.position.value)
+                    < current_distance_to_optimal):
+                energy_used = self.parent.stepper.try_step_in_direction(d)
+                if energy_used > 0:
+                    self.newly_spent_energy += energy_used
+                    return True
+        return False
+
+
 class HuntPlayerIfHurtMe(DamageTakenEffect):
     def __init__(self):
         super(HuntPlayerIfHurtMe, self).__init__()

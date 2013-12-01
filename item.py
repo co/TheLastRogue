@@ -697,8 +697,8 @@ class HealingPotionDrinkAction(DrinkAction):
     def __init__(self):
         super(HealingPotionDrinkAction, self).__init__()
         self.component_type = "health_potion_drink_action"
-        self.min_health = 5
-        self.max_health = 10
+        self.min_health = 6
+        self.max_health = 12
 
     def _drink(self, target_entity):
         """

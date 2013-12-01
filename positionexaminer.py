@@ -119,7 +119,7 @@ class MissileDestinationSelector(PositionSelector):
         dx, dy = self.cursor_position
         libtcod.line_init(sx, sy, dx, dy)
         x, y = libtcod.line_step()
-        while (not x is None):
+        while not x is None:
             result.append((x, y))
             x, y = libtcod.line_step()
         result.append(self.cursor_position)
@@ -146,11 +146,11 @@ class MissileDestinationSelector(PositionSelector):
         """
         if key == inputhandler.TAB:
             seen_entities = self._get_seen_entities_within_max_distance()
-            if(len(seen_entities) < 1):
+            if len(seen_entities) < 1:
                 return
             current_entity = self.entity.dungeon_level.value.\
                 get_tile_or_unknown(self.cursor_position).get_first_entity()
-            if(current_entity is None):
+            if current_entity is None:
                 self.cursor_position = seen_entities[0].position.value
             else:
                 current_index = seen_entities.index(current_entity)

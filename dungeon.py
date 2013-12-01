@@ -36,7 +36,7 @@ class Dungeon(object):
 
         dungeon_level = time_it("dungeon_level_generation",
                                 (lambda: dungeongenerator.generate_dungeon_exploded_rooms(size, depth)))
-        for _ in range(2 * (depth + 2) + 1):
+        for _ in range(depth + 4):
             if rng.coin_flip() and rng.coin_flip():
                 ghost = monster.Ghost(self.game_state)
                 spawner.place_piece_on_random_tile(ghost, dungeon_level)
