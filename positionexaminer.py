@@ -3,6 +3,7 @@ from console import console
 import libtcodpy as libtcod
 import colors
 import inputhandler
+import settings
 import state
 
 
@@ -11,13 +12,24 @@ class PositionExaminer(state.State):
                  max_distance=float("inf")):
         super(PositionExaminer, self).__init__()
         self._state_stack = state_stack
-        self.cursor_position = position
+        self._cursor_position = position
         self.start_position = position
         self.max_distance = max_distance
         self.camera = background_state.current_stack.get_game_state().camera
         self.cursor_symbol = 'X'
         self.cursor_color = colors.CURSOR
         self._background_state = background_state
+
+    @property
+    def cursor_position(self):
+        return self._cursor_position
+
+    @cursor_position.setter
+    def cursor_position(self, value):
+        x, y = self.camera.dungeon_to_screen_position(value)
+        x = max(0, min(x, settings.WINDOW_WIDTH - 1))
+        y = max(0, min(y, settings.WINDOW_HEIGHT - 1))
+        self._cursor_position = self.camera.screen_to_dungeon_position((x, y))
 
     def update(self):
         inputhandler.handler.update_keys()
