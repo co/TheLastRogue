@@ -68,24 +68,31 @@ class CharPrinter(Leaf):
         if not graphic_char.icon is None:
             console.console.set_symbol(position, graphic_char.icon, console=the_console)
 
+    def _tick_animation(self):
+        frame = None
+        if len(self._temp_animation_frames) > 0:
+            if self._current_frame <= 0:
+                self._current_frame = settings.ANIMATION_DELAY
+                frame = self._temp_animation_frames.pop()
+            else:
+                self._current_frame -= 1
+                frame = self._temp_animation_frames[-1]
+        return frame
+
     def draw(self, position, the_console=0):
         """
         Draws the char on the given position on the console.
         """
-        if len(self._temp_animation_frames) > 0:
-            if self._current_frame <= 0:
-                frame = self._temp_animation_frames.pop()
-                self._current_frame = settings.ANIMATION_DELAY
-            else:
-                frame = self._temp_animation_frames[-1]
-                self._current_frame -= 1
-            return self._draw(position, frame, the_console)
+        animation_frame = self._tick_animation()
+        if animation_frame:
+            return self._draw(position, animation_frame, the_console)
         self._draw(position, self.parent.graphic_char, the_console)
 
     def draw_unseen(self, screen_position, the_console=0):
         """
         Draws the char as it looks like outside the field of view.
         """
+        self._tick_animation()
         console.console.set_colors_and_symbol(screen_position,
                                               colors.UNSEEN_FG,
                                               colors.UNSEEN_BG,
