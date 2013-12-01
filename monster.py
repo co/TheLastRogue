@@ -6,7 +6,7 @@ from entityeffect import EffectQueue, DissolveDamageEffect, AddSpoofChild
 from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
-from missileaction import MonsterThrowStoneAction
+from missileaction import MonsterThrowStoneAction, MonsterMagicRangeAction
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor
 from mover import Mover, Stepper, CanShareTileEntityMover, ImmobileStepper
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
@@ -190,10 +190,11 @@ class Ghost(Composite):
         self.add_child(AwarenessChecker())
 
         self.add_child(Path())
-        self.add_child(KeepPlayerAtDistanceActor(5))
+        self.add_child(KeepPlayerAtDistanceActor(4))
         self.add_child(MonsterActorState())
         self.add_child(HuntPlayerIfHurtMe())
 
+        self.add_child(MonsterMagicRangeAction(1, 30))
         self.add_child(GameState(game_state))
         self.add_child(Equipment())
         self.add_child(Inventory())
@@ -402,9 +403,7 @@ class StuckInSlimeStepperSpoof(Stepper):
         slime_strength = self._slime.strength.value
         if self.has_sibling("attacker"):
             self.parent.attacker.hit(self._slime)
-        print "try to break"
         if rng.stat_check(my_strength, slime_strength + 2):
-            print "YES!"
             self._make_slime_skip_turn()
             return self.next.try_move_or_bump(position)
         return self.parent.movement_speed.value

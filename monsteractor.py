@@ -201,7 +201,9 @@ class KeepPlayerAtDistanceActor(MonsterActor):
         if self.notice_player_check():
             self.parent.monster_actor_state.value = MonsterActorState.HUNTING
 
-        if not self._keep_player_at_distance():
+        if self.can_do_ranged_attack():
+            self.do_range_attack()
+        elif not self._keep_player_at_distance():
             self.try_step_random_direction()
 
         if self.newly_spent_energy == 0:

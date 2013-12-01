@@ -9,7 +9,6 @@ from messenger import messenger
 from statusflags import StatusFlags
 
 
-
 # Effect types in execution order
 class EffectTypes(object):
     STATUS_REMOVER = 0
@@ -188,10 +187,29 @@ class DamageEntityEffect(EntityEffect):
         self.tick(time_spent)
 
 
-class StuckInPlaceEffect(EntityEffect):
-    pass
+class UndodgeableDamageEntityEffect(EntityEffect):
+    def __init__(self, source_entity, damage, damage_types, time_to_live=1):
+        super(UndodgeableDamageEntityEffect, self).__init__(source_entity=source_entity,
+                                                            effect_type=EffectTypes.DAMAGE,
+                                                            time_to_live=time_to_live)
+        self.damage = damage
+        self.damage_types = damage_types
+
+    def message(self, damage_caused):
+        message = "%s hits %s for %d damage." % \
+                  (self.source_entity.description.name,
+                   self.target_entity.description.name, damage_caused)
+        messenger.message(message)
+
+    def update(self, time_spent):
+        damage_caused = self.target_entity.health_modifier.hurt(self.damage,
+                                                                self.damage_types,
+                                                                entity=self.source_entity)
+        self.message(damage_caused)
+        self.tick(time_spent)
 
 
+### TODO: DissolveDamageEffect should not be its own effect, message should come from argument.
 class DissolveDamageEffect(EntityEffect):
     def __init__(self, source_entity, damage, damage_types, time_to_live):
         super(DissolveDamageEffect, self).__init__(source_entity=source_entity,
@@ -200,11 +218,6 @@ class DissolveDamageEffect(EntityEffect):
                                                    no_stack_id="dissolve_damage")
         self.damage = damage
         self.damage_types = damage_types
-
-    def miss_message(self):
-        message = "%s misses %s." % (self.source_entity.description.name,
-                                     self.target_entity.description.name)
-        messenger.message(message)
 
     def message(self, damage_caused):
         message = "%s dissolves %s for %d damage." % \

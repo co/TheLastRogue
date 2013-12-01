@@ -1,5 +1,6 @@
 import random
 from action import Action, SOURCE_ENTITY, GAME_STATE
+from attacker import DamageTypes, Damage, UndodgeableDamage
 from compositecore import Leaf
 import gametime
 import geometry
@@ -249,3 +250,27 @@ class MonsterThrowStoneAction(Action):
     def send_missile(self, dungeon_level, path):
         animate_flight(self.parent.game_state.value, path, self.icon, self.color_fg)
         rock_hit_position(dungeon_level, path[-1], self.parent)
+
+
+class MonsterMagicRangeAction(MonsterThrowStoneAction):
+    def __init__(self, damage, skip_chance=0, icon=icon.BIG_CENTER_DOT, color_fg=colors.PURPLE):
+        super(MonsterThrowStoneAction, self).__init__()
+        self.component_type = "monster_range_attack_action"
+        self.icon = icon
+        self.color_fg = color_fg
+        self.skip_chance = skip_chance
+        self.damage = damage
+
+    def send_missile(self, dungeon_level, path):
+        animate_flight(self.parent.game_state.value, path, self.icon, self.color_fg)
+        magic_hit_position(self.damage, dungeon_level, path[-1], self.parent)
+
+
+def magic_hit_position(damage, dungeon_level, position, source_entity):
+    target_entity = dungeon_level.get_tile(position).get_first_entity()
+    if target_entity is None:
+        return
+    damage_types = [DamageTypes.MAGIC]
+    thrown_damage = UndodgeableDamage(damage, 0, damage_types)
+    thrown_damage.damage_entity(source_entity, target_entity)
+
