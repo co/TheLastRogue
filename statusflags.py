@@ -10,7 +10,6 @@ class StatusFlags(Leaf):
     FLYING = 2
     HAS_MIND = 3
     CAN_OPEN_DOORS = 4
-    LEAVES_CORPSE = 5
 
     def __init__(self, status_flags=[]):
         super(StatusFlags, self).__init__()

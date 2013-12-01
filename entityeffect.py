@@ -2,7 +2,6 @@ import random
 import colors
 
 from compositecore import Leaf
-from dungeonlevelfactory import terrain_matrix_from_lines
 import gametime
 from graphic import GraphicChar
 import icon
@@ -45,7 +44,6 @@ class EffectQueue(Leaf):
         else:
             self._add(effect)
 
-
     def _add(self, effect):
         self._effect_queue[effect.effect_type].append(effect)
         effect.queue = self
@@ -59,10 +57,10 @@ class EffectQueue(Leaf):
             if effect.status_flag == status_to_remove:
                 self._effect_queue[EffectTypes.STATUS_ADDER].remove(effect)
 
-    def before_tick(self, time_spent):
+    def before_tick(self, time):
         for effect_type_queue in EffectTypes.ALLTYPES:
             for effect in self._effect_queue[effect_type_queue]:
-                effect.update(time_spent)
+                effect.update(time)
 
 
 class EntityEffect(object):
@@ -243,7 +241,7 @@ class Heal(EntityEffect):
 
 
 class AddSpoofChild(EntityEffect):
-    def __init__(self, source_entity, spoof_child, time_to_live=gametime.single_turn):
+    def __init__(self, source_entity, spoof_child, time_to_live):
         super(AddSpoofChild, self).__init__(source_entity=source_entity,
                                    effect_type=EffectTypes.ADD_SPOOF_CHILD,
                                    time_to_live=time_to_live)

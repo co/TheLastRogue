@@ -1,4 +1,6 @@
+import random
 from compositecore import Leaf
+import direction
 import geometry
 from position import DungeonLevel
 from statusflags import StatusFlags
@@ -23,6 +25,22 @@ class Mover(Leaf):
         new_tile = new_dungeon_level.get_tile(new_position)
         return (self._can_fit_on_tile(new_tile) and
                 self.can_pass_terrain(new_tile.get_terrain()))
+
+    def try_move_roll_over(self, new_position, new_dungeon_level=None):
+        """
+        Tries to move parent to new position.
+
+        Returns true if it is successful, false otherwise.
+        """
+        if self.try_move(new_position, new_dungeon_level):
+            return True
+        directions = direction.DIRECTIONS
+        random.shuffle(directions)
+        for d in directions:
+            destination = geometry.add_2d(d, new_position)
+            if self.try_move(destination, new_dungeon_level):
+                return True
+        return False
 
     def try_move(self, new_position, new_dungeon_level=None):
         """
@@ -62,7 +80,7 @@ class Mover(Leaf):
         new_place = new_tile.game_pieces[piece_type]
         for piece in new_place:
             piece.mover.try_remove_from_dungeon()
-        self.try_move(new_position, new_dungeon_level)
+        return self.try_move(new_position, new_dungeon_level)
 
     def _can_fit_on_tile(self, tile):
         """
@@ -92,7 +110,7 @@ class Mover(Leaf):
         if(not self.has_sibling("dungeon_level") or
            self.parent.dungeon_level.value is None):
             return True
-        if(self._remove_from_old_tile()):
+        if self._remove_from_old_tile():
             self.parent.dungeon_level.value = None
             return True
         return False

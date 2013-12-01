@@ -1,6 +1,5 @@
 from compositecore import Leaf
 import spawner
-from statusflags import StatusFlags
 from messenger import messenger
 
 
@@ -14,6 +13,7 @@ class RemoveEntityOnDeath(Leaf):
 
     def after_tick(self, time):
         if self.parent.health.is_dead():
+            self.parent.dungeon_level.value
             self.parent.mover.try_remove_from_dungeon()
 
 

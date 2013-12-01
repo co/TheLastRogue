@@ -31,7 +31,7 @@ def spawn_rat_man(dungeon_level, game_state):
 
 def spawn_corpse_of_entity(entity_killed):
     return spawn_corpse_on_position(entity_killed.position.value,
-                                    entity_killed.dungeon_level.value)
+                                    entity_killed.dungeon_level.last_dungeon_level)
 
 
 def spawn_corpse_on_position(position, dungeon_level):
@@ -65,7 +65,7 @@ def place_items_in_dungeon(dungeon_level):
             ring = random.choice([item.RingOfEvasion(), item.RingOfStealth(), item.RingOfEvasion()])
             place_piece_on_random_tile_not_on_item_or_feature(ring, dungeon_level)
 
-    for _ in range(random.randrange(depth + 2)):
+    for _ in range(random.randrange(depth + 3)):
         if rng.coin_flip() or rng.coin_flip():
             if rng.coin_flip() and rng.coin_flip() and rng.coin_flip():  # Rare equipment.
                 equipment = random.choice([item.Sword(), item.Gun()])

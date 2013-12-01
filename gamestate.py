@@ -215,6 +215,9 @@ class TestGameState(GameStateBase):
         rat = monster.Ratman(self)
         rat.mover.try_move((20, 8), self.dungeon_level)
 
+        ghost = monster.Ghost(self)
+        ghost.mover.try_move((21, 8), self.dungeon_level)
+
         slime = monster.Slime(self)
         slime.mover.try_move((20, 18), self.dungeon_level)
 

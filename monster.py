@@ -45,8 +45,7 @@ class Ratman(Composite):
         self.add_child(CharPrinter())
 
         self.add_child(Faction(Faction.MONSTER))
-        self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
-                                    StatusFlags.CAN_OPEN_DOORS]))
+        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
         self.add_child(Health(8))
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.single_turn))
@@ -104,8 +103,7 @@ class Cyclops(Composite):
         self.add_child(CharPrinter())
 
         self.add_child(Faction(Faction.MONSTER))
-        self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
-                                    StatusFlags.CAN_OPEN_DOORS]))
+        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
         self.add_child(Health(35))
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.one_and_half_turn))
@@ -150,6 +148,93 @@ class Jerico(Ratman):
         self.actor.energy_recovery = gametime.double_energy_gain
 
 
+class Ghost(Composite):
+    """
+    A composite component representing a Ghost monster.
+    """
+
+    def __init__(self, game_state):
+        super(Ghost, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.ENTITY))
+
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(Mover())
+        self.add_child(Stepper())
+
+        self.add_child(EntityMessages("The ghost sees you.",
+                                      "The ghost fades away."))
+        self.add_child(Description("Ghost",
+                                   "A spirit of a hunted creature."))
+        self.add_child(GraphicChar(None, colors.BLUE, icon.GHOST))
+        self.add_child(CharPrinter())
+
+        self.add_child(Faction(Faction.MONSTER))
+        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
+        self.add_child(Health(1))
+        self.add_child(HealthModifier())
+        self.add_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
+
+        self.add_child(AttackSpeed())
+        self.add_child(Strength(2))
+        self.add_child(Attacker())
+        self.add_child(Dodger())
+        self.add_child(Evasion(22))
+        self.add_child(Hit(14))
+
+        self.add_child(SightRadius(6))
+        self.add_child(DungeonMask())
+        self.add_child(Vision())
+        self.add_child(Stealth(7))
+        self.add_child(Awareness(8))
+        self.add_child(AwarenessChecker())
+
+        self.add_child(Path())
+        self.add_child(ChasePlayerActor())
+        self.add_child(MonsterActorState())
+        self.add_child(HuntPlayerIfHurtMe())
+
+        self.add_child(GameState(game_state))
+        self.add_child(Equipment())
+        self.add_child(Inventory())
+        self.add_child(EffectQueue())
+        self.add_child(AddGhostReviveToSeenEntities())
+
+        self.add_child(PrintDeathMessageOnDeath())
+        self.add_child(RemoveEntityOnDeath())
+
+
+class AddGhostReviveToSeenEntities(Leaf):
+    """
+    Revive other living creatures as ghosts.
+    """
+    def __init__(self):
+        super(AddGhostReviveToSeenEntities, self).__init__()
+        self.component_type = "add_ghost_revive_to_seen_entities"
+
+    def before_tick(self, time):
+        seen_entities = self.parent.vision.get_seen_entities()
+        for entity in seen_entities:
+            if not isinstance(entity, Ghost):
+                effect = ReviveAsGhostOnDeath()
+                entity.effect_queue.add(AddSpoofChild(self.parent, effect, 1))
+
+
+class ReviveAsGhostOnDeath(Leaf):
+    """
+    Will remove the parent from the dungeon when parent Entity dies.
+    """
+    def __init__(self):
+        super(ReviveAsGhostOnDeath, self).__init__()
+        self.component_type = "revive_as_ghost_on_death"
+
+    def on_tick(self, time):
+        if self.parent.health.is_dead():
+            ghost = Ghost(self.parent.game_state.value)
+            ghost.mover.try_move_roll_over(self.parent.position.value,
+                                           self.parent.dungeon_level.value)
+
+
 class StoneStatue(Composite):
     """
     A composite component representing a Ratman monster.
@@ -182,8 +267,7 @@ class StoneStatue(Composite):
         self.add_child(Strength(0))
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(AttackSpeed(gametime.single_turn))
-        self.add_child(StatusFlags([StatusFlags.LEAVES_CORPSE,
-                                    StatusFlags.CAN_OPEN_DOORS]))
+        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
         self.add_child(Dodger())
         self.add_child(Evasion(0))
         self.add_child(Hit(0))
@@ -206,6 +290,7 @@ class StoneStatue(Composite):
         self.add_child(PrintDeathMessageOnDeath())
         self.add_child(LeaveCorpseOnDeath())
         self.add_child(RemoveEntityOnDeath())
+
 
 class Slime(Composite):
     """
@@ -315,13 +400,16 @@ class StuckInSlimeStepperSpoof(Stepper):
     def try_move_or_bump(self, position):
         my_strength = self.parent.strength.value
         slime_strength = self._slime.strength.value
-        self.parent.attacker.hit(self._slime)
+        if self.has_sibling("attacker"):
+            self.parent.attacker.hit(self._slime)
+        print "try to break"
         if rng.stat_check(my_strength, slime_strength + 2):
+            print "YES!"
             self._make_slime_skip_turn()
             return self.next.try_move_or_bump(position)
         return self.parent.movement_speed.value
 
     def _make_slime_skip_turn(self):
         immobile_stepper = ImmobileStepper()
-        add_spoof_effect = AddSpoofChild(self.parent, immobile_stepper)
+        add_spoof_effect = AddSpoofChild(self.parent, immobile_stepper, 1)
         self._slime.effect_queue.add(add_spoof_effect)

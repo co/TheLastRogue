@@ -19,6 +19,7 @@ class DungeonLevel(Leaf):
         super(DungeonLevel, self).__init__()
         self.component_type = "dungeon_level"
         self._value = None
+        self.last_dungeon_level = None
 
     @property
     def value(self):
@@ -40,6 +41,9 @@ class DungeonLevel(Leaf):
             if(not old_dungeon_level is None and
                self.has_sibling("actor")):
                 old_dungeon_level.remove_actor_if_present(self.parent)
+                self.last_dungeon_level = old_dungeon_level
+        if self.last_dungeon_level is None:
+            self.last_dungeon_level = new_dungeon_level
 
     def _signal_dungeon_level_changed(self):
         """

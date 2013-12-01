@@ -178,12 +178,6 @@ class Composite(Component):
                             "had parent: {2}.".format(str(self),
                                                       str(child),
                                                       str(child.parent)))
-        if not child.component_type in self._children:
-            raise Exception("Component {0} tried to add_spoof_child"
-                            "component: {1} to its spoofed_children."
-                            "But there was no real "
-                            "child of that type.".format(str(self),
-                                                         str(child)))
         if not child.component_type in self._spoofed_children:
             self._spoofed_children[child.component_type] = []
         self._spoofed_children[child.component_type].append(child)
@@ -219,13 +213,28 @@ class Composite(Component):
         Runs before_tick on all child components.
         """
         self.reset_spoofed_children()
-        map(lambda x: x.before_tick(time), self._children.values())
+
+        visited_component_types = set()
+        for component_type, component in self._spoofed_children.iteritems():
+            visited_component_types.add(component_type)
+            component[0].before_tick(time)
+        components_without_spoof = [component for key, component in self._children.iteritems()
+                                    if not key in visited_component_types]
+        for component in components_without_spoof:
+            component.before_tick(time)
 
     def on_tick(self, time):
         """
         Runs on_tick on all child components.
         """
-        map(lambda x: x.on_tick(time), self._children.values())
+        visited_component_types = set()
+        for component_type, component in self._spoofed_children.iteritems():
+            visited_component_types.add(component_type)
+            component[0].on_tick(time)
+        components_without_spoof = [component for key, component in self._children.iteritems()
+                                    if not key in visited_component_types]
+        for component in components_without_spoof:
+            component.on_tick(time)
 
     def after_tick(self, time):
         """
@@ -233,7 +242,14 @@ class Composite(Component):
 
         It also resets all spoofed children.
         """
-        map(lambda x: x.after_tick(time), self._children.values())
+        visited_component_types = set()
+        for component_type, component in self._spoofed_children.iteritems():
+            visited_component_types.add(component_type)
+            component[0].after_tick(time)
+        components_without_spoof = [component for key, component in self._children.iteritems()
+                                    if not key in visited_component_types]
+        for component in components_without_spoof:
+            component.after_tick(time)
 
     def message(self, message):
         """
