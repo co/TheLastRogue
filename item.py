@@ -385,15 +385,14 @@ class Sword(Composite):
                                    "better days, it's as sharp as "
                                    "ever tough."))
         self.add_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-        self.add_child(DamageProvider(7, 5, [DamageTypes.PHYSICAL,
-                                             DamageTypes.CUTTING]))
+        self.add_child(DamageProvider(6, 3, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
         self.add_child(DropAction())
         self.add_child(PlayerThrowItemAction())
         self.add_child(ThrowerNonBreak())
         self.add_child(Weight(10))
-        self.add_child(Hit(17))
+        self.add_child(Hit(16))
 
 
 class Knife(Sword):
@@ -697,8 +696,8 @@ class HealingPotionDrinkAction(DrinkAction):
     def __init__(self):
         super(HealingPotionDrinkAction, self).__init__()
         self.component_type = "health_potion_drink_action"
-        self.min_health = 6
-        self.max_health = 12
+        self.min_health = 10
+        self.max_health = 15
 
     def _drink(self, target_entity):
         """

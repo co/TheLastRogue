@@ -265,6 +265,10 @@ class MonsterMagicRangeAction(MonsterThrowStoneAction):
         animate_flight(self.parent.game_state.value, path, self.icon, self.color_fg)
         magic_hit_position(self.damage, dungeon_level, path[-1], self.parent)
 
+    def is_destination_within_range(self, destination):
+        return (1 < geometry.chess_distance(self.parent.position.value, destination) <=
+                self.parent.sight_radius.value)
+
 
 def magic_hit_position(damage, dungeon_level, position, source_entity):
     target_entity = dungeon_level.get_tile(position).get_first_entity()
@@ -273,4 +277,3 @@ def magic_hit_position(damage, dungeon_level, position, source_entity):
     damage_types = [DamageTypes.MAGIC]
     thrown_damage = UndodgeableDamage(damage, 0, damage_types)
     thrown_damage.damage_entity(source_entity, target_entity)
-

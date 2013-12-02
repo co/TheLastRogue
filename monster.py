@@ -194,7 +194,7 @@ class Ghost(Composite):
         self.add_child(MonsterActorState())
         self.add_child(HuntPlayerIfHurtMe())
 
-        self.add_child(MonsterMagicRangeAction(1, 30))
+        self.add_child(MonsterMagicRangeAction(1, 60))
         self.add_child(GameState(game_state))
         self.add_child(Equipment())
         self.add_child(Inventory())
@@ -318,10 +318,10 @@ class Slime(Composite):
         self.add_child(CharPrinter())
 
         self.add_child(Faction(Faction.MONSTER))
-        self.add_child(Health(35))
+        self.add_child(Health(40))
         self.add_child(HealthModifier())
 
-        self.add_child(Strength(3))
+        self.add_child(Strength(2))
         self.add_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
         self.add_child(AttackSpeed(gametime.single_turn))
         self.add_child(StatusFlags())
@@ -381,7 +381,7 @@ class DissolveEntitySlimeShareTileEffect(object):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
         strength = source_entity.strength.value
-        damage = rng.random_variance(strength, strength/2)
+        damage = rng.random_variance(strength, 1)
 
         dissolve_effect = DissolveDamageEffect(source_entity, damage, [DamageTypes.ACID, DamageTypes.PHYSICAL],
                                                gametime.single_turn)
@@ -403,7 +403,7 @@ class StuckInSlimeStepperSpoof(Stepper):
         slime_strength = self._slime.strength.value
         if self.has_sibling("attacker"):
             self.parent.attacker.hit(self._slime)
-        if rng.stat_check(my_strength, slime_strength + 2):
+        if rng.stat_check(my_strength, slime_strength + 4):
             self._make_slime_skip_turn()
             return self.next.try_move_or_bump(position)
         return self.parent.movement_speed.value

@@ -46,11 +46,11 @@ def spawn_corpse_on_position(position, dungeon_level):
 def place_items_in_dungeon(dungeon_level):
     depth = dungeon_level.depth
 
-    for _ in range(depth + 2):
+    for _ in range(depth / 3 + 1):
         potion = item.HealthPotion()
         place_piece_on_random_tile_not_on_item_or_feature(potion, dungeon_level)
 
-    for _ in range(depth + 1):
+    for _ in range(2):
         if rng.coin_flip():
             potion = item.HealthPotion()
             place_piece_on_random_tile_not_on_item_or_feature(potion, dungeon_level)

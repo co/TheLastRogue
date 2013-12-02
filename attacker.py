@@ -102,8 +102,8 @@ class Damage(object):
         self.damage_types = damage_types
         self.hit = hit
 
-    def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
-        damage = rng.random_variance_no_negative(self.damage + bonus_damage, self.variance)
+    def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0, damage_multiplier=1):
+        damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
         damage_effect =\
             entityeffect.DamageEntityEffect(source_entity,
                                             damage * self.damage_multiplier,
@@ -118,9 +118,14 @@ class UndodgeableDamage(object):
         self.damage_multiplier = damage_multiplier
         self.damage_types = damage_types
 
-    def damage_entity(self, source_entity, target_entity, bonus_damage=0):
-        damage = rng.random_variance_no_negative(self.damage + bonus_damage, self.variance)
+    def damage_entity(self, source_entity, target_entity, bonus_damage=0, damage_multiplier=1):
+        damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
         damage_effect = \
             entityeffect.UndodgeableDamageEntityEffect(source_entity,
-                                            damage * self.damage_multiplier, self.damage_types)
+                                                       damage * self.damage_multiplier,
+                                                       self.damage_types)
         target_entity.effect_queue.add(damage_effect)
+
+
+def calculate_damage(damage, damage_variance, bonus_damage, damage_multiplier):
+    return rng.random_variance_no_negative((damage + bonus_damage) * damage_multiplier, damage_variance)
