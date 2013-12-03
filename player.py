@@ -10,7 +10,7 @@ from inventory import Inventory
 from memorymap import MemoryMap
 from missileaction import PlayerThrowStoneAction
 from mover import Mover, Stepper
-from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
+from ondeath import LeaveCorpseOnDeath
 from position import Position, DungeonLevel
 from stats import AttackSpeed, Faction, GameState, GamePieceType, Stealth, Awareness
 from stats import MovementSpeed, Strength, IsPlayer, Evasion, Hit

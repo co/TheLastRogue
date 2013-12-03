@@ -29,10 +29,14 @@ def reset_globals():
 
 
 class GameStateBase(state.State):
-    def __init__(self):
+    def __init__(self, player_name=""):
         super(GameStateBase, self).__init__()
         self.dungeon = Dungeon(self)
         self.player = Player(self)
+        if player_name == "":
+            self.player.description.name = "Roland"
+        else:
+            self.player.description.name = player_name
         self._init_caches_and_flags()
         messenger.messenger.message("Welcome to: The Last Rogue!")
 
@@ -145,11 +149,11 @@ class GameStateBase(state.State):
         if self.player.health.is_dead():
             self.force_draw()
             game_over_screen = menufactory.game_over_screen(self.current_stack)
-            delete_save_file_of_game_state(self)
+            delete_save_file_of_game_state()
             self.current_stack.push(game_over_screen)
         if self.has_won:
             victory_screen = menufactory.victory_screen(self.current_stack)
-            delete_save_file_of_game_state(self)
+            delete_save_file_of_game_state()
             self.current_stack.push(victory_screen)
 
         self.first_round = False
@@ -168,8 +172,8 @@ class GameStateBase(state.State):
 
 
 class TestGameState(GameStateBase):
-    def __init__(self):
-        super(TestGameState, self).__init__()
+    def __init__(self, player_name=""):
+        super(TestGameState, self).__init__(player_name)
         reset_globals()
         start_position = (20, 10)
         self.dungeon_level = dungeon_level_from_file("test.level")
@@ -224,7 +228,7 @@ class TestGameState(GameStateBase):
         cyclops = monster.Cyclops(self)
         cyclops.mover.try_move((2, 2), self.dungeon_level)
 
-        jerico = monster.Jerico(self)
+        jerico = monster.Jericho(self)
         jerico.mover.try_move((56, 14), self.dungeon_level)
 
         for i in range(5):
@@ -237,8 +241,8 @@ class TestGameState(GameStateBase):
 
 
 class GameState(GameStateBase):
-    def __init__(self):
-        super(GameState, self).__init__()
+    def __init__(self, player_name=""):
+        super(GameState, self).__init__(player_name)
         self.dungeon = Dungeon(self)
         self._init_player_position()
 
@@ -254,26 +258,25 @@ class GameState(GameStateBase):
         raise Exception("Could not put player at first up stairs.")
 
 
-def get_save_file_name(game_state):
-    hero_name = game_state.player.description.name
-    save_file_ending = ".sav"
-    return hero_name + save_file_ending
+def get_save_file_name():
+    save_file = "game.sav"
+    return save_file
 
 
 def save(game_state):
-
-    save_file = open(get_save_file_name(game_state), 'wb')
+    save_file = open(get_save_file_name(), 'wb')
     time_it("save", lambda: pickle.dump(game_state, save_file, -1))
     save_file.close()
+
 
 def get_save_files():
     directory = getcwd()
     return [f for f in listdir(directory)
-            if isfile(f) and f.endswith(".sav")]
+            if isfile(f) and f == get_save_file_name()]
 
 
-def delete_save_file_of_game_state(game_state):
-    file_name = get_save_file_name(game_state)
+def delete_save_file_of_game_state():
+    file_name = get_save_file_name()
     if os.path.isfile(file_name):
         os.remove(file_name)
 

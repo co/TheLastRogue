@@ -3,6 +3,7 @@ import math
 import constants
 from equipment import EquipmentSlots
 import icon
+import inputhandler
 from messenger import messenger
 from console import console
 import colors
@@ -90,6 +91,7 @@ class VerticalLine(UIElement):
     @property
     def height(self):
         return self._height
+
     @property
     def width(self):
         return 1
@@ -106,6 +108,7 @@ class VerticalLine(UIElement):
                 console.set_color_bg((x, y + i), self.color_bg)
             if not self.color_fg is None:
                 console.set_color_fg((x, y + i), self.color_fg)
+
 
 class RectangularUIElement(UIElement):
     def __init__(self, rect, margin=geo.zero2d()):
@@ -344,14 +347,14 @@ class CommandListPanel(RectangularUIElement):
         self._stack_panel.append(self.left_right_adjust("Quit", "Esc"))
 
         self._inactive_line = VerticalLine(icon.V_LINE, colors.BLACK, colors.BLUE_D,
-                                           settings.WINDOW_HEIGHT, (settings.WINDOW_WIDTH -1, 0))
+                                           settings.WINDOW_HEIGHT, (settings.WINDOW_WIDTH - 1, 0))
         text = "Press Tab to See Commands"
-        offset = (settings.WINDOW_WIDTH-1, (settings.WINDOW_HEIGHT - len(text)) / 2)
+        offset = (settings.WINDOW_WIDTH - 1, (settings.WINDOW_HEIGHT - len(text)) / 2)
         self._inactive_text = VerticalTextBox(text, offset, colors.LIGHT_BLUE)
 
 
     def left_right_adjust(self, text1, text2):
-        return TextBox(text1 + text2.rjust(self.rect.width - len(text1) - 4),(0, 0), colors.GRAY)
+        return TextBox(text1 + text2.rjust(self.rect.width - len(text1) - 4), (0, 0), colors.GRAY)
 
     def draw(self, offset=geo.zero2d()):
         if self.active:
@@ -750,3 +753,43 @@ class SymbolUIElement(UIElement):
         if not self.color_bg is None:
             console.set_color_bg((x, y), self.color_bg)
         console.set_symbol((x, y), self.icon)
+
+
+class TypeWriter(UIElement):
+    """
+    Takes alphanumerical input and prints the text on screen.
+    Assumes it is used together with a menu which updates the inputhandler.
+    """
+
+    def __init__(self, offset, color_fg, max_length, default_text="", color_bg=None, margin=(0, 0)):
+        super(TypeWriter, self).__init__(margin)
+        self.offset = offset
+        self.color_fg = color_fg
+        self.color_bg = color_bg
+        self._text = TextBox(default_text, (0, 0), color_fg)
+        self.max_length = max_length
+
+    @property
+    def height(self):
+        return self._text.height
+
+    @property
+    def width(self):
+        return self._text.width
+
+    @property
+    def text(self):
+        return self._text.text
+
+    def update(self):
+        key = inputhandler.handler.get_keypress_char()
+        special_key = inputhandler.handler.get_keypress()
+        if ((not key is None) and key in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
+            and len(self._text.text) < self.max_length):
+            self._text.text += key
+        if (special_key == inputhandler.BACKSPACE or special_key == inputhandler.DELETE) and len(self._text.text) > 0:
+            self._text.text = self._text.text[:-1]
+
+    def draw(self, offset=geo.zero2d()):
+        draw_offset = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
+        self._text.draw(draw_offset)

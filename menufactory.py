@@ -1,3 +1,4 @@
+import constants
 from equipactions import UnequipAction
 import colors
 import dungeoncreatorvisualizer
@@ -13,18 +14,18 @@ import style
 import icon
 
 
-def _main_menu_ui_elements(ui_state, state_stack):
+def _main_menu_ui_elements(ui_state, state_stack, player_name_func):
     """
     Creates the first menu of the game.
     """
     continue_game_function = \
         lambda: ui_state.current_stack.push(gamestate.load_first_game())
     start_game_function = \
-        lambda: ui_state.current_stack.push(gamestate.GameState())
+        lambda: ui_state.current_stack.push(gamestate.GameState(player_name_func()))
     save_game_function = \
         lambda: gamestate.save(ui_state.current_stack.get_game_state())
     start_test_game_function = \
-        lambda: ui_state.current_stack.push(gamestate.TestGameState())
+        lambda: ui_state.current_stack.push(gamestate.TestGameState(player_name_func()))
     quit_game_function = lambda: ui_state.current_stack.pop()
     dungeon_visualizer_function = \
         lambda: ui_state.current_stack.push(dungeoncreatorvisualizer.DungeonCreatorVisualizer())
@@ -58,7 +59,8 @@ def _main_menu_ui_elements(ui_state, state_stack):
     main_menu = menu.StaticMenu(temp_position,
                                 menu_items, state_stack,
                                 margin=style.menu_theme.margin,
-                                vertical_space=1)
+                                vertical_space=1,
+                                vi_keys_accepted=False)
     main_menu_rect = \
         rectfactory.ratio_of_screen_rect(main_menu.width + border,
                                          main_menu.height + border - 1, 0.5, 0.8)
@@ -299,12 +301,17 @@ def title_screen(state_stack):
 
     vspace = gui.VerticalSpace(15)
 
+    hero_name_typewriter = gui.TypeWriter((0, 0), colors.WHITE, constants.MONSTER_STATUS_BAR_WIDTH - 2, default_text="Roland")
+
     title_stack_panel.append(vspace)
     title_stack_panel.append(line)
     title_stack_panel.append(the_text)
     title_stack_panel.append(last_text)
     title_stack_panel.append(rogue_text)
     title_stack_panel.append(line)
+    title_stack_panel.append(gui.VerticalSpace(7))
+    title_stack_panel.append(hero_name_typewriter)
+
 
     bg_rect = gui.FilledRectangle(rectfactory.full_screen_rect(),
                                   colors.DARK_BLUE)
@@ -314,7 +321,7 @@ def title_screen(state_stack):
                                        colors.WHITE)
 
     ui_state = state.UIState(gui.UIElementList(None))
-    ui_elements = _main_menu_ui_elements(ui_state, state_stack)
+    ui_elements = _main_menu_ui_elements(ui_state, state_stack, lambda: hero_name_typewriter.text)
 
     ui_state.ui_element.elements = [bg_rect, bg_sign_rect,
                                     title_stack_panel] + ui_elements

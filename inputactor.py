@@ -66,7 +66,7 @@ class InputActor(Actor):
 
     def handle_keyboard_input(self):
         key = inputhandler.handler.get_keypress()
-        if key in inputhandler.move_controls:
+        if key in inputhandler.move_controls or key in inputhandler.vi_move_controls:
             self.handle_move_input(key)
         elif key == inputhandler.ENTER:
             self.spawn_context_menu()
@@ -139,7 +139,10 @@ class InputActor(Actor):
                 self.parent.path.set_line_path(destination)
 
     def handle_move_input(self, key):
-        direction = inputhandler.move_controls[key]
+        if key in inputhandler.move_controls:
+            direction = inputhandler.move_controls[key]
+        else:
+            direction = inputhandler.vi_move_controls[key]
         self.newly_spent_energy += self.parent.stepper.try_step_in_direction(direction)
 
     def spawn_context_menu(self):

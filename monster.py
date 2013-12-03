@@ -139,11 +139,11 @@ class Cyclops(Composite):
         self.add_child(RemoveEntityOnDeath())
 
 
-class Jerico(Ratman):
+class Jericho(Ratman):
     def __init__(self, game_state):
-        super(Jerico, self).__init__(game_state)
-        self.description.name = "Jerico"
-        self.entity_messages.death_message = "Jerico the quick is no more."
+        super(Jericho, self).__init__(game_state)
+        self.description.name = "Jericho"
+        self.entity_messages.death_message = "Jericho the quick is no more."
         self.graphic_char.color_fg = colors.YELLOW
         self.actor.energy_recovery = gametime.double_energy_gain
 

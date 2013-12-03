@@ -46,6 +46,9 @@ class PositionExaminer(state.State):
         if key in inputhandler.move_controls:
             dx, dy = inputhandler.move_controls[key]
             self.offset_cursor_position((dx * step_size, dy * step_size))
+        elif key in inputhandler.vi_move_controls:
+            dx, dy = inputhandler.vi_move_controls[key]
+            self.offset_cursor_position((dx * step_size, dy * step_size))
 
     def offset_cursor_position(self, offset):
         new_cursor_position = geo.add_2d(self.cursor_position, offset)

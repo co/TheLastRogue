@@ -9,6 +9,16 @@ NORTHWEST = 4
 NORTHEAST = 5
 SOUTHWEST = 6
 SOUTHEAST = 7
+
+VI_NORTH = 200
+VI_SOUTH = 201
+VI_WEST = 202
+VI_EAST = 203
+VI_NORTHWEST = 204
+VI_NORTHEAST = 205
+VI_SOUTHWEST = 206
+VI_SOUTHEAST = 207
+
 ENTER = 104
 REST = 105
 ONE = 106
@@ -32,6 +42,9 @@ PRINTSCREEN = 123
 TAB = 124
 STONE = 125
 SPACE = 126
+DELETE = 127
+BACKSPACE = 128
+
 
 #Aliases:
 UP = NORTH
@@ -53,33 +66,44 @@ move_controls = {
     SOUTHEAST: (1, 1)
 }
 
+vi_move_controls = {
+    VI_NORTH: (0, -1),
+    VI_SOUTH: (0, 1),
+    VI_WEST: (-1, 0),
+    VI_EAST: (1, 0),
+    VI_NORTHWEST: (-1, -1),
+    VI_NORTHEAST: (1, -1),
+    VI_SOUTHWEST: (-1, 1),
+    VI_SOUTHEAST: (1, 1)
+}
+
 controls = {
-    't': NORTH,  # up
+    't': VI_NORTH,  # up
     libtcod.KEY_UP: NORTH,  # up
     libtcod.KEY_KP8: NORTH,  # up
 
-    'h': SOUTH,   # down
+    'h': VI_SOUTH,   # down
     libtcod.KEY_DOWN: SOUTH,  # up
     libtcod.KEY_KP2: SOUTH,  # up
 
-    'd': WEST,  # left
+    'd': VI_WEST,  # left
     libtcod.KEY_LEFT: WEST,  # left
     libtcod.KEY_KP4: WEST,  # up
 
-    'n': EAST,   # right
+    'n': VI_EAST,   # right
     libtcod.KEY_RIGHT: EAST,  # right
     libtcod.KEY_KP6: EAST,  # up
 
-    'g': NORTHWEST,   # up, left
+    'g': VI_NORTHWEST,   # up, left
     libtcod.KEY_KP7: NORTHWEST,  # up, left
 
-    'c': NORTHEAST,   # up, right
+    'c': VI_NORTHEAST,   # up, right
     libtcod.KEY_KP9: NORTHEAST,  # up, right
 
-    'm': SOUTHWEST,   # down, left
+    'm': VI_SOUTHWEST,   # down, left
     libtcod.KEY_KP1: SOUTHWEST,  # down, left
 
-    'w': SOUTHEAST,   # down, right
+    'w': VI_SOUTHEAST,   # down, right
     libtcod.KEY_KP3: SOUTHEAST,  # down, right
 
     'f': FIRE,
@@ -108,6 +132,8 @@ controls = {
     libtcod.KEY_9: NINE,
     libtcod.KEY_TAB: TAB,
     libtcod.KEY_SPACE: SPACE,
+    libtcod.KEY_DELETE: DELETE,
+    libtcod.KEY_BACKSPACE: BACKSPACE,
 }
 
 
@@ -123,6 +149,11 @@ class InputHandler(object):
         key_char = self._get_key_char(self.key)
         if key_char in controls.keys() and self.key.pressed:
             return controls[key_char]
+        return None
+
+    def get_keypress_char(self):
+        if self.key.vk == libtcod.KEY_CHAR and self.key.pressed:
+            return chr(self.key.c)  # Case insensetive
         return None
 
     def _get_key_char(self, key):

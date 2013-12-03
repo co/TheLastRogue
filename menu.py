@@ -11,7 +11,7 @@ def clamp(n, minn, maxn):
 
 class Menu(gui.UIElement):
     def __init__(self, offset, state_stack,
-                 margin=geo.zero2d(), vertical_space=1, may_escape=True):
+                 margin=geo.zero2d(), vertical_space=1, may_escape=True, vi_keys_accepted=True):
         super(Menu, self).__init__(margin)
         self._menu_items = []
         self._state_stack = state_stack
@@ -21,6 +21,7 @@ class Menu(gui.UIElement):
         self.may_escape = may_escape
         self._item_stack_panel =\
             gui.StackPanelVertical(geo.zero2d(), vertical_space=vertical_space)
+        self.vi_keys_accepted = vi_keys_accepted
 
     @property
     def rect(self):
@@ -42,9 +43,9 @@ class Menu(gui.UIElement):
 
         inputhandler.handler.update_keys()
         key = inputhandler.handler.get_keypress()
-        if key == inputhandler.UP:
+        if key == inputhandler.UP or (self.vi_keys_accepted and key == inputhandler.VI_NORTH):
             self.index_decrease()
-        if key == inputhandler.DOWN:
+        if key == inputhandler.DOWN or (self.vi_keys_accepted and key == inputhandler.VI_SOUTH):
             self.index_increase()
         if key == inputhandler.ENTER or key == inputhandler.SPACE:
             self.activate()
@@ -185,10 +186,10 @@ class MenuOptionWithSymbols(MenuOption):
 
 class StaticMenu(Menu):
     def __init__(self, offset, menu_items, state_stack,
-                 margin=geo.zero2d(), vertical_space=1, may_escape=True):
+                 margin=geo.zero2d(), vertical_space=1, may_escape=True, vi_keys_accepted=True):
         super(StaticMenu, self).__init__(offset, state_stack, margin=margin,
                                          vertical_space=vertical_space,
-                                         may_escape=may_escape)
+                                         may_escape=may_escape, vi_keys_accepted=vi_keys_accepted)
         self._menu_items = menu_items
         self.try_set_index_to_valid_value()
         self._recreate_option_list()

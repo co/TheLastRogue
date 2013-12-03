@@ -54,7 +54,7 @@ class Dungeon(object):
                 spawner.place_piece_on_random_tile(slime, dungeon_level)
 
         if depth == (len(self._dungeon_levels) - 1):
-            jerico = monster.Jerico(self.game_state)
+            jerico = monster.Jericho(self.game_state)
             spawner.place_piece_on_random_tile(jerico, dungeon_level)
 
         spawner.place_items_in_dungeon(dungeon_level)
