@@ -782,6 +782,8 @@ class TypeWriter(UIElement):
         return self._text.text
 
     def update(self):
+        self._text.color_fg = self.color_fg
+
         key = inputhandler.handler.get_keypress_char()
         special_key = inputhandler.handler.get_keypress()
         if ((not key is None) and key in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
@@ -793,3 +795,12 @@ class TypeWriter(UIElement):
     def draw(self, offset=geo.zero2d()):
         draw_offset = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         self._text.draw(draw_offset)
+
+
+class UpdateCallOnlyElement(UIElement):
+    def __init__(self, update_functions):
+        self.update_functions = update_functions
+
+    def update(self):
+        for function in self.update_functions:
+            function()

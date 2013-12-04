@@ -152,7 +152,7 @@ class InputHandler(object):
         return None
 
     def get_keypress_char(self):
-        if self.key.vk == libtcod.KEY_CHAR and self.key.pressed:
+        if self.key.pressed:
             return chr(self.key.c)  # Case insensetive
         return None
 

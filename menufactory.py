@@ -14,7 +14,7 @@ import style
 import icon
 
 
-def _main_menu_ui_elements(ui_state, state_stack, player_name_func):
+def _main_menu(ui_state, state_stack, player_name_func):
     """
     Creates the first menu of the game.
     """
@@ -54,22 +54,12 @@ def _main_menu_ui_elements(ui_state, state_stack, player_name_func):
     menu_items = [continue_game_option, start_game_option, start_test_game_option,
                   dungeon_creator_option, quit_option]
 
-    border = 4
-    temp_position = (-1, -1)
-    main_menu = menu.StaticMenu(temp_position,
-                                menu_items, state_stack,
-                                margin=style.menu_theme.margin,
-                                vertical_space=1,
-                                vi_keys_accepted=False)
-    main_menu_rect = \
-        rectfactory.ratio_of_screen_rect(main_menu.width + border,
-                                         main_menu.height + border - 1, 0.5, 0.8)
-    main_menu.offset = main_menu_rect.top_left
-
-    background_rect = \
-        gui.StyledRectangle(main_menu_rect, style.menu_theme.rect_style)
-    ui_elements = [background_rect, main_menu]
-    return ui_elements
+    temp_position = (0, 0)
+    return menu.StaticMenu(temp_position,
+                           menu_items, state_stack,
+                           margin=style.menu_theme.margin,
+                           vertical_space=1,
+                           vi_keys_accepted=False)
 
 
 def get_menu_with_options(options, state_stack):
@@ -84,8 +74,7 @@ def get_menu_with_options(options, state_stack):
                                          main_menu.height + border - 1, 0.5, 0.8)
     main_menu.offset = main_menu_rect.top_left
 
-    background_rect = \
-        gui.StyledRectangle(main_menu_rect, style.menu_theme.rect_style)
+    background_rect = get_menu_background(main_menu_rect)
     ui_state = state.UIState(gui.UIElementList([background_rect, main_menu]))
     return ui_state
 
@@ -164,7 +153,7 @@ def equipment_menu(player, state_stack):
         slot_menu = equipment_slot_menu(player, slot, state_stack)
         option_func = DelayedStatePush(state_stack, slot_menu)
         item_in_slot = player.equipment.get(slot)
-        if (item_in_slot is None):
+        if item_in_slot is None:
             item_name = "-"
         else:
             item_name = item_in_slot.description.name
@@ -234,6 +223,13 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
     return ui_state
 
 
+def get_menu_background(rectangle):
+    background_rect = \
+        gui.StyledRectangle(rectangle,
+                            style.menu_theme.rect_style)
+    return background_rect
+
+
 def context_menu(player, state_stack):
     current_dungeon_feature = \
         (player.dungeon_level.value.
@@ -260,9 +256,7 @@ def context_menu(player, state_stack):
     resulting_menu = menu.StaticMenu(context_menu_rect.top_left,
                                      context_options, state_stack,
                                      margin=style.menu_theme.margin)
-    background_rect = \
-        gui.StyledRectangle(context_menu_rect,
-                            style.menu_theme.rect_style)
+    background_rect = get_menu_background(context_menu_rect)
 
     ui_elements = [background_rect, resulting_menu]
     ui_state = state.UIState(gui.UIElementList(ui_elements))
@@ -301,7 +295,10 @@ def title_screen(state_stack):
 
     vspace = gui.VerticalSpace(15)
 
-    hero_name_typewriter = gui.TypeWriter((0, 0), colors.WHITE, constants.MONSTER_STATUS_BAR_WIDTH - 2, default_text="Roland")
+    hero_name_typewriter = gui.TypeWriter((0, 0), colors.WHITE, constants.MONSTER_STATUS_BAR_WIDTH - 4,
+                                          default_text="Roland")
+
+    name_heading = gui.TextBox("Name:", (0, 0), colors.CYAN_D, (0, 1))
 
     title_stack_panel.append(vspace)
     title_stack_panel.append(line)
@@ -309,24 +306,45 @@ def title_screen(state_stack):
     title_stack_panel.append(last_text)
     title_stack_panel.append(rogue_text)
     title_stack_panel.append(line)
-    title_stack_panel.append(gui.VerticalSpace(7))
+    title_stack_panel.append(gui.VerticalSpace(5))
+    title_stack_panel.append(name_heading)
     title_stack_panel.append(hero_name_typewriter)
 
+    bg_rect = gui.FilledRectangle(rectfactory.full_screen_rect(), colors.DARK_BLUE)
 
-    bg_rect = gui.FilledRectangle(rectfactory.full_screen_rect(),
-                                  colors.DARK_BLUE)
-
-    bg_sign_rect = gui.FilledRectangle(geo.Rect((0, 15),
-                                                settings.WINDOW_WIDTH, 11),
-                                       colors.WHITE)
+    bg_sign_rect = gui.FilledRectangle(geo.Rect((0, 15), settings.WINDOW_WIDTH, 11), colors.WHITE)
 
     ui_state = state.UIState(gui.UIElementList(None))
-    ui_elements = _main_menu_ui_elements(ui_state, state_stack, lambda: hero_name_typewriter.text)
+    main_menu = _main_menu(ui_state, state_stack, lambda: hero_name_typewriter.text)
 
-    ui_state.ui_element.elements = [bg_rect, bg_sign_rect,
-                                    title_stack_panel] + ui_elements
+    border = 4
+    main_menu_rect = rectfactory.ratio_of_screen_rect(main_menu.width + border, main_menu.height + border - 1, 0.5, 0.8)
+    main_menu.offset = main_menu_rect.top_left
+
+    menu_background_rect = get_menu_background(main_menu_rect)
+
+    type_writer_highlight_update = \
+        gui.UpdateCallOnlyElement([lambda: type_writer_highlight_update_function([hero_name_typewriter, name_heading],
+                                                                                 main_menu, colors.WHITE,
+                                                                                 colors.GRAY_D, [1, 2])])
+
+    ui_state.ui_element.elements = [bg_rect, bg_sign_rect, title_stack_panel, menu_background_rect, main_menu,
+                                    type_writer_highlight_update]
     return ui_state
 
+
+def type_writer_highlight_update_function(elements, menu, active_fg_color, inactive_fg_color, active_indices):
+    """
+    Function for manipulating typewriter color, depending on selected menu item.
+
+    This is a ugly hack, remove if some event system is implemented for menus.
+    """
+    if menu.selected_index in active_indices:
+        for e in elements:
+            e.color_fg = active_fg_color
+    else:
+        for e in elements:
+            e.color_fg = inactive_fg_color
 
 def victory_screen(state_stack):
     victory_stack_panel = gui.StackPanelVerticalCentering((0, 0))

@@ -15,7 +15,7 @@ class Menu(gui.UIElement):
         super(Menu, self).__init__(margin)
         self._menu_items = []
         self._state_stack = state_stack
-        self._selected_index = 0
+        self.selected_index = 0
         self.offset = offset
         self._wrap = True
         self.may_escape = may_escape
@@ -45,7 +45,7 @@ class Menu(gui.UIElement):
         key = inputhandler.handler.get_keypress()
         if key == inputhandler.UP or (self.vi_keys_accepted and key == inputhandler.VI_NORTH):
             self.index_decrease()
-        if key == inputhandler.DOWN or (self.vi_keys_accepted and key == inputhandler.VI_SOUTH):
+        if key == inputhandler.DOWN or (self.vi_keys_accepted and key == inputhandler.VI_SOUTH) or key == inputhandler.TAB:
             self.index_increase()
         if key == inputhandler.ENTER or key == inputhandler.SPACE:
             self.activate()
@@ -54,14 +54,14 @@ class Menu(gui.UIElement):
 
     def try_set_index_to_valid_value(self):
         if not any(menu_item.can_activate() for menu_item in self._menu_items):
-            self._selected_index = None
-        self._selected_index = 0
+            self.selected_index = None
+        self.selected_index = 0
         if not self.has_valid_option_selected():
             self.index_increase()
 
     def has_valid_option_selected(self):
-        return (0 <= self._selected_index < len(self._menu_items) and
-                self._menu_items[self._selected_index].can_activate())
+        return (0 <= self.selected_index < len(self._menu_items) and
+                self._menu_items[self.selected_index].can_activate())
 
     def _update_menu_items(self):
         pass
@@ -70,7 +70,7 @@ class Menu(gui.UIElement):
         self._update_menu_items()
         self._item_stack_panel.clear()
         for index, item in enumerate(self._menu_items):
-            if index == self._selected_index:
+            if index == self.selected_index:
                 menu_item = item.selected_ui_representation()
             elif item.can_activate():
                 menu_item = item.unselected_ui_representation()
@@ -79,42 +79,42 @@ class Menu(gui.UIElement):
             self._item_stack_panel.append(menu_item)
 
     def can_activate(self):
-        return (not self._selected_index is None and
-                self._menu_items[self._selected_index].can_activate())
+        return (not self.selected_index is None and
+                self._menu_items[self.selected_index].can_activate())
 
     def activate(self):
         if self.can_activate():
-            selected_option = self._menu_items[self._selected_index]
+            selected_option = self._menu_items[self.selected_index]
             selected_option.activate()
 
     def index_increase(self):
         if(not any(item.can_activate() for item in self._menu_items) or
-           self._selected_index is None):
-            self._selected_index = None
+           self.selected_index is None):
+            self.selected_index = None
             return
         self._offset_index(1)
-        if not self._menu_items[self._selected_index].can_activate():
+        if not self._menu_items[self.selected_index].can_activate():
             self.index_increase()
 
     def index_decrease(self):
         if(not any(item.can_activate() for item in self._menu_items) or
-           self._selected_index is None):
-            self._selected_index = None
+           self.selected_index is None):
+            self.selected_index = None
             return
         self._offset_index(-1)
-        if not self._menu_items[self._selected_index].can_activate():
+        if not self._menu_items[self.selected_index].can_activate():
             self.index_decrease()
 
     def _offset_index(self, offset):
-        if len(self._menu_items) == 0 or self._selected_index is None:
+        if len(self._menu_items) == 0 or self.selected_index is None:
             return
         if self._wrap:
             # Will behave strangely for when offset is less than -menu_size
-            self._selected_index =\
-                (offset + self._selected_index + len(self._menu_items))\
+            self.selected_index =\
+                (offset + self.selected_index + len(self._menu_items))\
                 % len(self._menu_items)
         else:
-            self._selected_index = clamp(offset + self._selected_index, 0,
+            self.selected_index = clamp(offset + self.selected_index, 0,
                                          len(self._menu_items) - 1)
 
     def draw(self, offset=geo.zero2d()):
