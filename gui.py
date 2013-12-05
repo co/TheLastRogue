@@ -128,6 +128,38 @@ class RectangularUIElement(UIElement):
         return geo.int_2d(self.rect.top_left)
 
 
+class UIDock(RectangularUIElement):
+    def __init__(self, rectangle, margin=geo.zero2d()):
+        super(UIDock, self).__init__(rectangle, margin)
+        self.margin = margin
+        self.parent = None
+        self.top_left = None
+        self.top_right = None
+        self.bottom_left = None
+        self.bottom_right = None
+
+    def draw(self, offset=geo.zero2d()):
+        if self.top_left:
+            self.top_left.draw((0, 0))
+        if self.top_right:
+            self.top_right.draw((self.width - self.top_right.width, 0))
+        if self.bottom_left:
+            self.bottom_left.draw((0, self.height - self.bottom_left.height))
+        if self.bottom_right:
+            self.bottom_right.draw((self.width - self.top_right.width,
+                                    self.height - self.bottom_right.height))
+
+    def update(self):
+        if self.top_left:
+            self.top_left.update()
+        if self.top_right:
+            self.top_right.update()
+        if self.bottom_left:
+            self.bottom_left.update()
+        if self.bottom_right:
+            self.bottom_right.update()
+
+
 class FilledRectangle(RectangularUIElement):
     def __init__(self, rect, color_bg, margin=geo.zero2d()):
         super(FilledRectangle, self).__init__(rect, margin)
@@ -150,8 +182,7 @@ class StyledRectangle(RectangularUIElement):
         self.title_color_fg = title_color_fg
 
     def draw(self, offset=geo.zero2d()):
-        px, py = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
-                                       self.margin))
+        px, py = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
 
         for y in range(py, self.height + py):
             for x in range(px, self.width + px):
@@ -396,6 +427,14 @@ class PlayerStatusBox(RectangularUIElement):
         self.depth_text_box = TextBox("", (2, 0), colors.BLUE_D)
         self._status_stack_panel.append(self.depth_text_box)
 
+    @property
+    def height(self):
+        return self.rect.height
+
+    @property
+    def width(self):
+        return self.rect.width
+
     def update(self):
         self._status_stack_panel.update()
         self.depth_text_box.text = ("Depth:" +
@@ -470,29 +509,34 @@ class InventoryBox(RectangularUIElement):
             graphic_item.draw(geo.add_2d(position, (1, 1)))
 
 
-class EntityStatusList(RectangularUIElement):
-    def __init__(self, rect, margin=geo.zero2d(), vertical_space=0):
-        super(EntityStatusList, self).__init__(rect, margin=margin)
-        self._entity_stack_panel = \
-            StackPanelVertical(rect.top_left, (0, 0),
-                               vertical_space=vertical_space)
-        self._offset = (0, 0)
+class EntityStatusList(UIElement):
+    def __init__(self, looking_entity, width, margin=geo.zero2d(), vertical_space=0):
+        super(EntityStatusList, self).__init__(margin=margin)
+        self._entity_stack_panel = StackPanelVertical((0, 0), (0, 0), vertical_space=vertical_space)
+        self.looking_entity = looking_entity
+        self._width = width
 
-    def update(self, entity):
-        seen_entities = entity.vision.get_seen_entities_closest_first()
+    def update(self):
+        seen_entities = self.looking_entity.vision.get_seen_entities_closest_first()
         seen_entities.reverse()
-        if entity in seen_entities:
-            seen_entities.remove(entity)
+        if self.looking_entity in seen_entities:
+            seen_entities.remove(self.looking_entity)
         self._entity_stack_panel.clear()
-        rect = geo.Rect(geo.zero2d(), self.width, 3)
+        rect = geo.Rect((0, 0), self.width, 3)
         for seen_entity in seen_entities:
             entity_status = EntityStatus(seen_entity, rect)
             self._entity_stack_panel.append(entity_status)
-        self._offset = (0, settings.WINDOW_HEIGHT - self._entity_stack_panel.height - constants.STATUS_BAR_HEIGHT)
 
     def draw(self, offset=geo.zero2d()):
-        position = geo.add_2d(geo.add_2d(offset, self.margin), self._offset)
-        self._entity_stack_panel.draw(position)
+        self._entity_stack_panel.draw(geo.add_2d(offset, self.margin))
+
+    @property
+    def height(self):
+        return self._entity_stack_panel.height
+
+    @property
+    def width(self):
+        return self._width
 
 
 class EntityStatus(UIElement):
@@ -511,9 +555,8 @@ class EntityStatus(UIElement):
         self._hp_stack_panel.append(entity_symbol)
         self._hp_stack_panel.append(monster_health_bar)
 
-        self._rectangle_bg = \
-            StyledRectangle(rect, style.monster_list_card,
-                            entity.description.name, entity.graphic_char.color_fg)
+        self._rectangle_bg = StyledRectangle(rect, style.monster_list_card,
+                                             entity.description.name, entity.graphic_char.color_fg)
 
         self._status_stack_panel = StackPanelVertical(rect.top_left, margin)
         self._status_stack_panel.append(self._hp_stack_panel)
@@ -527,6 +570,7 @@ class EntityStatus(UIElement):
         return self._width
 
     def draw(self, offset=geo.zero2d()):
+        offset = geo.add_2d(offset, self.margin)
         self._rectangle_bg.draw(offset)
         self._status_stack_panel.draw(offset)
 

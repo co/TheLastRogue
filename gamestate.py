@@ -71,19 +71,13 @@ class GameStateBase(state.State):
         self._init_caches_and_flags()
 
     def _init_gui(self):
-        player_status_rect = rectfactory.player_status_rect()
-        self._player_status_box = \
-            gui.PlayerStatusBox(player_status_rect, self.player)
-
-        monster_status_rect = geo.Rect(geo.zero2d(),
-                                       constants.MONSTER_STATUS_BAR_WIDTH,
-                                       constants.MONSTER_STATUS_BAR_HEIGHT)
-
-        self._monster_status_stack = gui.EntityStatusList(monster_status_rect,
-                                                          vertical_space=0)
+        entity_stack_panel = gui.StackPanelVertical((0, 0))
+        entity_stack_panel.append(gui.EntityStatusList(self.player, constants.MONSTER_STATUS_BAR_WIDTH, vertical_space=0))
+        entity_stack_panel.append(gui.PlayerStatusBox(rectfactory.player_status_rect(), self.player))
+        self.gui_dock = gui.UIDock(rectfactory.full_screen_rect())
+        self.gui_dock.bottom_left = entity_stack_panel
 
         self._message_display = gui.MessageDisplay(rectfactory.message_display_rect())
-
         self.command_list_bar = gui.CommandListPanel(rectfactory.right_side_menu_rect())
 
     def _init_bg(self):
@@ -129,9 +123,8 @@ class GameStateBase(state.State):
         self.prepare_draw_gui()
 
     def prepare_draw_gui(self):
-        self._player_status_box.draw()
+        self.gui_dock.draw()
         self._message_display.draw()
-        self._monster_status_stack.draw()
         self.command_list_bar.draw()
 
     def update(self):
@@ -162,8 +155,7 @@ class GameStateBase(state.State):
         pass
 
     def _update_gui(self):
-        self._monster_status_stack.update(self.player)
-        self._player_status_box.update()
+        self.gui_dock.update()
         self.command_list_bar.update()
 
     def _draw_bg(self):
@@ -228,8 +220,8 @@ class TestGameState(GameStateBase):
         cyclops = monster.Cyclops(self)
         cyclops.mover.try_move((2, 2), self.dungeon_level)
 
-        jerico = monster.Jericho(self)
-        jerico.mover.try_move((56, 14), self.dungeon_level)
+        jericho = monster.Jericho(self)
+        jericho.mover.try_move((56, 14), self.dungeon_level)
 
         for i in range(5):
             ammo = item.Ammunition()
