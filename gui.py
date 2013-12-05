@@ -146,8 +146,7 @@ class UIDock(RectangularUIElement):
         if self.bottom_left:
             self.bottom_left.draw((0, self.height - self.bottom_left.height))
         if self.bottom_right:
-            self.bottom_right.draw((self.width - self.top_right.width,
-                                    self.height - self.bottom_right.height))
+            self.bottom_right.draw((self.width - self.bottom_right.width, self.height - self.bottom_right.height))
 
     def update(self):
         if self.top_left:
@@ -260,6 +259,18 @@ class UIElementList(object):
         for element in self.elements:
             element.update()
 
+    @property
+    def height(self):
+        if len(self.elements) < 1:
+            return 0
+        return max([element.height for element in self.elements])
+
+    @property
+    def width(self):
+        if len(self.elements) < 1:
+            return 0
+        return max([element.width for element in self.elements])
+
 
 class StackPanel(UIElement):
     def __init__(self, offset, margin=geo.zero2d()):
@@ -365,7 +376,7 @@ class CommandListPanel(RectangularUIElement):
         self._stack_panel.append(VerticalSpace(2))
         self._stack_panel.append(self.left_right_adjust("Commands", "Key"))
         self._stack_panel.append(VerticalSpace(2))
-        self._stack_panel.append(self.left_right_adjust("Walk", "Numpad"))
+        self._stack_panel.append(self.left_right_adjust("Walk", "Mouse/Numpad"))
         self._stack_panel.append(self.left_right_adjust("Pick Up/Use", "Space"))
         self._stack_panel.append(self.left_right_adjust("Fire Gun", "f"))
         self._stack_panel.append(self.left_right_adjust("Throw Stone", "s"))

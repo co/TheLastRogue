@@ -80,28 +80,22 @@ def get_menu_with_options(options, state_stack):
 
 
 def inventory_menu(player, state_stack):
-    right_side_menu_rect = rectfactory.right_side_menu_rect()
-    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left)
-    heading = gui.TextBox("Inventory:", geo.zero2d(),
+    menu_stack_panel = gui.StackPanelVertical((0, 0))
+    heading = gui.TextBox("Inventory:", (0, 1),
                           colors.INVENTORY_HEADING,
                           margin=style.menu_theme.margin)
     menu_stack_panel.append(heading)
 
-    inventory_menu_rect = geo.Rect(geo.zero2d(),
-                                   right_side_menu_rect.width,
-                                   right_side_menu_rect.height)
-    inventory_menu = \
-        menu.InventoryMenu(inventory_menu_rect.top_left, player, state_stack,
-                           margin=style.menu_theme.margin)
+    inventory_menu = menu.InventoryMenu((0, 0), player, state_stack, margin=style.menu_theme.margin)
     menu_stack_panel.append(inventory_menu)
+    inventory_menu.update()
 
-    inventory_menu_bg = \
-        gui.StyledRectangle(right_side_menu_rect,
-                            style.menu_theme.rect_style)
+    right_side_menu_rect = geo.Rect((0, 0), constants.RIGHT_SIDE_MENU_WIDTH,  inventory_menu.height + 9)
+    inventory_menu_bg = gui.StyledRectangle(right_side_menu_rect, style.menu_theme.rect_style)
 
-    ui_elements = [inventory_menu_bg, menu_stack_panel]
-    ui_state = state.UIState(gui.UIElementList(ui_elements))
-    return ui_state
+    dock = gui.UIDock(rectfactory.full_screen_rect())
+    dock.bottom_right = gui.UIElementList([inventory_menu_bg, menu_stack_panel])
+    return state.UIState(dock)
 
 
 def item_actions_menu(item, player, state_stack):
