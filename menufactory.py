@@ -82,15 +82,16 @@ def inventory_menu(player, state_stack):
 
 
 def item_actions_menu(item, player, state_stack):
-    right_side_menu_rect = rectfactory.right_side_menu_rect()
-    menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left)
-    heading = gui.TextBox(item.description.name, geo.zero2d(), colors.INVENTORY_HEADING, margin=style.menu_theme.margin)
-    menu_stack_panel.append(heading)
+    menu_stack_panel = gui.StackPanelVertical((2, 2), vertical_space=1)
+    heading_stack = gui.StackPanelHorizontal((0, 1), horizontal_space=1)
+    heading_stack.append(gui.SymbolUIElement((0, 0), item.graphic_char))
+    heading = gui.TextBox(item.description.name, (0, 0), colors.INVENTORY_HEADING)
+    heading_stack.append(heading)
+    menu_stack_panel.append(heading_stack)
 
-    item_actions_menu = menu.ItemActionsMenu(right_side_menu_rect.top_left, item, player, state_stack,
-                                             margin=style.menu_theme.margin)
+    item_actions_menu = menu.ItemActionsMenu((0, 0), item, player, state_stack, margin=(2, 2))
     menu_stack_panel.append(item_actions_menu)
-    inventory_menu_bg = gui.StyledRectangle(right_side_menu_rect, style.menu_theme.rect_style)
+    inventory_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.rogue_classic_theme.rect_style)
 
     dock = gui.UIDock(rectfactory.full_screen_rect())
     ui_elements = [inventory_menu_bg, menu_stack_panel]
@@ -102,7 +103,7 @@ def item_actions_menu(item, player, state_stack):
 def equipment_menu(player, state_stack):
     right_side_menu_rect = rectfactory.right_side_menu_rect()
     menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left)
-    heading = gui.TextBox("Equipment:", geo.zero2d(), colors.INVENTORY_HEADING, margin=style.menu_theme.margin)
+    heading = gui.TextBox("Equipment", geo.zero2d(), colors.INVENTORY_HEADING, margin=style.menu_theme.margin)
     menu_stack_panel.append(heading)
 
     equipment_menu_rect = geo.Rect(geo.zero2d(), right_side_menu_rect.width, right_side_menu_rect.height)

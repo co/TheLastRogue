@@ -19,7 +19,7 @@ class Menu(gui.UIElement):
         self.offset = offset
         self._wrap = True
         self.may_escape = may_escape
-        self._item_stack_panel = gui.StackPanelVertical(geo.zero2d(), vertical_space=vertical_space)
+        self._item_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=vertical_space)
         self.vi_keys_accepted = vi_keys_accepted
 
     @property
