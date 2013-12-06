@@ -120,6 +120,11 @@ class InputActor(Actor):
                                   self.parent.game_state.value)
             self.newly_spent_energy += gametime.single_turn
 
+        elif key == inputhandler.NINE:
+            for entity in self.parent.dungeon_level.value.entities:
+                if not entity is self.parent:
+                    entity.health_modifier.kill()
+            self.newly_spent_energy += gametime.single_turn
         elif key == inputhandler.ZERO:
             self.parent.game_state.value.has_won = True
             self.newly_spent_energy += gametime.single_turn
@@ -164,8 +169,7 @@ class InputActor(Actor):
 
     def try_open_inventory(self):
         if not self.parent.inventory.is_empty():
-            menu = menufactory.inventory_menu(self.parent, self.parent.game_state.
-            value.menu_prompt_stack)
+            menu = menufactory.inventory_menu(self.parent, self.parent.game_state. value.menu_prompt_stack)
             self.parent.game_state.value.start_prompt(menu)
 
     def toggle_command_list(self):

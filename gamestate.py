@@ -71,14 +71,14 @@ class GameStateBase(state.State):
         self._init_caches_and_flags()
 
     def _init_gui(self):
-        entity_stack_panel = gui.StackPanelVertical((0, 0))
-        entity_stack_panel.append(gui.EntityStatusList(self.player, constants.MONSTER_STATUS_BAR_WIDTH, vertical_space=0))
-        entity_stack_panel.append(gui.PlayerStatusBox(rectfactory.player_status_rect(), self.player))
+        self.entity_stack_panel = gui.StackPanelVertical((0, 0))
+        self.entity_stack_panel.append(gui.EntityStatusList(self.player, constants.LEFT_SIDE_BAR_WIDTH, vertical_space=0))
+        self.entity_stack_panel.append(gui.PlayerStatusBox(rectfactory.player_status_rect(), self.player))
         self.gui_dock = gui.UIDock(rectfactory.full_screen_rect())
-        self.gui_dock.bottom_left = entity_stack_panel
-
-        self._message_display = gui.MessageDisplay(rectfactory.message_display_rect())
+        self.gui_dock.bottom_left = self.entity_stack_panel
         self.command_list_bar = gui.CommandListPanel(rectfactory.right_side_menu_rect())
+        self.gui_dock.bottom_right = self.command_list_bar
+        self._message_display = gui.MessageDisplay(rectfactory.message_display_rect())
 
     def _init_bg(self):
         for x in range(constants.GAME_STATE_WIDTH):
@@ -123,9 +123,8 @@ class GameStateBase(state.State):
         self.prepare_draw_gui()
 
     def prepare_draw_gui(self):
-        self.gui_dock.draw()
         self._message_display.draw()
-        self.command_list_bar.draw()
+        self.gui_dock.draw()
 
     def update(self):
         self._message_display.update()
@@ -155,7 +154,7 @@ class GameStateBase(state.State):
         pass
 
     def _update_gui(self):
-        self.gui_dock.update()
+        self.entity_stack_panel.update()
         self.command_list_bar.update()
 
     def _draw_bg(self):
@@ -227,9 +226,9 @@ class TestGameState(GameStateBase):
             ammo = item.Ammunition()
             ammo.mover.try_move((21 + i, 13), self.dungeon_level)
 
-        for i in range(18):
+        for i in range(23):
             knife = item.Knife()
-            knife.mover.try_move((16 + i, 23), self.dungeon_level)
+            knife.mover.try_move((10 + i, 23), self.dungeon_level)
 
 
 class GameState(GameStateBase):

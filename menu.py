@@ -19,8 +19,7 @@ class Menu(gui.UIElement):
         self.offset = offset
         self._wrap = True
         self.may_escape = may_escape
-        self._item_stack_panel =\
-            gui.StackPanelVertical(geo.zero2d(), vertical_space=vertical_space)
+        self._item_stack_panel = gui.StackPanelVertical(geo.zero2d(), vertical_space=vertical_space)
         self.vi_keys_accepted = vi_keys_accepted
 
     @property
@@ -45,7 +44,8 @@ class Menu(gui.UIElement):
         key = inputhandler.handler.get_keypress()
         if key == inputhandler.UP or (self.vi_keys_accepted and key == inputhandler.VI_NORTH):
             self.index_decrease()
-        if key == inputhandler.DOWN or (self.vi_keys_accepted and key == inputhandler.VI_SOUTH) or key == inputhandler.TAB:
+        if(key == inputhandler.DOWN or (self.vi_keys_accepted and key == inputhandler.VI_SOUTH)
+           or key == inputhandler.TAB):
             self.index_increase()
         if key == inputhandler.ENTER or key == inputhandler.SPACE:
             self.activate()
@@ -147,48 +147,35 @@ class MenuOption(gui.UIElement):
 #TODO MenuOption should probably have a graphic representation object
 # this should not be solved by subclassing!
 class MenuOptionWithSymbols(MenuOption):
-    def __init__(self, text, selected_symbol, unselected_symbol,
+    def __init__(self, text, selected_graphic_char, unselected_graphic_char,
                  functions, can_activate=(lambda: True)):
         super(MenuOptionWithSymbols, self).__init__(text, functions, can_activate)
-        self.selected_symbol = selected_symbol
-        self.unselected_symbol = unselected_symbol
+        self.selected_graphic_char = selected_graphic_char
+        self.unselected_graphic_char = unselected_graphic_char
 
     def selected_ui_representation(self):
-        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(),
-                                                    horizontal_space=1)
-        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(),
-                                                    self.selected_symbol,
-                                                    colors.TEXT_SELECTED))
-        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(),
-                                            colors.TEXT_SELECTED))
+        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), horizontal_space=1)
+        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(), self.selected_graphic_char))
+        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(), colors.TEXT_SELECTED))
         return horizontal_stack
 
     def unselected_ui_representation(self):
-        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(),
-                                                    horizontal_space=1)
-        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(),
-                                                    self.unselected_symbol,
-                                                    colors.TEXT_UNSELECTED))
-        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(),
-                                            colors.TEXT_UNSELECTED))
+        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), horizontal_space=1)
+        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(), self.unselected_graphic_char))
+        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(), colors.TEXT_UNSELECTED))
         return horizontal_stack
 
     def inactive_ui_representation(self):
-        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(),
-                                                    horizontal_space=1)
-        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(),
-                                                    self.unselected_symbol,
-                                                    colors.TEXT_INACTIVE))
-        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(),
-                                            colors.TEXT_INACTIVE))
+        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), horizontal_space=1)
+        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(), self.unselected_graphic_char))
+        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(), colors.TEXT_INACTIVE))
         return horizontal_stack
 
 
 class StaticMenu(Menu):
-    def __init__(self, offset, menu_items, state_stack,
-                 margin=geo.zero2d(), vertical_space=1, may_escape=True, vi_keys_accepted=True):
-        super(StaticMenu, self).__init__(offset, state_stack, margin=margin,
-                                         vertical_space=vertical_space,
+    def __init__(self, offset, menu_items, state_stack, margin=geo.zero2d(),
+                 vertical_space=1, may_escape=True, vi_keys_accepted=True):
+        super(StaticMenu, self).__init__(offset, state_stack, margin=margin, vertical_space=vertical_space,
                                          may_escape=may_escape, vi_keys_accepted=vi_keys_accepted)
         self._menu_items = menu_items
         self.try_set_index_to_valid_value()
@@ -206,18 +193,20 @@ class InventoryMenu(Menu):
     def _update_menu_items(self):
         item_rect = geo.Rect(self.parent.offset,
                              self.parent.width, self.parent.height)
-        self._menu_items =\
-            [MenuOption(self._get_item_option_text(item),
-                        [OpenItemActionMenuAction(self._state_stack,
-                                                  item_rect, item,
-                                                  self._player)],
-                        (lambda: (len(item.get_children_with_tag("user_action")) >= 1)))
-             for item in self._player.inventory.get_items_sorted()]
+        self._menu_items = []
+        for item in self._player.inventory.get_items_sorted():
+            menu_item_action = OpenItemActionMenuAction(self._state_stack, item_rect, item, self._player)
+            menu_item_can_activate_function = (lambda: (len(item.get_children_with_tag("user_action")) >= 1))
+            item_icon = item.graphic_char
+            menu_option = MenuOptionWithSymbols(_get_item_option_text(item), item_icon, item_icon, [menu_item_action],
+                                                menu_item_can_activate_function)
+            self._menu_items.append(menu_option)
 
-    def _get_item_option_text(self, item):
-        if item.has_child("stacker"):
-            return item.description.name + " (" + str(item.stacker.size) + ")"
-        return item.description.name
+
+def _get_item_option_text(item):
+    if item.has_child("stacker"):
+        return item.description.name + " (" + str(item.stacker.size) + ")"
+    return item.description.name
 
 
 class OpenItemActionMenuAction(object):

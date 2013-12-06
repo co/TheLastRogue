@@ -32,7 +32,7 @@ class StateStack(object):
     def pop(self):
         state = self._stack.pop()
         state.current_stack = None
-        if (state is self._current_game_state_cache):
+        if state is self._current_game_state_cache:
             self._current_game_state_cache is None
         return state
 
@@ -42,18 +42,16 @@ class StateStack(object):
             self.pop()
 
     def pop_to_main_menu(self):
-        while(len(self._stack) > 1):
+        while len(self._stack) > 1:
             self.pop()
 
 
 class GameMenuStateStack(StateStack):
-    def __init__(self, gamestate):
+    def __init__(self, game_state):
         super(GameMenuStateStack, self).__init__()
-        self._grayout_rectangle =\
-            gui.RectangleChangeColor(rectfactory.full_screen_rect(),
-                                     colors.BLACK)
+        self._grayout_rectangle = gui.RectangleChangeColor(rectfactory.full_screen_rect(), colors.BLACK)
         self._stack = []
-        self._game_state = gamestate
+        self._game_state = game_state
 
     def main_loop(self):
         self._draw_background()

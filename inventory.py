@@ -2,7 +2,7 @@ from compositecore import Leaf
 from item import Ammunition
 from libtcodpy import _CBsp
 
-ITEM_CAPACITY = 16
+ITEM_CAPACITY = 24
 
 
 class Inventory(Leaf):
@@ -27,8 +27,7 @@ class Inventory(Leaf):
         if not item.dungeon_level.value is None:
             success = item.mover.try_remove_from_dungeon()
             if not success:
-                raise Exception("ERROR: Tried to remove item: "
-                                + str(item) + "but could not.")
+                raise Exception("ERROR: Tried to remove item: " + str(item) + "but could not.")
         self._items.append(item)
 
     def try_stack_item(self, stackable_item):

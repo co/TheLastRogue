@@ -1,9 +1,10 @@
 import math
-
 import constants
 from equipment import EquipmentSlots
+import graphic
 import icon
 import inputhandler
+import inventory
 from messenger import messenger
 from console import console
 import colors
@@ -81,11 +82,9 @@ class HorizontalLine(UIElement):
 
 
 class VerticalLine(UIElement):
-    def __init__(self, icon, color_fg, color_bg, height, margin=geo.zero2d()):
+    def __init__(self, graphic_char, height, margin=geo.zero2d()):
         super(VerticalLine, self).__init__(margin)
-        self.icon = icon
-        self.color_bg = color_bg
-        self.color_fg = color_fg
+        self.graphic_char = graphic_char
         self._height = height
 
     @property
@@ -102,12 +101,12 @@ class VerticalLine(UIElement):
         """
         x, y = geo.add_2d(offset, self.margin)
         for i in range(self.height):
-            if not self.icon is None:
-                console.set_symbol((x, y + i), self.icon)
-            if not self.color_bg is None:
-                console.set_color_bg((x, y + i), self.color_bg)
-            if not self.color_fg is None:
-                console.set_color_fg((x, y + i), self.color_fg)
+            if not self.graphic_char.icon is None:
+                console.set_symbol((x, y + i), self.graphic_char.icon)
+            if not self.graphic_char.color_bg is None:
+                console.set_color_bg((x, y + i), self.graphic_char.color_bg)
+            if not self.graphic_char.color_fg is None:
+                console.set_color_fg((x, y + i), self.graphic_char.color_fg)
 
 
 class RectangularUIElement(UIElement):
@@ -139,14 +138,16 @@ class UIDock(RectangularUIElement):
         self.bottom_right = None
 
     def draw(self, offset=geo.zero2d()):
+        the_offset = geo.add_2d(offset, self.margin)
         if self.top_left:
-            self.top_left.draw((0, 0))
+            self.top_left.draw(the_offset)
         if self.top_right:
-            self.top_right.draw((self.width - self.top_right.width, 0))
+            self.top_right.draw(geo.add_2d((self.width - self.top_right.width, 0), the_offset))
         if self.bottom_left:
-            self.bottom_left.draw((0, self.height - self.bottom_left.height))
+            self.bottom_left.draw(geo.add_2d((0, self.height - self.bottom_left.height), the_offset))
         if self.bottom_right:
-            self.bottom_right.draw((self.width - self.bottom_right.width, self.height - self.bottom_right.height))
+            self.bottom_right.draw(
+                geo.add_2d((self.width - self.bottom_right.width, self.height - self.bottom_right.height), the_offset))
 
     def update(self):
         if self.top_left:
@@ -263,6 +264,7 @@ class UIElementList(object):
     def height(self):
         if len(self.elements) < 1:
             return 0
+        print self.elements, max([element.height for element in self.elements])
         return max([element.height for element in self.elements])
 
     @property
@@ -321,9 +323,7 @@ class StackPanelHorizontal(StackPanel):
         element_position = position
         for element in self._elements:
             element.draw(element_position)
-            element_position = geo.add_2d(element_position,
-                                          (element.total_width +
-                                           self.horizontal_space, 0))
+            element_position = geo.add_2d(element_position, (element.total_width + self.horizontal_space, 0))
 
 
 class StackPanelVertical(StackPanel):
@@ -348,15 +348,12 @@ class StackPanelVertical(StackPanel):
         element_position = position
         for element in self._elements:
             element.draw(element_position)
-            element_position = geo.add_2d(element_position,
-                                          (0, element.total_height +
-                                              self.vertical_space))
+            element_position = geo.add_2d(element_position, (0, element.total_height + self.vertical_space))
 
 
 class StackPanelVerticalCentering(StackPanelVertical):
     def __init__(self, offset, margin=geo.zero2d(), vertical_space=0):
-        super(StackPanelVerticalCentering, self).__init__(offset,
-                                                          margin=margin)
+        super(StackPanelVerticalCentering, self).__init__(offset, margin=margin, vertical_space=vertical_space)
 
     def draw(self, offset=geo.zero2d()):
         root_x, y = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
@@ -373,9 +370,9 @@ class CommandListPanel(RectangularUIElement):
         self._stack_panel = StackPanelVertical(geo.add_2d(rect.top_left, (2, 2)), vertical_space=1)
         self.active = True
 
-        self._stack_panel.append(VerticalSpace(2))
+        self._stack_panel.append(VerticalSpace(1))
         self._stack_panel.append(self.left_right_adjust("Commands", "Key"))
-        self._stack_panel.append(VerticalSpace(2))
+        self._stack_panel.append(VerticalSpace(1))
         self._stack_panel.append(self.left_right_adjust("Walk", "Mouse/Numpad"))
         self._stack_panel.append(self.left_right_adjust("Pick Up/Use", "Space"))
         self._stack_panel.append(self.left_right_adjust("Fire Gun", "f"))
@@ -383,17 +380,16 @@ class CommandListPanel(RectangularUIElement):
         self._stack_panel.append(self.left_right_adjust("Wait/Rest", "r"))
         self._stack_panel.append(self.left_right_adjust("Inventory", "i"))
         self._stack_panel.append(self.left_right_adjust("Context menu", "Enter"))
-        self._stack_panel.append(VerticalSpace(2))
-        self._stack_panel.append(self.left_right_adjust("Print Screen", "@"))
+        self._stack_panel.append(VerticalSpace(1))
+        self._stack_panel.append(self.left_right_adjust("Print Screen", "F12"))
         self._stack_panel.append(self.left_right_adjust("Toggle View", "Tab"))
-        self._stack_panel.append(self.left_right_adjust("Quit", "Esc"))
+        self._stack_panel.append(self.left_right_adjust("Save/Quit", "Esc"))
 
-        self._inactive_line = VerticalLine(icon.V_LINE, colors.BLACK, colors.BLUE_D,
-                                           settings.WINDOW_HEIGHT, (settings.WINDOW_WIDTH - 1, 0))
-        text = "Press Tab to See Commands"
-        offset = (settings.WINDOW_WIDTH - 1, (settings.WINDOW_HEIGHT - len(text)) / 2)
-        self._inactive_text = VerticalTextBox(text, offset, colors.LIGHT_BLUE)
-
+        self._inactive_line = VerticalLine(graphic.GraphicChar(colors.INTERFACE_BG, colors.BLACK, icon.V_LINE),
+                                           self.height, (self.width - 1, 0))
+        text = "Press Tap to see Commands"
+        offset = (self.width - 1, (self.height - len(text)) / 2)
+        self._inactive_text = VerticalTextBox(text, offset, colors.GRAY_D)
 
     def left_right_adjust(self, text1, text2):
         return TextBox(text1 + text2.rjust(self.rect.width - len(text1) - 4), (0, 0), colors.GRAY)
@@ -415,25 +411,25 @@ class PlayerStatusBox(RectangularUIElement):
 
         element_width = self.width - style.interface_theme.margin[0] * 2 - 2
         player_hp = player.health.hp
-        hp_bar = CounterBarWithNumbers(player_hp, element_width,
-                                       colors.HP_BAR_FULL, colors.HP_BAR_EMPTY,
-                                       colors.WHITE, colors.PINK, colors.HP_BAR_EMPTY,
-                                       colors.CYAN, colors.BLACK)
-        heart = SymbolUIElement((0, 0), icon.HEALTH_STAT, colors.RED)
+        hp_bar = CounterBarWithNumbers(player_hp, element_width, colors.HP_BAR_FULL, colors.HP_BAR_EMPTY,
+                                       colors.WHITE, colors.PINK, colors.HP_BAR_EMPTY, colors.CYAN, colors.BLACK)
+        heart = SymbolUIElement((0, 0), graphic.GraphicChar(None, colors.RED, icon.HEALTH_STAT))
 
         self._hp_stack_panel = StackPanelHorizontal((0, 0), (0, 1), 1)
         self._hp_stack_panel.append(heart)
         self._hp_stack_panel.append(hp_bar)
 
-        self._rectangle_bg = \
-            StyledRectangle(rect, style.interface_theme.rect_style,
+        self._rectangle_bg = StyledRectangle(rect, style.interface_theme.rect_style,
                             player.description.name, player.graphic_char.color_fg)
 
         self._status_stack_panel.append(self._hp_stack_panel)
-        items_row = StackPanelHorizontal((0, 0), (2, 1), 1)
-        items_row.append(InventoryBox(player.inventory, geo.Rect((0, 0), 10, 6)))
-        items_row.append(EquipmentBox(player.equipment, geo.Rect((0, 0), 5, 6)))
-        self._status_stack_panel.append(items_row)
+        inner_margin = 3
+        item_row_height = 6
+        dock = UIDock(geo.Rect((0, 0), self.width - inner_margin * 2, item_row_height), margin=(2, 1))
+
+        dock.bottom_left = InventoryBox(player.inventory, item_row_height - 2)
+        dock.bottom_right = EquipmentBox(player.equipment, geo.Rect((0, 0), 5, 6))
+        self._status_stack_panel.append(dock)
 
         self.depth_text_box = TextBox("", (2, 0), colors.BLUE_D)
         self._status_stack_panel.append(self.depth_text_box)
@@ -448,8 +444,7 @@ class PlayerStatusBox(RectangularUIElement):
 
     def update(self):
         self._status_stack_panel.update()
-        self.depth_text_box.text = ("Depth:" +
-                                    str(self._player.dungeon_level.value.depth + 1).rjust(4))
+        self.depth_text_box.text = ("Depth:" + str(self._player.dungeon_level.value.depth + 1).rjust(4))
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(offset, self.margin)
@@ -458,17 +453,16 @@ class PlayerStatusBox(RectangularUIElement):
 
 
 class EquipmentBox(RectangularUIElement):
-    POSITIONS = {
-        EquipmentSlots.HEADGEAR: (2, 1),
-        EquipmentSlots.LEFT_RING: (1, 2),
-        EquipmentSlots.AMULET: (2, 2),
-        EquipmentSlots.RIGHT_RING: (3, 2),
-        EquipmentSlots.MELEE_WEAPON: (1, 3),
-        EquipmentSlots.ARMOR: (2, 3),
-        EquipmentSlots.RANGED_WEAPON: (3, 3),
-        EquipmentSlots.BOOTS: (2, 4)}
+    POSITIONS = {EquipmentSlots.HEADGEAR: (2, 1),
+                 EquipmentSlots.LEFT_RING: (1, 2),
+                 EquipmentSlots.AMULET: (2, 2),
+                 EquipmentSlots.RIGHT_RING: (3, 2),
+                 EquipmentSlots.MELEE_WEAPON: (1, 3),
+                 EquipmentSlots.ARMOR: (2, 3),
+                 EquipmentSlots.RANGED_WEAPON: (3, 3),
+                 EquipmentSlots.BOOTS: (2, 4)}
 
-    def __init__(self, equipment, rect, margin=geo.zero2d(), vertical_space=0):
+    def __init__(self, equipment, rect, margin=geo.zero2d()):
         super(EquipmentBox, self).__init__(rect, margin=margin)
         self._equipment = equipment
         self._bg_rect = StyledRectangle(rect, style.MinimalStyle())
@@ -479,12 +473,10 @@ class EquipmentBox(RectangularUIElement):
         for slot in EquipmentSlots.ALL:
             if self._equipment.slot_is_equiped(slot):
                 item = self._equipment.get(slot)
-                graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot],
-                                               item.graphic_char.icon,
-                                               item.graphic_char.color_fg)
+                graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot], item.graphic_char)
             else:
                 graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot],
-                                               slot.icon, colors.BLUE_D)
+                                               graphic.GraphicChar(None, colors.BLUE_D, slot.icon))
             self._equipment_slot_items.append(graphic_item)
 
     def draw(self, offset=geo.zero2d()):
@@ -496,12 +488,13 @@ class EquipmentBox(RectangularUIElement):
 
 
 class InventoryBox(RectangularUIElement):
-    def __init__(self, inventory, rect, margin=geo.zero2d(), vertical_space=0):
-        super(InventoryBox, self).__init__(rect, margin=margin)
-        self._inventory = inventory
-        self._inventory_width = rect.width - 2
-        self._inventory_height = rect.height - 2
-        self._bg_rect = StyledRectangle(rect, style.ChestStyle())
+    def __init__(self, the_inventory, height, margin=geo.zero2d()):
+        super(InventoryBox, self).__init__(geo.Rect((0, 0), inventory.ITEM_CAPACITY / height + 2, height + 2),
+                                           margin=margin)
+        self._inventory = the_inventory
+        self._inventory_height = self.rect.height - 2
+        self._inventory_width = self.rect.width - 2
+        self._bg_rect = StyledRectangle(self.rect, style.ChestStyle())
         self.graphic_char_items = []
 
     def update(self):
@@ -509,8 +502,7 @@ class InventoryBox(RectangularUIElement):
         self.graphic_char_items = []
         for idx, item in enumerate(items):
             offset = (idx % self._inventory_width, idx / self._inventory_width)
-            graphic_item = SymbolUIElement(offset, item.graphic_char.icon,
-                                           item.graphic_char.color_fg)
+            graphic_item = SymbolUIElement(offset, item.graphic_char)
             self.graphic_char_items.append(graphic_item)
 
     def draw(self, offset=geo.zero2d()):
@@ -559,8 +551,7 @@ class EntityStatus(UIElement):
                                         colors.HP_BAR_FULL,
                                         colors.HP_BAR_EMPTY)
 
-        entity_symbol = SymbolUIElement((0, 0), entity.graphic_char.icon,
-                                        entity.graphic_char.color_fg)
+        entity_symbol = SymbolUIElement((0, 0), entity.graphic_char)
 
         self._hp_stack_panel = StackPanelHorizontal((0, 0), (1, 1), 1)
         self._hp_stack_panel.append(entity_symbol)
@@ -785,12 +776,10 @@ class VerticalTextBox(UIElement):
 
 
 class SymbolUIElement(UIElement):
-    def __init__(self, offset, the_symbol, color_fg, color_bg=None, margin=(0, 0)):
+    def __init__(self, offset, graphic_char, margin=(0, 0)):
         super(SymbolUIElement, self).__init__(margin)
         self.offset = offset
-        self.color_fg = color_fg
-        self.color_bg = color_bg
-        self.icon = the_symbol
+        self.graphic_char = graphic_char
 
     @property
     def height(self):
@@ -801,13 +790,12 @@ class SymbolUIElement(UIElement):
         return 1
 
     def draw(self, offset=geo.zero2d()):
-        x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
-                                     self.margin))
-        if not self.color_fg is None:
-            console.set_color_fg((x, y), self.color_fg)
-        if not self.color_bg is None:
-            console.set_color_bg((x, y), self.color_bg)
-        console.set_symbol((x, y), self.icon)
+        x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
+        if not self.graphic_char.color_fg is None:
+            console.set_color_fg((x, y), self.graphic_char.color_fg)
+        if not self.graphic_char.color_bg is None:
+            console.set_color_bg((x, y), self.graphic_char.color_bg)
+        console.set_symbol((x, y), self.graphic_char.icon)
 
 
 class TypeWriter(UIElement):

@@ -493,6 +493,7 @@ class StrengthBonusEquipEffect(EquippedEffect):
         """
         entity.add_spoof_child(DataPointBonusSpoof("strength", self.strength_bonus))
 
+
 class StealthEquipEffect(EquippedEffect):
     def __init__(self, stealth_bonus=3):
         super(StealthEquipEffect, self).__init__()
@@ -502,8 +503,8 @@ class StealthEquipEffect(EquippedEffect):
         """
         Causes the entity that equips this item stealth more often.
         """
-        print "new stealth!"
         entity.add_spoof_child(DataPointBonusSpoof("stealth", self.stealth_bonus))
+
 
 class SetInvisibilityFlagEquippedEffect(EquippedEffect):
     def __init__(self):
@@ -513,10 +514,10 @@ class SetInvisibilityFlagEquippedEffect(EquippedEffect):
         """
         Causes the entity that equips this item to become invisible.
         """
-        invisibile_flag = entity.StatusFlags.INVISIBILE
+        invisible_flag = entity.StatusFlags.INVISIBILE
         invisibility_effect = entityeffect. \
             StatusAdder(self.parent, self.parent,
-                        invisibile_flag, time_to_live=1)
+                        invisible_flag, time_to_live=1)
         self.parent.effect_queue.add(invisibility_effect)
 
 

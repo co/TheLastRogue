@@ -62,8 +62,7 @@ class ConsoleVisual(object):
 
     def print_text_vertical(self, position, text):
         for idx, char in enumerate(text):
-            self.set_color_fg((position[0], position[1] + idx),
-                              self.get_default_color_fg())
+            self.set_color_fg((position[0], position[1] + idx), self.get_default_color_fg())
             self.set_symbol((position[0], position[1] + idx), char)
 
     def set_colors_and_symbol(self, position, color_fg, color_bg, icon, console=0):

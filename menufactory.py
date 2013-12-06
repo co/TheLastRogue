@@ -5,7 +5,9 @@ import dungeoncreatorvisualizer
 import equipment
 import gamestate
 import geometry as geo
+import graphic
 import gui
+import inventory
 import menu
 import rectfactory
 import settings
@@ -30,48 +32,32 @@ def _main_menu(ui_state, state_stack, player_name_func):
     dungeon_visualizer_function = \
         lambda: ui_state.current_stack.push(dungeoncreatorvisualizer.DungeonCreatorVisualizer())
 
-    continue_game_option = \
-        menu.MenuOptionWithSymbols("Continue",
-                                   icon.GUN, " ",
-                                   [continue_game_function],
-                                   (lambda: gamestate.is_there_a_saved_game()))
+    no_icon = graphic.GraphicChar(None, colors.BLACK, " ")
+    gun_icon = graphic.GraphicChar(None, colors.WHITE, icon.GUN)
+    continue_game_option = menu.MenuOptionWithSymbols("Continue", gun_icon, no_icon, [continue_game_function],
+                                                      (lambda: gamestate.is_there_a_saved_game()))
 
     start_game_option = \
-        menu.MenuOptionWithSymbols("Start Dungeon",
-                                   icon.GUN, " ",
-                                   [start_game_function, save_game_function])
+        menu.MenuOptionWithSymbols("Start Dungeon", gun_icon, no_icon, [start_game_function, save_game_function])
     start_test_game_option = \
-        menu.MenuOptionWithSymbols("Start Test Dungeon",
-                                   icon.GUN, " ",
-                                   [start_test_game_function])
+        menu.MenuOptionWithSymbols("Start Test Dungeon", gun_icon, no_icon, [start_test_game_function])
     dungeon_creator_option = \
-        menu.MenuOptionWithSymbols("Dungeon Creator",
-                                   icon.GUN, " ",
-                                   [dungeon_visualizer_function])
-    quit_option = menu.MenuOptionWithSymbols("Quit", icon.GUN,
-                                             " ", [quit_game_function])
+        menu.MenuOptionWithSymbols("Dungeon Creator", gun_icon, no_icon, [dungeon_visualizer_function])
+    quit_option = menu.MenuOptionWithSymbols("Quit", gun_icon, no_icon, [quit_game_function])
 
     menu_items = [continue_game_option, start_game_option, start_test_game_option,
                   dungeon_creator_option, quit_option]
 
     temp_position = (0, 0)
-    return menu.StaticMenu(temp_position,
-                           menu_items, state_stack,
-                           margin=style.menu_theme.margin,
-                           vertical_space=1,
-                           vi_keys_accepted=False)
+    return menu.StaticMenu(temp_position, menu_items, state_stack, margin=style.menu_theme.margin,
+                           vertical_space=1, vi_keys_accepted=False)
 
 
 def get_menu_with_options(options, state_stack):
     border = 4
     temp_position = (-1, -1)
-    main_menu = menu.StaticMenu(temp_position,
-                                options, state_stack,
-                                margin=style.menu_theme.margin,
-                                vertical_space=1)
-    main_menu_rect = \
-        rectfactory.ratio_of_screen_rect(main_menu.width + border,
-                                         main_menu.height + border - 1, 0.5, 0.8)
+    main_menu = menu.StaticMenu(temp_position, options, state_stack, margin=style.menu_theme.margin, vertical_space=1)
+    main_menu_rect = rectfactory.ratio_of_screen_rect(main_menu.width + border, main_menu.height + border - 1, 0.5, 0.8)
     main_menu.offset = main_menu_rect.top_left
 
     background_rect = get_menu_background(main_menu_rect)
@@ -80,18 +66,15 @@ def get_menu_with_options(options, state_stack):
 
 
 def inventory_menu(player, state_stack):
-    menu_stack_panel = gui.StackPanelVertical((0, 0))
-    heading = gui.TextBox("Inventory:", (0, 1),
-                          colors.INVENTORY_HEADING,
-                          margin=style.menu_theme.margin)
+    menu_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=0)
+    heading = gui.TextBox("Inventory", (2, 1), colors.INVENTORY_HEADING, margin=style.menu_theme.margin)
     menu_stack_panel.append(heading)
 
-    inventory_menu = menu.InventoryMenu((0, 0), player, state_stack, margin=style.menu_theme.margin)
+    inventory_menu = menu.InventoryMenu((0, 0), player, state_stack, (2, 1), vertical_space=0)
     menu_stack_panel.append(inventory_menu)
     inventory_menu.update()
 
-    right_side_menu_rect = geo.Rect((0, 0), constants.RIGHT_SIDE_MENU_WIDTH,  inventory_menu.height + 9)
-    inventory_menu_bg = gui.StyledRectangle(right_side_menu_rect, style.menu_theme.rect_style)
+    inventory_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.MinimalChestStyle())
 
     dock = gui.UIDock(rectfactory.full_screen_rect())
     dock.bottom_right = gui.UIElementList([inventory_menu_bg, menu_stack_panel])
@@ -101,44 +84,30 @@ def inventory_menu(player, state_stack):
 def item_actions_menu(item, player, state_stack):
     right_side_menu_rect = rectfactory.right_side_menu_rect()
     menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left)
-    heading = gui.TextBox(item.description.name, geo.zero2d(),
-                          colors.INVENTORY_HEADING,
-                          margin=style.menu_theme.margin)
+    heading = gui.TextBox(item.description.name, geo.zero2d(), colors.INVENTORY_HEADING, margin=style.menu_theme.margin)
     menu_stack_panel.append(heading)
 
-    item_actions_menu_rect = geo.Rect(geo.zero2d(),
-                                      right_side_menu_rect.width,
-                                      right_side_menu_rect.height)
-    item_actions_menu = \
-        menu.ItemActionsMenu(item_actions_menu_rect.top_left,
-                             item, player, state_stack,
-                             margin=style.menu_theme.margin)
+    item_actions_menu = menu.ItemActionsMenu(right_side_menu_rect.top_left, item, player, state_stack,
+                                             margin=style.menu_theme.margin)
     menu_stack_panel.append(item_actions_menu)
+    inventory_menu_bg = gui.StyledRectangle(right_side_menu_rect, style.menu_theme.rect_style)
 
-    inventory_menu_bg = \
-        gui.StyledRectangle(right_side_menu_rect,
-                            style.menu_theme.rect_style)
-
+    dock = gui.UIDock(rectfactory.full_screen_rect())
     ui_elements = [inventory_menu_bg, menu_stack_panel]
-    ui_state = state.UIState(gui.UIElementList(ui_elements))
+    dock.bottom_right = gui.UIElementList(ui_elements)
+    ui_state = state.UIState(dock)
     return ui_state
 
 
 def equipment_menu(player, state_stack):
     right_side_menu_rect = rectfactory.right_side_menu_rect()
     menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left)
-    heading = gui.TextBox("Equipment:", geo.zero2d(),
-                          colors.INVENTORY_HEADING,
-                          margin=style.menu_theme.margin)
+    heading = gui.TextBox("Equipment:", geo.zero2d(), colors.INVENTORY_HEADING, margin=style.menu_theme.margin)
     menu_stack_panel.append(heading)
 
-    equipment_menu_rect = geo.Rect(geo.zero2d(),
-                                   right_side_menu_rect.width,
-                                   right_side_menu_rect.height)
+    equipment_menu_rect = geo.Rect(geo.zero2d(), right_side_menu_rect.width, right_side_menu_rect.height)
 
-    equipment_menu_bg = \
-        gui.StyledRectangle(right_side_menu_rect,
-                            style.menu_theme.rect_style)
+    equipment_menu_bg = gui.StyledRectangle(right_side_menu_rect, style.menu_theme.rect_style)
 
     equipment_options = []
     #slots_with_items = [slot for slot in equipment.EquipmentSlots.ALL
@@ -151,13 +120,9 @@ def equipment_menu(player, state_stack):
             item_name = "-"
         else:
             item_name = item_in_slot.description.name
-        equipment_options.append(menu.MenuOptionWithSymbols(item_name,
-                                                            slot.icon,
-                                                            slot.icon,
-                                                            [option_func]))
+        equipment_options.append(menu.MenuOptionWithSymbols(item_name, slot.icon, slot.icon, [option_func]))
 
-    resulting_menu = menu.StaticMenu(equipment_menu_rect.top_left,
-                                     equipment_options, state_stack,
+    resulting_menu = menu.StaticMenu(equipment_menu_rect.top_left, equipment_options, state_stack,
                                      margin=style.menu_theme.margin)
     menu_stack_panel.append(resulting_menu)
 
@@ -174,43 +139,32 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
     right_side_menu_rect = rectfactory.right_side_menu_rect()
     menu_stack_panel = gui.StackPanelVertical(right_side_menu_rect.top_left)
 
-    heading = gui.TextBox("Change : " + equipment_slot.name, geo.zero2d(),
-                          colors.INVENTORY_HEADING,
+    heading = gui.TextBox("Change : " + equipment_slot.name, geo.zero2d(), colors.INVENTORY_HEADING,
                           margin=style.menu_theme.margin)
     menu_stack_panel.append(heading)
 
-    equipment_menu_rect = geo.Rect(geo.zero2d(),
-                                   right_side_menu_rect.width,
-                                   right_side_menu_rect.height)
-    items = \
-        player.inventory.items_of_equipment_type(equipment_slot.equipment_type)
+    equipment_menu_rect = geo.Rect(geo.zero2d(), right_side_menu_rect.width, right_side_menu_rect.height)
+    items = player.inventory.items_of_equipment_type(equipment_slot.equipment_type)
     re_equip_options = []
     for item in items:
-        reequip_function = \
-            item.reequip_action.delayed_call(source_entity=player,
-                                             target_entity=player,
-                                             equipment_slot=equipment_slot)
+        reequip_function = item.reequip_action.delayed_call(source_entity=player, target_entity=player,
+                                                            equipment_slot=equipment_slot)
         stack_pop_function = menu.StackPopFunction(state_stack, 3)
         functions = [reequip_function, stack_pop_function]
-        re_equip_options.append(menu.MenuOption(item.description.name,
-                                                functions))
+        re_equip_options.append(menu.MenuOption(item.description.name, functions))
 
-    unequip_function = \
-        UnequipAction().delayed_call(source_entity=player,
-                                     target_entity=player,
-                                     equipment_slot=equipment_slot)
+    unequip_function = UnequipAction().delayed_call(source_entity=player, target_entity=player,
+                                                    equipment_slot=equipment_slot)
     stack_pop_function = menu.StackPopFunction(state_stack, 3)
     functions = [unequip_function, stack_pop_function]
 
     re_equip_options.append(menu.MenuOption("- None -", functions))
 
-    resulting_menu = menu.StaticMenu(equipment_menu_rect.top_left,
-                                     re_equip_options, state_stack,
+    resulting_menu = menu.StaticMenu(equipment_menu_rect.top_left, re_equip_options, state_stack,
                                      margin=style.menu_theme.margin)
     menu_stack_panel.append(resulting_menu)
 
-    equipment_menu_bg = gui.StyledRectangle(right_side_menu_rect,
-                                            style.menu_theme.rect_style)
+    equipment_menu_bg = gui.StyledRectangle(right_side_menu_rect, style.menu_theme.rect_style)
 
     ui_elements = [equipment_menu_bg, menu_stack_panel]
     ui_state = state.UIState(gui.UIElementList(ui_elements))
@@ -218,37 +172,28 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
 
 
 def get_menu_background(rectangle):
-    background_rect = \
-        gui.StyledRectangle(rectangle,
-                            style.menu_theme.rect_style)
+    background_rect = gui.StyledRectangle(rectangle, style.menu_theme.rect_style)
     return background_rect
 
 
 def context_menu(player, state_stack):
-    current_dungeon_feature = \
-        (player.dungeon_level.value.
-         get_tile(player.position.value).get_dungeon_feature())
+    current_dungeon_feature = (player.dungeon_level.value. get_tile(player.position.value).get_dungeon_feature())
     context_options = []
     stack_pop_function = menu.BackToGameFunction(state_stack)
     if not current_dungeon_feature is None:
         context_options.extend(get_dungeon_feature_menu_options(player, stack_pop_function))
 
     inventory_menu_opt = inventory_menu(player, state_stack)
-    open_inventory_option = \
-        menu.MenuOption("Inventory",
-                        [lambda: state_stack.push(inventory_menu_opt)],
-                        (lambda: not player.inventory.is_empty()))
+    open_inventory_option = menu.MenuOption("Inventory", [lambda: state_stack.push(inventory_menu_opt)],
+                                             (lambda: not player.inventory.is_empty()))
     context_options.append(open_inventory_option)
 
     equipment_menu_opt = equipment_menu(player, state_stack)
-    open_equipment_option = \
-        menu.MenuOption("Equipment",
-                        [lambda: state_stack.push(equipment_menu_opt)])
+    open_equipment_option = menu.MenuOption("Equipment", [lambda: state_stack.push(equipment_menu_opt)])
     context_options.append(open_equipment_option)
 
     context_menu_rect = rectfactory.center_of_screen_rect(16, 8)
-    resulting_menu = menu.StaticMenu(context_menu_rect.top_left,
-                                     context_options, state_stack,
+    resulting_menu = menu.StaticMenu(context_menu_rect.top_left, context_options, state_stack,
                                      margin=style.menu_theme.margin)
     background_rect = get_menu_background(context_menu_rect)
 
@@ -289,7 +234,7 @@ def title_screen(state_stack):
 
     vspace = gui.VerticalSpace(15)
 
-    hero_name_typewriter = gui.TypeWriter((0, 0), colors.WHITE, constants.MONSTER_STATUS_BAR_WIDTH - 4,
+    hero_name_typewriter = gui.TypeWriter((0, 0), colors.WHITE, constants.LEFT_SIDE_BAR_WIDTH - 4,
                                           default_text="Roland")
 
     name_heading = gui.TextBox("Name:", (0, 0), colors.CYAN_D, (0, 1))

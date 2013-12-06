@@ -141,6 +141,14 @@ class ChestStyle(RectangleStyle):
         self.title_separator_right = self.top
 
 
+class MinimalChestStyle(ChestStyle):
+    def __init__(self):
+        super(MinimalChestStyle, self).__init__()
+        light = colors.RED_D
+        dark = colors.DARK_BROWN
+        self.center = GrahicChar(dark, light, " ")
+
+
 class MinimalStyle(RectangleStyle):
     def __init__(self):
         bg = colors.INTERFACE_BG

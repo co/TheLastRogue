@@ -12,17 +12,9 @@ class GraphicChar(Leaf):
     def __init__(self, color_bg, color_fg, icon):
         super(GraphicChar, self).__init__()
         self.component_type = "graphic_char"
-        self._icon = icon
         self._color_bg = color_bg
         self._color_fg = color_fg
-
-    @property
-    def icon(self):
-        return self._icon
-
-    @icon.setter
-    def icon(self, value):
-        self._icon = value
+        self._icon = icon
 
     @property
     def color_bg(self):
@@ -39,6 +31,14 @@ class GraphicChar(Leaf):
     @color_fg.setter
     def color_fg(self, value):
         self._color_fg = value
+
+    @property
+    def icon(self):
+        return self._icon
+
+    @icon.setter
+    def icon(self, value):
+        self._icon = value
 
     def copy(self):
         """

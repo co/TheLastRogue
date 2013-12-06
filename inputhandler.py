@@ -108,7 +108,7 @@ controls = {
 
     'f': FIRE,
     's': STONE,
-    '@': PRINTSCREEN,
+    libtcod.KEY_F12: PRINTSCREEN,
 
     libtcod.KEY_ENTER: ENTER,
     libtcod.KEY_ESCAPE: ESCAPE,
