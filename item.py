@@ -313,9 +313,7 @@ class LeatherArmor(Armor):
     def __init__(self):
         super(LeatherArmor, self).__init__()
         self.add_child(Description("Leather Armor",
-                                   "A worn leather armor, "
-                                   "it's old, but should still "
-                                   "protect you from some damage."))
+                                   "A worn leather armor. It's old, but should still protect you from some damage."))
         self.add_child(Weight(10))
         self.add_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
         self.add_child(BlockDamageEquippedEffect(1, 3, [DamageTypes.PHYSICAL]))
@@ -330,7 +328,7 @@ class LeatherBoots(Armor):
     def __init__(self):
         super(LeatherBoots, self).__init__()
         self.add_child(Description("Leather Boots",
-                                   "A worn pair of boots, mud covers most of the leather.."))
+                                   "A worn pair of boots, dry mud covers most of the leather."))
         self.add_child(Weight(4))
         self.add_child(GraphicChar(None, colors.ORANGE_D, icon.BOOTS))
         self.add_child(BlockDamageEquippedEffect(1, 2, [DamageTypes.PHYSICAL]))
@@ -381,7 +379,7 @@ class Sword(Composite):
         self.add_child(DungeonLevel())
         self.add_child(Mover())
         self.add_child(Description("Iron Sword",
-                                   "This old blade has seen some, "
+                                   "This old blade has seen some "
                                    "better days, it's as sharp as "
                                    "ever tough."))
         self.add_child(GraphicChar(None, colors.GRAY, icon.SWORD))
@@ -403,8 +401,7 @@ class Knife(Sword):
     def __init__(self):
         super(Knife, self).__init__()
         self.description.name = "Knife"
-        self.description.description = "A trusty knife," \
-                                       "small and precise but will only inflict small wounds."
+        self.description.description = "A trusty knife, small and precise but will only inflict small wounds."
         self.graphic_char.icon = icon.KNIFE
         self.weight.value = 6
         self.hit.value = 21

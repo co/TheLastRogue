@@ -93,14 +93,21 @@ def inventory_menu(player, state_stack):
     heading = gui.TextBox("Inventory", (2, 1), colors.INVENTORY_HEADING, margin=style.menu_theme.margin)
     menu_stack_panel.append(heading)
 
-    inventory_menu = menu.InventoryMenu((0, 0), player, state_stack, (2, 1), vertical_space=0)
+    description_card = gui.DescriptionCard(geo.Rect((0, 0), 40, 10), style.rogue_classic_theme)
+    inventory_menu = menu.InventoryMenu((0, 0), player, state_stack, description_card, (2, 1), vertical_space=0)
     menu_stack_panel.append(inventory_menu)
+
     inventory_menu.update()
 
     inventory_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.MinimalChestStyle())
+    inventory_gui = gui.UIElementList([inventory_menu_bg, menu_stack_panel])
+
+    inventory_stack_panel = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_BOTTOM)
+    inventory_stack_panel.append(description_card)
+    inventory_stack_panel.append(inventory_gui)
 
     dock = gui.UIDock(rectfactory.full_screen_rect())
-    dock.bottom_right = gui.UIElementList([inventory_menu_bg, menu_stack_panel])
+    dock.bottom_right = inventory_stack_panel
     return state.UIState(dock)
 
 
@@ -245,7 +252,7 @@ def get_dungeon_feature_menu_options(player, stack_pop_function):
 
 
 def title_screen(state_stack):
-    title_stack_panel = gui.StackPanelVerticalCentering((0, 0))
+    title_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
     line = gui.HorizontalLine(icon.H_LINE, colors.GRAY,
                               colors.WHITE, settings.WINDOW_WIDTH)
     the_text = gui.TextBox("T H E", (0, 0), colors.BLACK, (0, 1))
@@ -307,7 +314,7 @@ def type_writer_highlight_update_function(elements, menu, active_fg_color, inact
 
 
 def victory_screen(state_stack):
-    victory_stack_panel = gui.StackPanelVerticalCentering((0, 0))
+    victory_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
     line = gui.HorizontalLine(icon.H_LINE, colors.YELLOW,
                               None, settings.WINDOW_WIDTH)
     victory_text = gui.TextBox("A WINNER IS YOU", (0, 0), colors.WHITE)
@@ -342,7 +349,7 @@ def victory_screen(state_stack):
 
 
 def game_over_screen(state_stack):
-    game_over_stack_panel = gui.StackPanelVerticalCentering((0, 0))
+    game_over_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
     red_line = gui.HorizontalLine(icon.H_LINE, colors.RED,
                                   colors.BLACK, settings.WINDOW_WIDTH)
     game_over_text = gui.TextBox("YOU DIED", (0, 0), colors.RED)

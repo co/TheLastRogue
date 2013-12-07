@@ -15,7 +15,7 @@ class Menu(gui.UIElement):
         super(Menu, self).__init__(margin)
         self._menu_items = []
         self._state_stack = state_stack
-        self.selected_index = 0
+        self._selected_index = 0
         self.offset = offset
         self._wrap = True
         self.may_escape = may_escape
@@ -33,6 +33,16 @@ class Menu(gui.UIElement):
     @property
     def height(self):
         return self._item_stack_panel.height
+
+    @property
+    def selected_index(self):
+        return self._selected_index
+
+    @selected_index.setter
+    def selected_index(self, value):
+        if not value is self._selected_index and not value is None:
+            self._selected_index = value
+            self._signal_new_index()
 
     def update(self):
         self._recreate_option_list()
@@ -111,26 +121,27 @@ class Menu(gui.UIElement):
             return
         if self._wrap:
             # Will behave strangely for when offset is less than -menu_size
-            self.selected_index =\
-                (offset + self.selected_index + len(self._menu_items))\
-                % len(self._menu_items)
+            self.selected_index = (offset + self.selected_index + len(self._menu_items)) % len(self._menu_items)
         else:
-            self.selected_index = clamp(offset + self.selected_index, 0,
-                                         len(self._menu_items) - 1)
+            self.selected_index = clamp(offset + self.selected_index, 0, len(self._menu_items) - 1)
 
     def draw(self, offset=geo.zero2d()):
         real_offset = geo.int_2d(geo.add_2d(geo.add_2d(self.offset, offset),
                                             self.margin))
         self._item_stack_panel.draw(real_offset)
 
+    def _signal_new_index(self):
+        pass
+
 
 class MenuOption(gui.UIElement):
-    def __init__(self, text, functions, can_activate=(lambda: True)):
+    def __init__(self, text, functions, can_activate=(lambda: True), description=None):
         self._functions = functions
         self.can_activate = can_activate
         self._selected = gui.TextBox(text, geo.zero2d(), colors.TEXT_SELECTED)
         self._unselected = gui.TextBox(text, geo.zero2d(), colors.TEXT_UNSELECTED)
         self._inactive = gui.TextBox(text, geo.zero2d(), colors.TEXT_INACTIVE)
+        self.description = description
 
     def activate(self):
         for function in self._functions:
@@ -159,8 +170,8 @@ class MenuOption(gui.UIElement):
 # this should not be solved by subclassing!
 class MenuOptionWithSymbols(MenuOption):
     def __init__(self, text, selected_graphic_char, unselected_graphic_char,
-                 functions, can_activate=(lambda: True)):
-        super(MenuOptionWithSymbols, self).__init__(text, functions, can_activate)
+                 functions, can_activate=(lambda: True), description=None):
+        super(MenuOptionWithSymbols, self).__init__(text, functions, can_activate, description=description)
         self.selected_graphic_char = selected_graphic_char
         self.unselected_graphic_char = unselected_graphic_char
 
@@ -188,12 +199,13 @@ class StaticMenu(Menu):
 
 
 class InventoryMenu(Menu):
-    def __init__(self, offset, player, state_stack,
+    def __init__(self, offset, player, state_stack, description_card,
                  margin=geo.zero2d(), vertical_space=1, may_escape=True):
         super(InventoryMenu, self).__init__(offset, state_stack, margin=margin,
                                             vertical_space=vertical_space, may_escape=may_escape)
         self._player = player
         self.try_set_index_to_valid_value()
+        self.description_card = description_card
 
     def _update_menu_items(self):
         item_rect = geo.Rect(self.parent.offset,
@@ -204,8 +216,19 @@ class InventoryMenu(Menu):
             menu_item_can_activate_function = (lambda: (len(item.get_children_with_tag("user_action")) >= 1))
             item_icon = item.graphic_char
             menu_option = MenuOptionWithSymbols(_get_item_option_text(item), item_icon, item_icon, [menu_item_action],
-                                                menu_item_can_activate_function)
+                                                menu_item_can_activate_function, description=item.description)
             self._menu_items.append(menu_option)
+        if self.description_card.description is None:
+            self.update_description()
+
+    def update_description(self):
+        print self.selected_index
+        selected_option = self._menu_items[self.selected_index]
+        print "io: ", self.selected_index, selected_option, selected_option.description
+        self.description_card.description = selected_option.description
+
+    def _signal_new_index(self):
+        self.update_description()
 
 
 def _get_item_option_text(item):

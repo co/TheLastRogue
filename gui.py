@@ -272,11 +272,20 @@ class UIElementList(object):
             return 0
         return max([element.width for element in self.elements])
 
+    @property
+    def total_width(self):
+        return self.width
+
+    @property
+    def total_height(self):
+        return self.height
+
 
 class StackPanel(UIElement):
     def __init__(self, offset, margin=geo.zero2d()):
         super(StackPanel, self).__init__(margin=margin)
         self._offset = offset
+        self._elements = []
 
     def append(self, element):
         element.parent = self
@@ -301,10 +310,14 @@ class StackPanel(UIElement):
 
 
 class StackPanelHorizontal(StackPanel):
-    def __init__(self, offset, margin=geo.zero2d(), horizontal_space=0):
+    ALIGN_TOP = 0
+    ALIGN_CENTER = 1
+    ALIGN_BOTTOM = 2
+
+    def __init__(self, offset, margin=geo.zero2d(), horizontal_space=0, alignment=ALIGN_TOP):
         super(StackPanelHorizontal, self).__init__(offset, margin=margin)
         self.horizontal_space = horizontal_space
-        self._elements = []
+        self.alignment = alignment
 
     @property
     def height(self):
@@ -314,22 +327,33 @@ class StackPanelHorizontal(StackPanel):
 
     @property
     def width(self):
-        return sum([element.total_width + self.horizontal_space
-                    for element in self._elements])
+        return sum([element.total_width + self.horizontal_space for element in self._elements])
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         element_position = position
         for element in self._elements:
-            element.draw(element_position)
+            element.draw(geo.add_2d((0, self.get_y_offset(element)), element_position))
             element_position = geo.add_2d(element_position, (element.total_width + self.horizontal_space, 0))
+
+    def get_y_offset(self, element):
+        if self.alignment == StackPanelHorizontal.ALIGN_TOP:
+            return 0
+        elif self.alignment == StackPanelHorizontal.ALIGN_CENTER:
+            return (self.height - element.height + 1) / 2
+        elif self.alignment == StackPanelHorizontal.ALIGN_BOTTOM:
+            return self.height - element.height
 
 
 class StackPanelVertical(StackPanel):
-    def __init__(self, offset, margin=geo.zero2d(), vertical_space=0):
+    ALIGN_LEFT = 0
+    ALIGN_CENTER = 1
+    ALIGN_RIGHT = 2
+
+    def __init__(self, offset, margin=geo.zero2d(), vertical_space=0, alignment=ALIGN_LEFT):
         super(StackPanelVertical, self).__init__(offset, margin=margin)
         self.vertical_space = vertical_space
-        self._elements = []
+        self.alignment = alignment
 
     @property
     def width(self):
@@ -339,27 +363,22 @@ class StackPanelVertical(StackPanel):
 
     @property
     def height(self):
-        return sum([element.total_height + self.vertical_space
-                    for element in self._elements])
+        return sum([element.total_height + self.vertical_space for element in self._elements])
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         element_position = position
         for element in self._elements:
-            element.draw(element_position)
+            element.draw(geo.add_2d((self.get_x_offset(element), 0), element_position))
             element_position = geo.add_2d(element_position, (0, element.total_height + self.vertical_space))
 
-
-class StackPanelVerticalCentering(StackPanelVertical):
-    def __init__(self, offset, margin=geo.zero2d(), vertical_space=0):
-        super(StackPanelVerticalCentering, self).__init__(offset, margin=margin, vertical_space=vertical_space)
-
-    def draw(self, offset=geo.zero2d()):
-        root_x, y = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
-        for element in self._elements:
-            x = root_x + (self.width - element.width + 1) / 2
-            element.draw((x, y))
-            y = y + element.total_height + self.vertical_space
+    def get_x_offset(self, element):
+        if self.alignment == StackPanelVertical.ALIGN_LEFT:
+            return 0
+        elif self.alignment == StackPanelVertical.ALIGN_CENTER:
+            return (self.width - element.width + 1) / 2 - 1
+        elif self.alignment == StackPanelVertical.ALIGN_RIGHT:
+            return self.width - element.width
 
 
 class CommandListPanel(RectangularUIElement):
@@ -386,7 +405,7 @@ class CommandListPanel(RectangularUIElement):
 
         self._inactive_line = VerticalLine(graphic.GraphicChar(colors.INTERFACE_BG, colors.BLACK, icon.V_LINE),
                                            self.height, (self.width - 1, 0))
-        text = "Press Tap to see Commands"
+        text = "Press Tab to see Commands"
         offset = (self.width - 1, (self.height - len(text)) / 2)
         self._inactive_text = VerticalTextBox(text, offset, colors.GRAY_D)
 
@@ -576,6 +595,35 @@ class EntityStatus(UIElement):
         self._status_stack_panel.draw(offset)
 
 
+class DescriptionCard(RectangularUIElement):
+    """
+    GUI Element for displaying a description object as text in a styled rectangle.
+    """
+    def __init__(self, rect, gui_style, heading_fg=colors.WHITE, margin=(0, 0), vertical_space=1):
+        super(DescriptionCard, self).__init__(rect, margin=margin)
+        self._bg_rect = StyledRectangle(self.rect, gui_style.rect_style)
+        self.text_stack_panel = StackPanelVertical(gui_style.margin, vertical_space=vertical_space,
+                                                   alignment=StackPanelVertical.ALIGN_LEFT)
+        self.description = None
+        self.heading_fg = heading_fg
+        self._inner_margin = gui_style.margin
+        self._offset = (0, 0)
+
+    def update(self):
+        self.text_stack_panel.clear()
+        if self.description:
+            self.text_stack_panel.append(TextBox(self.description.name, (0, 0), self.heading_fg))
+            self.text_stack_panel.append(TextBoxWrap(self.description.description, (0, 0), colors.WHITE,
+                                                     self.width - self._inner_margin[0] - 1,
+                                                     self.height - self._inner_margin[1]))
+
+    def draw(self, offset=geo.zero2d()):
+        if self.description:
+            position = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
+            self._bg_rect.draw(position)
+            self.text_stack_panel.draw(position)
+
+
 class MessageDisplay(RectangularUIElement):
     def __init__(self, rect, margin=(0, 0), vertical_space=0):
         super(MessageDisplay, self).__init__(rect, margin=margin)
@@ -739,8 +787,7 @@ class TextBox(UIElement):
         return max([len(line) for line in lines])
 
     def draw(self, offset=geo.zero2d()):
-        x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset),
-                                     self.margin))
+        x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
         if x > settings.WINDOW_WIDTH:
             return
         if x + len(self.text) > settings.WINDOW_WIDTH:
@@ -751,6 +798,38 @@ class TextBox(UIElement):
 
         console.set_default_color_fg(self.color_fg)
         console.print_text((x, y), show_text)
+
+
+class TextBoxWrap(UIElement):
+    def __init__(self, text, offset, color_fg, row_max_width, max_rows, margin=(0, 0), vertical_space=0):
+        super(TextBoxWrap, self).__init__(margin)
+        self.offset = offset
+        self.text = text
+        self.color_fg = color_fg
+        self.row_max_width = row_max_width
+        self.max_rows = max_rows
+        self._text_stack_panel = StackPanelVertical(offset, (0, 0), vertical_space=vertical_space)
+
+    def update(self):
+        words = str(self.text).split()
+        lines = []
+        line = words[0]
+        for word in words[1:]:
+            if len(line) + len(" " + word) > self.row_max_width:
+                lines.append(line)
+                line = word
+            else:
+                line += (" " + word)
+        if len(line) >= 1:
+            lines.append(line)
+        for line in lines:
+            text_box = TextBox(str(line), (0, 0), self.color_fg, (0, 0))
+            self._text_stack_panel.append(text_box)
+
+    def draw(self, offset=geo.zero2d()):
+        self.update()
+        position = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
+        self._text_stack_panel.draw(position)
 
 
 class VerticalTextBox(UIElement):
