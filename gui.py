@@ -264,7 +264,6 @@ class UIElementList(object):
     def height(self):
         if len(self.elements) < 1:
             return 0
-        print self.elements, max([element.height for element in self.elements])
         return max([element.height for element in self.elements])
 
     @property
@@ -444,7 +443,7 @@ class PlayerStatusBox(RectangularUIElement):
 
     def update(self):
         self._status_stack_panel.update()
-        self.depth_text_box.text = ("Depth:" + str(self._player.dungeon_level.value.depth + 1).rjust(4))
+        self.depth_text_box.text = ("Depth:" + str(self._player.dungeon_level.value.depth + 1).rjust(2))
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(offset, self.margin)
@@ -476,7 +475,7 @@ class EquipmentBox(RectangularUIElement):
                 graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot], item.graphic_char)
             else:
                 graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot],
-                                               graphic.GraphicChar(None, colors.BLUE_D, slot.icon))
+                                               graphic.GraphicChar(None, colors.NOT_EQUIPPED_FG, slot.icon))
             self._equipment_slot_items.append(graphic_item)
 
     def draw(self, offset=geo.zero2d()):

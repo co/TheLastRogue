@@ -44,6 +44,7 @@ STONE = 125
 SPACE = 126
 DELETE = 127
 BACKSPACE = 128
+EQUIPMENT = 129
 
 
 #Aliases:
@@ -118,6 +119,7 @@ controls = {
     ".": REST,
     "p": PICKUP,
     "i": INVENTORY,
+    "e": EQUIPMENT,
     "x": EXAMINE,
     ">": DESCEND,
     libtcod.KEY_0: ZERO,

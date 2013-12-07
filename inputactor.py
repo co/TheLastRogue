@@ -77,15 +77,12 @@ class InputActor(Actor):
         elif key == inputhandler.SPACE:
             self.handle_context_action()
         elif key == inputhandler.PICKUP:  # Pick up
-            if self.parent.pick_up_item_action.can_act(source_entity=self.parent,
-                                                       target_entity=self.parent,
+            if self.parent.pick_up_item_action.can_act(source_entity=self.parent, target_entity=self.parent,
                                                        game_state=self.parent.game_state.value):
-                self.parent.pick_up_item_action.act(source_entity=self.parent,
-                                                    target_entity=self.parent,
+                self.parent.pick_up_item_action.act(source_entity=self.parent, target_entity=self.parent,
                                                     game_state=self.parent.game_state.value)
             else:
-                self.parent.pick_up_item_action.print_player_error(source_entity=self.parent,
-                                                                   target_entity=self.parent,
+                self.parent.pick_up_item_action.print_player_error(source_entity=self.parent, target_entity=self.parent,
                                                                    game_state=self.parent.game_state.value)
         elif key == inputhandler.FIRE:
             equipment = self.parent.equipment
@@ -103,6 +100,9 @@ class InputActor(Actor):
 
         elif key == inputhandler.INVENTORY:
             self.try_open_inventory()
+
+        elif key == inputhandler.EQUIPMENT:
+            self.open_equipment()
 
         elif key == inputhandler.TWO:
             self.parent.health_modifier.heal(300)
@@ -151,42 +151,38 @@ class InputActor(Actor):
         self.newly_spent_energy += self.parent.stepper.try_step_in_direction(direction)
 
     def spawn_context_menu(self):
-        context_menu = \
-            menufactory.context_menu(self.parent,
-                                     self.parent.
-                                     game_state.value.menu_prompt_stack)
+        context_menu = menufactory.context_menu(self.parent, self.parent. game_state.value.menu_prompt_stack)
         self.parent.game_state.value.start_prompt(context_menu)
 
     def start_examine(self):
-        destination_selector = \
-            positionexaminer. \
-                PositionSelector(self.parent.game_state.value.menu_prompt_stack,
-                                 self.parent.position.value,
-                                 self.parent.game_state.value)
+        destination_selector = positionexaminer.PositionSelector(self.parent.game_state.value.menu_prompt_stack,
+                                                                 self.parent.position.value,
+                                                                 self.parent.game_state.value)
         self.parent.game_state.value.start_prompt(destination_selector)
         destination = destination_selector.selected_position
         self.set_path_destination(destination)
 
     def try_open_inventory(self):
         if not self.parent.inventory.is_empty():
-            menu = menufactory.inventory_menu(self.parent, self.parent.game_state. value.menu_prompt_stack)
-            self.parent.game_state.value.start_prompt(menu)
+            inventory_menu = menufactory.inventory_menu(self.parent, self.parent.game_state.value.menu_prompt_stack)
+            self.parent.game_state.value.start_prompt(inventory_menu)
+
+    def open_equipment(self):
+        equipment_menu = menufactory.equipment_menu(self.parent, self.parent.game_state.value.menu_prompt_stack)
+        self.parent.game_state.value.start_prompt(equipment_menu)
 
     def toggle_command_list(self):
         command_list_state = self.parent.game_state.value.command_list_bar.active
         self.parent.game_state.value.command_list_bar.active = not command_list_state
 
     def toggle_invisibility(self):
-        invisibile_flag = StatusFlags.INVISIBILE
-        if not self.parent.status_flags.has_status(invisibile_flag):
-            effect = StatusAdder(self.parent,
-                                 invisibile_flag,
-                                 time_to_live=float("inf"))
+        invisible_flag = StatusFlags.INVISIBILE
+        if not self.parent.status_flags.has_status(invisible_flag):
+            effect = StatusAdder(self.parent, invisible_flag, time_to_live=float("inf"))
             self.parent.effect_queue.add(effect)
         else:
             invisible_status = StatusFlags.INVISIBILE
-            effect = StatusRemover(self.parent, invisible_status,
-                                   time_to_live=1)
+            effect = StatusRemover(self.parent, invisible_status, time_to_live=1)
             self.parent.effect_queue.add(effect)
             self.newly_spent_energy += gametime.single_turn
 

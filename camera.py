@@ -9,7 +9,7 @@ class Camera(object):
     def __init__(self, screen_position, camera_offset, game_state):
         self.screen_position = screen_position
         self._camera_offset = camera_offset
-        self.x_graze_edge = [30, settings.WINDOW_WIDTH - 30]
+        self.x_graze_edge = [35, settings.WINDOW_WIDTH - 35]
         self.y_graze_edge = [15, settings.WINDOW_HEIGHT - 15]
         self.game_state = game_state
 
