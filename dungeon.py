@@ -29,7 +29,8 @@ class Dungeon(object):
         """
         Hack to improve save speed, I don't think I need past levels anyway...
         """
-        self._dungeon_levels[depth] = None
+        del self._dungeon_levels[depth]
+        self._dungeon_levels.insert(depth, None)
 
     def _generate_dungeon_level(self, depth):
         size = 700
