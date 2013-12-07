@@ -222,8 +222,6 @@ class InputActor(Actor):
                               game_state=game_state)
 
     def save_and_quit(self):
-        current_game_state = self.parent.game_state.value
-        gamestate.save(current_game_state)
-        self.parent.game_state.value.current_stack.pop()
-        #  Is needed to break out of loop, won't effect the saved state.
-        self.newly_spent_energy += gametime.single_turn
+        save_quit_menu = menufactory.get_save_quit_menu(self.parent, self.parent.game_state.value.menu_prompt_stack)
+        self.parent.game_state.value.start_prompt(save_quit_menu)
+        #self.newly_spent_energy += gametime.single_turn

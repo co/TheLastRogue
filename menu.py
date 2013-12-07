@@ -42,7 +42,8 @@ class Menu(gui.UIElement):
 
         inputhandler.handler.update_keys()
         key = inputhandler.handler.get_keypress()
-        if key == inputhandler.UP or (self.vi_keys_accepted and key == inputhandler.VI_NORTH):
+        if (key == inputhandler.UP or (self.vi_keys_accepted and key == inputhandler.VI_NORTH)
+            or (key == inputhandler.TAB and inputhandler.handler.is_special_key_pressed(inputhandler.KEY_SHIFT))):
             self.index_decrease()
         if(key == inputhandler.DOWN or (self.vi_keys_accepted and key == inputhandler.VI_SOUTH)
            or key == inputhandler.TAB):
@@ -125,23 +126,33 @@ class Menu(gui.UIElement):
 
 class MenuOption(gui.UIElement):
     def __init__(self, text, functions, can_activate=(lambda: True)):
-        self.text = text
         self._functions = functions
         self.can_activate = can_activate
+        self._selected = gui.TextBox(text, geo.zero2d(), colors.TEXT_SELECTED)
+        self._unselected = gui.TextBox(text, geo.zero2d(), colors.TEXT_UNSELECTED)
+        self._inactive = gui.TextBox(text, geo.zero2d(), colors.TEXT_INACTIVE)
 
     def activate(self):
         for function in self._functions:
             function()
         return
 
+    @property
+    def width(self):
+        return self._selected.width
+
+    @property
+    def height(self):
+        return self._selected.height
+
     def selected_ui_representation(self):
-        return gui.TextBox(self.text, geo.zero2d(), colors.TEXT_SELECTED)
+        return self._selected
 
     def unselected_ui_representation(self):
-        return gui.TextBox(self.text, geo.zero2d(), colors.TEXT_UNSELECTED)
+        return self._unselected
 
     def inactive_ui_representation(self):
-        return gui.TextBox(self.text, geo.zero2d(), colors.TEXT_INACTIVE)
+        return self._inactive
 
 
 #TODO MenuOption should probably have a graphic representation object
@@ -153,23 +164,17 @@ class MenuOptionWithSymbols(MenuOption):
         self.selected_graphic_char = selected_graphic_char
         self.unselected_graphic_char = unselected_graphic_char
 
-    def selected_ui_representation(self):
-        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), horizontal_space=1)
-        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(), self.selected_graphic_char))
-        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(), colors.TEXT_SELECTED))
-        return horizontal_stack
+        self._selected = gui.StackPanelHorizontal(geo.zero2d(), horizontal_space=1)
+        self._selected.append(gui.SymbolUIElement(geo.zero2d(), self.selected_graphic_char))
+        self._selected.append(gui.TextBox(text, geo.zero2d(), colors.TEXT_SELECTED))
 
-    def unselected_ui_representation(self):
-        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), horizontal_space=1)
-        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(), self.unselected_graphic_char))
-        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(), colors.TEXT_UNSELECTED))
-        return horizontal_stack
+        self._unselected = gui.StackPanelHorizontal(geo.zero2d(), horizontal_space=1)
+        self._unselected.append(gui.SymbolUIElement(geo.zero2d(), self.unselected_graphic_char))
+        self._unselected.append(gui.TextBox(text, geo.zero2d(), colors.TEXT_UNSELECTED))
 
-    def inactive_ui_representation(self):
-        horizontal_stack = gui.StackPanelHorizontal(geo.zero2d(), horizontal_space=1)
-        horizontal_stack.append(gui.SymbolUIElement(geo.zero2d(), self.unselected_graphic_char))
-        horizontal_stack.append(gui.TextBox(self.text, geo.zero2d(), colors.TEXT_INACTIVE))
-        return horizontal_stack
+        self._inactive = gui.StackPanelHorizontal(geo.zero2d(), horizontal_space=1)
+        self._inactive.append(gui.SymbolUIElement(geo.zero2d(), self.unselected_graphic_char))
+        self._inactive.append(gui.TextBox(text, geo.zero2d(), colors.TEXT_INACTIVE))
 
 
 class StaticMenu(Menu):

@@ -810,6 +810,7 @@ class TypeWriter(UIElement):
         self.color_bg = color_bg
         self._text = TextBox(default_text, (0, 0), color_fg)
         self.max_length = max_length
+        self.any_key_pressed_yet = False
 
     @property
     def height(self):
@@ -830,13 +831,20 @@ class TypeWriter(UIElement):
         special_key = inputhandler.handler.get_keypress()
         if ((not key is None) and key in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-"
             and len(self._text.text) < self.max_length):
+            self.clear_if_first_key_press()
             self._text.text += key
         if (special_key == inputhandler.BACKSPACE or special_key == inputhandler.DELETE) and len(self._text.text) > 0:
+            self.clear_if_first_key_press()
             self._text.text = self._text.text[:-1]
 
     def draw(self, offset=geo.zero2d()):
         draw_offset = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         self._text.draw(draw_offset)
+
+    def clear_if_first_key_press(self):
+        if not self.any_key_pressed_yet:
+            self._text.text = ""
+            self.any_key_pressed_yet = True
 
 
 class UpdateCallOnlyElement(UIElement):

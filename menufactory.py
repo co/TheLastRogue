@@ -4,6 +4,7 @@ import colors
 import dungeoncreatorvisualizer
 import equipment
 import gamestate
+import gametime
 import geometry as geo
 import graphic
 import gui
@@ -52,6 +53,27 @@ def _main_menu(ui_state, state_stack, player_name_func):
     temp_position = (0, 0)
     return menu.StaticMenu(temp_position, menu_items, state_stack, margin=style.menu_theme.margin,
                            vertical_space=1, vi_keys_accepted=False)
+
+
+def get_save_quit_menu(player, state_stack):
+    options = []
+    game_state = player.game_state.value
+    stack_pop_function = menu.BackToGameFunction(state_stack)
+    save_and_quit_graphic_active = graphic.GraphicChar(None, colors.WHITE, icon.GUNSLINGER_THIN)
+    save_and_quit_graphic_inactive = graphic.GraphicChar(None, colors.GRAY, icon.GUNSLINGER_THIN)
+    options.append(menu.MenuOptionWithSymbols("Save and Quit", save_and_quit_graphic_active,
+                                              save_and_quit_graphic_inactive,
+                                              [lambda: gamestate.save(game_state), stack_pop_function,
+                                               game_state.current_stack.pop,
+                                               (lambda: player.actor.add_energy_spent(gametime.single_turn))]))
+
+    give_up_graphic_active = graphic.GraphicChar(None, colors.WHITE, icon.CORPSE)
+    give_up_graphic_inactive = graphic.GraphicChar(None, colors.GRAY, icon.CORPSE)
+    options.append(menu.MenuOptionWithSymbols("Give Up", give_up_graphic_active, give_up_graphic_inactive,
+                                              [player.health_modifier.kill, stack_pop_function,
+                                               (lambda: player.actor.add_energy_spent(gametime.single_turn))]))
+
+    return get_menu_with_options(options, state_stack)
 
 
 def get_menu_with_options(options, state_stack):
@@ -175,7 +197,7 @@ def get_menu_background(rectangle):
 
 
 def context_menu(player, state_stack):
-    current_dungeon_feature = (player.dungeon_level.value. get_tile(player.position.value).get_dungeon_feature())
+    current_dungeon_feature = (player.dungeon_level.value.get_tile(player.position.value).get_dungeon_feature())
     context_options = []
     stack_pop_function = menu.BackToGameFunction(state_stack)
     if not current_dungeon_feature is None:
@@ -183,7 +205,7 @@ def context_menu(player, state_stack):
 
     inventory_menu_opt = inventory_menu(player, state_stack)
     open_inventory_option = menu.MenuOption("Inventory", [lambda: state_stack.push(inventory_menu_opt)],
-                                             (lambda: not player.inventory.is_empty()))
+                                            (lambda: not player.inventory.is_empty()))
     context_options.append(open_inventory_option)
 
     equipment_menu_opt = equipment_menu(player, state_stack)
@@ -282,6 +304,7 @@ def type_writer_highlight_update_function(elements, menu, active_fg_color, inact
     else:
         for e in elements:
             e.color_fg = inactive_fg_color
+
 
 def victory_screen(state_stack):
     victory_stack_panel = gui.StackPanelVerticalCentering((0, 0))

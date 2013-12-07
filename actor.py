@@ -30,6 +30,8 @@ class Actor(Leaf):
         raise NotImplementedError("act method not implemented for parent:" +
                                   str(self.parent))
 
+    def add_energy_spent(self, energy):
+        self.newly_spent_energy += energy
 
 class DoNothingActor(Actor):
     """
