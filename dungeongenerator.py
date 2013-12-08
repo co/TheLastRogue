@@ -204,7 +204,6 @@ def generate_dungeon_exploded_rooms(open_area, depth):
         minor_room_positions.add(mid_point)
         corridor = shapegenerator.three_point_rectangle_draw(edge[0], mid_point, edge[1])
         corridors_points.update(corridor)
-        room_graph.add_point(room_position)
 
     #  Corridor and small corner room shape generation
     open_points = corridors_points

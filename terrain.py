@@ -142,7 +142,7 @@ class Wall (Composite):
         self.add_child(GraphicCharTerrainCorners(colors.FLOOR_BG,
                                                  colors.WALL_FG,
                                                  icon.DUNGEON_WALLS_ROW,
-                                                 [Wall, Door]))
+                                                 [Wall, Door, Chasm]))
         self.add_child(IsSolid(True))
         self.add_child(IsTransparent(False))
 

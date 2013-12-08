@@ -6,6 +6,7 @@ import dungeontrash
 import geometry
 import rng
 import shapegenerator
+import terrain
 
 
 class Health(Leaf):
@@ -160,9 +161,9 @@ class BleedWhenDamaged(DamageTakenEffect):
         #self.component_type = "bleed_when_damaged"
 
     def put_blood_on_tile(self, dungeon_level, position):
-        terrain = dungeon_level.get_tile_or_unknown(position).get_terrain()
-        if terrain.is_solid.value:
-            terrain.graphic_char.color_fg = colors.RED
+        the_terrain = dungeon_level.get_tile_or_unknown(position).get_terrain()
+        if isinstance(the_terrain, terrain.Wall):
+            the_terrain.graphic_char.color_fg = colors.RED
         else:
             spawn_blood_on_position(position, dungeon_level)
 

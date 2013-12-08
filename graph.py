@@ -18,7 +18,7 @@ class Graph(object):
         return frozenset([point1, point2]) in self._edges
 
     def is_connected(self):
-        if(len(self._points) < 1):
+        if len(self._points) < 1:
             return True
         first = self._points.values()[0]
         visited = set()
