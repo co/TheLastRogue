@@ -179,8 +179,8 @@ def _apply_cellular_automata_rule_on_tile(dungeon_level, position,
 
 
 def generate_dungeon_exploded_rooms(open_area, depth):
-    rooms = random.randrange(4, 12)
-    room_area = open_area * 0.8 / rooms
+    rooms = random.randrange(4, 9)
+    room_area = open_area * 0.7 / rooms
     aprox_room_radius = math.sqrt(room_area) * 1.2
 
     room_distance = aprox_room_radius
@@ -214,6 +214,12 @@ def generate_dungeon_exploded_rooms(open_area, depth):
     for position in minor_room_positions:
         room_points = shapegenerator.random_explosion(position, room_area / 4, direction.AXIS_DIRECTIONS)
         open_points.update(room_points)
+    open_points = shapegenerator.smooth_shape(open_points)
+    open_points = shapegenerator.smooth_shape(open_points)
+
+    # Redraw corridors to make sure no dead rooms appear.
+    open_points.update(corridors_points)
+
 
     #  Chasm shape generation
     chasm_points = set()
@@ -222,7 +228,10 @@ def generate_dungeon_exploded_rooms(open_area, depth):
         variance = 10
         chasm_start_point = (random.randrange(room_x - variance, room_x + variance),
                              random.randrange(room_y - variance, room_y + variance))
-        chasm_points.update(shapegenerator.random_explosion(chasm_start_point, room_area * 0.8, direction.AXIS_DIRECTIONS))
+        chasm_points.update(shapegenerator.random_explosion(chasm_start_point,
+                                                            room_area * 0.8, direction.AXIS_DIRECTIONS))
+    chasm_points = shapegenerator.smooth_shape(chasm_points)
+    chasm_points = shapegenerator.smooth_shape(chasm_points)
 
     # Normalize Points to dungeon
     frame = 2

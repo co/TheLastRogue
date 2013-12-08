@@ -184,6 +184,19 @@ def _manhattan_walker_recursive(start_point, end_point, points):
     return _manhattan_walker_recursive(new_start_point, end_point, points)
 
 
+def get_neighbours_points(point):
+    return [geo.add_2d(p, point) for p in direction.DIRECTIONS]
+
+
+def smooth_shape(shape, minimum_number_of_neighbours=3):
+    result_shape = set()
+    for point in shape:
+        filled_neighbors = [p for p in get_neighbours_points(point) if p in shape]
+        if len(filled_neighbors) >= minimum_number_of_neighbours:
+            result_shape.add(point)
+    return result_shape
+
+
 class Shape(object):
     def __init__(self, points):
         self._points = set(points)
