@@ -45,3 +45,7 @@ def monster_status_rect():
 
 def right_side_menu_rect():
     return geo.Rect((0, 0), constants.RIGHT_SIDE_BAR_WIDTH,  inventory.ITEM_CAPACITY + 8)
+
+
+def description_rectangle():
+    return geo.Rect((0, 0), 40, 10)

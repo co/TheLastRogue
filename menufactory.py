@@ -1,5 +1,4 @@
 import constants
-from equipactions import UnequipAction
 import colors
 import dungeoncreatorvisualizer
 import equipment
@@ -8,14 +7,12 @@ import gametime
 import geometry as geo
 import graphic
 import gui
-import inventory
 import menu
 import rectfactory
 import settings
 import state
 import style
 import icon
-from vision import AwarenessChecker
 
 
 def _main_menu(ui_state, state_stack, player_name_func):
@@ -93,7 +90,7 @@ def inventory_menu(player, state_stack):
     heading = gui.TextBox("Inventory", (2, 1), colors.INVENTORY_HEADING, margin=style.menu_theme.margin)
     menu_stack_panel.append(heading)
 
-    description_card = gui.DescriptionCard(geo.Rect((0, 0), 40, 10), style.rogue_classic_theme)
+    description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.rogue_classic_theme)
     inventory_menu = menu.InventoryMenu((0, 0), player, state_stack, description_card, (2, 1), vertical_space=0)
     menu_stack_panel.append(inventory_menu)
 
@@ -163,38 +160,23 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
     Creates a menu which shows the possible actions
     that can be taken on a given equipment_slot.
     """
-    right_side_menu_rect = rectfactory.right_side_menu_rect()
     menu_stack_panel = gui.StackPanelVertical((0, 0), margin=(0, 0))
     heading = gui.TextBox("Change " + equipment_slot.name, (2, 1), colors.INVENTORY_HEADING, (2, 2))
     menu_stack_panel.append(heading)
 
-    equipment_menu_rect = geo.Rect((0, 0), right_side_menu_rect.width, right_side_menu_rect.height)
-    items = player.inventory.items_of_equipment_type(equipment_slot.equipment_type)
-    re_equip_options = []
-    for item in items:
-        reequip_function = item.reequip_action.delayed_call(source_entity=player, target_entity=player,
-                                                            equipment_slot=equipment_slot)
-        stack_pop_function = menu.BackToGameFunction(state_stack)
-        functions = [reequip_function, stack_pop_function]
-        re_equip_options.append(menu.MenuOptionWithSymbols(item.description.name, item.graphic_char,
-                                                           item.graphic_char, functions))
-
-    unequip_function = UnequipAction().delayed_call(source_entity=player, target_entity=player,
-                                                    equipment_slot=equipment_slot)
-    stack_pop_function = menu.BackToGameFunction(state_stack)
-    unequip_functions = [unequip_function, stack_pop_function]
-    none_item_graphic = graphic.GraphicChar(None, colors.NOT_EQUIPPED_FG, equipment_slot.icon)
-    re_equip_options.append(menu.MenuOptionWithSymbols("- None -", none_item_graphic,
-                                                       none_item_graphic, unequip_functions))
-
-    vspace = 1 if len(items) * 2 + 2 <= inventory.ITEM_CAPACITY else 0
-    resulting_menu = menu.StaticMenu(equipment_menu_rect.top_left, re_equip_options, state_stack,
-                                     (2, 1), vertical_space=vspace)
+    description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.rogue_classic_theme)
+    resulting_menu = menu.EquipSlotMenu((0, 0), player, equipment_slot, state_stack, description_card, (2, 1))
     menu_stack_panel.append(resulting_menu)
 
-    equipment_menu_bg = gui.StyledRectangle(right_side_menu_rect, style.rogue_classic_theme.rect_style)
+    equipment_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.rogue_classic_theme.rect_style)
+    equipment_slot_gui = gui.UIElementList([equipment_menu_bg, menu_stack_panel])
+
+    equipment_slot_stack_panel = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_BOTTOM)
+    equipment_slot_stack_panel.append(description_card)
+    equipment_slot_stack_panel.append(equipment_slot_gui)
+
     dock = gui.UIDock(rectfactory.full_screen_rect())
-    dock.bottom_right = gui.UIElementList([equipment_menu_bg, menu_stack_panel])
+    dock.bottom_right = equipment_slot_stack_panel
     return state.UIState(dock)
 
 

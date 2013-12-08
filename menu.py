@@ -1,7 +1,10 @@
+import equipactions
+import graphic
 import inputhandler
 import geometry as geo
 import colors
 import gui
+import inventory
 import menufactory
 
 
@@ -11,7 +14,7 @@ def clamp(n, minn, maxn):
 
 class Menu(gui.UIElement):
     def __init__(self, offset, state_stack,
-                 margin=geo.zero2d(), vertical_space=1, may_escape=True, vi_keys_accepted=True):
+                 margin=geo.zero2d(), vertical_space=1, may_escape=True, vi_keys_accepted=True, description_card=None):
         super(Menu, self).__init__(margin)
         self._menu_items = []
         self._state_stack = state_stack
@@ -21,6 +24,7 @@ class Menu(gui.UIElement):
         self.may_escape = may_escape
         self._item_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=vertical_space)
         self.vi_keys_accepted = vi_keys_accepted
+        self.description_card = description_card
 
     @property
     def rect(self):
@@ -130,8 +134,16 @@ class Menu(gui.UIElement):
                                             self.margin))
         self._item_stack_panel.draw(real_offset)
 
+    def update_description(self):
+        print "time to update D"
+        if self.description_card:
+            print "YEP! time to update D"
+            selected_option = self._menu_items[self.selected_index]
+            print "so: ", selected_option, selected_option.description
+            self.description_card.description = selected_option.description
+
     def _signal_new_index(self):
-        pass
+        self.update_description()
 
 
 class MenuOption(gui.UIElement):
@@ -202,10 +214,10 @@ class InventoryMenu(Menu):
     def __init__(self, offset, player, state_stack, description_card,
                  margin=geo.zero2d(), vertical_space=1, may_escape=True):
         super(InventoryMenu, self).__init__(offset, state_stack, margin=margin,
-                                            vertical_space=vertical_space, may_escape=may_escape)
+                                            vertical_space=vertical_space, may_escape=may_escape,
+                                            description_card=description_card)
         self._player = player
         self.try_set_index_to_valid_value()
-        self.description_card = description_card
 
     def _update_menu_items(self):
         item_rect = geo.Rect(self.parent.offset,
@@ -221,20 +233,44 @@ class InventoryMenu(Menu):
         if self.description_card.description is None:
             self.update_description()
 
-    def update_description(self):
-        print self.selected_index
-        selected_option = self._menu_items[self.selected_index]
-        print "io: ", self.selected_index, selected_option, selected_option.description
-        self.description_card.description = selected_option.description
-
-    def _signal_new_index(self):
-        self.update_description()
-
 
 def _get_item_option_text(item):
     if item.has_child("stacker"):
         return item.description.name + " (" + str(item.stacker.size) + ")"
     return item.description.name
+
+
+class EquipSlotMenu(Menu):
+    def __init__(self, offset, player, equipment_slot, state_stack, description_card,
+                 margin=geo.zero2d(), may_escape=True):
+        super(EquipSlotMenu, self).__init__(offset, state_stack, margin=margin,
+                                            may_escape=may_escape, description_card=description_card)
+        self.player = player
+        self.try_set_index_to_valid_value()
+        self.equipment_slot = equipment_slot
+
+    def _update_menu_items(self):
+        items = self.player.inventory.items_of_equipment_type(self.equipment_slot.equipment_type)
+        self._menu_items = []
+        for item in items:
+            reequip_function = item.reequip_action.delayed_call(source_entity=self.player, target_entity=self.player,
+                                                                equipment_slot=self.equipment_slot)
+            stack_pop_function = BackToGameFunction(self._state_stack)
+            functions = [reequip_function, stack_pop_function]
+            self._menu_items.append(MenuOptionWithSymbols(item.description.name, item.graphic_char,
+                                                          item.graphic_char, functions, description=item.description))
+
+        unequip_function = equipactions.UnequipAction().delayed_call(source_entity=self.player, target_entity=self.player,
+                                                                     equipment_slot=self.equipment_slot)
+        stack_pop_function = BackToGameFunction(self._state_stack)
+        unequip_functions = [unequip_function, stack_pop_function]
+        none_item_graphic = graphic.GraphicChar(None, colors.NOT_EQUIPPED_FG, self.equipment_slot.icon)
+        self._menu_items.append(MenuOptionWithSymbols("- None -", none_item_graphic,
+                                                      none_item_graphic, unequip_functions))
+        if self.description_card.description is None:
+            self.update_description()
+
+        self._item_stack_panel.vertical_space = 1 if len(items) * 2 + 2 <= inventory.ITEM_CAPACITY else 0
 
 
 class OpenItemActionMenuAction(object):

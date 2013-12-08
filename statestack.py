@@ -54,9 +54,9 @@ class GameMenuStateStack(StateStack):
         self._game_state = game_state
 
     def main_loop(self):
-        self._draw_background()
         while len(self._stack) > 0:
             state = self.peek()
+            self._draw_background()
             state.draw()
             state.update()
         self._game_state.force_draw()
