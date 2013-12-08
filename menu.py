@@ -1,4 +1,5 @@
 import equipactions
+import equipment
 import graphic
 import inputhandler
 import geometry as geo
@@ -135,11 +136,8 @@ class Menu(gui.UIElement):
         self._item_stack_panel.draw(real_offset)
 
     def update_description(self):
-        print "time to update D"
         if self.description_card:
-            print "YEP! time to update D"
             selected_option = self._menu_items[self.selected_index]
-            print "so: ", selected_option, selected_option.description
             self.description_card.description = selected_option.description
 
     def _signal_new_index(self):
@@ -238,6 +236,34 @@ def _get_item_option_text(item):
     if item.has_child("stacker"):
         return item.description.name + " (" + str(item.stacker.size) + ")"
     return item.description.name
+
+
+class EquipmentMenu(Menu):
+    def __init__(self, offset, player, state_stack, description_card,
+                 margin=geo.zero2d(), may_escape=True):
+        super(EquipmentMenu, self).__init__(offset, state_stack, margin=margin,
+                                            may_escape=may_escape, description_card=description_card)
+        self.player = player
+        self.try_set_index_to_valid_value()
+
+    def _update_menu_items(self):
+        self._menu_items = []
+        for slot in equipment.EquipmentSlots.ALL:
+            slot_menu = menufactory.equipment_slot_menu(self.player, slot, self._state_stack)
+            option_func = menufactory.DelayedStatePush(self._state_stack, slot_menu)
+            item_in_slot = self.player.equipment.get(slot)
+            if item_in_slot is None:
+                item_name = "-"
+                item_graphic = graphic.GraphicChar(None, colors.NOT_EQUIPPED_FG, slot.icon)
+                description = None
+            else:
+                item_name = item_in_slot.description.name
+                item_graphic = item_in_slot.graphic_char
+                description = item_in_slot.description
+            self._menu_items.append(MenuOptionWithSymbols(item_name, item_graphic, item_graphic, [option_func],
+                                                          description=description))
+        if self.description_card.description is None:
+            self.update_description()
 
 
 class EquipSlotMenu(Menu):

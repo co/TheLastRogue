@@ -285,16 +285,16 @@ class StackPanel(UIElement):
     def __init__(self, offset, margin=geo.zero2d()):
         super(StackPanel, self).__init__(margin=margin)
         self._offset = offset
-        self._elements = []
+        self.elements = []
 
     def append(self, element):
         element.parent = self
-        return self._elements.append(element)
+        return self.elements.append(element)
 
     def clear(self):
-        for element in self._elements:
+        for element in self.elements:
             element.parent = None
-        self._elements = []
+        self.elements = []
 
     @property
     def offset(self):
@@ -305,7 +305,7 @@ class StackPanel(UIElement):
         return geo.Rect(self.offset, self.width, self.height)
 
     def update(self):
-        for element in self._elements:
+        for element in self.elements:
             element.update()
 
 
@@ -321,18 +321,18 @@ class StackPanelHorizontal(StackPanel):
 
     @property
     def height(self):
-        if len(self._elements) < 1:
+        if len(self.elements) < 1:
             return 0
-        return max([element.total_height for element in self._elements])
+        return max([element.total_height for element in self.elements])
 
     @property
     def width(self):
-        return sum([element.total_width + self.horizontal_space for element in self._elements])
+        return sum([element.total_width + self.horizontal_space for element in self.elements])
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         element_position = position
-        for element in self._elements:
+        for element in self.elements:
             element.draw(geo.add_2d((0, self.get_y_offset(element)), element_position))
             element_position = geo.add_2d(element_position, (element.total_width + self.horizontal_space, 0))
 
@@ -357,18 +357,18 @@ class StackPanelVertical(StackPanel):
 
     @property
     def width(self):
-        if len(self._elements) < 1:
+        if len(self.elements) < 1:
             return 0
-        return max([element.total_width for element in self._elements])
+        return max([element.total_width for element in self.elements])
 
     @property
     def height(self):
-        return sum([element.total_height + self.vertical_space for element in self._elements])
+        return sum([element.total_height + self.vertical_space for element in self.elements])
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
         element_position = position
-        for element in self._elements:
+        for element in self.elements:
             element.draw(geo.add_2d((self.get_x_offset(element), 0), element_position))
             element_position = geo.add_2d(element_position, (0, element.total_height + self.vertical_space))
 

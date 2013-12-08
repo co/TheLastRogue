@@ -134,24 +134,18 @@ def equipment_menu(player, state_stack):
 
     equipment_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.rogue_classic_theme.rect_style)
 
-    equipment_options = []
-    for slot in equipment.EquipmentSlots.ALL:
-        slot_menu = equipment_slot_menu(player, slot, state_stack)
-        option_func = DelayedStatePush(state_stack, slot_menu)
-        item_in_slot = player.equipment.get(slot)
-        if item_in_slot is None:
-            item_name = "-"
-            item_graphic = graphic.GraphicChar(None, colors.NOT_EQUIPPED_FG, slot.icon)
-        else:
-            item_name = item_in_slot.description.name
-            item_graphic = item_in_slot.graphic_char
-        equipment_options.append(menu.MenuOptionWithSymbols(item_name, item_graphic, item_graphic, [option_func]))
-
-    resulting_menu = menu.StaticMenu((0, 0), equipment_options, state_stack, (2, 1))
+    description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.rogue_classic_theme)
+    resulting_menu = menu.EquipmentMenu((0, 0), player, state_stack, description_card=description_card, margin=(2, 1))
     menu_stack_panel.append(resulting_menu)
 
+    equipment_gui = gui.UIElementList([equipment_menu_bg, menu_stack_panel])
+
+    equipment_stack_panel = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_BOTTOM)
+    equipment_stack_panel.append(description_card)
+    equipment_stack_panel.append(equipment_gui)
+
     dock = gui.UIDock(rectfactory.full_screen_rect())
-    dock.bottom_right = gui.UIElementList([equipment_menu_bg, menu_stack_panel])
+    dock.bottom_right = equipment_stack_panel
     return state.UIState(dock)
 
 
