@@ -265,7 +265,7 @@ class Ammunition(Composite):
         self.add_child(Mover())
         self.add_child(Description("Gun Bullets",
                                    "These bullets will fit in most guns."))
-        self.add_child(GraphicChar(None, colors.GRAY, ":"))
+        self.add_child(GraphicChar(None, colors.GRAY, icon.AMMO2))
         self.add_child(DropAction())
         self.add_child(CharPrinter())
         self.add_child(Weight(1))

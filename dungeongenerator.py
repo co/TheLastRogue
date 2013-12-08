@@ -204,41 +204,55 @@ def generate_dungeon_exploded_rooms(open_area, depth):
         minor_room_positions.add(mid_point)
         corridor = shapegenerator.three_point_rectangle_draw(edge[0], mid_point, edge[1])
         corridors_points.update(corridor)
+        room_graph.add_point(room_position)
 
+    #  Corridor and small corner room shape generation
     open_points = corridors_points
     for position in room_positions:
-        room_points = \
-            shapegenerator.random_explosion(position, room_area,
-                                            direction.AXIS_DIRECTIONS)
+        room_points = shapegenerator.random_explosion(position, room_area, direction.AXIS_DIRECTIONS)
         open_points.update(room_points)
 
     for position in minor_room_positions:
-        room_points = \
-            shapegenerator.random_explosion(position, room_area / 4,
-                                            direction.AXIS_DIRECTIONS)
+        room_points = shapegenerator.random_explosion(position, room_area / 4, direction.AXIS_DIRECTIONS)
         open_points.update(room_points)
 
-    level_shape = shapegenerator.Shape(open_points)
-    frame = 2
-    dungeon_rect = level_shape.calc_rect().expanded_by(frame)
+    #  Chasm shape generation
+    chasm_points = set()
+    for room_position in room_positions:
+        room_x, room_y = room_position
+        variance = 10
+        chasm_start_point = (random.randrange(room_x - variance, room_x + variance),
+                             random.randrange(room_y - variance, room_y + variance))
+        chasm_points.update(shapegenerator.random_explosion(chasm_start_point, room_area * 0.8, direction.AXIS_DIRECTIONS))
 
-    dungeon_level = get_full_wall_dungeon(dungeon_rect.width,
-                                          dungeon_rect.height, depth)
-    brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
+    # Normalize Points to dungeon
+    frame = 2
+    level_shape = shapegenerator.Shape(open_points)
+    chasm_shape = shapegenerator.Shape(chasm_points)
+    dungeon_rect = level_shape.calc_rect().expanded_by(frame)
+    normalized_chasm_points = chasm_shape.calc_normalized_points(frame / 2)
     normalized_open_points = level_shape.calc_normalized_points(frame / 2)
+
+    # Apply shapes to dungeon
+    dungeon_level = get_full_wall_dungeon(dungeon_rect.width, dungeon_rect.height, depth)
+
+    brush = SinglePointBrush(ReplaceTerrain(terrain.Chasm))
+    apply_brush_to_points(dungeon_level, normalized_chasm_points, brush)
+
+    brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
     apply_brush_to_points(dungeon_level, normalized_open_points, brush)
 
     feature_positions = random.sample(normalized_open_points, 3)
-    place_up_down_stairs(dungeon_level, feature_positions[0],
-                         feature_positions[1])
-    _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(),
-                                              dungeon_level,
-                                              feature_positions[2])
+    place_up_down_stairs(dungeon_level, feature_positions[0], feature_positions[1])
+    _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(), dungeon_level, feature_positions[2])
 
     return dungeon_level
 
 
 def generate_dungeon_cave_floor(size, depth):
+    """
+    Unused
+    """
     corridor_room_area_ratio = 0.25
     corridor_area = size * corridor_room_area_ratio
     corridors_directions = direction.AXIS_DIRECTIONS
@@ -263,7 +277,6 @@ def generate_dungeon_cave_floor(size, depth):
 
     dungeon_level = get_full_wall_dungeon(dungeon_rect.width,
                                           dungeon_rect.height, depth)
-
     normalized_open_points = level_shape.calc_normalized_points(frame / 2)
     brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
     apply_brush_to_points(dungeon_level, normalized_open_points, brush)

@@ -15,7 +15,7 @@ def dfs_tunnler(start_position, min_length, max_length,
         length = random.randint(min_length, max_length)
         visited.add(position)
         for _ in range(length):
-            if(len(visited) >= size):
+            if len(visited) >= size:
                 break
             position = geo.add_2d(position, direction_)
             visited.add(position)
@@ -32,11 +32,11 @@ def dfs_tunnler_with_random_stop(start_position, min_length, max_length,
         length = random.randint(min_length, max_length)
         visited.add(position)
         for _ in range(length):
-            if(len(visited) >= size):
+            if len(visited) >= size:
                 break
             position = geo.add_2d(position, direction_)
             visited.add(position)
-        if(rng.coin_flip()):
+        if rng.coin_flip():
             position = random.sample(visited, 1)[0]
     return visited
 
@@ -51,11 +51,11 @@ def dfs_tunnler_with_random_restart(start_position, min_length, max_length,
         length = random.randint(min_length, max_length)
         visited.add(position)
         for _ in range(length):
-            if(len(visited) >= size):
+            if len(visited) >= size:
                 break
             position = geo.add_2d(position, direction_)
             visited.add(position)
-        if(rng.coin_flip()):
+        if rng.coin_flip():
             position = start_position
     return visited
 

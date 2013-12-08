@@ -2,6 +2,7 @@ import colors
 from compositecore import Leaf, CompositeMessage
 from console import console
 import geometry
+import icon
 import libtcodpy as libtcod
 import turn
 
@@ -239,8 +240,8 @@ class Path(Leaf):
             if not self.parent.mover.can_pass_terrain(
                     self.parent.dungeon_level.value.get_tile_or_unknown(point).get_terrain()):
                 break
-            console.set_symbol(camera.dungeon_to_screen_position(point), ":")
-            console.set_color_fg(camera.dungeon_to_screen_position(point), colors.WHITE)
+            console.set_symbol(camera.dungeon_to_screen_position(point), icon.FOOT_STEPS)
+            console.set_color_fg(camera.dungeon_to_screen_position(point), colors.GRAY)
 
     def message(self, message):
         if message == CompositeMessage.DUNGEON_LEVEL_CHANGED:

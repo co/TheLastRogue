@@ -101,6 +101,21 @@ class GlassWall(Composite):
         self.add_child(IsTransparent(True))
 
 
+class Chasm(Composite):
+    def __init__(self):
+        super(Chasm, self).__init__()
+        self.add_child(GamePieceType(GamePieceType.TERRAIN))
+        self.add_child(Mover())
+        self.add_child(Position())
+        self.add_child(DungeonLevel())
+        self.add_child(GraphicChar(colors.BLACK,
+                                   colors.FLOOR_BG,
+                                   icon.CHASM))
+        self.add_child(CharPrinter())
+        self.add_child(IsSolid(True))
+        self.add_child(IsTransparent(True))
+
+
 class Unknown(Composite):
     def __init__(self):
         super(Unknown, self).__init__()
