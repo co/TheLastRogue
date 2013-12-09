@@ -1,3 +1,4 @@
+import random
 from compositecore import Composite, Leaf
 from graphic import GraphicChar, CharPrinter
 from mover import Mover
@@ -79,7 +80,7 @@ class DrinkFromFountainAction(action.Action):
 
     def act(self, **kwargs):
         target_entity = kwargs["target_entity"]
-        target_entity.health_modifier.increases_max_hp(5)
+        target_entity.health_modifier.increases_max_hp(random.randrange(2, 6))  # Players gain 2-5 hp for drinking.
         target_entity.char_printer.append_fg_color_blink_frames([colors.CYAN])
         self._dry_up_fountain()
         self.add_energy_spent_to_entity(target_entity)

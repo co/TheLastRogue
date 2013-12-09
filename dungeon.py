@@ -9,7 +9,7 @@ from tools import time_it
 
 class Dungeon(object):
     def __init__(self, game_state):
-        level_count = 5
+        level_count = 10
         self._dungeon_levels = [None for _ in range(level_count)]
         self.game_state = game_state
 
@@ -37,28 +37,30 @@ class Dungeon(object):
 
         dungeon_level = time_it("dungeon_level_generation",
                                 (lambda: dungeongenerator.generate_dungeon_exploded_rooms(size, depth)))
-        for _ in range(depth + 4):
+        for _ in range(depth + 5):
             if rng.coin_flip() and rng.coin_flip():
                 ghost = monster.Ghost(self.game_state)
                 spawner.place_piece_on_random_tile(ghost, dungeon_level)
             else:
                 spawner.spawn_rat_man(dungeon_level, self.game_state)
 
-        for _ in range(random.randrange(depth + 2)):
+        for _ in range(random.randrange(depth, depth + 2) - 1):
             if rng.coin_flip() and rng.coin_flip():
                 cyclops = monster.Cyclops(self.game_state)
                 spawner.place_piece_on_random_tile(cyclops, dungeon_level)
 
-        for _ in range(random.randrange(depth + 2)):
+        for _ in range(random.randrange(depth, depth + 3) - 1):
             if rng.coin_flip():
                 slime = monster.Slime(self.game_state)
                 spawner.place_piece_on_random_tile(slime, dungeon_level)
 
         if depth == (len(self._dungeon_levels) - 1):
-            jerico = monster.Jericho(self.game_state)
-            spawner.place_piece_on_random_tile(jerico, dungeon_level)
+            jericho = monster.Jericho(self.game_state)
+            spawner.place_piece_on_random_tile(jericho, dungeon_level)
 
         spawner.place_items_in_dungeon(dungeon_level)
+
+        dungeon_level.print_statistics()
 
         dungeon_level.dungeon = self
         return dungeon_level

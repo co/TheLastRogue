@@ -316,7 +316,7 @@ class LeatherArmor(Armor):
                                    "A worn leather armor. It's old, but should still protect you from some damage."))
         self.add_child(Weight(10))
         self.add_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
-        self.add_child(BlockDamageEquippedEffect(1, 3, [DamageTypes.PHYSICAL]))
+        self.add_child(BlockDamageEquippedEffect(1, 2, [DamageTypes.PHYSICAL]))
         self.add_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
 
 
@@ -331,7 +331,7 @@ class LeatherBoots(Armor):
                                    "A worn pair of boots, dry mud covers most of the leather."))
         self.add_child(Weight(4))
         self.add_child(GraphicChar(None, colors.ORANGE_D, icon.BOOTS))
-        self.add_child(BlockDamageEquippedEffect(1, 2, [DamageTypes.PHYSICAL]))
+        self.add_child(BlockDamageEquippedEffect(0, 1, [DamageTypes.PHYSICAL]))
         self.add_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
 
 
@@ -346,7 +346,7 @@ class LeatherCap(Armor):
                                    "An old cap made out of leather, this should keep some harm away."))
         self.add_child(Weight(4))
         self.add_child(GraphicChar(None, colors.ORANGE_D, icon.HELM))
-        self.add_child(BlockDamageEquippedEffect(1, 2, [DamageTypes.PHYSICAL]))
+        self.add_child(BlockDamageEquippedEffect(0, 1, [DamageTypes.PHYSICAL]))
         self.add_child(EquipmentType(equipment.EquipmentTypes.HEADGEAR))
 
 class BlockDamageEquippedEffect(EquippedEffect):

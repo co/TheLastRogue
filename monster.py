@@ -104,17 +104,17 @@ class Cyclops(Composite):
 
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
-        self.add_child(Health(35))
+        self.add_child(Health(40))
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.one_and_half_turn))
         self.add_child(BleedWhenDamaged())
 
         self.add_child(AttackSpeed(gametime.single_turn, throw_speed=gametime.double_turn))
         self.add_child(Strength(12))
-        self.add_child(Attacker(0.6, 1.5))
+        self.add_child(Attacker(0.8, 1.5))
         self.add_child(Dodger())
         self.add_child(Evasion(5))
-        self.add_child(Hit(10))
+        self.add_child(Hit(11))
 
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())
@@ -349,8 +349,7 @@ class Slime(Composite):
         self.add_child(Equipment())
         self.add_child(EffectQueue())
 
-        self.add_child(EntityShareTileEffect
-            (DissolveEntitySlimeShareTileEffect()))
+        self.add_child(EntityShareTileEffect(DissolveEntitySlimeShareTileEffect()))
 
         self.add_child(PrintDeathMessageOnDeath())
         self.add_child(RemoveEntityOnDeath())
@@ -383,8 +382,7 @@ class DissolveEntitySlimeShareTileEffect(object):
         strength = source_entity.strength.value
         damage = rng.random_variance(strength, 1)
 
-        dissolve_effect = DissolveDamageEffect(source_entity, damage, [DamageTypes.ACID, DamageTypes.PHYSICAL],
-                                               gametime.single_turn)
+        dissolve_effect = DissolveDamageEffect(source_entity, damage, [DamageTypes.ACID], gametime.single_turn)
         target_entity.effect_queue.add(dissolve_effect)
 
         stuck_in_slime_step_spoof = StuckInSlimeStepperSpoof(source_entity)

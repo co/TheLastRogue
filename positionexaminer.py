@@ -151,8 +151,9 @@ class MissileDestinationSelector(PositionSelector):
             seen_entities = self._get_seen_entities_within_max_distance()
             if len(seen_entities) < 1:
                 return
-            current_entity = self.entity.dungeon_level.value.\
-                get_tile_or_unknown(self.cursor_position).get_first_entity()
+            entities_on_cursor =\
+                self.entity.dungeon_level.value.get_tile_or_unknown(self.cursor_position).get_entities()
+            current_entity = next((entity for entity in entities_on_cursor if not entity.has_child("is_player")), None)
             if current_entity is None:
                 self.cursor_position = seen_entities[0].position.value
             else:

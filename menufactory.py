@@ -94,8 +94,6 @@ def inventory_menu(player, state_stack):
     inventory_menu = menu.InventoryMenu((0, 0), player, state_stack, description_card, (2, 1), vertical_space=0)
     menu_stack_panel.append(inventory_menu)
 
-    inventory_menu.update()
-
     inventory_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.MinimalChestStyle())
     inventory_gui = gui.UIElementList([inventory_menu_bg, menu_stack_panel])
 

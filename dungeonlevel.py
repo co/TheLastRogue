@@ -130,6 +130,22 @@ class DungeonLevel(object):
         return (self._walkable_destinations
                 .get_walkable_positions(entity, position))
 
+    def print_statistics(self):
+        monsters = {}
+        for entity in self.entities:
+            if entity.description.name in monsters:
+                monsters[entity.description.name] += 1
+            else:
+                monsters[entity.description.name] = 1
+        print "===================================="
+        print "Dungeon statistics"
+        print "Depth:", self.depth + 1
+        for monster, amount in monsters.iteritems():
+            print "   ", monster, amount
+        print "===================================="
+
+
+
 
 class DungeonLevelScreen(object):
     def __init__(self, dungeon_level):
