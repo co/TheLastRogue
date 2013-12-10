@@ -170,7 +170,7 @@ class Ghost(Composite):
         self.add_child(CharPrinter())
 
         self.add_child(Faction(Faction.MONSTER))
-        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
+        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.FLYING]))
         self.add_child(Health(1))
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
@@ -367,9 +367,7 @@ class EntityShareTileEffect(Leaf):
 
     def share_tile_effect_tick(self, sharing_entity, time_spent):
         if not sharing_entity is self.parent:
-            self.effect(source_entity=self.parent,
-                        target_entity=sharing_entity,
-                        time=time_spent)
+            self.effect(source_entity=self.parent, target_entity=sharing_entity, time=time_spent)
 
 
 class DissolveEntitySlimeShareTileEffect(object):

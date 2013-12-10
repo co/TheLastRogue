@@ -94,13 +94,18 @@ class Mover(Leaf):
         """
         Checks if the parent can move through a terrain.
         """
-        if terrain_to_pass is None or not terrain_to_pass.is_solid.value:
+        if terrain_to_pass is None:
             return True
         if self.has_sibling("status_flags"):
             status_flags = self.parent.status_flags
+            if (terrain_to_pass.has_child("is_chasm") and terrain_to_pass.is_chasm.value
+                and not status_flags.has_status(StatusFlags.FLYING)):
+                return False
             if(status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
                terrain_to_pass.has_child("is_door")):
                 return True
+        if not terrain_to_pass.is_solid.value:
+            return True
         return False
 
     def try_remove_from_dungeon(self):

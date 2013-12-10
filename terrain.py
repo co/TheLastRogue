@@ -33,6 +33,11 @@ class IsSolid(Leaf):
         self.component_type = "is_solid"
         self.value = is_solid
 
+class IsChasm(Leaf):
+    def __init__(self, is_chasm=True):
+        super(IsChasm, self).__init__()
+        self.component_type = "is_chasm"
+        self.value = is_chasm
 
 class IsTransparent(Leaf):
     def __init__(self, is_transparent=False):
@@ -112,7 +117,8 @@ class Chasm(Composite):
                                    colors.FLOOR_BG,
                                    icon.CHASM))
         self.add_child(CharPrinter())
-        self.add_child(IsSolid(True))
+        self.add_child(IsChasm(True))
+        self.add_child(IsSolid(False))
         self.add_child(IsTransparent(True))
 
 
