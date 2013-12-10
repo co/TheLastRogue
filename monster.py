@@ -406,5 +406,5 @@ class StuckInSlimeStepperSpoof(Stepper):
 
     def _make_slime_skip_turn(self):
         immobile_stepper = ImmobileStepper()
-        add_spoof_effect = AddSpoofChild(self.parent, immobile_stepper, 1)
+        add_spoof_effect = AddSpoofChild(self.parent, immobile_stepper, gametime.single_turn)
         self._slime.effect_queue.add(add_spoof_effect)
