@@ -41,14 +41,12 @@ def place_up_down_stairs_at_center(dungeon_level):
 
 
 def place_up_down_stairs(dungeon_level, up_position, down_position):
-    _place_feature_replace_terrain_with_floor(dungeonfeature.StairsDown(),
-                                              dungeon_level, down_position)
-    _place_feature_replace_terrain_with_floor(dungeonfeature.StairsUp(),
-                                              dungeon_level, up_position)
+    _place_feature_replace_terrain_with_floor(dungeonfeature.StairsDown(), dungeon_level, down_position)
+    print dungeon_level, down_position
+    _place_feature_replace_terrain_with_floor(dungeonfeature.StairsUp(), dungeon_level, up_position)
 
 
-def _place_feature_replace_terrain_with_floor(feature, dungeon_level,
-                                              position):
+def _place_feature_replace_terrain_with_floor(feature, dungeon_level, position):
     terrain.Floor().mover.replace_move(position, dungeon_level)
     feature.mover.try_move(position, dungeon_level)
 
@@ -63,14 +61,11 @@ def get_full_of_terrain_dungeon(terrain_class, width, height, depth):
 
 
 def get_full_wall_dungeon(width, height, depth):
-    return get_full_of_terrain_dungeon(terrain.Wall, width,
-                                       height, depth)
+    return get_full_of_terrain_dungeon(terrain.Wall, width, height, depth)
 
 
 def get_empty_tile_matrix(width, height):
-    return [[tile.Tile()
-             for x in range(width)]
-            for y in range(height)]
+    return [[tile.Tile() for x in range(width)] for y in range(height)]
 
 
 def get_empty_dungeon(width, height, depth):
@@ -237,7 +232,7 @@ def generate_dungeon_exploded_rooms(open_area, depth):
     frame = 2
     level_shape = shapegenerator.Shape(open_points)
     chasm_shape = shapegenerator.Shape(chasm_points)
-    dungeon_rect = level_shape.calc_rect().expanded_by(frame)
+    dungeon_rect = shapegenerator.Shape(open_points | chasm_points).calc_rect().expanded_by(frame)
     normalized_chasm_points = chasm_shape.calc_normalized_points(frame / 2)
     normalized_open_points = level_shape.calc_normalized_points(frame / 2)
 
@@ -290,8 +285,7 @@ def generate_dungeon_cave_floor(size, depth):
     apply_brush_to_points(dungeon_level, normalized_open_points, brush)
 
     feature_positions = random.sample(normalized_open_points, 2)
-    place_up_down_stairs(dungeon_level, feature_positions[0],
-                         feature_positions[1])
+    place_up_down_stairs(dungeon_level, feature_positions[0], feature_positions[1])
 
     drinks = 1 if rng.coin_flip() else 0
     _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(drinks),

@@ -99,12 +99,12 @@ class Mover(Leaf):
         if self.has_sibling("status_flags"):
             status_flags = self.parent.status_flags
             if (terrain_to_pass.has_child("is_chasm") and terrain_to_pass.is_chasm.value
-                and not status_flags.has_status(StatusFlags.FLYING)):
-                return False
+                and status_flags.has_status(StatusFlags.FLYING)):
+                return True
             if(status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
                terrain_to_pass.has_child("is_door")):
                 return True
-        if not terrain_to_pass.is_solid.value:
+        if not terrain_to_pass.is_solid.value and not terrain_to_pass.has_child("is_chasm"):
             return True
         return False
 
@@ -160,7 +160,7 @@ class Stepper(Leaf):
             Energy spent
         """
         terrain_to_step =\
-            self.parent.dungeon_level.value.get_tile(position).get_terrain()
+            self.parent.dungeon_level.value.get_tile_or_unknown(position).get_terrain()
         if(terrain_to_step.has_child("bump_action") and
            terrain_to_step.bump_action.can_bump(self.parent)):
             terrain_to_step.bump_action.bump(self.parent)
