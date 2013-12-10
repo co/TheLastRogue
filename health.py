@@ -4,6 +4,8 @@ import counter
 import colors
 import dungeontrash
 import geometry
+from graphic import GraphicChar
+import icon
 import rng
 import shapegenerator
 import terrain
@@ -61,7 +63,12 @@ class HealthModifier(Leaf):
         Heals increases the current hp by health.
         """
         self.parent.health.hp.increase(health)
+        self._animate_heal()
         return health
+
+    def _animate_heal(self):
+        heart_graphic_char = GraphicChar(None, colors.RED, icon.HEALTH_GAIN_ICON)
+        self.parent.char_printer.append_graphic_char_temporary_frames([heart_graphic_char])
 
     def increases_max_hp(self, amount):
         """
@@ -70,6 +77,12 @@ class HealthModifier(Leaf):
         hp = self.parent.health.hp
         hp.max_value = hp.max_value + amount
         hp.increase(amount)
+        self._animate_heal()
+        self._animate_max_hp_gain()
+
+    def _animate_max_hp_gain(self):
+        heart_graphic_char = GraphicChar(None, colors.CYAN, icon.HEALTH_GAIN_ICON)
+        self.parent.char_printer.append_graphic_char_temporary_frames([heart_graphic_char])
 
     def _call_damage_taken_effect(self, damage, entity):
         """

@@ -101,14 +101,13 @@ class Sling(Composite):
 
 
 class RangeWeaponType(DataPoint):
+    """
+    Component that marks a weapon as a ranged weapon.
+    """
+
     GUN = 0
     SLING = 1
 
-    """
-    Component that marks a weapon as a .
-
-    Only the player should have this component.
-    """
     def __init__(self, range_weapon_type):
         super(RangeWeaponType, self).__init__("range_weapon_type", range_weapon_type)
 
@@ -711,15 +710,15 @@ class HealingPotionDrinkAction(DrinkAction):
     def __init__(self):
         super(HealingPotionDrinkAction, self).__init__()
         self.component_type = "health_potion_drink_action"
-        self.min_health = 10
-        self.max_health = 15
+        self.min_heal = 10
+        self.max_heal = 15
 
     def _drink(self, target_entity):
         """
         When an entity drinks a healing potion, it is healed.
         """
-        health = random.randrange(self.min_health, self.max_health)
-        heal_effect = entityeffect.Heal(target_entity, health)
+        heal = random.randrange(self.min_heal, self.max_heal + 1)
+        heal_effect = entityeffect.Heal(target_entity, heal)
         target_entity.effect_queue.add(heal_effect)
 
 

@@ -1,5 +1,6 @@
 import random
 from compositecore import Composite, Leaf
+import entityeffect
 from graphic import GraphicChar, CharPrinter
 from mover import Mover
 from position import Position, DungeonLevel
@@ -80,8 +81,7 @@ class DrinkFromFountainAction(action.Action):
 
     def act(self, **kwargs):
         target_entity = kwargs["target_entity"]
-        target_entity.health_modifier.increases_max_hp(random.randrange(2, 6))  # Players gain 2-5 hp for drinking.
-        target_entity.char_printer.append_fg_color_blink_frames([colors.CYAN])
+        target_entity.health_modifier.increases_max_hp(random.randrange(3, 7))  # Players gain 3-6 hp for drinking.
         self._dry_up_fountain()
         self.add_energy_spent_to_entity(target_entity)
 
@@ -115,7 +115,15 @@ class DescendStairsAction(action.Action):
         next_dungeon_level = dungeon.get_dungeon_level(current_depth + 1)
         dungeon.remove_dungeon_level(current_depth)
         self.add_energy_spent_to_entity(target_entity)
-        if(next_dungeon_level is None):
+        if next_dungeon_level is None:
             return
         destination_position = next_dungeon_level.up_stairs[0].position.value
         target_entity.mover.try_move(destination_position, next_dungeon_level)
+        self._go_down_rest_heal(target_entity)
+
+    def _go_down_rest_heal(self, target_entity):
+        min_heal = 5
+        max_heal = 8
+        heal = random.randrange(min_heal, max_heal + 1)
+        heal_effect = entityeffect.Heal(target_entity, heal)
+        target_entity.effect_queue.add(heal_effect)

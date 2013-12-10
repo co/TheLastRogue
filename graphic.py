@@ -73,11 +73,15 @@ class CharPrinter(Leaf):
         if len(self._temp_animation_frames) > 0:
             if self._current_frame <= 0:
                 self._current_frame = settings.ANIMATION_DELAY
-                frame = self._temp_animation_frames.pop()
+                frame = self._temp_animation_frames.pop(0)
             else:
                 self._current_frame -= 1
-                frame = self._temp_animation_frames[-1]
+                frame = self._temp_animation_frames[0]
         return frame
+
+    def reset_animation(self):
+        self._current_frame = settings.ANIMATION_DELAY
+        self._temp_animation_frames = []
 
     def draw(self, position, the_console=0):
         """
