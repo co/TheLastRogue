@@ -39,7 +39,7 @@ class Player(Composite):
         self.add_child(Stepper())
         self.add_child(Attacker())
         self.add_child(Dodger())
-        self.add_child(Evasion(14))
+        self.add_child(Evasion(15))
         self.add_child(Hit(16))
 
         self.add_child(Description("CO", "The Brave"))

@@ -269,8 +269,7 @@ class Composite(Component):
             return self._children[component_type]
         except KeyError:
             raise AttributeError("Tried to access component {0} from composite {1} "
-                                 "But it doesn't exist.".format(str(component_type),
-                                                                str(self)))
+                                 "But it doesn't exist.".format(str(component_type), str(self)))
 
     def get_original_child(self, component_type):
         """

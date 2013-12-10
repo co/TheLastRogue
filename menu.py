@@ -235,6 +235,8 @@ class InventoryMenu(Menu):
 def _get_item_option_text(item):
     if item.has_child("stacker") and item.stacker.size > 1:
         return item.description.name + " (" + str(item.stacker.size) + ")"
+    if item.has_child("charge"):
+        return item.description.name + " [" + str(item.charge.charges) + "]"
     return item.description.name
 
 
@@ -316,30 +318,21 @@ class OpenItemActionMenuAction(object):
 class ItemActionsMenu(Menu):
     def __init__(self, offset, item, player, state_stack,
                  margin=geo.zero2d(), vertical_space=1, may_escape=True):
-        super(ItemActionsMenu, self).__init__(offset, state_stack,
-                                              margin=margin, vertical_space=vertical_space,
-                                              may_escape=True)
-        self._actions =\
-            sorted(item.get_children_with_tag("user_action"),
-                   key=lambda action: action.display_order)
+        super(ItemActionsMenu, self).__init__(offset, state_stack, margin=margin,
+                                              vertical_space=vertical_space, may_escape=may_escape)
+        self._actions = sorted(item.get_children_with_tag("user_action"), key=lambda action: action.display_order)
         self._player = player
-        self._update_menu_items()
-        self.try_set_index_to_valid_value()
+        self.update()
 
     def _update_menu_items(self):
         game_state = self._state_stack.get_game_state()
         self._menu_items = []
         for item_action in self._actions:
-            action_function =\
-                item_action.delayed_call(source_entity=self._player,
-                                         target_entity=self._player,
-                                         game_state=game_state)
+            action_function = item_action.delayed_call(source_entity=self._player, target_entity=self._player,
+                                                       game_state=game_state)
             back_to_game_function = BackToGameFunction(self._state_stack)
             functions = [action_function, back_to_game_function]
-            option =\
-                MenuOption(item_action.name, functions,
-                           (lambda: item_action.can_act(source_entity=self._player,
-                                                        target_entity=self._player)))
+            option = MenuOption(item_action.name, functions, can_activate=item_action.can_act)
             self._menu_items.append(option)
 
 

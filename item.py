@@ -112,6 +112,7 @@ class RangeWeaponType(DataPoint):
     def __init__(self, range_weapon_type):
         super(RangeWeaponType, self).__init__("range_weapon_type", range_weapon_type)
 
+
 class Device(Composite):
     """
     A composite component representing a Gun item.
@@ -125,7 +126,7 @@ class Device(Composite):
         self.add_child(DungeonLevel())
         self.add_child(Mover())
         self.add_child(Description("Ancient Device",
-                                   "An anchient device, its creators are "
+                                   "An ancient device, its creators are "
                                    "long dead. But what is it for?\n"))
         self.add_child(GraphicChar(None, colors.GREEN, icon.MACHINE))
         self.add_child(CharPrinter())
@@ -133,6 +134,14 @@ class Device(Composite):
         self.add_child(PlayerThrowItemAction())
         self.add_child(ThrowerNonBreak())
         self.add_child(Weight(5))
+        self.add_child(Charge(random.randrange(2, 7)))
+
+
+class Charge(Leaf):
+    def __init__(self, charges):
+        super(Charge, self).__init__()
+        self.component_type = "charge"
+        self.charges = charges
 
 
 class DarknessDevice(Device):
@@ -146,7 +155,7 @@ class DarknessDevice(Device):
 class HeartStopDevice(Device):
     def __init__(self):
         super(HeartStopDevice, self).__init__()
-        self.description.name = "Device of Heart Stop"
+        self.description.name = "Dev. of Heart Stop"
         self.graphic_char.color_fg = colors.BLUE
         self.add_child(HeartStopDeviceAction())
 
@@ -163,9 +172,17 @@ class ActivateDeviceAction(Action):
         """
         target_entity = kwargs[action.TARGET_ENTITY]
         source_entity = kwargs[action.SOURCE_ENTITY]
+
         self._activate(source_entity)
         _item_flash_animation(source_entity, self.parent)
+        self.parent.charge.charges -= 1
         self.add_energy_spent_to_entity(source_entity)
+
+    def can_act(self, **kwargs):
+        """
+        You cannot use a device without charges.
+        """
+        return self.parent.charge.charges > 0
 
     def _activate(self, source_entity):
         """
@@ -611,15 +628,15 @@ class ReEquipAction(Action):
         Will attempt to equip the parent item to the given entity.
         """
         source_entity = kwargs[action.SOURCE_ENTITY]
-        if (action.EQUIPMENT_SLOT in kwargs):
+        if action.EQUIPMENT_SLOT in kwargs:
             equipment_slot = kwargs[action.EQUIPMENT_SLOT]
         else:
             equipment_slot = self.get_equipment_slot(source_entity)
         old_item = None
-        if (source_entity.equipment.slot_is_equiped(equipment_slot)):
+        if source_entity.equipment.slot_is_equiped(equipment_slot):
             old_item = source_entity.equipment.unequip(equipment_slot)
         self._re_equip(source_entity, equipment_slot)
-        if (not old_item is None):
+        if not old_item is None:
             source_entity.inventory.try_add(old_item)
         self.add_energy_spent_to_entity(source_entity)
 
@@ -629,7 +646,7 @@ class ReEquipAction(Action):
         """
         open_slots = (source_entity.equipment.get_open_slots_of_type
                           (self.parent.equipment_type.value))
-        if (len(open_slots) > 0):
+        if len(open_slots) > 0:
             return open_slots[0]
         else:
             return (source_entity.equipment.get_slots_of_type

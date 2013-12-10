@@ -19,14 +19,10 @@ def _main_menu(ui_state, state_stack, player_name_func):
     """
     Creates the first menu of the game.
     """
-    continue_game_function = \
-        lambda: ui_state.current_stack.push(gamestate.load_first_game())
-    start_game_function = \
-        lambda: ui_state.current_stack.push(gamestate.GameState(player_name_func()))
-    save_game_function = \
-        lambda: gamestate.save(ui_state.current_stack.get_game_state())
-    start_test_game_function = \
-        lambda: ui_state.current_stack.push(gamestate.TestGameState(player_name_func()))
+    continue_game_function = lambda: ui_state.current_stack.push(gamestate.load_first_game())
+    start_game_function = lambda: ui_state.current_stack.push(gamestate.GameState(player_name_func()))
+    save_game_function = lambda: gamestate.save(ui_state.current_stack.get_game_state())
+    start_test_game_function = lambda: ui_state.current_stack.push(gamestate.TestGameState(player_name_func()))
     quit_game_function = lambda: ui_state.current_stack.pop()
     dungeon_visualizer_function = \
         lambda: ui_state.current_stack.push(dungeoncreatorvisualizer.DungeonCreatorVisualizer())
@@ -34,7 +30,7 @@ def _main_menu(ui_state, state_stack, player_name_func):
     no_icon = graphic.GraphicChar(None, colors.BLACK, " ")
     gun_icon = graphic.GraphicChar(None, colors.WHITE, icon.GUN)
     continue_game_option = menu.MenuOptionWithSymbols("Continue", gun_icon, no_icon, [continue_game_function],
-                                                      (lambda: gamestate.is_there_a_saved_game()))
+                                                      gamestate.is_there_a_saved_game)
 
     start_game_option = \
         menu.MenuOptionWithSymbols("Start Dungeon", gun_icon, no_icon, [start_game_function, save_game_function])
@@ -220,8 +216,7 @@ def get_dungeon_feature_menu_options(player, stack_pop_function):
                                                      target_entity=player,
                                                      game_state=game_state)
         functions = [feature_option, stack_pop_function]
-        feature_options.append(menu.MenuOption(feature_action.name, functions,
-                                               (lambda: feature_action.can_act())))
+        feature_options.append(menu.MenuOption(feature_action.name, functions, feature_action.can_act))
     return feature_options
 
 
@@ -297,8 +292,7 @@ def victory_screen(state_stack):
                     (0, 0), colors.YELLOW_D)
 
     continue_option = \
-        menu.MenuOption("Press Enter to Continue...",
-                        [lambda: state_stack.pop_to_main_menu()])
+        menu.MenuOption("Press Enter to Continue...", [lambda: state_stack.pop_to_main_menu()])
 
     continue_menu = menu.StaticMenu((0, 0), [continue_option], state_stack,
                                     margin=style.menu_theme.margin, may_escape=False)
