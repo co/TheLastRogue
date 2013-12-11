@@ -5,8 +5,7 @@ import constants
 
 
 def full_screen_rect():
-    return geo.Rect(geo.zero2d(),
-                    settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT)
+    return geo.Rect(geo.zero2d(), settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT)
 
 
 def center_of_screen_rect(width, height):
@@ -27,12 +26,12 @@ def right_side_menu_rect():
 
 def message_display_rect():
     message_display_position =\
-        (constants.LEFT_SIDE_BAR_WIDTH, settings.WINDOW_HEIGHT - constants.MESSAGES_BAR_HEIGHT)
-    return geo.Rect(message_display_position, constants.MESSAGES_BAR_WIDTH, constants.MESSAGES_BAR_HEIGHT)
+        (constants.LEFT_SIDE_BAR_WIDTH, settings.WINDOW_HEIGHT - constants.GUI_BOX_HEIGHT)
+    return geo.Rect(message_display_position, constants.MESSAGES_BAR_WIDTH, constants.GUI_BOX_HEIGHT)
 
 
 def player_status_rect():
-    return geo.Rect((0, 0), constants.LEFT_SIDE_BAR_WIDTH, constants.MESSAGES_BAR_HEIGHT)
+    return geo.Rect((0, 0), constants.LEFT_SIDE_BAR_WIDTH, constants.GUI_BOX_HEIGHT)
 
     x = settings.WINDOW_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH
     y = 0
@@ -48,4 +47,4 @@ def right_side_menu_rect():
 
 
 def description_rectangle():
-    return geo.Rect((0, 0), 40, 10)
+    return geo.Rect((0, 0), min(40, settings.WINDOW_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH), 10)

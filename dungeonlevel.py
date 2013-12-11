@@ -145,8 +145,6 @@ class DungeonLevel(object):
         print "===================================="
 
 
-
-
 class DungeonLevelScreen(object):
     def __init__(self, dungeon_level):
         self.dungeon_level = dungeon_level
@@ -155,8 +153,9 @@ class DungeonLevelScreen(object):
     @property
     def console(self):
         if self._console is None:
-            self._console = libtcodpy.console_new(max(self.dungeon_level.width, constants.GAME_STATE_WIDTH),
-                                                  max(self.dungeon_level.height, constants.GAME_STATE_HEIGHT))
+            print "d, g", self.dungeon_level.width, constants.GAME_STATE_WIDTH
+            print "d, g", self.dungeon_level.height, constants.GAME_STATE_HEIGHT
+            self._console = libtcodpy.console_new(constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT)
         return self._console
 
     def __getstate__(self):
@@ -199,8 +198,8 @@ class DungeonLevelScreen(object):
 
     def blit(self, source_position):
         src_x, src_y = source_position
-        libtcodpy.console_blit(self.console, src_x, src_y, constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT, 0,
-                               0, 0)
+        libtcodpy.console_blit(self.console, src_x, src_y, constants.GAME_STATE_WIDTH,
+                               constants.GAME_STATE_HEIGHT, 0, 0, 0)
 
 
 def get_tile_or_unknown(position, tile_matrix):

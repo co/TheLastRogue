@@ -381,18 +381,16 @@ class StackPanelVertical(StackPanel):
             return self.width - element.width
 
 
-class CommandListPanel(RectangularUIElement):
-    def __init__(self, rect, margin=geo.zero2d()):
-        super(CommandListPanel, self).__init__(rect, margin)
-        self._bg_rect = StyledRectangle(rect, style.MinimalClassicStyle2())
-        self._stack_panel = StackPanelVertical(geo.add_2d(rect.top_left, (2, 2)), vertical_space=1)
+class CommandListPanel(UIElement):
+    def __init__(self, margin=geo.zero2d()):
+        super(CommandListPanel, self).__init__(margin)
+        self._stack_panel = StackPanelVertical(geo.add_2d((0, 0), (2, 2)), vertical_space=0)
         self.active = True
 
-        self._stack_panel.append(VerticalSpace(1))
-        self._stack_panel.append(self.left_right_adjust("Commands", "Key"))
+        self._stack_panel.append(self.left_right_adjust("Commands", "Key", colors.WHITE))
         self._stack_panel.append(VerticalSpace(1))
         self._stack_panel.append(self.left_right_adjust("Walk", "Mouse/Numpad"))
-        self._stack_panel.append(self.left_right_adjust("Pick Up/Use", "Space"))
+        self._stack_panel.append(self.left_right_adjust("Pick Up/Use", "Space", colors.LIGHT_PINK))
         self._stack_panel.append(self.left_right_adjust("Fire Gun", "f"))
         self._stack_panel.append(self.left_right_adjust("Throw Stone", "s"))
         self._stack_panel.append(self.left_right_adjust("Wait/Rest", "r"))
@@ -400,17 +398,29 @@ class CommandListPanel(RectangularUIElement):
         self._stack_panel.append(self.left_right_adjust("Context menu", "Enter"))
         self._stack_panel.append(VerticalSpace(1))
         self._stack_panel.append(self.left_right_adjust("Print Screen", "F12"))
-        self._stack_panel.append(self.left_right_adjust("Toggle View", "Tab"))
+        self._stack_panel.append(self.left_right_adjust("Toggle View", "Tab", colors.LIGHT_ORANGE))
         self._stack_panel.append(self.left_right_adjust("Save/Quit", "Esc"))
+
+        self._bg_rect = StyledRectangle(geo.Rect((0, 0), self._stack_panel.total_width + 4, self._stack_panel.total_height + 3),
+                                        style.MinimalClassicStyle2())
+
+        text = "Press Tab"
+        offset = (self._stack_panel.width + 3, (self.height - len(text)) / 2)
+        self._inactive_text = VerticalTextBox(text, offset, colors.LIGHT_ORANGE)
 
         self._inactive_line = VerticalLine(graphic.GraphicChar(colors.INTERFACE_BG, colors.BLACK, icon.V_LINE),
                                            self.height, (self.width - 1, 0))
-        text = "Press Tab to see Commands"
-        offset = (self.width - 1, (self.height - len(text)) / 2)
-        self._inactive_text = VerticalTextBox(text, offset, colors.GRAY_D)
 
-    def left_right_adjust(self, text1, text2):
-        return TextBox(text1 + text2.rjust(self.rect.width - len(text1) - 4), (0, 0), colors.GRAY)
+    @property
+    def height(self):
+        return self._bg_rect.height
+
+    @property
+    def width(self):
+        return self._bg_rect.width
+
+    def left_right_adjust(self, text1, text2, color=colors.GRAY):
+        return TextBox(text1 + text2.rjust(constants.RIGHT_SIDE_BAR_WIDTH - len(text1) - 5), (0, 0), color)
 
     def draw(self, offset=geo.zero2d()):
         if self.active:
@@ -657,7 +667,7 @@ class MessageDisplay(RectangularUIElement):
                 for line in lines:
                     text_box = TextBox(str(line), geo.zero2d(), colors.TEXT_OLD, geo.zero2d())
                     self._message_stack_panel.append(text_box)
-                self._offset = (0, constants.MESSAGES_BAR_HEIGHT - self._message_stack_panel.height - 4)
+                self._offset = (0, constants.GUI_BOX_HEIGHT - self._message_stack_panel.height - 4)
 
     def draw(self, offset=geo.zero2d()):
         offset = geo.add_2d(offset, self._offset)

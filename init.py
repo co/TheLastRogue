@@ -1,8 +1,8 @@
 import os
-
 import constants
 import settings
 import libtcodpy as libtcod
+
 
 def init_libtcod():
     font = os.path.join('fonts', 'terminal16x16_gs_ro.png')

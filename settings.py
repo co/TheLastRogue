@@ -1,6 +1,9 @@
 WINDOW_WIDTH = 110
 WINDOW_HEIGHT = 60
 
+WINDOW_WIDTH = 1024 / 16
+WINDOW_HEIGHT = 768 / 16
+
 ANIMATION_DELAY = 3
 
 # only draw state if player has moved.
