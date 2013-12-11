@@ -1,3 +1,4 @@
+import libtcodpy
 import palette
 
 
@@ -88,6 +89,7 @@ WHITE = palette.WHITE
 GRAY = palette.GRAY
 GRAY_D = palette.GRAY_D
 BLACK = palette.BLACK
+DARK_GRAY = libtcodpy.Color(21, 25, 32)
 
 ################################
 # Color Assignments

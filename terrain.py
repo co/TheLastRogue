@@ -98,9 +98,7 @@ class GlassWall(Composite):
         self.add_child(Mover())
         self.add_child(Position())
         self.add_child(DungeonLevel())
-        self.add_child(GraphicChar(colors.FLOOR_BG,
-                                   colors.WHITE,
-                                   icon.GLASS_WALL))
+        self.add_child(GraphicChar(colors.FLOOR_BG, colors.WHITE, icon.GLASS_WALL))
         self.add_child(CharPrinter())
         self.add_child(IsSolid(True))
         self.add_child(IsTransparent(True))
@@ -113,9 +111,7 @@ class Chasm(Composite):
         self.add_child(Mover())
         self.add_child(Position())
         self.add_child(DungeonLevel())
-        self.add_child(GraphicChar(colors.BLACK,
-                                   colors.FLOOR_BG,
-                                   icon.CHASM))
+        self.add_child(GraphicChar(colors.DARK_GRAY, colors.DARK_GREEN, icon.CHASM + 1))
         self.add_child(CharPrinter())
         self.add_child(IsChasm(True))
         self.add_child(IsSolid(False))
