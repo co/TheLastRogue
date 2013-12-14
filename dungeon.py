@@ -63,4 +63,5 @@ class Dungeon(object):
         dungeon_level.print_statistics()
 
         dungeon_level.dungeon = self
+        dungeon_level.print_dungeon()
         return dungeon_level

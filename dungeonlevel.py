@@ -44,6 +44,7 @@ class DungeonLevel(object):
     def draw_everything(self, camera):
         self._dungeon_level_screen.draw_everything(camera, self.tile_matrix)
         self._dungeon_level_screen.blit(camera.offset)
+        self._dungeon_level_screen.clear()
 
     def draw_close_to_player(self, camera):
         the_player = self._get_player_if_available()
@@ -123,7 +124,12 @@ class DungeonLevel(object):
         for y, row in enumerate(self.tile_matrix):
             line = ""
             for x, tile in enumerate(row):
-                line += str(self.get_tile_or_unknown((x, y)).icon)
+                if tile.get_terrain().is_solid.value:
+                    line += "#"
+                elif tile.get_terrain().has_child("is_chasm"):
+                    line += "_"
+                else:
+                    line += "."
             print(line)
 
     def get_walkable_positions(self, entity, position):
@@ -148,42 +154,49 @@ class DungeonLevel(object):
 class DungeonLevelScreen(object):
     def __init__(self, dungeon_level):
         self.dungeon_level = dungeon_level
-        self._console = None
+        self.height = max(constants.GAME_STATE_HEIGHT, self.dungeon_level.height)
+        self.width = max(constants.GAME_STATE_WIDTH, self.dungeon_level.width)
+        print "d: ", self.width, self.height
+        self.console = libtcodpy.console_new(self.width, self.height)
 
-    @property
-    def console(self):
-        if self._console is None:
-            print "d, g", self.dungeon_level.width, constants.GAME_STATE_WIDTH
-            print "d, g", self.dungeon_level.height, constants.GAME_STATE_HEIGHT
-            self._console = libtcodpy.console_new(constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT)
-        return self._console
+    #@property
+    #def console(self):
+    #    if self._console is None:
+    #        print (max(constants.GAME_STATE_WIDTH, self.dungeon_level.width),
+    #               max(constants.GAME_STATE_HEIGHT, self.dungeon_level.height))
+    #        self._console = libtcodpy.console_new(width, height)
+    #    return self._console
 
     def __getstate__(self):
         state = dict(self.__dict__)
-        del state["_console"]
+        del state["console"]
         return state
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self._console = None
+        self.console = libtcodpy.console_new(self.width, self.height)
 
     def draw_everything(self, camera, tile_matrix):
-        for y in range(settings.WINDOW_HEIGHT):
-            for x in range(settings.WINDOW_WIDTH):
+        for y in range(self.height):
+            for x in range(self.width):
                 position = (x, y)
                 tile_position = geo.add_2d(position, camera.camera_offset)
                 the_tile = get_tile_or_unknown(tile_position, tile_matrix)
                 the_tile.draw(self.console, position, True)
 
     def draw_rectangle_seen_by_entity(self, rectangle, tile_matrix, entity):
-        for y in range(rectangle.top, rectangle.bottom):
-            for x in range(rectangle.left, rectangle.right):
+        y_start = max(0, rectangle.top)
+        y_end = min(self.height, rectangle.bottom)
+        x_start = max(0, rectangle.left)
+        x_end = min(self.width, rectangle.right)
+        for y in range(y_start, y_end):
+            for x in range(x_start, x_end):
                 position = (x, y)
                 self._draw_tile(position, tile_matrix, entity)
 
     def redraw_screen_as_seen_by_entity(self, tile_matrix, entity):
-        for y in range(constants.GAME_STATE_HEIGHT):
-            for x in range(constants.GAME_STATE_WIDTH):
+        for y in range(self.height):
+            for x in range(self.width):
                 position = (x, y)
                 self._draw_tile(position, tile_matrix, entity)
 
@@ -201,6 +214,9 @@ class DungeonLevelScreen(object):
         libtcodpy.console_blit(self.console, src_x, src_y, constants.GAME_STATE_WIDTH,
                                constants.GAME_STATE_HEIGHT, 0, 0, 0)
 
+    def clear(self):
+        libtcodpy.console_clear(self.console)
+
 
 def get_tile_or_unknown(position, tile_matrix):
     x, y = position
@@ -210,4 +226,3 @@ def get_tile_or_unknown(position, tile_matrix):
         return tile_matrix[y][x]
     except IndexError:
         return tile.unknown_tile
-

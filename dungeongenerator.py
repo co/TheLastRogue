@@ -1,5 +1,6 @@
 import math
 import random
+import constants
 
 import terrain
 import rng
@@ -229,15 +230,17 @@ def generate_dungeon_exploded_rooms(open_area, depth):
     chasm_points = shapegenerator.smooth_shape(chasm_points)
 
     # Normalize Points to dungeon
-    frame = 2
+    print "The Frog King was here!"
+    frame = (2, 2)  # Just to be safe we won't try to draw outside Dungeon.
     level_shape = shapegenerator.Shape(open_points)
     chasm_shape = shapegenerator.Shape(chasm_points)
-    dungeon_rect = shapegenerator.Shape(open_points | chasm_points).calc_rect().expanded_by(frame)
-    normalized_chasm_points = chasm_shape.calc_normalized_points(frame / 2)
-    normalized_open_points = level_shape.calc_normalized_points(frame / 2)
+    dungeon_rect = shapegenerator.Shape(open_points | chasm_points).calc_rect()
+    dungeon_rect_with_frame = dungeon_rect.expanded_by(frame)
+    normalized_chasm_points = chasm_shape.offset_points(geo.sub_2d(frame, dungeon_rect.top_left))
+    normalized_open_points = level_shape.offset_points(geo.sub_2d(frame, dungeon_rect.top_left))
 
     # Apply shapes to dungeon
-    dungeon_level = get_full_wall_dungeon(dungeon_rect.width, dungeon_rect.height, depth)
+    dungeon_level = get_full_wall_dungeon(dungeon_rect_with_frame.width, dungeon_rect_with_frame.height, depth)
 
     brush = SinglePointBrush(ReplaceTerrain(terrain.Chasm))
     apply_brush_to_points(dungeon_level, normalized_chasm_points, brush)

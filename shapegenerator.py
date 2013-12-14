@@ -219,10 +219,16 @@ class Shape(object):
             down = max(point[1], down)
         return geo.Rect((left, up), right - left, down - up)
 
-    def calc_normalized_points(self, offset=0):
-        rect = self.calc_rect()
+#    def calc_normalized_points(self, offset=0):
+#        rect = self.calc_rect()
+#        normalized = set()
+#        for point in self.points:
+#            normalized.add((point[0] - rect.left + offset,
+#                            point[1] - rect.top + offset))
+#        return normalized
+
+    def offset_points(self, offset):
         normalized = set()
         for point in self.points:
-            normalized.add((point[0] - rect.left + offset,
-                            point[1] - rect.top + offset))
+            normalized.add(geo.add_2d(point, offset))
         return normalized

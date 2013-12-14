@@ -131,14 +131,14 @@ class Rect(object):
         """Return the bottom-right corner as a tuple."""
         return self.right, self.bottom
 
-    def expanded_by(self, n):
+    def expanded_by(self, point):
         """Return a rectangle with extended borders.
 
         Create a new rectangle that is wider and taller than the
         immediate one. All sides are extended by "n" tuple.
         """
-        p1 = (self.left - n, self.top - n)
-        p2 = (self.right + n, self.bottom + n)
+        p1 = (self.left - point[0], self.top - point[1])
+        p2 = (self.right + point[0], self.bottom + point[1])
         return Rect(p1, p2[0] - p1[0], p2[1] - p1[1])
 
     def containing_points(self):
