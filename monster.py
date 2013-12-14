@@ -209,6 +209,7 @@ class AddGhostReviveToSeenEntities(Leaf):
     """
     Revive other living creatures as ghosts.
     """
+
     def __init__(self):
         super(AddGhostReviveToSeenEntities, self).__init__()
         self.component_type = "add_ghost_revive_to_seen_entities"
@@ -225,6 +226,7 @@ class ReviveAsGhostOnDeath(Leaf):
     """
     Will remove the parent from the dungeon when parent Entity dies.
     """
+
     def __init__(self):
         super(ReviveAsGhostOnDeath, self).__init__()
         self.component_type = "revive_as_ghost_on_death"
@@ -307,12 +309,12 @@ class Slime(Composite):
         self.add_child(Stepper())
         self.add_child(CanShareTileEntityMover())
 
-        self.add_child(EntityMessages(("The slime seems to",
-                                       "wobble with happiness."),
+        self.add_child(EntityMessages("The slime seems to "
+                                      "wobble with happiness.",
                                       "The slime melts away."))
         self.add_child(Description("Slime",
-                                   ("Slime, slime, slime. Ugh, I hate Slimes."
-                                    "It seems to be looking at you...")))
+                                   "Slime, slime, slime. Ugh, I hate Slimes."
+                                   "It seems to be looking at you..."))
         self.add_child(GraphicChar(None, colors.GREEN,
                                    icon.SLIME))
         self.add_child(CharPrinter())

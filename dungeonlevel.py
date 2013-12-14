@@ -156,16 +156,7 @@ class DungeonLevelScreen(object):
         self.dungeon_level = dungeon_level
         self.height = max(constants.GAME_STATE_HEIGHT, self.dungeon_level.height)
         self.width = max(constants.GAME_STATE_WIDTH, self.dungeon_level.width)
-        print "d: ", self.width, self.height
         self.console = libtcodpy.console_new(self.width, self.height)
-
-    #@property
-    #def console(self):
-    #    if self._console is None:
-    #        print (max(constants.GAME_STATE_WIDTH, self.dungeon_level.width),
-    #               max(constants.GAME_STATE_HEIGHT, self.dungeon_level.height))
-    #        self._console = libtcodpy.console_new(width, height)
-    #    return self._console
 
     def __getstate__(self):
         state = dict(self.__dict__)

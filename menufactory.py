@@ -223,7 +223,7 @@ def get_dungeon_feature_menu_options(player, stack_pop_function):
 def title_screen(state_stack):
     title_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
     line = gui.HorizontalLine(icon.H_LINE, colors.GRAY,
-                              colors.WHITE, settings.WINDOW_WIDTH)
+                              colors.WHITE, settings.SCREEN_WIDTH + 1)
     the_text = gui.TextBox("T H E", (0, 0), colors.BLACK, (0, 1))
     last_text = gui.TextBox("L A S T", (0, 0), colors.BLACK, (0, 1))
     rogue_text = gui.TextBox("R O G U E", (0, 0), colors.BLACK, (0, 1))
@@ -247,7 +247,7 @@ def title_screen(state_stack):
 
     bg_rect = gui.FilledRectangle(rectfactory.full_screen_rect(), colors.DARK_BLUE)
 
-    bg_sign_rect = gui.FilledRectangle(geo.Rect((0, 15), settings.WINDOW_WIDTH, 11), colors.WHITE)
+    bg_sign_rect = gui.FilledRectangle(geo.Rect((0, 15), settings.SCREEN_WIDTH, 11), colors.WHITE)
 
     ui_state = state.UIState(gui.UIElementList(None))
     main_menu = _main_menu(ui_state, state_stack, lambda: hero_name_typewriter.text)
@@ -285,7 +285,7 @@ def type_writer_highlight_update_function(elements, menu, active_fg_color, inact
 def victory_screen(state_stack):
     victory_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
     line = gui.HorizontalLine(icon.H_LINE, colors.YELLOW,
-                              None, settings.WINDOW_WIDTH)
+                              None, settings.SCREEN_WIDTH + 1)
     victory_text = gui.TextBox("A WINNER IS YOU", (0, 0), colors.WHITE)
     ironic_text = \
         gui.TextBox("Good job! No seriously, I bet it was real hard...",
@@ -298,7 +298,7 @@ def victory_screen(state_stack):
                                     margin=style.menu_theme.margin, may_escape=False)
 
     short_vspace = gui.VerticalSpace(7)
-    long_vspace = gui.VerticalSpace(settings.WINDOW_HEIGHT - 22)
+    long_vspace = gui.VerticalSpace(settings.SCREEN_HEIGHT - 22)
 
     victory_stack_panel.append(short_vspace)
     victory_stack_panel.append(line)
@@ -319,7 +319,7 @@ def victory_screen(state_stack):
 def game_over_screen(state_stack):
     game_over_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
     red_line = gui.HorizontalLine(icon.H_LINE, colors.RED,
-                                  colors.BLACK, settings.WINDOW_WIDTH)
+                                  colors.BLACK, settings.SCREEN_WIDTH + 1)
     game_over_text = gui.TextBox("YOU DIED", (0, 0), colors.RED)
     insult_text = gui.TextBox("Like a bitch.", (0, 0), colors.DARK_BROWN)
 
@@ -331,7 +331,7 @@ def game_over_screen(state_stack):
                                     margin=style.menu_theme.margin, may_escape=False)
 
     short_vspace = gui.VerticalSpace(7)
-    long_vspace = gui.VerticalSpace(settings.WINDOW_HEIGHT - 22)
+    long_vspace = gui.VerticalSpace(settings.SCREEN_HEIGHT - 22)
 
     game_over_stack_panel.append(short_vspace)
     game_over_stack_panel.append(red_line)

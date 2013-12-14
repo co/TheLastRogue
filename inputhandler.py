@@ -1,5 +1,6 @@
 import time
 import libtcodpy as libtcod
+import settings
 
 NORTH = 0
 SOUTH = 1
@@ -79,49 +80,46 @@ vi_move_controls = {
 }
 
 controls = {
-    't': VI_NORTH,  # up
+    settings.KEY_UP: VI_NORTH,  # up
     libtcod.KEY_UP: NORTH,  # up
     libtcod.KEY_KP8: NORTH,  # up
 
-    'h': VI_SOUTH,   # down
+    settings.KEY_DOWN: VI_SOUTH,   # down
     libtcod.KEY_DOWN: SOUTH,  # up
     libtcod.KEY_KP2: SOUTH,  # up
 
-    'd': VI_WEST,  # left
+    settings.KEY_LEFT: VI_WEST,  # left
     libtcod.KEY_LEFT: WEST,  # left
     libtcod.KEY_KP4: WEST,  # up
 
-    'n': VI_EAST,   # right
+    settings.KEY_RIGHT: VI_EAST,   # right
     libtcod.KEY_RIGHT: EAST,  # right
     libtcod.KEY_KP6: EAST,  # up
 
-    'g': VI_NORTHWEST,   # up, left
+    settings.KEY_UP_LEFT: VI_NORTHWEST,   # up, left
     libtcod.KEY_KP7: NORTHWEST,  # up, left
 
-    'c': VI_NORTHEAST,   # up, right
+    settings.KEY_UP_RIGHT: VI_NORTHEAST,   # up, right
     libtcod.KEY_KP9: NORTHEAST,  # up, right
 
-    'm': VI_SOUTHWEST,   # down, left
+    settings.KEY_DOWN_LEFT: VI_SOUTHWEST,   # down, left
     libtcod.KEY_KP1: SOUTHWEST,  # down, left
 
-    'w': VI_SOUTHEAST,   # down, right
+    settings.KEY_DOWN_RIGHT: VI_SOUTHEAST,   # down, right
     libtcod.KEY_KP3: SOUTHEAST,  # down, right
 
-    'f': FIRE,
-    's': STONE,
+    settings.KEY_FIRE: FIRE,
+    settings.KEY_STONE: STONE,
     libtcod.KEY_F12: PRINTSCREEN,
 
     libtcod.KEY_ENTER: ENTER,
     libtcod.KEY_ESCAPE: ESCAPE,
     libtcod.KEY_SHIFT: SHIFT,  # shift
 
-    "r": REST,
-    ".": REST,
-    "p": PICKUP,
-    "i": INVENTORY,
-    "e": EQUIPMENT,
-    "x": EXAMINE,
-    ">": DESCEND,
+    settings.KEY_REST: REST,
+    settings.KEY_INVENTORY: INVENTORY,
+    settings.KEY_EQUIPMENT: EQUIPMENT,
+    settings.KEY_EXAMINE: EXAMINE,
     libtcod.KEY_0: ZERO,
     libtcod.KEY_1: ONE,
     libtcod.KEY_2: TWO,

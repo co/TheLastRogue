@@ -27,8 +27,8 @@ class PositionExaminer(state.State):
     @cursor_position.setter
     def cursor_position(self, value):
         x, y = self.camera.dungeon_to_screen_position(value)
-        x = max(0, min(x, settings.WINDOW_WIDTH - 1))
-        y = max(0, min(y, settings.WINDOW_HEIGHT - 1))
+        x = max(0, min(x, settings.SCREEN_WIDTH - 1))
+        y = max(0, min(y, settings.SCREEN_HEIGHT - 1))
         self._cursor_position = self.camera.screen_to_dungeon_position((x, y))
 
     def update(self):

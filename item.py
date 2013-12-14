@@ -547,7 +547,7 @@ class HealthPotion(Composite):
         self.add_child(Mover())
         self.add_child(Description("Health Potion",
                                    "An unusual liquid\
-                                   contained in a glass flask."))
+                                   contained in a glass bottle."))
         self.add_child(GraphicChar(None, colors.PINK, icon.POTION))
         self.add_child(CharPrinter())
         self.add_child(Stacker("health_potion", 3))

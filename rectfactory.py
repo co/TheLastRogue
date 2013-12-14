@@ -5,7 +5,7 @@ import constants
 
 
 def full_screen_rect():
-    return geo.Rect(geo.zero2d(), settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT)
+    return geo.Rect(geo.zero2d(), settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)
 
 
 def center_of_screen_rect(width, height):
@@ -13,29 +13,29 @@ def center_of_screen_rect(width, height):
 
 
 def ratio_of_screen_rect(width, height, x_ratio, y_ratio):
-    x = int((settings.WINDOW_WIDTH - width) * x_ratio)
-    y = int((settings.WINDOW_HEIGHT - height) * y_ratio)
+    x = int((settings.SCREEN_WIDTH - width) * x_ratio)
+    y = int((settings.SCREEN_HEIGHT - height) * y_ratio)
     return geo.Rect((x, y), width, height)
 
 
 def right_side_menu_rect():
-    x = settings.WINDOW_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH
+    x = settings.SCREEN_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH
     y = 0
-    return geo.Rect((x, y), constants.RIGHT_SIDE_BAR_WIDTH, settings.WINDOW_HEIGHT)
+    return geo.Rect((x, y), constants.RIGHT_SIDE_BAR_WIDTH, settings.SCREEN_HEIGHT)
 
 
 def message_display_rect():
     message_display_position =\
-        (constants.LEFT_SIDE_BAR_WIDTH, settings.WINDOW_HEIGHT - constants.GUI_BOX_HEIGHT)
+        (constants.LEFT_SIDE_BAR_WIDTH, settings.SCREEN_HEIGHT - constants.GUI_BOX_HEIGHT)
     return geo.Rect(message_display_position, constants.MESSAGES_BAR_WIDTH, constants.GUI_BOX_HEIGHT)
 
 
 def player_status_rect():
     return geo.Rect((0, 0), constants.LEFT_SIDE_BAR_WIDTH, constants.GUI_BOX_HEIGHT)
 
-    x = settings.WINDOW_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH
+    x = settings.SCREEN_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH
     y = 0
-    return geo.Rect((x, y), constants.RIGHT_SIDE_BAR_WIDTH, settings.WINDOW_HEIGHT)
+    return geo.Rect((x, y), constants.RIGHT_SIDE_BAR_WIDTH, settings.SCREEN_HEIGHT)
 
 
 def monster_status_rect():
@@ -47,4 +47,4 @@ def right_side_menu_rect():
 
 
 def description_rectangle():
-    return geo.Rect((0, 0), min(40, settings.WINDOW_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH), 10)
+    return geo.Rect((0, 0), min(40, settings.SCREEN_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH), 10)

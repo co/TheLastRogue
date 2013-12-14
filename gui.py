@@ -391,10 +391,10 @@ class CommandListPanel(UIElement):
         self._stack_panel.append(VerticalSpace(1))
         self._stack_panel.append(self.left_right_adjust("Walk", "Mouse/Numpad"))
         self._stack_panel.append(self.left_right_adjust("Pick Up/Use", "Space", colors.LIGHT_PINK))
-        self._stack_panel.append(self.left_right_adjust("Fire Gun", "f"))
-        self._stack_panel.append(self.left_right_adjust("Throw Stone", "s"))
-        self._stack_panel.append(self.left_right_adjust("Wait/Rest", "r"))
-        self._stack_panel.append(self.left_right_adjust("Inventory", "i"))
+        self._stack_panel.append(self.left_right_adjust("Fire Gun", settings.KEY_FIRE))
+        self._stack_panel.append(self.left_right_adjust("Throw Stone", settings.KEY_STONE))
+        self._stack_panel.append(self.left_right_adjust("Wait/Rest", settings.KEY_REST))
+        self._stack_panel.append(self.left_right_adjust("Inventory", settings.KEY_INVENTORY))
         self._stack_panel.append(self.left_right_adjust("Context menu", "Enter"))
         self._stack_panel.append(VerticalSpace(1))
         self._stack_panel.append(self.left_right_adjust("Print Screen", "F12"))
@@ -798,10 +798,10 @@ class TextBox(UIElement):
 
     def draw(self, offset=geo.zero2d()):
         x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
-        if x > settings.WINDOW_WIDTH:
+        if x > settings.SCREEN_WIDTH:
             return
-        if x + len(self.text) > settings.WINDOW_WIDTH:
-            max_width = settings.WINDOW_WIDTH - x
+        if x + len(self.text) > settings.SCREEN_WIDTH:
+            max_width = settings.SCREEN_WIDTH - x
             show_text = self.text[:max_width - 3] + "..."
         else:
             show_text = self.text
