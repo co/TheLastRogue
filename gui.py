@@ -151,7 +151,6 @@ class UIDock(RectangularUIElement):
             self.right.draw(geo.add_2d((self.width - self.right.width,
                                         self.height / 2 - self.right.height / 2), the_offset))
         if self.bottom:
-            print self.width, self.bottom.width / 2
             self.bottom.draw(geo.add_2d((self.width / 2 - self.bottom.width / 2,
                                          self.height - self.bottom.height), the_offset))
         if self.top:

@@ -276,7 +276,7 @@ class Ammunition(Composite):
         self.add_child(ItemType(ItemType.AMMO))
         self.add_child(Position())
         self.add_child(IsAmmo())
-        self.add_child(Stacker("ammo", 10, 3))
+        self.add_child(Stacker("ammo", 10, random.randrange(2, 6)))
         self.add_child(DungeonLevel())
         self.add_child(Mover())
         self.add_child(Description("Gun Bullets",

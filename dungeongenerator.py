@@ -43,7 +43,6 @@ def place_up_down_stairs_at_center(dungeon_level):
 
 def place_up_down_stairs(dungeon_level, up_position, down_position):
     _place_feature_replace_terrain_with_floor(dungeonfeature.StairsDown(), dungeon_level, down_position)
-    print dungeon_level, down_position
     _place_feature_replace_terrain_with_floor(dungeonfeature.StairsUp(), dungeon_level, up_position)
 
 

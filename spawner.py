@@ -46,7 +46,7 @@ def spawn_corpse_on_position(position, dungeon_level):
 def place_health_potions(dungeon_level):
     health_potions_to_spawn = 0
 
-    for _ in range(3):
+    for _ in range(4):
         if rng.coin_flip():
             health_potions_to_spawn += 1
     for _ in range(2):
@@ -59,6 +59,11 @@ def place_health_potions(dungeon_level):
 
 def place_equipment(dungeon_level):
     depth = dungeon_level.depth
+
+    if (depth == 0 or depth == 1) and rng.coin_flip():
+        early_weapon = random.choice([item.Knife(), item.Sling()])
+        place_piece_on_random_tile(early_weapon, dungeon_level)
+
     for _ in range(random.randrange(depth + 1)):
         if rng.coin_flip():
             if rng.coin_flip() and rng.coin_flip() and rng.coin_flip():  # Rare equipment.

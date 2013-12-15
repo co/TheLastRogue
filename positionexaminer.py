@@ -139,7 +139,7 @@ class MissileDestinationSelector(PositionSelector):
             self._exit()
 
     def _handle_enter(self, key):
-        if key == inputhandler.ENTER:
+        if key == inputhandler.ENTER or key == inputhandler.FIRE or key == inputhandler.STONE:
             self.selected_path = self._get_current_path()
             self._exit()
 
