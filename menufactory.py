@@ -35,16 +35,16 @@ def _main_menu(ui_state, state_stack, player_name_func):
     menu_items.append(continue_game_option)
 
     start_game_option = \
-        menu.MenuOptionWithSymbols("Start Dungeon", gun_icon, no_icon, [start_game_function, save_game_function])
+        menu.MenuOptionWithSymbols("New Game", gun_icon, no_icon, [start_game_function, save_game_function])
     menu_items.append(start_game_option)
 
     if settings.DEV_MODE_FLAG:
         start_test_game_option = \
-            menu.MenuOptionWithSymbols("Start Test Dungeon", gun_icon, no_icon, [start_test_game_function])
+            menu.MenuOptionWithSymbols("Test Dungeon", gun_icon, no_icon, [start_test_game_function])
         menu_items.append(start_test_game_option)
 
         dungeon_creator_option = \
-            menu.MenuOptionWithSymbols("Dungeon Creator", gun_icon, no_icon, [dungeon_visualizer_function])
+            menu.MenuOptionWithSymbols("Dungeon Generator", gun_icon, no_icon, [dungeon_visualizer_function])
         menu_items.append(dungeon_creator_option)
 
     quit_option = menu.MenuOptionWithSymbols("Quit", gun_icon, no_icon, [quit_game_function])

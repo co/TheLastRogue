@@ -11,7 +11,7 @@ animation_delay=3
 fps=20
 
 #Set to True for full screen, don't forget to set resolution.
-full_screen=False
+#full_screen=True
 
 [KeyBind]
 left=d

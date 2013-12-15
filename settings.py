@@ -35,7 +35,7 @@ defaults = {
 }
 
 config = ConfigParser.SafeConfigParser(defaults)
-config.read('config_dvorak.txt')
+config.read('config.txt')
 
 tile_width = 16
 
