@@ -5,9 +5,9 @@ import gametime
 import geometry as geo
 from graphic import GraphicChar
 from health import DamageTakenEffect
-import rng
 import direction
 from messenger import messenger
+import rng
 from statusflags import StatusFlags
 from actor import Actor
 
@@ -100,6 +100,8 @@ class MonsterActor(Actor):
         player = self.get_player_if_seen()
         if player is None:
             return False
+        elif self.parent.monster_actor_state.value == MonsterActorState.HUNTING:
+            return True
         return self.parent.awareness_checker.check(player.stealth.value)
 
     def set_path_to_random_walkable_point(self):
@@ -163,6 +165,8 @@ class ChasePlayerActor(MonsterActor):
         #  Perform Stealth Check
         if self.notice_player_check():
             self.parent.monster_actor_state.value = MonsterActorState.HUNTING
+        elif rng.coin_flip() and rng.coin_flip() and rng.coin_flip():
+            self.parent.monster_actor_state.value = MonsterActorState.WANDERING
 
         #  Set Path
         self.set_path_to_player_if_seen()
@@ -200,6 +204,8 @@ class KeepPlayerAtDistanceActor(MonsterActor):
         #  Perform Stealth Check
         if self.notice_player_check():
             self.parent.monster_actor_state.value = MonsterActorState.HUNTING
+        elif rng.coin_flip() and rng.coin_flip() and rng.coin_flip():
+            self.parent.monster_actor_state.value = MonsterActorState.WANDERING
 
         if self.can_do_ranged_attack():
             self.do_range_attack()
@@ -247,14 +253,3 @@ class HuntPlayerIfHurtMe(DamageTakenEffect):
     def effect(self, _, source_entity):
         if source_entity.has_child("is_player"):
             self.parent.monster_actor_state.value = MonsterActorState.HUNTING
-
-#    def try_to_escape_slime(self):
-#        """
-#        Assumes the entity is trapped by a slime,
-#        if escape is successful return true otherwise false.
-#        """
-#        slime = self.get_entity_sharing_my_position()
-#        if not slime is None:
-#            self.parent.attacker.hit(slime)
-#        escape_successful = rng.coin_flip() and rng.coin_flip()
-#        return escape_successful
