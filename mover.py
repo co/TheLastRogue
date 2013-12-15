@@ -26,9 +26,38 @@ class Mover(Leaf):
         return (self._can_fit_on_tile(new_tile) and
                 self.can_pass_terrain(new_tile.get_terrain()))
 
+    def move_push_over(self, new_position, dungeon_level=None):
+        """
+        Will move parent to new position.
+        If that position already is occupied try move the old occupant to an adjacent tile.
+        The old occupant may be removed if all adjacent tiles are occupied already.
+
+        Returns true if it is successful, false otherwise.
+        """
+        if dungeon_level is None:
+            dungeon_level = self.parent.dungeon_level.value
+        if self.try_move(new_position, dungeon_level):
+            return True
+        old_occupants = self.get_defying_occupants(new_position, dungeon_level)
+        for old_occupant in old_occupants:
+            old_occupant.mover.try_remove_from_dungeon()
+
+        self.replace_move(new_position, dungeon_level)
+
+        for old_occupant in old_occupants:
+            old_occupant.mover.try_move_roll_over(new_position, dungeon_level)
+        return True
+
+    def get_defying_occupants(self, position, dungeon_level=None):
+        if dungeon_level is None:
+            dungeon_level = self.parent.dungeon_level.value
+        tile = dungeon_level.get_tile(position)
+        return tile.game_pieces[self.parent.game_piece_type.value]
+
     def try_move_roll_over(self, new_position, new_dungeon_level=None):
         """
         Tries to move parent to new position.
+        Or an adjacent tile if it is already occupied.
 
         Returns true if it is successful, false otherwise.
         """
@@ -201,3 +230,16 @@ class CanShareTileEntityMover(Mover):
         if len(entities_on_tile) > 1:
             return False
         return True
+
+
+def teleport_monsters(player):
+    positions = (player.dungeon_level.value.get_walkable_positions(player, player.position.value))
+    random_positions = random.sample(positions, len(positions))
+    max_tries = 30
+    while len(player.vision.get_seen_entities()) > 0 and max_tries > 0:
+        entity = player.vision.get_seen_entities()[0]
+        for position in random_positions:
+            teleport_successful = entity.mover.try_move(position)
+            if teleport_successful:
+                break
+        max_tries -= 1

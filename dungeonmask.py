@@ -43,8 +43,7 @@ class DungeonMask(Leaf):
         """
         Initiates the dungeon map of a dungeon_level, if available.
         """
-        if (self.has_sibling("dungeon_level") and
-                not self.parent.dungeon_level.value is None):
+        if (self.has_sibling("dungeon_level") and not self.parent.dungeon_level.value is None):
             self._init_dungeon_map()
             self.last_dungeon_map_update_timestamp = -1
 
@@ -153,6 +152,8 @@ class DungeonMask(Leaf):
         """
         if message == CompositeMessage.DUNGEON_LEVEL_CHANGED:
             self.init_dungeon_map_if_has_dungeon_level()
+            self.update_dungeon_map()
+            self.update_fov()
 
 
 class Path(Leaf):

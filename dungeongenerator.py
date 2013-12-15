@@ -230,7 +230,6 @@ def generate_dungeon_exploded_rooms(open_area, depth):
     chasm_points = shapegenerator.smooth_shape(chasm_points)
 
     # Normalize Points to dungeon
-    print "The Frog King was here!"
     frame = (2, 2)  # Just to be safe we won't try to draw outside Dungeon.
     level_shape = shapegenerator.Shape(open_points)
     chasm_shape = shapegenerator.Shape(chasm_points)

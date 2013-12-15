@@ -2,7 +2,7 @@ import random
 from compositecore import Composite, Leaf
 import entityeffect
 from graphic import GraphicChar, CharPrinter
-from mover import Mover
+from mover import Mover, teleport_monsters
 from position import Position, DungeonLevel
 from stats import GamePieceType
 from text import Description
@@ -87,7 +87,6 @@ class DrinkFromFountainAction(action.Action):
 
     def _dry_up_fountain(self):
         self.parent.graphic_char.icon = icon.FOUNTAIN_EMPTY
-        print icon.FOUNTAIN_EMPTY, icon.FOUNTAIN_FULL
         self.parent.graphic_char.color_fg = colors.GRAY_D
         self.parent.remove_component(self)
 
@@ -119,6 +118,7 @@ class DescendStairsAction(action.Action):
             return
         destination_position = next_dungeon_level.up_stairs[0].position.value
         target_entity.mover.try_move(destination_position, next_dungeon_level)
+        teleport_monsters(target_entity)
         self._go_down_rest_heal(target_entity)
 
     def _go_down_rest_heal(self, target_entity):

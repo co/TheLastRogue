@@ -33,7 +33,7 @@ class Dungeon(object):
         self._dungeon_levels.insert(depth, None)
 
     def _generate_dungeon_level(self, depth):
-        size = 700
+        size = 600 + depth * 20
 
         dungeon_level = time_it("dungeon_level_generation",
                                 (lambda: dungeongenerator.generate_dungeon_exploded_rooms(size, depth)))

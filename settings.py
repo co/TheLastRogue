@@ -41,8 +41,11 @@ if not config.has_section("Screen"):
 if not config.has_section("KeyBind"):
     config.add_section("KeyBind")
 
-SCREEN_WIDTH = config.getint('Screen', 'resolution_width') / tile_width
-SCREEN_HEIGHT = config.getint('Screen', 'resolution_height') / tile_width
+MINIMUM_RESOLUTION_WIDTH = 1024
+MINIMUM_RESOLUTION_HEIGHT = 768
+
+SCREEN_WIDTH = max(config.getint('Screen', 'resolution_width'), MINIMUM_RESOLUTION_WIDTH) / tile_width
+SCREEN_HEIGHT = max(config.getint('Screen', 'resolution_height'), MINIMUM_RESOLUTION_HEIGHT) / tile_width
 ANIMATION_DELAY = config.getint('Screen', 'animation_delay')
 FULL_SCREEN = config.getboolean('Screen', 'full_screen')
 FPS = config.getint('Screen', 'fps')

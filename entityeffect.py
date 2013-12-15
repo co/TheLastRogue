@@ -146,6 +146,7 @@ class Teleport(EntityEffect):
                      get_walkable_positions(self.target_entity,
                                             self.target_entity.position.value))
         random_positions = random.sample(positions, len(positions))
+
         for position in random_positions:
             teleport_successful = self.target_entity.mover.try_move(position)
             if teleport_successful:

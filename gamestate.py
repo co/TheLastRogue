@@ -6,11 +6,11 @@ import colors
 from dungeon import Dungeon
 from dungeonlevelfactory import dungeon_level_from_file
 import libtcodpy
+from mover import teleport_monsters
 from player import Player
 import camera
 import console
 import constants
-import geometry as geo
 import gui
 import item
 import menufactory
@@ -241,10 +241,10 @@ class GameState(GameStateBase):
         first_level = self.dungeon.get_dungeon_level(0)
         self.dungeon_level = first_level
         for stairs in first_level.up_stairs:
-            move_succeded = self.player.mover.try_move(stairs.position.value,
-                                                       first_level)
+            move_succeded = self.player.mover.move_push_over(stairs.position.value, first_level)
             if move_succeded:
                 self.camera.center_on_entity(self.player)
+                teleport_monsters(self.player)
                 return
         raise Exception("Could not put player at first up stairs.")
 
