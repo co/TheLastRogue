@@ -1,7 +1,10 @@
 import ConfigParser
+import sys
 
 menu_theme = "ff_blue_theme"
 interface_theme = "rogue_classic_theme"
+
+DEV_MODE_FLAG = "--dev-mode" in sys.argv
 
 defaults = {
     'resolution_width': '1024',

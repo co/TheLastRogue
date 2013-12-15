@@ -132,6 +132,12 @@ class UIDock(RectangularUIElement):
         super(UIDock, self).__init__(rectangle, margin)
         self.margin = margin
         self.parent = None
+
+        self.top = None
+        self.bottom = None
+        self.left = None
+        self.right = None
+
         self.top_left = None
         self.top_right = None
         self.bottom_left = None
@@ -139,6 +145,18 @@ class UIDock(RectangularUIElement):
 
     def draw(self, offset=geo.zero2d()):
         the_offset = geo.add_2d(offset, self.margin)
+        if self.left:
+            self.left.draw(geo.add_2d((0, self.height / 2 - self.left.height / 2), the_offset))
+        if self.right:
+            self.right.draw(geo.add_2d((self.width - self.right.width,
+                                        self.height / 2 - self.right.height / 2), the_offset))
+        if self.bottom:
+            print self.width, self.bottom.width / 2
+            self.bottom.draw(geo.add_2d((self.width / 2 - self.bottom.width / 2,
+                                         self.height - self.bottom.height), the_offset))
+        if self.top:
+            self.top.draw(geo.add_2d(self.width / 2 - self.top.width / 2, 0, the_offset))
+
         if self.top_left:
             self.top_left.draw(the_offset)
         if self.top_right:
@@ -150,6 +168,15 @@ class UIDock(RectangularUIElement):
                 geo.add_2d((self.width - self.bottom_right.width, self.height - self.bottom_right.height), the_offset))
 
     def update(self):
+        if self.left:
+            self.left.update()
+        if self.right:
+            self.right.update()
+        if self.bottom:
+            self.bottom.update()
+        if self.top:
+            self.top.update()
+
         if self.top_left:
             self.top_left.update()
         if self.top_right:

@@ -1,7 +1,6 @@
 import constants
 import colors
 import dungeoncreatorvisualizer
-import equipment
 import gamestate
 import gametime
 import geometry as geo
@@ -29,19 +28,27 @@ def _main_menu(ui_state, state_stack, player_name_func):
 
     no_icon = graphic.GraphicChar(None, colors.BLACK, " ")
     gun_icon = graphic.GraphicChar(None, colors.WHITE, icon.GUN)
+    menu_items =[]
+
     continue_game_option = menu.MenuOptionWithSymbols("Continue", gun_icon, no_icon, [continue_game_function],
                                                       gamestate.is_there_a_saved_game)
+    menu_items.append(continue_game_option)
 
     start_game_option = \
         menu.MenuOptionWithSymbols("Start Dungeon", gun_icon, no_icon, [start_game_function, save_game_function])
-    start_test_game_option = \
-        menu.MenuOptionWithSymbols("Start Test Dungeon", gun_icon, no_icon, [start_test_game_function])
-    dungeon_creator_option = \
-        menu.MenuOptionWithSymbols("Dungeon Creator", gun_icon, no_icon, [dungeon_visualizer_function])
-    quit_option = menu.MenuOptionWithSymbols("Quit", gun_icon, no_icon, [quit_game_function])
+    menu_items.append(start_game_option)
 
-    menu_items = [continue_game_option, start_game_option, start_test_game_option,
-                  dungeon_creator_option, quit_option]
+    if settings.DEV_MODE_FLAG:
+        start_test_game_option = \
+            menu.MenuOptionWithSymbols("Start Test Dungeon", gun_icon, no_icon, [start_test_game_function])
+        menu_items.append(start_test_game_option)
+
+        dungeon_creator_option = \
+            menu.MenuOptionWithSymbols("Dungeon Creator", gun_icon, no_icon, [dungeon_visualizer_function])
+        menu_items.append(dungeon_creator_option)
+
+    quit_option = menu.MenuOptionWithSymbols("Quit", gun_icon, no_icon, [quit_game_function])
+    menu_items.append(quit_option)
 
     temp_position = (0, 0)
     return menu.StaticMenu(temp_position, menu_items, state_stack, margin=style.menu_theme.margin,
@@ -233,8 +240,6 @@ def title_screen(state_stack):
     hero_name_typewriter = gui.TypeWriter((0, 0), colors.WHITE, constants.LEFT_SIDE_BAR_WIDTH - 4,
                                           default_text="Roland")
 
-    name_heading = gui.TextBox("Name:", (0, 0), colors.CYAN_D, (0, 1))
-
     title_stack_panel.append(vspace)
     title_stack_panel.append(line)
     title_stack_panel.append(the_text)
@@ -242,29 +247,33 @@ def title_screen(state_stack):
     title_stack_panel.append(rogue_text)
     title_stack_panel.append(line)
     title_stack_panel.append(gui.VerticalSpace(5))
-    title_stack_panel.append(name_heading)
-    title_stack_panel.append(hero_name_typewriter)
 
     bg_rect = gui.FilledRectangle(rectfactory.full_screen_rect(), colors.DARK_BLUE)
-
     bg_sign_rect = gui.FilledRectangle(geo.Rect((0, 15), settings.SCREEN_WIDTH, 11), colors.WHITE)
 
     ui_state = state.UIState(gui.UIElementList(None))
     main_menu = _main_menu(ui_state, state_stack, lambda: hero_name_typewriter.text)
-
     border = 4
-    main_menu_rect = rectfactory.ratio_of_screen_rect(main_menu.width + border, main_menu.height + border - 1, 0.5, 0.8)
-    main_menu.offset = main_menu_rect.top_left
+    menu_bg = get_menu_background(geo.Rect((0, 0), main_menu.width + border, main_menu.height + border - 1))
+    menu_and_bg = gui.UIElementList([menu_bg, main_menu])
 
-    menu_background_rect = get_menu_background(main_menu_rect)
+    name_heading = gui.TextBox("Name:", (0, 0), colors.CYAN_D, (0, 1))
+    menu_stack_panel = gui.StackPanelVertical((0, 0), (0, 0), vertical_space=0, alignment=gui.StackPanelVertical.ALIGN_CENTER)
+    menu_stack_panel.append(name_heading)
+    menu_stack_panel.append(hero_name_typewriter)
+    menu_stack_panel.append(gui.VerticalSpace(1))
+    menu_stack_panel.append(menu_and_bg)
+    menu_stack_panel.append(gui.VerticalSpace(2))
+
+    dock = gui.UIDock(rectfactory.full_screen_rect())
+    dock.bottom = menu_stack_panel
 
     type_writer_highlight_update = \
         gui.UpdateCallOnlyElement([lambda: type_writer_highlight_update_function([hero_name_typewriter, name_heading],
                                                                                  main_menu, colors.WHITE,
                                                                                  colors.GRAY_D, [1, 2])])
 
-    ui_state.ui_element.elements = [bg_rect, bg_sign_rect, title_stack_panel, menu_background_rect, main_menu,
-                                    type_writer_highlight_update]
+    ui_state.ui_element.elements = [bg_rect, bg_sign_rect, title_stack_panel, dock, type_writer_highlight_update]
     return ui_state
 
 

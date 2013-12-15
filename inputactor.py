@@ -2,6 +2,7 @@ from actor import Actor
 from entityeffect import Teleport, StatusAdder, StatusRemover
 from equipment import EquipmentSlots
 from item import RangeWeaponType
+import settings
 import spawner
 import menu
 from missileaction import PlayerShootWeaponAction, PlayerSlingStoneAction
@@ -62,6 +63,32 @@ class InputActor(Actor):
             tile_menu = menufactory.get_menu_with_options(context_menu_options, state_stack)
             self.parent.game_state.value.start_prompt(tile_menu)
 
+    def handle_dev_mode_commands(self, key):
+        if key == inputhandler.TWO:
+            self.parent.health_modifier.heal(300)
+
+        elif key == inputhandler.THREE:
+            effect = Teleport(self.parent, time_to_live=1)
+            self.parent.effect_queue.add(effect)
+            self.newly_spent_energy += gametime.single_turn
+
+        elif key == inputhandler.FOUR:
+            self.toggle_invisibility()
+
+        elif key == inputhandler.FIVE:
+            spawner.spawn_rat_man(self.parent.dungeon_level.value,
+                                  self.parent.game_state.value)
+            self.newly_spent_energy += gametime.single_turn
+
+        elif key == inputhandler.NINE:
+            for entity in self.parent.dungeon_level.value.entities:
+                if not entity is self.parent:
+                    entity.health_modifier.kill()
+            self.newly_spent_energy += gametime.single_turn
+        elif key == inputhandler.ZERO:
+            self.parent.game_state.value.has_won = True
+            self.newly_spent_energy += gametime.single_turn
+
     def handle_keyboard_input(self):
         key = inputhandler.handler.get_keypress()
         if key in inputhandler.move_controls or key in inputhandler.vi_move_controls:
@@ -102,33 +129,12 @@ class InputActor(Actor):
         elif key == inputhandler.EQUIPMENT:
             self.open_equipment()
 
-        elif key == inputhandler.TWO:
-            self.parent.health_modifier.heal(300)
-
-        elif key == inputhandler.THREE:
-            effect = Teleport(self.parent, time_to_live=1)
-            self.parent.effect_queue.add(effect)
-            self.newly_spent_energy += gametime.single_turn
-
-        elif key == inputhandler.FOUR:
-            self.toggle_invisibility()
-
-        elif key == inputhandler.FIVE:
-            spawner.spawn_rat_man(self.parent.dungeon_level.value,
-                                  self.parent.game_state.value)
-            self.newly_spent_energy += gametime.single_turn
-
-        elif key == inputhandler.NINE:
-            for entity in self.parent.dungeon_level.value.entities:
-                if not entity is self.parent:
-                    entity.health_modifier.kill()
-            self.newly_spent_energy += gametime.single_turn
-        elif key == inputhandler.ZERO:
-            self.parent.game_state.value.has_won = True
-            self.newly_spent_energy += gametime.single_turn
 
         elif key == inputhandler.PRINTSCREEN:
             console.console.print_screen()
+
+        if settings.DEV_MODE_FLAG:
+            self.handle_dev_mode_commands(key)
 
     def step_path(self):
         if self.parent.path.has_path():
