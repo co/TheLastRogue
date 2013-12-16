@@ -17,6 +17,7 @@ import menufactory
 import messenger
 import monster
 import rectfactory
+import settings
 import state
 import statestack
 from tools import time_it
@@ -150,9 +151,6 @@ class GameStateBase(state.State):
 
         self.first_round = False
 
-    def draw_bg(self):
-        pass
-
     def _update_gui(self):
         self.entity_stack_panel.update()
         self.command_list_bar.update()
@@ -160,7 +158,12 @@ class GameStateBase(state.State):
     def _draw_bg(self):
         libtcodpy.console_blit(self._background_console, 0, 0, constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT,
                                0, 0, 0)
-
+    def draw_loading_screen(self, text):
+        libtcodpy.console_blit(self._background_console, 0, 0, constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT,
+                               0, 0, 0)
+        console.console.print_text((settings.SCREEN_WIDTH / 2 - len(text) / 2,
+                                    settings.SCREEN_HEIGHT / 2), text)
+        console.console.flush()
 
 class TestGameState(GameStateBase):
     def __init__(self, player_name=""):
@@ -255,6 +258,7 @@ def get_save_file_name():
 
 
 def save(game_state):
+    game_state.draw_loading_screen("Saving...")
     save_file = open(get_save_file_name(), 'wb')
     time_it("save", lambda: pickle.dump(game_state, save_file, -1))
     save_file.close()

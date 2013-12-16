@@ -28,6 +28,15 @@ class DungeonLevel(object):
 
         self.x = 0
 
+    # TODO: Ugly Hack for improving save time. Improve this please.
+    def __getstate__(self):
+        if len(self.entities) == 0:
+            return dict(self.__dict__)
+        if any(entity.has_child("is_player") for entity in self.entities):
+            return dict(self.__dict__)
+        else:
+            return False
+
     @property
     def entities(self):
         return self.actor_scheduler.entities
@@ -160,6 +169,8 @@ class DungeonLevelScreen(object):
 
     def __getstate__(self):
         state = dict(self.__dict__)
+        #TODO: When saving we have to traverse all past dungeon_levels, WHY?
+        #print "You found me! Said the Frog King, at depth: ", self.dungeon_level.depth
         del state["console"]
         return state
 

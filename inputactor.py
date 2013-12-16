@@ -88,6 +88,15 @@ class InputActor(Actor):
         elif key == inputhandler.ZERO:
             self.parent.game_state.value.has_won = True
             self.newly_spent_energy += gametime.single_turn
+        elif key == inputhandler.END:
+            self.newly_spent_energy += gametime.single_turn
+            current_depth = self.parent.dungeon_level.value.depth
+            next_dungeon_level = self.parent.dungeon_level.value.dungeon.get_dungeon_level(current_depth + 1)
+            self.newly_spent_energy += gametime.single_turn
+            if next_dungeon_level is None:
+                return
+            destination_position = next_dungeon_level.up_stairs[0].position.value
+            self.parent.mover.move_push_over(destination_position, next_dungeon_level)
 
     def handle_keyboard_input(self):
         key = inputhandler.handler.get_keypress()

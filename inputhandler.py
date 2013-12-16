@@ -46,6 +46,7 @@ SPACE = 126
 DELETE = 127
 BACKSPACE = 128
 EQUIPMENT = 129
+END = 130
 
 
 #Aliases:
@@ -134,6 +135,7 @@ controls = {
     libtcod.KEY_SPACE: SPACE,
     libtcod.KEY_DELETE: DELETE,
     libtcod.KEY_BACKSPACE: BACKSPACE,
+    libtcod.KEY_END: END,
 }
 
 

@@ -12,10 +12,12 @@ class StateStack(object):
 
     def main_loop(self):
         while len(self._stack) > 0:
+            frame.current_frame += 1
             state = self.peek()
             state.update()
+            if not state is self.peek():
+                continue
             state.draw()
-            frame.current_frame += 1
 
     def push(self, state):
         state.current_stack = self
@@ -24,6 +26,8 @@ class StateStack(object):
             self._current_game_state_cache = state
 
     def peek(self):
+        if len(self._stack) < 1:
+            return None
         return self._stack[-1]
 
     def get_game_state(self):
@@ -59,7 +63,6 @@ class GameMenuStateStack(StateStack):
             self._draw_background()
             state.draw()
             state.update()
-        self._game_state.force_draw()
 
     def get_game_state(self):
         return self._game_state

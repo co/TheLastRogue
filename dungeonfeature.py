@@ -112,12 +112,11 @@ class DescendStairsAction(action.Action):
         current_depth = target_entity.dungeon_level.value.depth
         dungeon = target_entity.dungeon_level.value.dungeon
         next_dungeon_level = dungeon.get_dungeon_level(current_depth + 1)
-        dungeon.remove_dungeon_level(current_depth)
         self.add_energy_spent_to_entity(target_entity)
         if next_dungeon_level is None:
             return
         destination_position = next_dungeon_level.up_stairs[0].position.value
-        target_entity.mover.try_move(destination_position, next_dungeon_level)
+        target_entity.mover.move_push_over(destination_position, next_dungeon_level)
         teleport_monsters(target_entity)
         self._go_down_rest_heal(target_entity)
 

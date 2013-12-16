@@ -58,19 +58,19 @@ def _main_menu(ui_state, state_stack, player_name_func):
 def get_save_quit_menu(player, state_stack):
     options = []
     game_state = player.game_state.value
-    stack_pop_function = menu.BackToGameFunction(state_stack)
+    exit_menu_function = menu.BackToGameFunction(state_stack)
     save_and_quit_graphic_active = graphic.GraphicChar(None, colors.WHITE, icon.GUNSLINGER_THIN)
     save_and_quit_graphic_inactive = graphic.GraphicChar(None, colors.GRAY, icon.GUNSLINGER_THIN)
     options.append(menu.MenuOptionWithSymbols("Save and Quit", save_and_quit_graphic_active,
                                               save_and_quit_graphic_inactive,
-                                              [lambda: gamestate.save(game_state), stack_pop_function,
+                                              [lambda: gamestate.save(game_state), exit_menu_function,
                                                game_state.current_stack.pop,
                                                (lambda: player.actor.add_energy_spent(gametime.single_turn))]))
 
     give_up_graphic_active = graphic.GraphicChar(None, colors.WHITE, icon.CORPSE)
     give_up_graphic_inactive = graphic.GraphicChar(None, colors.GRAY, icon.CORPSE)
     options.append(menu.MenuOptionWithSymbols("Give Up", give_up_graphic_active, give_up_graphic_inactive,
-                                              [player.health_modifier.kill, stack_pop_function,
+                                              [player.health_modifier.kill, exit_menu_function,
                                                (lambda: player.actor.add_energy_spent(gametime.single_turn))]))
 
     return get_menu_with_options(options, state_stack)
@@ -253,8 +253,9 @@ def title_screen(state_stack):
 
     ui_state = state.UIState(gui.UIElementList(None))
     main_menu = _main_menu(ui_state, state_stack, lambda: hero_name_typewriter.text)
-    border = 4
-    menu_bg = get_menu_background(geo.Rect((0, 0), main_menu.width + border, main_menu.height + border - 1))
+    border_x = 5
+    border_y = 3
+    menu_bg = get_menu_background(geo.Rect((0, 0), main_menu.width + border_x, main_menu.height + border_y))
     menu_and_bg = gui.UIElementList([menu_bg, main_menu])
 
     name_heading = gui.TextBox("Name:", (0, 0), colors.CYAN_D, (0, 1))
