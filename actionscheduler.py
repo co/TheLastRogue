@@ -39,9 +39,8 @@ class ActionScheduler(object):
             tile = (current_piece.dungeon_level.value.
                     get_tile(current_piece.position.value))
             for piece in tile.get_all_pieces():
-                if piece.has_child("entity_share_tile_effect"):
-                    piece.entity_share_tile_effect. share_tile_effect_tick(current_piece,
-                                                                           gametime.normal_energy_gain)
+                for share_effect in piece.get_children_with_tag("entity_share_tile_effect"):
+                    share_effect.share_tile_effect_tick(current_piece, gametime.normal_energy_gain)
 
     def tick(self):
         self._actors_tick()

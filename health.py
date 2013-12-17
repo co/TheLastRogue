@@ -94,10 +94,12 @@ class HealthModifier(Leaf):
         for effect in effects:
             effect.effect(damage, entity)
 
-    def kill(self):
+    def kill(self, entity=None):
         """
         Removes all hp, this kills the entity.
         """
+        if entity:
+            self.parent.health.killer = entity
         self.parent.health.hp.set_min()
 
 

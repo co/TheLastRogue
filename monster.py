@@ -45,7 +45,7 @@ class Ratman(Composite):
         self.add_child(CharPrinter())
 
         self.add_child(Faction(Faction.MONSTER))
-        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
+        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.HAS_MIND, StatusFlags.IS_ALIVE]))
         self.add_child(Health(8))
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.single_turn))
@@ -103,7 +103,7 @@ class Cyclops(Composite):
         self.add_child(CharPrinter())
 
         self.add_child(Faction(Faction.MONSTER))
-        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
+        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.HAS_MIND, StatusFlags.IS_ALIVE]))
         self.add_child(Health(40))
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.one_and_half_turn))
@@ -170,7 +170,7 @@ class Ghost(Composite):
         self.add_child(CharPrinter())
 
         self.add_child(Faction(Faction.MONSTER))
-        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.FLYING]))
+        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.HAS_MIND, StatusFlags.FLYING]))
         self.add_child(Health(1))
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
@@ -217,7 +217,8 @@ class AddGhostReviveToSeenEntities(Leaf):
     def before_tick(self, time):
         seen_entities = self.parent.vision.get_seen_entities()
         for entity in seen_entities:
-            if not isinstance(entity, Ghost):
+            if (entity.status_flags.has_status(StatusFlags.IS_ALIVE) and
+                    entity.status_flags.has_status(StatusFlags.HAS_MIND)):
                 effect = ReviveAsGhostOnDeath()
                 entity.effect_queue.add(AddSpoofChild(self.parent, effect, 1))
 
@@ -315,18 +316,17 @@ class Slime(Composite):
         self.add_child(Description("Slime",
                                    "Slime, slime, slime. Ugh, I hate Slimes."
                                    "It seems to be looking at you..."))
-        self.add_child(GraphicChar(None, colors.GREEN,
-                                   icon.SLIME))
+        self.add_child(GraphicChar(None, colors.GREEN, icon.SLIME))
         self.add_child(CharPrinter())
 
         self.add_child(Faction(Faction.MONSTER))
-        self.add_child(Health(40))
+        self.add_child(Health(35))
         self.add_child(HealthModifier())
 
         self.add_child(Strength(2))
         self.add_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
         self.add_child(AttackSpeed(gametime.single_turn))
-        self.add_child(StatusFlags())
+        self.add_child(StatusFlags([StatusFlags.IS_ALIVE]))
         self.add_child(Dodger())
         self.add_child(Evasion(7))
         self.add_child(Hit(15))
@@ -351,7 +351,7 @@ class Slime(Composite):
         self.add_child(Equipment())
         self.add_child(EffectQueue())
 
-        self.add_child(EntityShareTileEffect(DissolveEntitySlimeShareTileEffect()))
+        self.add_child(DissolveEntitySlimeShareTileEffect())
 
         self.add_child(PrintDeathMessageOnDeath())
         self.add_child(RemoveEntityOnDeath())
@@ -362,32 +362,43 @@ class EntityShareTileEffect(Leaf):
     Defines an effect that sharing tile with this parent entity will result in.
     """
 
-    def __init__(self, effect):
+    def __init__(self):
         super(EntityShareTileEffect, self).__init__()
-        self.component_type = "entity_share_tile_effect"
-        self.effect = effect
+        self.tags = ["entity_share_tile_effect"]
 
     def share_tile_effect_tick(self, sharing_entity, time_spent):
         if not sharing_entity is self.parent:
-            self.effect(source_entity=self.parent, target_entity=sharing_entity, time=time_spent)
+            self._effect(source_entity=self.parent, target_entity=sharing_entity, time=time_spent)
 
-
-class DissolveEntitySlimeShareTileEffect(object):
-    def __init__(self):
+    def _effect(self, **kwargs):
         pass
 
-    def __call__(self, **kwargs):
+
+class DissolveEntitySlimeShareTileEffect(EntityShareTileEffect):
+    def __init__(self):
+        super(DissolveEntitySlimeShareTileEffect, self).__init__()
+        self.component_type = "dissolve_entity_slime_share_tile_effect"
+
+    def _effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
         strength = source_entity.strength.value
         damage = rng.random_variance(strength, 1)
 
-        dissolve_effect = DissolveDamageEffect(source_entity, damage, [DamageTypes.ACID], gametime.single_turn)
-        target_entity.effect_queue.add(dissolve_effect)
+        if len(target_entity.get_children_with_tag("entity_share_tile_effect")) > 0:
+            #Merge with other slime.
+            return
+            #self.parent.health_modifier.increases_max_hp(target_entity.health.hp.max_value / 2)
+            #self.parent.health_modifier.heal(target_entity.health.hp.value / 2)
+            #target_entity.health_modifier.kill(self.parent)
+        else:
+            #Damage other creature.
+            dissolve_effect = DissolveDamageEffect(source_entity, damage, [DamageTypes.ACID], gametime.single_turn)
+            target_entity.effect_queue.add(dissolve_effect)
 
-        stuck_in_slime_step_spoof = StuckInSlimeStepperSpoof(source_entity)
-        add_spoof_effect = AddSpoofChild(source_entity, stuck_in_slime_step_spoof, time_to_live=1)
-        target_entity.effect_queue.add(add_spoof_effect)
+            stuck_in_slime_step_spoof = StuckInSlimeStepperSpoof(source_entity)
+            add_spoof_effect = AddSpoofChild(source_entity, stuck_in_slime_step_spoof, time_to_live=1)
+            target_entity.effect_queue.add(add_spoof_effect)
 
 
 class StuckInSlimeStepperSpoof(Stepper):

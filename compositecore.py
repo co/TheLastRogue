@@ -46,7 +46,7 @@ class Component(object):
         siblings =\
             self.parent.get_spoofed_children_of_type(self.component_type)
         next_index = siblings.index(self) + 1
-        if(len(siblings) > next_index):
+        if len(siblings) > next_index:
             return siblings[next_index]
         return self.parent.get_original_child(self.component_type)
 

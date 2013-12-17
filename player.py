@@ -56,7 +56,7 @@ class Player(Composite):
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(AttackSpeed())
         self.add_child(PlayerThrowStoneAction())
-        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
+        self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.HAS_MIND, StatusFlags.IS_ALIVE]))
 
         self.add_child(DungeonMask())
         self.add_child(SightRadius(6))
