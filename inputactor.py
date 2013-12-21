@@ -119,29 +119,19 @@ class InputActor(Actor):
                 self.parent.pick_up_item_action.print_player_error(source_entity=self.parent, target_entity=self.parent,
                                                                    game_state=self.parent.game_state.value)
         elif key == inputhandler.FIRE:
-            equipment = self.parent.equipment
-            if equipment.slot_is_equiped(EquipmentSlots.RANGED_WEAPON):
-                self.shoot_weapon()
-        elif key == inputhandler.STONE:
-            self.throw_rock()
+            self.throw_or_shoot()
         elif key == inputhandler.ESCAPE:
             self.save_and_quit()
         elif key == inputhandler.REST:  # Rest
             self.newly_spent_energy += gametime.single_turn
-
         elif key == inputhandler.EXAMINE:
             self.start_examine()
-
         elif key == inputhandler.INVENTORY:
             self.try_open_inventory()
-
         elif key == inputhandler.EQUIPMENT:
             self.open_equipment()
-
-
         elif key == inputhandler.PRINTSCREEN:
             console.console.print_screen()
-
         if settings.DEV_MODE_FLAG:
             self.handle_dev_mode_commands(key)
 
@@ -217,7 +207,10 @@ class InputActor(Actor):
             if shooting_succeded:
                 self.newly_spent_energy += gametime.single_turn
 
-    def shoot_weapon(self):
+    def throw_or_shoot(self):
+        if not self.parent.equipment.slot_is_equiped(EquipmentSlots.RANGED_WEAPON):
+            self.throw_rock()
+            return
         weapon = self.parent.equipment.get(EquipmentSlots.RANGED_WEAPON)
         if weapon.range_weapon_type.value == RangeWeaponType.GUN:
             self.shoot_gun(weapon)

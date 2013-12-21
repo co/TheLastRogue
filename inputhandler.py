@@ -41,7 +41,6 @@ ZERO = 121
 FIRE = 122
 PRINTSCREEN = 123
 TAB = 124
-STONE = 125
 SPACE = 126
 DELETE = 127
 BACKSPACE = 128
@@ -110,7 +109,6 @@ controls = {
     libtcod.KEY_KP3: SOUTHEAST,  # down, right
 
     settings.KEY_FIRE: FIRE,
-    settings.KEY_STONE: STONE,
     libtcod.KEY_F12: PRINTSCREEN,
 
     libtcod.KEY_ENTER: ENTER,

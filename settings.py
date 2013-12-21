@@ -65,7 +65,6 @@ KEY_DOWN_RIGHT = config.get('KeyBind', 'down_right')
 
 KEY_INVENTORY = config.get('KeyBind', 'inventory')
 KEY_EQUIPMENT = config.get('KeyBind', 'equipment')
-KEY_STONE = config.get('KeyBind', 'stone')
 KEY_FIRE = config.get('KeyBind', 'fire')
 KEY_REST = config.get('KeyBind', 'rest')
 KEY_EXAMINE = config.get('KeyBind', 'examine')

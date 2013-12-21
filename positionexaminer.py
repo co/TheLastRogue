@@ -51,12 +51,14 @@ class PositionExaminer(state.State):
             self.offset_cursor_position((dx * step_size, dy * step_size))
 
     def offset_cursor_position(self, offset):
-        new_cursor_position = geo.add_2d(self.cursor_position, offset)
-
-        if(geo.chess_distance(new_cursor_position, self.start_position) >
-           self.max_distance):
-            return
-        self.cursor_position = new_cursor_position
+        old_x, old_y = self.cursor_position[0], self.cursor_position[1]
+        print "old ", old_x, old_y
+        print "ofs ", offset[0], offset[1]
+        print "min_max_x ", old_x - self.max_distance, old_x + self.max_distance
+        new_x = min_max(old_x + offset[0], self.start_position[0] - self.max_distance, self.start_position[0] + self.max_distance)
+        new_y = min_max(old_y + offset[1], self.start_position[1] - self.max_distance, self.start_position[1] + self.max_distance)
+        print "new ", new_x, new_y
+        self.cursor_position = (new_x, new_y)
 
     def _handle_escape(self, key):
         if key == inputhandler.ESCAPE:
@@ -139,7 +141,7 @@ class MissileDestinationSelector(PositionSelector):
             self._exit()
 
     def _handle_enter(self, key):
-        if key == inputhandler.ENTER or key == inputhandler.FIRE or key == inputhandler.STONE:
+        if key == inputhandler.ENTER or key == inputhandler.FIRE:
             self.selected_path = self._get_current_path()
             self._exit()
 
@@ -185,3 +187,7 @@ class MissileDestinationSelector(PositionSelector):
         self._draw_path()
         self._draw_cursor()
         console.flush()
+
+
+def min_max(value, minimum, maximum):
+    return min(maximum, max(minimum, value))
