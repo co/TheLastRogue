@@ -1,6 +1,4 @@
 from compositecore import Leaf
-from item import Ammunition
-from libtcodpy import _CBsp
 
 ITEM_CAPACITY = 24
 

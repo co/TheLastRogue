@@ -46,7 +46,7 @@ def spawn_corpse_on_position(position, dungeon_level):
 def place_health_potions(dungeon_level):
     health_potions_to_spawn = 0
 
-    for _ in range(4):
+    for _ in range(2):
         if rng.coin_flip():
             health_potions_to_spawn += 1
     for _ in range(2):

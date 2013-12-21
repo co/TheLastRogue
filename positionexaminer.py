@@ -1,5 +1,6 @@
 import geometry as geo
 from console import console
+import gui
 import libtcodpy as libtcod
 import colors
 import inputhandler
@@ -19,6 +20,8 @@ class PositionExaminer(state.State):
         self.cursor_symbol = 'X'
         self.cursor_color = colors.CURSOR
         self._background_state = background_state
+        self._info_text = gui.InfoTextLine(["DIRECTION to step, SHIFT + DIRECTION to step 5.",
+                                            " ENTER to walk to cursor."])
 
     @property
     def cursor_position(self):
@@ -86,6 +89,7 @@ class PositionExaminer(state.State):
 
     def draw(self):
         self._draw_background()
+        self._info_text.draw()
         self._draw_cursor()
         console.flush()
 
@@ -117,6 +121,8 @@ class MissileDestinationSelector(PositionSelector):
         self.selected_path = None
         if not init_target is None:
             self.cursor_position = init_target
+        self._info_text = gui.InfoTextLine(["DIRECTION to step, SHIFT + DIRECTION to step 5.",
+                                            "ENTER or F to fire/throw."])
 
     def _get_current_path(self):
         result = []
@@ -186,6 +192,7 @@ class MissileDestinationSelector(PositionSelector):
         self._draw_background()
         self._draw_path()
         self._draw_cursor()
+        self._info_text.draw()
         console.flush()
 
 

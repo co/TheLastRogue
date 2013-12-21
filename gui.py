@@ -9,6 +9,7 @@ from messenger import messenger
 from console import console
 import colors
 import geometry as geo
+import rectfactory
 import style
 import settings
 
@@ -72,7 +73,7 @@ class HorizontalLine(UIElement):
         Draws the line.
         """
         x, y = geo.add_2d(offset, self.margin)
-        for i in range(self.width):
+        for i in range(self.width + 1):
             if not self.icon is None:
                 console.set_symbol((x + i, y), self.icon)
             if not self.color_bg is None:
@@ -154,8 +155,7 @@ class UIDock(RectangularUIElement):
             self.bottom.draw(geo.add_2d((self.width / 2 - self.bottom.width / 2,
                                          self.height - self.bottom.height), the_offset))
         if self.top:
-            self.top.draw(geo.add_2d(self.width / 2 - self.top.width / 2, 0, the_offset))
-
+            self.top.draw(geo.add_2d((1 + self.width / 2 - self.top.width / 2, 0), the_offset))
         if self.top_left:
             self.top_left.draw(the_offset)
         if self.top_right:
@@ -825,7 +825,9 @@ class TextBox(UIElement):
 
     def draw(self, offset=geo.zero2d()):
         x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
+        print x, y
         if x > settings.SCREEN_WIDTH:
+            print "outside"
             return
         if x + len(self.text) > settings.SCREEN_WIDTH:
             max_width = settings.SCREEN_WIDTH - x
@@ -970,3 +972,43 @@ class UpdateCallOnlyElement(UIElement):
     def update(self):
         for function in self.update_functions:
             function()
+
+
+class InfoTextLine(UIElement):
+    def __init__(self, texts, color_bg=colors.DARK_GREEN, color_fg=colors.GREEN,
+                 width=settings.SCREEN_WIDTH, margin=geo.zero2d()):
+        super(InfoTextLine, self).__init__(margin)
+        self.margin = margin
+        self.parent = None
+        self.texts = texts
+        self.color_bg = color_bg
+        self.color_fg = color_fg
+        self._width = width
+        if settings.MINIMUM_WIDTH < max(len(text) for text in texts):
+            raise Exception("Info texts is longer than minimum resolution.")
+        if constants.MAX_INFO_LINES < len(texts):
+            raise Exception("Info texts is longer than minimum resolution.")
+        self._text_stack_panel = StackPanelVertical((0, 0), alignment=StackPanelVertical.ALIGN_CENTER)
+        self._bg_stack_panel = StackPanelVertical((0, 0), alignment=StackPanelVertical.ALIGN_CENTER)
+        self.dock = UIDock(rectfactory.full_screen_rect())
+        self.update()
+
+    @property
+    def width(self):
+        return self._width
+
+    @property
+    def height(self):
+        return 1
+
+    def update(self):
+        self._text_stack_panel.clear()
+        self._bg_stack_panel.clear()
+        for text in self.texts:
+            self._text_stack_panel.append(TextBox(text, (0, 0), self.color_fg))
+            self._bg_stack_panel.append(HorizontalLine(" ", self.color_fg, self.color_bg, self.width))
+        self.dock.top = UIElementList([self._text_stack_panel])
+
+    def draw(self):
+        self._bg_stack_panel.draw()
+        self.dock.draw()

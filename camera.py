@@ -20,10 +20,7 @@ class Camera(object):
 
     @property
     def screen_center_position(self):
-        result = geo.add_2d(self.camera_offset,
-                            (settings.SCREEN_WIDTH / 2,
-                             settings.SCREEN_HEIGHT / 2))
-        return result
+        return geo.add_2d(self.camera_offset, (settings.SCREEN_WIDTH / 2, settings.SCREEN_HEIGHT / 2))
 
     @property
     def offset(self):
