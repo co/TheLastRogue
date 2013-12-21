@@ -1,6 +1,7 @@
 import math
 import constants
 from equipment import EquipmentSlots
+import frame
 import graphic
 import icon
 import inputhandler
@@ -921,14 +922,21 @@ class TypeWriter(UIElement):
     Assumes it is used together with a menu which updates the inputhandler.
     """
 
-    def __init__(self, offset, color_fg, max_length, default_text="", color_bg=None, margin=(0, 0)):
+    def __init__(self, offset, active_color_fg, inactive_color_fg, max_length, default_text="", color_bg=None, margin=(0, 0)):
         super(TypeWriter, self).__init__(margin)
         self.offset = offset
-        self.color_fg = color_fg
+        self.active_color_fg = active_color_fg
+        self.inactive_color_fg = inactive_color_fg
         self.color_bg = color_bg
-        self._text = TextBox(default_text, (0, 0), color_fg)
+        self._text = TextBox(default_text[:max_length], (0, 0), active_color_fg)
+        self._text_cursor = SymbolUIElement((0, 0), graphic.GraphicChar(None, active_color_fg, '_'))
+        self._text_line = StackPanelHorizontal((0, 0))
+        self._text_line.append(self._text)
+        self._text_line.append(self._text_cursor)
         self.max_length = max_length
         self.any_key_pressed_yet = False
+        self.is_active = True
+        self.update_text_look()
 
     @property
     def height(self):
@@ -942,8 +950,17 @@ class TypeWriter(UIElement):
     def text(self):
         return self._text.text
 
+    def update_text_look(self):
+        self._text.color_fg = self.active_color_fg if self.is_active else self.inactive_color_fg
+        animation_length = 8
+        current_animation_frame = frame.current_frame % (animation_length * 2)
+        if self.is_active and current_animation_frame > animation_length:
+            self._text_cursor.graphic_char.color_fg = self.active_color_fg
+        else:
+            self._text_cursor.graphic_char.color_fg = self.inactive_color_fg
+
     def update(self):
-        self._text.color_fg = self.color_fg
+        self.update_text_look()
 
         key = inputhandler.handler.get_keypress_char()
         special_key = inputhandler.handler.get_keypress()
@@ -957,7 +974,7 @@ class TypeWriter(UIElement):
 
     def draw(self, offset=geo.zero2d()):
         draw_offset = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
-        self._text.draw(draw_offset)
+        self._text_line.draw(draw_offset)
 
     def clear_if_first_key_press(self):
         if not self.any_key_pressed_yet:

@@ -111,7 +111,7 @@ class Chasm(Composite):
         self.add_child(Mover())
         self.add_child(Position())
         self.add_child(DungeonLevel())
-        self.add_child(GraphicChar(colors.DARK_GRAY, colors.DARK_GREEN, icon.CHASM + 1))
+        self.add_child(GraphicChar(colors.DARK_BLUE, colors.DARK_GREEN, icon.CHASM))
         self.add_child(CharPrinter())
         self.add_child(IsChasm(True))
         self.add_child(IsSolid(False))

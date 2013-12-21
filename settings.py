@@ -1,5 +1,6 @@
 import ConfigParser
 import sys
+import getpass
 
 menu_theme = "ff_blue_theme"
 interface_theme = "rogue_classic_theme"
@@ -31,7 +32,8 @@ defaults = {
     'examine': 'x',
     'drink': 'q',
     'activate': 'a',
-    'wear_wield': 'w'
+    'wear_wield': 'w',
+    'default_name': getpass.getuser()
 }
 
 config = ConfigParser.SafeConfigParser(defaults)
@@ -39,10 +41,13 @@ config.read('config.txt')
 
 tile_width = 16
 
+# For some reason the parser cries if a section is missing. So if a section is missing we add it.
 if not config.has_section("Screen"):
     config.add_section("Screen")
 if not config.has_section("KeyBind"):
     config.add_section("KeyBind")
+if not config.has_section("Misc"):
+    config.add_section("Misc")
 
 MINIMUM_RESOLUTION_WIDTH = 1024
 MINIMUM_RESOLUTION_HEIGHT = 768
@@ -74,3 +79,5 @@ KEY_EXAMINE = config.get('KeyBind', 'examine')
 KEY_DRINK = config.get('KeyBind', 'drink')
 KEY_ACTIVATE = config.get('KeyBind', 'activate')
 KEY_WEAR_WIELD = config.get('KeyBind', 'wear_wield')
+DEFAULT_PLAYER_NAME = config.get('Misc', 'default_name')
+

@@ -237,8 +237,8 @@ def title_screen(state_stack):
 
     vspace = gui.VerticalSpace(15)
 
-    hero_name_typewriter = gui.TypeWriter((0, 0), colors.WHITE, constants.LEFT_SIDE_BAR_WIDTH - 4,
-                                          default_text="Roland")
+    hero_name_type_writer = gui.TypeWriter((0, 0), colors.WHITE, colors.GRAY_D, constants.LEFT_SIDE_BAR_WIDTH - 4,
+                                           default_text=settings.DEFAULT_PLAYER_NAME)
 
     title_stack_panel.append(vspace)
     title_stack_panel.append(line)
@@ -252,7 +252,7 @@ def title_screen(state_stack):
     bg_sign_rect = gui.FilledRectangle(geo.Rect((0, 15), settings.SCREEN_WIDTH, 11), colors.WHITE)
 
     ui_state = state.UIState(gui.UIElementList(None))
-    main_menu = _main_menu(ui_state, state_stack, lambda: hero_name_typewriter.text)
+    main_menu = _main_menu(ui_state, state_stack, lambda: hero_name_type_writer.text)
     border_x = 5
     border_y = 3
     menu_bg = get_menu_background(geo.Rect((0, 0), main_menu.width + border_x, main_menu.height + border_y))
@@ -261,7 +261,7 @@ def title_screen(state_stack):
     name_heading = gui.TextBox("Name:", (0, 0), colors.CYAN_D, (0, 1))
     menu_stack_panel = gui.StackPanelVertical((0, 0), (0, 0), vertical_space=0, alignment=gui.StackPanelVertical.ALIGN_CENTER)
     menu_stack_panel.append(name_heading)
-    menu_stack_panel.append(hero_name_typewriter)
+    menu_stack_panel.append(hero_name_type_writer)
     menu_stack_panel.append(gui.VerticalSpace(1))
     menu_stack_panel.append(menu_and_bg)
     menu_stack_panel.append(gui.VerticalSpace(2))
@@ -270,7 +270,7 @@ def title_screen(state_stack):
     dock.bottom = menu_stack_panel
 
     type_writer_highlight_update = \
-        gui.UpdateCallOnlyElement([lambda: type_writer_highlight_update_function([hero_name_typewriter, name_heading],
+        gui.UpdateCallOnlyElement([lambda: type_writer_highlight_update_function(name_heading, hero_name_type_writer,
                                                                                  main_menu, colors.WHITE,
                                                                                  colors.GRAY_D, [1, 2])])
 
@@ -278,18 +278,18 @@ def title_screen(state_stack):
     return ui_state
 
 
-def type_writer_highlight_update_function(elements, menu, active_fg_color, inactive_fg_color, active_indices):
+def type_writer_highlight_update_function(label, type_writer, menu, active_fg_color, inactive_fg_color, active_indices):
     """
     Function for manipulating typewriter color, depending on selected menu item.
 
     This is a ugly hack, remove if some event system is implemented for menus.
     """
     if menu.selected_index in active_indices:
-        for e in elements:
-            e.color_fg = active_fg_color
+        label.color_fg = active_fg_color
+        type_writer.is_active = True
     else:
-        for e in elements:
-            e.color_fg = inactive_fg_color
+        label.color_fg = inactive_fg_color
+        type_writer.is_active = False
 
 
 def victory_screen(state_stack):

@@ -412,7 +412,7 @@ class StuckInSlimeStepperSpoof(Stepper):
         slime_strength = self._slime.strength.value
         if self.has_sibling("attacker"):
             self.parent.attacker.hit(self._slime)
-        if rng.stat_check(my_strength, slime_strength + 4):
+        if rng.stat_check(my_strength, slime_strength + 6):
             self._make_slime_skip_turn()
             return self.next.try_move_or_bump(position)
         return self.parent.movement_speed.value
