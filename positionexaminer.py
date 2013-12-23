@@ -119,7 +119,7 @@ class MissileDestinationSelector(PositionSelector):
                              background_state, max_distance)
         self.entity = entity
         self.selected_path = None
-        if not init_target is None:
+        if init_target:
             self.cursor_position = init_target
         self._info_text = gui.InfoTextLine(["DIRECTION to step, SHIFT + DIRECTION to step 5.",
                                             "ENTER or F to fire/throw."])

@@ -49,6 +49,8 @@ def place_health_potions(dungeon_level):
     for _ in range(2):
         if rng.coin_flip():
             health_potions_to_spawn += 1
+    if dungeon_level.depth == 0:
+        health_potions_to_spawn += 2
     health_potions_to_spawn += 1
     for _ in range(health_potions_to_spawn):
         potion = item.HealthPotion()

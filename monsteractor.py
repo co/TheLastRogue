@@ -6,7 +6,7 @@ import geometry as geo
 from graphic import GraphicChar
 from health import DamageTakenEffect
 import direction
-from messenger import messenger
+from messenger import msg
 import rng
 from statusflags import StatusFlags
 from actor import Actor
@@ -35,7 +35,7 @@ class MonsterActorState(Leaf):
             found_gfx = GraphicChar(None, colors.BLUE, "!")
             (self.parent.char_printer.
              append_graphic_char_temporary_frames([found_gfx]))
-            messenger.message(self.parent.entity_messages.notice)
+            msg.message(self.parent.entity_messages.notice)
 
         self._value = new_value
 

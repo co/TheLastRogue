@@ -2,10 +2,11 @@ from actor import DoNothingActor
 from attacker import Attacker, Dodger, DamageTypes, ArmorChecker
 from compositecore import Composite, Leaf
 from dungeonmask import DungeonMask, Path
-from entityeffect import EffectQueue, DissolveDamageEffect, AddSpoofChild
+from entityeffect import EffectQueue, AddSpoofChild, UndodgeableDamageEntityEffect, EffectStackID, UndodgeableDamagAndBlockSameEffect
 from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
+import messenger
 from missileaction import MonsterThrowStoneAction, MonsterMagicRangeAction
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor
 from mover import Mover, Stepper, CanShareTileEntityMover, ImmobileStepper
@@ -401,7 +402,10 @@ class DissolveEntitySlimeShareTileEffect(EntityShareTileEffect):
             #target_entity.health_modifier.kill(self.parent)
         else:
             #Damage other creature.
-            dissolve_effect = DissolveDamageEffect(source_entity, damage, [DamageTypes.ACID], gametime.single_turn)
+            dissolve_effect = UndodgeableDamagAndBlockSameEffect(source_entity, damage, [DamageTypes.ACID],
+                                                                 messenger.DISSOLVE_MESSAGE,
+                                                                 EffectStackID.SLIME_DISSOLVE,
+                                                                 time_to_live=gametime.single_turn)
             target_entity.effect_queue.add(dissolve_effect)
 
             stuck_in_slime_step_spoof = StuckInSlimeStepperSpoof(source_entity)

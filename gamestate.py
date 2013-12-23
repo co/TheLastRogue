@@ -26,7 +26,7 @@ import turn
 
 def reset_globals():
     turn.current_turn = 0
-    messenger.messenger = messenger.Messenger()
+    messenger.msg = messenger.Messenger()
 
 
 class GameStateBase(state.State):
@@ -39,7 +39,7 @@ class GameStateBase(state.State):
         else:
             self.player.description.name = player_name
         self._init_caches_and_flags()
-        messenger.messenger.message("Welcome to: The Last Rogue!")
+        messenger.msg.message("Welcome to: The Last Rogue!")
 
     def _init_caches_and_flags(self):
         """

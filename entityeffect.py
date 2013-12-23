@@ -5,7 +5,7 @@ from compositecore import Leaf
 import gametime
 from graphic import GraphicChar
 import icon
-from messenger import messenger
+import messenger
 from statusflags import StatusFlags
 
 
@@ -22,6 +22,10 @@ class EffectTypes(object):
 
     ALLTYPES = [STATUS_REMOVER, ADD_SPOOF_CHILD, BLOCKER, STATUS_ADDER,
                 TELEPORT, HEAL, DAMAGE, EQUIPMENT]
+
+
+class EffectStackID(object):
+    SLIME_DISSOLVE = "slime_dissolve"
 
 
 class EffectQueue(Leaf):
@@ -120,6 +124,7 @@ class HeartStop(EntityEffect):
     def _on_remove_effect(self):
         self.target_entity.health_modifier.kill()
 
+
 class StatusAdder(EntityEffect):
     def __init__(self, source_entity, status_flag, time_to_live=1):
         super(StatusAdder, self).__init__(source_entity, time_to_live,
@@ -152,26 +157,30 @@ class Teleport(EntityEffect):
 
 
 class DamageEntityEffect(EntityEffect):
-    def __init__(self, source_entity, damage,
-                 damage_types, hit, time_to_live=1):
-        super(DamageEntityEffect,
-              self).__init__(source_entity=source_entity,
-                             effect_type=EffectTypes.DAMAGE,
-                             time_to_live=time_to_live)
+    def __init__(self, source_entity, damage, damage_types, hit, hit_message=messenger.HIT_MESSAGE,
+                 miss_message=messenger.MISS_MESSAGE, no_stack_id=None, time_to_live=1):
+        super(DamageEntityEffect, self).__init__(source_entity=source_entity,
+                                                 effect_type=EffectTypes.DAMAGE,
+                                                 no_stack_id=no_stack_id,
+                                                 time_to_live=time_to_live)
         self.hit = hit
         self.damage = damage
         self.damage_types = damage_types
+        self.miss_message = miss_message
+        self.hit_message = hit_message
 
-    def miss_message(self):
-        message = "%s misses %s." % (self.source_entity.description.name,
-                                     self.target_entity.description.name)
-        messenger.message(message)
+    def send_miss_message(self):
+        print (self.miss_message % {"source_entity": self.source_entity.description.name,
+                                                   "target_entity": self.target_entity.description.name})
+        messenger.msg.message(self.miss_message % {"source_entity": self.source_entity.description.name,
+                                                   "target_entity": self.target_entity.description.name})
 
-    def message(self, damage_caused):
-        message = "%s hits %s for %d damage." % \
-                  (self.source_entity.description.name,
-                   self.target_entity.description.name, damage_caused)
-        messenger.message(message)
+    def send_hit_message(self, damage_caused):
+        m = self.hit_message % {"source_entity": self.source_entity.description.name,
+                                "target_entity": self.target_entity.description.name,
+                                "damage": str(damage_caused)}
+        print "what", m
+        messenger.msg.message(m)
 
     def is_a_hit(self):
         return self.target_entity.dodger.is_a_hit(self.hit)
@@ -180,57 +189,59 @@ class DamageEntityEffect(EntityEffect):
         if self.is_a_hit():
             damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
             damage_caused = self.target_entity.health_modifier.hurt(damage_after_armor, entity=self.source_entity)
-            self.message(damage_caused)
+            self.send_hit_message(damage_caused)
         else:
-            self.miss_message()
+            self.send_miss_message()
         self.tick(time_spent)
 
 
 class UndodgeableDamageEntityEffect(DamageEntityEffect):
-    def __init__(self, source_entity, damage, damage_types, time_to_live=1):
+    def __init__(self, source_entity, damage, damage_types, hit_message=messenger.HIT_MESSAGE,
+                 no_stack_id=None, time_to_live=1):
         super(UndodgeableDamageEntityEffect, self).__init__(source_entity, damage, damage_types, -1,
+                                                            hit_message=hit_message,
+                                                            no_stack_id=no_stack_id,
                                                             time_to_live=time_to_live)
 
     def is_a_hit(self):
         return True
 
 
-### TODO: DissolveDamageEffect should not be its own effect, message should come from argument.
-class DissolveDamageEffect(EntityEffect):
-    def __init__(self, source_entity, damage, damage_types, time_to_live):
-        super(DissolveDamageEffect, self).__init__(source_entity=source_entity,
-                                                   effect_type=EffectTypes.DAMAGE,
-                                                   time_to_live=time_to_live,
-                                                   no_stack_id="dissolve_damage")
+class UndodgeableDamagAndBlockSameEffect(EntityEffect):
+    def __init__(self, source_entity, damage, damage_types, damage_message, no_stack_id, time_to_live):
+        super(UndodgeableDamagAndBlockSameEffect, self).__init__(source_entity=source_entity,
+                                                                 effect_type=EffectTypes.DAMAGE,
+                                                                 time_to_live=time_to_live,
+                                                                 no_stack_id=no_stack_id)
         self.damage = damage
         self.damage_types = damage_types
+        self.damage_message = damage_message
 
-    def message(self, damage_caused):
-        message = "%s dissolves %s for %d damage." % \
-                  (self.source_entity.description.name,
-                   self.target_entity.description.name, damage_caused)
-        messenger.message(message)
+    def send_damage_message(self, damage_caused):
+        messenger.msg.message(self.damage_message % {"source_entity": self.source_entity.description.name,
+                                                     "target_entity": self.target_entity.description.name,
+                                                     "damage": str(damage_caused)})
 
     def update(self, time_spent):
         if self.time_alive == 0:
-            damage_caused = self.target_entity.health_modifier.hurt(self.damage,
-                                                                    entity=self.source_entity)
-            self.message(damage_caused)
+            damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
+            damage_caused = self.target_entity.health_modifier.hurt(damage_after_armor, entity=self.source_entity)
+            self.send_damage_message(damage_caused)
         self.tick(time_spent)
 
 
 class Heal(EntityEffect):
-    def __init__(self, source_entity, health, time_to_live=1):
+    def __init__(self, source_entity, health, heal_message, time_to_live=1):
         super(Heal, self).__init__(source_entity=source_entity,
                                    effect_type=EffectTypes.HEAL,
                                    time_to_live=time_to_live)
         self.health = health
+        self.heal_message = heal_message
 
     def message(self):
-        message = "%s heals %s for %d health." % \
-                  (self.source_entity.description.name,
-                   self.target_entity.description.name, self.health)
-        messenger.message(message)
+        messenger.msg.message(self.heal_message % {"source_entity": self.source_entity.description.name,
+                                                   "target_entity": self.target_entity.description.name,
+                                                   "health": str(self.health)})
 
     def update(self, time_spent):
         self.target_entity.health_modifier.heal(self.health)
@@ -241,8 +252,8 @@ class Heal(EntityEffect):
 class AddSpoofChild(EntityEffect):
     def __init__(self, source_entity, spoof_child, time_to_live):
         super(AddSpoofChild, self).__init__(source_entity=source_entity,
-                                   effect_type=EffectTypes.ADD_SPOOF_CHILD,
-                                   time_to_live=time_to_live)
+                                            effect_type=EffectTypes.ADD_SPOOF_CHILD,
+                                            time_to_live=time_to_live)
         self.spoof_child = spoof_child
 
     def update(self, time_spent):
@@ -251,16 +262,17 @@ class AddSpoofChild(EntityEffect):
 
 
 class Equip(EntityEffect):
-    def __init__(self, source_entity, item):
+    def __init__(self, source_entity, item, equip_message=messenger.EQUIP_MESSAGE):
         super(Equip, self).__init__(source_entity=source_entity,
                                     effect_type=EffectTypes.EQUIPMENT,
                                     time_to_live=1)
         self.item = item
+        self.equip_message = equip_message
 
     def message(self):
-        message = "%s equips %s." % (self.source_entity.description.name,
-                                     self.item.description.name)
-        messenger.message(message)
+        messenger.msg.message(self.equip_message % {"source_entity": self.source_entity.description.name,
+                                                    "target_entity": self.target_entity.description.name,
+                                                    "item": self.item.description.name})
 
     def update(self, time_spent):
         equipment = self.queue.target_entity.equipment
@@ -279,19 +291,9 @@ class StepEffect(EntityEffect):
                                          time_to_live=1)
         self.item = item
 
-    def message(self):
-        message = "%s equips %s." % (self.source_entity.description.name,
-                                     self.item.description.name)
-        messenger.message(message)
-
     def update(self, time_spent):
-        equipment = self.queue.target_entity.equipment
-        equip_succeeded = equipment.try_equip(self.item)
-        if equip_succeeded:
-            self.message()
-            if self.queue.target_entity.inventory.has_item(self.item):
-                self.queue.target_entity.inventory.remove_item(self.item)
-        self.tick(time_spent)
+        pass
+
 
 class Unequip(EntityEffect):
     def __init__(self, source_entity, equipment_slot):
@@ -300,11 +302,12 @@ class Unequip(EntityEffect):
                                       time_to_live=1)
         self.item = source_entity.equipment.get(equipment_slot)
         self.equipment_slot = equipment_slot
+        self.unequip_message = messenger.msg.UNEQUIP_MESSAGE
 
     def message(self):
-        message = "%s puts away %s." % (self.source_entity.description.name,
-                                        self.item.description.name)
-        messenger.message(message)
+        messenger.msg.message(self.unequip_message % {"source_entity": self.source_entity.description.name,
+                                                      "target_entity": self.target_entity.description.name,
+                                                      "item": self.item.description.name})
 
     def update(self, time_spent):
         equipment = self.target_entity.equipment
@@ -327,7 +330,7 @@ class ReEquip(EntityEffect):
     def message(self):
         message = "%s equips %s." % (self.source_entity.description.name,
                                      self.item.description.name)
-        messenger.message(message)
+        messenger.msg.message(message)
 
     def update(self, time_spent):
         old_item = None

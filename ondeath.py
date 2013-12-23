@@ -1,6 +1,6 @@
 from compositecore import Leaf
 import spawner
-from messenger import messenger
+from messenger import msg
 
 
 class RemoveEntityOnDeath(Leaf):
@@ -27,7 +27,7 @@ class PrintDeathMessageOnDeath(Leaf):
 
     def on_tick(self, time):
         if self.parent.health.is_dead():
-            messenger.message(self.parent.entity_messages.death)
+            msg.message(self.parent.entity_messages.death)
 
 
 class LeaveCorpseOnDeath(Leaf):

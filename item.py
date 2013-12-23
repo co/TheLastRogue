@@ -15,7 +15,7 @@ import colors
 import entityeffect
 import equipment
 import gametime
-from messenger import messenger
+from messenger import msg
 import icon
 from vision import SightRadius
 
@@ -729,7 +729,7 @@ class PickUpItemAction(Action):
         pickup_succeded = self.parent.inventory.try_add(item)
         if pickup_succeded:
             message = "Picked up: " + item.description.name
-            messenger.message(message)
+            msg.message(message)
             self.parent.actor.newly_spent_energy += gametime.single_turn
             _item_flash_animation(source_entity, item)
 
@@ -748,7 +748,7 @@ class PickUpItemAction(Action):
                 not self.parent.inventory.has_room_for_item(item)):
             message = "Could not pick up: " + item.description.name + \
                       ", the inventory is full."
-            messenger.message(message)
+            msg.message(message)
 
 
 class EquipmentType(Leaf):
@@ -837,7 +837,7 @@ class ThrowerNonBreak(Thrower):
         self.parent.mover.try_move(position, dungeon_level)
         message = "The " + self.parent.description.name.lower() + \
                   " hits the ground with a thud."
-        messenger.message(message)
+        msg.message(message)
 
 
 class ThrowerBreak(Thrower):
@@ -851,7 +851,7 @@ class ThrowerBreak(Thrower):
     def throw_effect(self, dungeon_level, position):
         message = "The " + self.parent.description.name.lower() + \
                   " smashes to the ground and breaks into pieces."
-        messenger.message(message)
+        msg.message(message)
 
 
 def _item_flash_animation(entity, item):

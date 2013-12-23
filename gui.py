@@ -6,7 +6,7 @@ import graphic
 import icon
 import inputhandler
 import inventory
-from messenger import messenger
+from messenger import msg
 from console import console
 import colors
 import geometry as geo
@@ -672,10 +672,11 @@ class MessageDisplay(RectangularUIElement):
         self._offset = (0, 0)
 
     def update(self):
-        if messenger.new_message:
+        print "HI", msg.has_new_message
+        if msg.has_new_message:
             messages_height = (self.height -
                                style.interface_theme.margin[0] * 2)
-            messages = messenger.tail(messages_height)
+            messages = msg.tail(messages_height)
             self._message_stack_panel.clear()
             for message in messages:
                 message_width = (self.width -

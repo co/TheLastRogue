@@ -1,5 +1,5 @@
 import gametime
-from messenger import messenger
+from messenger import msg
 from compositecore import Leaf
 
 
