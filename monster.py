@@ -1,5 +1,5 @@
 from actor import DoNothingActor
-from attacker import Attacker, Dodger, DamageTypes
+from attacker import Attacker, Dodger, DamageTypes, ArmorChecker
 from compositecore import Composite, Leaf
 from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue, DissolveDamageEffect, AddSpoofChild
@@ -12,7 +12,7 @@ from mover import Mover, Stepper, CanShareTileEntityMover, ImmobileStepper
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
 import rng
-from stats import AttackSpeed, Faction, GameState, Evasion, Stealth, Awareness
+from stats import AttackSpeed, Faction, GameState, Evasion, Stealth, Awareness, Armor
 from stats import MovementSpeed, Strength, GamePieceType, Hit
 from statusflags import StatusFlags
 from text import Description, EntityMessages
@@ -52,11 +52,13 @@ class Ratman(Composite):
         self.add_child(BleedWhenDamaged())
 
         self.add_child(AttackSpeed())
-        self.add_child(Strength(2))
+        self.add_child(Strength(4))
         self.add_child(Attacker())
         self.add_child(Dodger())
         self.add_child(Evasion(16))
         self.add_child(Hit(13))
+        self.add_child(Armor(4))
+        self.add_child(ArmorChecker())
 
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())
@@ -104,17 +106,19 @@ class Cyclops(Composite):
 
         self.add_child(Faction(Faction.MONSTER))
         self.add_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.HAS_MIND, StatusFlags.IS_ALIVE]))
-        self.add_child(Health(40))
+        self.add_child(Health(45))
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.one_and_half_turn))
         self.add_child(BleedWhenDamaged())
 
         self.add_child(AttackSpeed(gametime.single_turn, throw_speed=gametime.double_turn))
-        self.add_child(Strength(12))
+        self.add_child(Strength(14))
         self.add_child(Attacker(0.8, 1.5))
         self.add_child(Dodger())
         self.add_child(Evasion(5))
         self.add_child(Hit(11))
+        self.add_child(Armor(6))
+        self.add_child(ArmorChecker())
 
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())
@@ -181,6 +185,8 @@ class Ghost(Composite):
         self.add_child(Dodger())
         self.add_child(Evasion(22))
         self.add_child(Hit(14))
+        self.add_child(Armor(0))
+        self.add_child(ArmorChecker())
 
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())
@@ -333,6 +339,8 @@ class Slime(Composite):
         self.add_child(Stealth(7))
         self.add_child(Awareness(5))
         self.add_child(AwarenessChecker())
+        self.add_child(Armor(3))
+        self.add_child(ArmorChecker())
 
         self.add_child(SightRadius(6))
         self.add_child(DungeonMask())
@@ -412,7 +420,7 @@ class StuckInSlimeStepperSpoof(Stepper):
         slime_strength = self._slime.strength.value
         if self.has_sibling("attacker"):
             self.parent.attacker.hit(self._slime)
-        if rng.stat_check(my_strength, slime_strength + 6):
+        if rng.stat_check(my_strength, slime_strength + 8):
             self._make_slime_skip_turn()
             return self.next.try_move_or_bump(position)
         return self.parent.movement_speed.value

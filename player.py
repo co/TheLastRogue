@@ -1,5 +1,5 @@
 from item import PickUpItemAction
-from attacker import Attacker, Dodger
+from attacker import Attacker, Dodger, ArmorChecker
 from compositecore import Composite
 from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue
@@ -12,7 +12,7 @@ from missileaction import PlayerThrowStoneAction
 from mover import Mover, Stepper
 from ondeath import LeaveCorpseOnDeath
 from position import Position, DungeonLevel
-from stats import AttackSpeed, Faction, GameState, GamePieceType, Stealth, Awareness
+from stats import AttackSpeed, Faction, GameState, GamePieceType, Stealth, Awareness, Armor
 from stats import MovementSpeed, Strength, IsPlayer, Evasion, Hit
 from statusflags import StatusFlags
 from text import Description
@@ -41,6 +41,8 @@ class Player(Composite):
         self.add_child(Dodger())
         self.add_child(Evasion(15))
         self.add_child(Hit(16))
+        self.add_child(Armor(4))
+        self.add_child(ArmorChecker())
 
         self.add_child(Description("CO", "The Brave"))
         self.add_child(GraphicChar(None, colors.WHITE,
@@ -52,7 +54,7 @@ class Player(Composite):
         self.add_child(BleedWhenDamaged())
 
         self.add_child(Faction(Faction.PLAYER))
-        self.add_child(Strength(4))
+        self.add_child(Strength(5))
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(AttackSpeed())
         self.add_child(PlayerThrowStoneAction())

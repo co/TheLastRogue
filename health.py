@@ -36,7 +36,7 @@ class HealthModifier(Leaf):
         super(HealthModifier, self).__init__()
         self.component_type = "health_modifier"
 
-    def hurt(self, damage, damage_types=[], entity=None):
+    def hurt(self, damage, entity=None):
         """
         Damages the entity by reducing hp by damage.
         """
@@ -108,11 +108,11 @@ class HealthSpoof(Leaf):
         super(HealthSpoof, self).__init__()
         self.component_type = "health_modifier"
 
-    def hurt(self, damage, damage_types=[], entity=None):
+    def hurt(self, damage, entity=None):
         """
         Passes call to next spoof.
         """
-        return self.next.hurt(damage, damage_types=damage_types, entity=entity)
+        return self.next.hurt(damage, entity=entity)
 
     def heal(self, health):
         """
@@ -131,25 +131,6 @@ class HealthSpoof(Leaf):
         Removes all hp, this kills the entity.
         """
         self.next.kill()
-
-
-class BlockDamageHealthSpoof(HealthSpoof):
-    def __init__(self, block_amount, variance, blocked_damage_types):
-        super(BlockDamageHealthSpoof, self).__init__()
-        self.block_amount = block_amount
-        self.variance = variance
-        self.blocked_damage_types = set(blocked_damage_types)
-
-    def hurt(self, damage, damage_types=[], entity=None):
-        """
-        Reduces damage done to parent entity.
-        """
-        block_amount = 0
-        if len(set(damage_types) & self.blocked_damage_types) > 0:
-            block_amount = rng.random_variance_no_negative(self.block_amount, self.variance)
-        new_damage = max(damage - block_amount, 0)
-        return self.next.hurt(new_damage, damage_types=damage_types,
-                              entity=entity)
 
 
 class DamageTakenEffect(Leaf):

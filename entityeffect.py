@@ -134,12 +134,8 @@ class StatusAdder(EntityEffect):
 
 
 class Teleport(EntityEffect):
-    def __init__(self, source_entity,
-                 time_to_live=1):
-        super(Teleport,
-              self).__init__(source_entity,
-                             time_to_live,
-                             EffectTypes.TELEPORT)
+    def __init__(self, source_entity, time_to_live=1):
+        super(Teleport, self).__init__(source_entity, time_to_live, EffectTypes.TELEPORT)
 
     def update(self, time_spent):
         positions = (self.target_entity.dungeon_level.value.
@@ -150,6 +146,7 @@ class Teleport(EntityEffect):
         for position in random_positions:
             teleport_successful = self.target_entity.mover.try_move(position)
             if teleport_successful:
+                self.target_entity.game_state.value.dungeon_needs_redraw = True
                 break
         self.tick(time_spent)
 
@@ -176,38 +173,26 @@ class DamageEntityEffect(EntityEffect):
                    self.target_entity.description.name, damage_caused)
         messenger.message(message)
 
+    def is_a_hit(self):
+        return self.target_entity.dodger.is_a_hit(self.hit)
+
     def update(self, time_spent):
-        if self.target_entity.dodger.is_a_hit(self.hit):
-            damage_caused = \
-                self.target_entity.health_modifier.hurt(self.damage,
-                                                        self.damage_types,
-                                                        entity=self.source_entity)
+        if self.is_a_hit():
+            damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
+            damage_caused = self.target_entity.health_modifier.hurt(damage_after_armor, entity=self.source_entity)
             self.message(damage_caused)
         else:
             self.miss_message()
         self.tick(time_spent)
 
 
-class UndodgeableDamageEntityEffect(EntityEffect):
+class UndodgeableDamageEntityEffect(DamageEntityEffect):
     def __init__(self, source_entity, damage, damage_types, time_to_live=1):
-        super(UndodgeableDamageEntityEffect, self).__init__(source_entity=source_entity,
-                                                            effect_type=EffectTypes.DAMAGE,
+        super(UndodgeableDamageEntityEffect, self).__init__(source_entity, damage, damage_types, -1,
                                                             time_to_live=time_to_live)
-        self.damage = damage
-        self.damage_types = damage_types
 
-    def message(self, damage_caused):
-        message = "%s hits %s for %d damage." % \
-                  (self.source_entity.description.name,
-                   self.target_entity.description.name, damage_caused)
-        messenger.message(message)
-
-    def update(self, time_spent):
-        damage_caused = self.target_entity.health_modifier.hurt(self.damage,
-                                                                self.damage_types,
-                                                                entity=self.source_entity)
-        self.message(damage_caused)
-        self.tick(time_spent)
+    def is_a_hit(self):
+        return True
 
 
 ### TODO: DissolveDamageEffect should not be its own effect, message should come from argument.
@@ -229,7 +214,6 @@ class DissolveDamageEffect(EntityEffect):
     def update(self, time_spent):
         if self.time_alive == 0:
             damage_caused = self.target_entity.health_modifier.hurt(self.damage,
-                                                                    self.damage_types,
                                                                     entity=self.source_entity)
             self.message(damage_caused)
         self.tick(time_spent)

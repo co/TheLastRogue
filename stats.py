@@ -38,6 +38,12 @@ class Strength(DataPoint):
     def __init__(self, strength):
         super(Strength, self).__init__("strength", strength)
 
+class Armor(DataPoint):
+    """
+    Composites holding this has the armor attribute.
+    """
+    def __init__(self, strength):
+        super(Armor, self).__init__("armor", strength)
 
 class IsPlayer(Leaf):
     """
@@ -86,7 +92,7 @@ class AttackSpeed(Leaf):
     """
     Composites holding this has the attack_speed attribute.
     """
-    def __init__(self, melee_speed=gametime.single_turn, throw_speed=gametime.single_turn, shoot_speed=gametime.single_turn):
+    def __init__(self, melee_speed=gametime.single_turn, throw_speed=gametime.double_turn, shoot_speed=gametime.single_turn):
         super(AttackSpeed, self).__init__()
         self.component_type = "attack_speed"
         self.melee = melee_speed

@@ -4,7 +4,6 @@ from action import Action
 from compositecore import Leaf, Composite
 from attacker import Damage, DamageTypes
 from graphic import GraphicChar, CharPrinter
-from health import BlockDamageHealthSpoof
 from missileaction import PlayerThrowItemAction
 from mover import Mover
 from position import Position, DungeonLevel
@@ -94,8 +93,7 @@ class Sling(Composite):
         self.add_child(DropAction())
         self.add_child(PlayerThrowItemAction())
         self.add_child(ThrowerNonBreak())
-        self.add_child(DamageProvider(1, 3, [DamageTypes.PHYSICAL,
-                                             DamageTypes.PIERCING]))
+        self.add_child(DamageProvider(1, 2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
         self.add_child(Weight(3))
         self.add_child(Hit(5))
 
@@ -169,7 +167,6 @@ class ActivateDeviceAction(Action):
         """
         Performs the drink action, subclasses should not override this.
         """
-        target_entity = kwargs[action.TARGET_ENTITY]
         source_entity = kwargs[action.SOURCE_ENTITY]
 
         self._activate(source_entity)
@@ -332,7 +329,7 @@ class LeatherArmor(Armor):
                                    "A worn leather armor. It's old, but should still protect you from some damage."))
         self.add_child(Weight(10))
         self.add_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
-        self.add_child(BlockDamageEquippedEffect(1, 2, [DamageTypes.PHYSICAL]))
+        self.add_child(StatBonusEquipEffect("armor", 2))
         self.add_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
 
 
@@ -347,7 +344,7 @@ class LeatherBoots(Armor):
                                    "A worn pair of boots, dry mud covers most of the leather."))
         self.add_child(Weight(4))
         self.add_child(GraphicChar(None, colors.ORANGE_D, icon.BOOTS))
-        self.add_child(BlockDamageEquippedEffect(0, 1, [DamageTypes.PHYSICAL]))
+        self.add_child(StatBonusEquipEffect("armor", 1))
         self.add_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
 
 
@@ -362,7 +359,7 @@ class LeatherCap(Armor):
                                    "An old cap made out of leather, this should keep some harm away."))
         self.add_child(Weight(4))
         self.add_child(GraphicChar(None, colors.ORANGE_D, icon.HELM))
-        self.add_child(BlockDamageEquippedEffect(0, 1, [DamageTypes.PHYSICAL]))
+        self.add_child(StatBonusEquipEffect("armor", 1))
         self.add_child(EquipmentType(equipment.EquipmentTypes.HEADGEAR))
 
 class BlockDamageEquippedEffect(EquippedEffect):
@@ -399,7 +396,7 @@ class Sword(Composite):
                                    "better days, it's as sharp as "
                                    "ever tough."))
         self.add_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-        self.add_child(DamageProvider(6, 3, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+        self.add_child(DamageProvider(4, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
         self.add_child(CharPrinter())
         self.add_child(ReEquipAction())
         self.add_child(DropAction())
@@ -421,7 +418,7 @@ class Knife(Sword):
         self.graphic_char.icon = icon.KNIFE
         self.weight.value = 6
         self.hit.value = 21
-        self.damage_provider.damage = 3
+        self.damage_provider.damage = 2
         self.damage_provider.variance = 1
 
 
@@ -458,7 +455,7 @@ class RingOfEvasion(Ring):
     def __init__(self):
         super(RingOfEvasion, self).__init__()
         self.graphic_char.color_fg = colors.GREEN
-        self.add_child(DodgeBonusEquipEffect(3))
+        self.add_child(StatBonusEquipEffect("evasion", 3))
         self.add_child(Description("Ring of Evasion",
                                    "The ring is light on your finger, "
                                    "Its magic powers makes it easier for you to dodge attacks."))
@@ -468,7 +465,7 @@ class RingOfStealth(Ring):
     def __init__(self):
         super(RingOfStealth, self).__init__()
         self.graphic_char.color_fg = colors.BLUE
-        self.add_child(StealthEquipEffect(3))
+        self.add_child(StatBonusEquipEffect("stealth", 3))
         self.add_child(Description("Ring of Stealth",
                                    "The ring is smooth to your skin, "
                                    "Its magic powers makes it easier for you to sneak past enemies."))
@@ -478,45 +475,23 @@ class RingOfStrength(Ring):
     def __init__(self):
         super(RingOfStrength, self).__init__()
         self.graphic_char.color_fg = colors.ORANGE
-        self.add_child(StrengthBonusEquipEffect(3))
+        self.add_child(StatBonusEquipEffect("strength", 3))
         self.add_child(Description("Ring of Strength",
                                    "The ring feels unnaturally heavy, "
                                    "Its magic powers makes you stronger."))
 
-class DodgeBonusEquipEffect(EquippedEffect):
-    def __init__(self, dodge_bonus=3):
-        super(DodgeBonusEquipEffect, self).__init__()
-        self.dodge_bonus = dodge_bonus
+
+class StatBonusEquipEffect(EquippedEffect):
+    def __init__(self, stat, bonus):
+        super(StatBonusEquipEffect, self).__init__()
+        self.stat = stat
+        self.bonus = bonus
 
     def effect(self, entity):
         """
-        Causes the entity that equips this item dodge more often.
+        Causes the entity that equips this have a bonus to one stat.
         """
-        entity.add_spoof_child(DataPointBonusSpoof("evasion", self.dodge_bonus))
-
-
-class StrengthBonusEquipEffect(EquippedEffect):
-    def __init__(self, strength_bonus=3):
-        super(StrengthBonusEquipEffect, self).__init__()
-        self.strength_bonus = strength_bonus
-
-    def effect(self, entity):
-        """
-        Causes the entity that equips this item dodge more often.
-        """
-        entity.add_spoof_child(DataPointBonusSpoof("strength", self.strength_bonus))
-
-
-class StealthEquipEffect(EquippedEffect):
-    def __init__(self, stealth_bonus=3):
-        super(StealthEquipEffect, self).__init__()
-        self.stealth_bonus = stealth_bonus
-
-    def effect(self, entity):
-        """
-        Causes the entity that equips this item stealth more often.
-        """
-        entity.add_spoof_child(DataPointBonusSpoof("stealth", self.stealth_bonus))
+        entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
 
 
 class SetInvisibilityFlagEquippedEffect(EquippedEffect):

@@ -65,8 +65,7 @@ class Attacker(Leaf):
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
         damage_strength = int(self.parent.strength.value * self.melee_damage_modifier)
-        return Damage(1 + damage_strength / 2, damage_strength / 4, damage_types,
-                      self.parent.hit.value)
+        return Damage(1 + damage_strength / 2, damage_strength / 4, damage_types, self.parent.hit.value)
 
 
 class Dodger(Leaf):
@@ -81,8 +80,31 @@ class Dodger(Leaf):
         """
         Returns true if it is a hit, false otherwise.
         """
-        return rng.stat_check(hit + 5, self.parent.evasion.value)
+        return rng.stat_check(hit, self.parent.evasion.value)
 
+
+class ArmorChecker(Leaf):
+    """
+    Component for calculating dodge.
+    """
+    def __init__(self):
+        super(ArmorChecker, self).__init__()
+        self.component_type = "armor_checker"
+
+    def get_damage_after_armor(self, damage, damage_types):
+        """
+        Returns the damage taken after it goes through the armor.
+        """
+        if (DamageTypes.BLUNT in damage_types or
+                    DamageTypes.PIERCING in damage_types or
+                    DamageTypes.CUTTING in damage_types):
+            armor =self.parent.armor.value
+            if damage <= armor:
+                damage_reduction_mid = armor / 4
+            else:
+                damage_reduction_mid = armor / 8
+            return max(damage - rng.random_variance_no_negative(damage_reduction_mid, damage_reduction_mid), 0)
+        return damage
 
 class DamageTypes(object):
     PHYSICAL = 0
@@ -104,10 +126,8 @@ class Damage(object):
 
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0, damage_multiplier=1):
         damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
-        damage_effect =\
-            entityeffect.DamageEntityEffect(source_entity,
-                                            damage * self.damage_multiplier,
-                                            self.damage_types, self.hit + bonus_hit)
+        damage_effect = entityeffect.DamageEntityEffect(source_entity, damage * self.damage_multiplier,
+                                                        self.damage_types, self.hit + bonus_hit)
         target_entity.effect_queue.add(damage_effect)
 
 
@@ -121,8 +141,7 @@ class UndodgeableDamage(object):
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, damage_multiplier=1):
         damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
         damage_effect = \
-            entityeffect.UndodgeableDamageEntityEffect(source_entity,
-                                                       damage * self.damage_multiplier,
+            entityeffect.UndodgeableDamageEntityEffect(source_entity, damage * self.damage_multiplier,
                                                        self.damage_types)
         target_entity.effect_queue.add(damage_effect)
 
