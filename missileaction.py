@@ -129,7 +129,7 @@ class PlayerSlingStoneAction(PlayerMissileAction):
         """
         Help method for spending energy for the act performing entity.
         """
-        entity.actor.newly_spent_energy += entity.attack_speed.shoot
+        entity.actor.newly_spent_energy += entity.attack_speed.throw
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         animate_flight(game_state, path, self.icon, self.color_fg)

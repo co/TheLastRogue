@@ -51,8 +51,8 @@ class Ratman(Composite):
         self.add_child(MovementSpeed(gametime.single_turn))
         self.add_child(BleedWhenDamaged())
 
-        self.add_child(AttackSpeed())
-        self.add_child(Strength(4))
+        self.add_child(AttackSpeed(throw_speed=gametime.single_turn))
+        self.add_child(Strength(5))
         self.add_child(Attacker())
         self.add_child(Dodger())
         self.add_child(Evasion(16))
@@ -179,7 +179,7 @@ class Ghost(Composite):
         self.add_child(HealthModifier())
         self.add_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
 
-        self.add_child(AttackSpeed())
+        self.add_child(AttackSpeed(throw_speed=gametime.single_turn))
         self.add_child(Strength(2))
         self.add_child(Attacker())
         self.add_child(Dodger())

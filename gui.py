@@ -826,9 +826,7 @@ class TextBox(UIElement):
 
     def draw(self, offset=geo.zero2d()):
         x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
-        print x, y
         if x > settings.SCREEN_WIDTH:
-            print "outside"
             return
         if x + len(self.text) > settings.SCREEN_WIDTH:
             max_width = settings.SCREEN_WIDTH - x
