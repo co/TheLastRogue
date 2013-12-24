@@ -26,7 +26,7 @@ import turn
 
 def reset_globals():
     turn.current_turn = 0
-    messenger.msg = messenger.Messenger()
+    messenger.msg.clear()
 
 
 class GameStateBase(state.State):

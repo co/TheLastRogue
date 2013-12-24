@@ -672,15 +672,12 @@ class MessageDisplay(RectangularUIElement):
         self._offset = (0, 0)
 
     def update(self):
-        print "HI", msg.has_new_message
         if msg.has_new_message:
-            messages_height = (self.height -
-                               style.interface_theme.margin[0] * 2)
+            messages_height = (self.height - style.interface_theme.margin[0] * 2)
             messages = msg.tail(messages_height)
             self._message_stack_panel.clear()
             for message in messages:
-                message_width = (self.width -
-                                 style.interface_theme.margin[0] * 2)
+                message_width = (self.width - style.interface_theme.margin[0] * 2)
                 words = str(message).split()
                 lines = []
                 line = words[0]

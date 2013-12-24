@@ -1,6 +1,6 @@
 EQUIP_MESSAGE = "%(source_entity)s equips %(item)s."
 UNEQUIP_MESSAGE = "%(source_entity)s puts away %(item)s."
-HEALTH_MESSAGE = "%(source_entity)s heals %(target_entity)s for %(health)s health."
+HEAL_MESSAGE = "%(source_entity)s heals %(target_entity)s for %(health)s health."
 DISSOLVE_MESSAGE = "%(source_entity)s dissolves %(target_entity)s for %(damage)s damage."
 HIT_MESSAGE = "%(source_entity)s hits %(target_entity)s for %(damage)s damage."
 MISS_MESSAGE = "%(source_entity)s misses %(target_entity)s."
@@ -9,11 +9,17 @@ MISS_MESSAGE = "%(source_entity)s misses %(target_entity)s."
 class Messenger(object):
     def __init__(self):
         self._messages = []
-        self.has_new_message = False
-        self.new_message = None
+        self._has_new_message = False
+
+    @property
+    def has_new_message(self):
+        return self._has_new_message
+
+    @has_new_message.setter
+    def has_new_message(self, value):
+        self._has_new_message = value
 
     def message(self, new_message):
-        print new_message, new_message.__class__
         new_message = Message(new_message)
         old_message = next((message for message in self._messages
                            if message.message == new_message.message and
@@ -21,25 +27,17 @@ class Messenger(object):
         if old_message:
             old_message.increase()
         else:
-            print "YESS: ", new_message
             self._messages.append(new_message)
-            print "LETS SEE:", [(message.message, message.ttl) for message in self._messages]
         self.has_new_message = True
-        if self.new_message:
-            print "WHATWHAT", self.new_message
-        print "Yo!", self.has_new_message
 
     def tail(self, length):
-        print "THIS:", [message.message for message in self._messages[-length:]]
-        raise
         self.has_new_message = False
-        print "YoYo!", self.has_new_message
         self._messages = [message for message in self._messages if message.ttl > 0]
-        print "this:", [message.message for message in self._messages]
         map(lambda m: m.tick(), self._messages)
-        print "THIS:", [message.message for message in self._messages[-length:]]
         return self._messages[-length:]
 
+    def clear(self):
+        self._messages = []
 
 class Message(object):
     def __init__(self, message):

@@ -55,12 +55,8 @@ class PositionExaminer(state.State):
 
     def offset_cursor_position(self, offset):
         old_x, old_y = self.cursor_position[0], self.cursor_position[1]
-        print "old ", old_x, old_y
-        print "ofs ", offset[0], offset[1]
-        print "min_max_x ", old_x - self.max_distance, old_x + self.max_distance
         new_x = min_max(old_x + offset[0], self.start_position[0] - self.max_distance, self.start_position[0] + self.max_distance)
         new_y = min_max(old_y + offset[1], self.start_position[1] - self.max_distance, self.start_position[1] + self.max_distance)
-        print "new ", new_x, new_y
         self.cursor_position = (new_x, new_y)
 
     def _handle_escape(self, key):

@@ -170,8 +170,6 @@ class DamageEntityEffect(EntityEffect):
         self.hit_message = hit_message
 
     def send_miss_message(self):
-        print (self.miss_message % {"source_entity": self.source_entity.description.name,
-                                                   "target_entity": self.target_entity.description.name})
         messenger.msg.message(self.miss_message % {"source_entity": self.source_entity.description.name,
                                                    "target_entity": self.target_entity.description.name})
 
@@ -179,7 +177,6 @@ class DamageEntityEffect(EntityEffect):
         m = self.hit_message % {"source_entity": self.source_entity.description.name,
                                 "target_entity": self.target_entity.description.name,
                                 "damage": str(damage_caused)}
-        print "what", m
         messenger.msg.message(m)
 
     def is_a_hit(self):
@@ -231,7 +228,7 @@ class UndodgeableDamagAndBlockSameEffect(EntityEffect):
 
 
 class Heal(EntityEffect):
-    def __init__(self, source_entity, health, heal_message, time_to_live=1):
+    def __init__(self, source_entity, health, heal_message=messenger.HEAL_MESSAGE, time_to_live=1):
         super(Heal, self).__init__(source_entity=source_entity,
                                    effect_type=EffectTypes.HEAL,
                                    time_to_live=time_to_live)
