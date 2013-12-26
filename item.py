@@ -133,6 +133,7 @@ class Device(Composite):
         self.add_child(ThrowerNonBreak())
         self.add_child(Weight(5))
         self.add_child(Charge(random.randrange(2, 7)))
+        self.add_child(PlayerAutoPickUp())
 
 
 class Charge(Leaf):
@@ -283,6 +284,7 @@ class Ammunition(Composite):
         self.add_child(DropAction())
         self.add_child(CharPrinter())
         self.add_child(Weight(1))
+        self.add_child(PlayerAutoPickUp())
 
 
 class EquippedEffect(Leaf):
@@ -529,6 +531,7 @@ class HealthPotion(Composite):
         self.add_child(Stacker("health_potion", 3))
         self.add_child(HealingPotionDrinkAction())
         self.add_child(DropAction())
+        self.add_child(PlayerAutoPickUp())
 
         self.add_child(ThrowerBreak())
         self.add_child(Weight(4))
@@ -732,6 +735,7 @@ class PickUpItemAction(Action):
         pickup_succeded = self.parent.inventory.try_add(item)
         if pickup_succeded:
             message = "Picked up: " + item.description.name
+            item.remove_component_of_type("player_auto_pick_up")
             msg.send_visual_message(message, source_entity.position.value)
             self.parent.actor.newly_spent_energy += gametime.single_turn
             _item_flash_animation(source_entity, item)
@@ -791,8 +795,19 @@ class OnUnequipEffect(Leaf):
     """
 
     def __init__(self, effect_function):
+        super(OnUnequipEffect, self).__init__()
         self.component_type = "on_unequip_effect"
         self.effect = effect_function
+
+
+class PlayerAutoPickUp(Leaf):
+    """
+    Items with this component, should trigger the player auto pick up of the item.
+    """
+
+    def __init__(self):
+        super(PlayerAutoPickUp, self).__init__()
+        self.component_type = "player_auto_pick_up"
 
 
 class OnEquipEffect(Leaf):
@@ -801,6 +816,7 @@ class OnEquipEffect(Leaf):
     """
 
     def __init__(self, effect_function):
+        super(OnEquipEffect, self).__init__()
         self.component_type = "on_equip_effect"
         self.effect = effect_function
 

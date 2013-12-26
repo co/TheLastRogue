@@ -28,6 +28,8 @@ class InputActor(Actor):
 
         if len(self.parent.vision.get_seen_entities()) > 0:
             self.parent.path.clear()
+        else:
+            self.handle_auto_pick_up()
 
         if self.newly_spent_energy < 1:
             self.handle_keyboard_input()
@@ -64,6 +66,13 @@ class InputActor(Actor):
             tile_menu = menufactory.get_menu_with_options(context_menu_options, state_stack)
             self.parent.game_state.value.start_prompt(tile_menu)
 
+    def handle_auto_pick_up(self):
+        dungeon_level = self.parent.dungeon_level.value
+        position = self.parent.position.value
+        item = dungeon_level.get_tile(position).get_first_item()
+        if item and item.has_child("player_auto_pick_up"):
+            self.handle_pick_up()
+
     def handle_dev_mode_commands(self, key):
         if key == inputhandler.TWO:
             self.parent.health_modifier.heal(300)
@@ -99,6 +108,15 @@ class InputActor(Actor):
             destination_position = next_dungeon_level.up_stairs[0].position.value
             self.parent.mover.move_push_over(destination_position, next_dungeon_level)
 
+    def handle_pick_up(self):
+        if self.parent.pick_up_item_action.can_act(source_entity=self.parent, target_entity=self.parent,
+                                                   game_state=self.parent.game_state.value):
+            self.parent.pick_up_item_action.act(source_entity=self.parent, target_entity=self.parent,
+                                                game_state=self.parent.game_state.value)
+        else:
+            self.parent.pick_up_item_action.print_player_error(source_entity=self.parent, target_entity=self.parent,
+                                                               game_state=self.parent.game_state.value)
+
     def handle_keyboard_input(self):
         key = inputhandler.handler.get_keypress()
         if key in inputhandler.move_controls or key in inputhandler.vi_move_controls:
@@ -112,13 +130,7 @@ class InputActor(Actor):
         elif key == inputhandler.SPACE:
             self.handle_context_action()
         elif key == inputhandler.PICKUP:  # Pick up
-            if self.parent.pick_up_item_action.can_act(source_entity=self.parent, target_entity=self.parent,
-                                                       game_state=self.parent.game_state.value):
-                self.parent.pick_up_item_action.act(source_entity=self.parent, target_entity=self.parent,
-                                                    game_state=self.parent.game_state.value)
-            else:
-                self.parent.pick_up_item_action.print_player_error(source_entity=self.parent, target_entity=self.parent,
-                                                                   game_state=self.parent.game_state.value)
+            self.handle_pick_up()
         elif key == inputhandler.FIRE:
             self.throw_or_shoot()
         elif key == inputhandler.ESCAPE:

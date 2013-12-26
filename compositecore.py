@@ -202,6 +202,15 @@ class Composite(Component):
             component.parent = None
         return component
 
+    def remove_component_of_type(self, component_type):
+        """
+        Removes a child component of a type of this component.
+        """
+        if component_type in self._children:
+            self._children[component_type].parent = None
+            del self._children[component_type]
+        return
+
     def update(self):
         """
         Runs update on all child components.
