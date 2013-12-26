@@ -24,9 +24,10 @@ from tools import time_it
 import turn
 
 
-def reset_globals():
+def reset_globals(player):
     turn.current_turn = 0
     messenger.msg.clear()
+    messenger.msg.player = player
 
 
 class GameStateBase(state.State):
@@ -39,13 +40,13 @@ class GameStateBase(state.State):
         else:
             self.player.description.name = player_name
         self._init_caches_and_flags()
-        messenger.msg.message("Welcome to: The Last Rogue!")
+        messenger.msg.send_global_message("Welcome to: The Last Rogue!")
 
     def _init_caches_and_flags(self):
         """
         Sets up all variables for a new gamestate instance
         """
-        reset_globals()
+        reset_globals(self.player)
         self._init_gui()
         self._should_draw = True
         self._last_dungeon_level = None
@@ -168,7 +169,7 @@ class GameStateBase(state.State):
 class TestGameState(GameStateBase):
     def __init__(self, player_name=""):
         super(TestGameState, self).__init__(player_name)
-        reset_globals()
+        reset_globals(self.player)
         start_position = (20, 10)
         self.dungeon_level = dungeon_level_from_file("test.level")
         self.player.mover.try_move(start_position, self.dungeon_level)

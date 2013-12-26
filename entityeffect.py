@@ -170,14 +170,16 @@ class DamageEntityEffect(EntityEffect):
         self.hit_message = hit_message
 
     def send_miss_message(self):
-        messenger.msg.message(self.miss_message % {"source_entity": self.source_entity.description.name,
-                                                   "target_entity": self.target_entity.description.name})
+        messenger.msg.send_visual_message(self.miss_message % {"source_entity": self.source_entity.description.name,
+                                                   "target_entity": self.target_entity.description.name},
+                                          self.target_entity.position.value)
 
     def send_hit_message(self, damage_caused):
         m = self.hit_message % {"source_entity": self.source_entity.description.name,
                                 "target_entity": self.target_entity.description.name,
                                 "damage": str(damage_caused)}
-        messenger.msg.message(m)
+        messenger.msg.send_visual_message(m,
+                                          self.target_entity.position.value)
 
     def is_a_hit(self):
         return self.target_entity.dodger.is_a_hit(self.hit)
@@ -215,9 +217,10 @@ class UndodgeableDamagAndBlockSameEffect(EntityEffect):
         self.damage_message = damage_message
 
     def send_damage_message(self, damage_caused):
-        messenger.msg.message(self.damage_message % {"source_entity": self.source_entity.description.name,
+        messenger.msg.send_visual_message(self.damage_message % {"source_entity": self.source_entity.description.name,
                                                      "target_entity": self.target_entity.description.name,
-                                                     "damage": str(damage_caused)})
+                                                     "damage": str(damage_caused)},
+                                          self.target_entity.position.value)
 
     def update(self, time_spent):
         if self.time_alive == 0:
@@ -236,9 +239,10 @@ class Heal(EntityEffect):
         self.heal_message = heal_message
 
     def message(self):
-        messenger.msg.message(self.heal_message % {"source_entity": self.source_entity.description.name,
+        messenger.msg.send_visual_message(self.heal_message % {"source_entity": self.source_entity.description.name,
                                                    "target_entity": self.target_entity.description.name,
-                                                   "health": str(self.health)})
+                                                   "health": str(self.health)},
+                                          self.target_entity.position.value)
 
     def update(self, time_spent):
         self.target_entity.health_modifier.heal(self.health)
@@ -267,9 +271,10 @@ class Equip(EntityEffect):
         self.equip_message = equip_message
 
     def message(self):
-        messenger.msg.message(self.equip_message % {"source_entity": self.source_entity.description.name,
+        messenger.msg.send_visual_message(self.equip_message % {"source_entity": self.source_entity.description.name,
                                                     "target_entity": self.target_entity.description.name,
-                                                    "item": self.item.description.name})
+                                                    "item": self.item.description.name},
+                                          self.target_entity.position.value)
 
     def update(self, time_spent):
         equipment = self.queue.target_entity.equipment
@@ -302,9 +307,10 @@ class Unequip(EntityEffect):
         self.unequip_message = messenger.UNEQUIP_MESSAGE
 
     def message(self):
-        messenger.msg.message(self.unequip_message % {"source_entity": self.source_entity.description.name,
+        messenger.msg.send_visual_message(self.unequip_message % {"source_entity": self.source_entity.description.name,
                                                       "target_entity": self.target_entity.description.name,
-                                                      "item": self.item.description.name})
+                                                      "item": self.item.description.name},
+                                          self.target_entity.position.value)
 
     def update(self, time_spent):
         equipment = self.target_entity.equipment
@@ -327,7 +333,8 @@ class ReEquip(EntityEffect):
     def message(self):
         message = "%s equips %s." % (self.source_entity.description.name,
                                      self.item.description.name)
-        messenger.msg.message(message)
+        messenger.msg.send_visual_message(message,
+                                          self.target_entity.position.value)
 
     def update(self, time_spent):
         old_item = None

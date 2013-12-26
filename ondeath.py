@@ -27,7 +27,7 @@ class PrintDeathMessageOnDeath(Leaf):
 
     def on_tick(self, time):
         if self.parent.health.is_dead():
-            msg.message(self.parent.entity_messages.death)
+            msg.send_visual_message(self.parent.entity_messages.death, self.parent.position.value)
 
 
 class LeaveCorpseOnDeath(Leaf):

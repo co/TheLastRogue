@@ -35,7 +35,7 @@ class MonsterActorState(Leaf):
             found_gfx = GraphicChar(None, colors.BLUE, "!")
             (self.parent.char_printer.
              append_graphic_char_temporary_frames([found_gfx]))
-            msg.message(self.parent.entity_messages.notice)
+            msg.send_visual_message(self.parent.entity_messages.notice, self.parent.position.value)
 
         self._value = new_value
 

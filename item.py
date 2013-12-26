@@ -732,7 +732,7 @@ class PickUpItemAction(Action):
         pickup_succeded = self.parent.inventory.try_add(item)
         if pickup_succeded:
             message = "Picked up: " + item.description.name
-            msg.message(message)
+            msg.send_visual_message(message, source_entity.position.value)
             self.parent.actor.newly_spent_energy += gametime.single_turn
             _item_flash_animation(source_entity, item)
 
@@ -751,7 +751,7 @@ class PickUpItemAction(Action):
                 not self.parent.inventory.has_room_for_item(item)):
             message = "Could not pick up: " + item.description.name + \
                       ", the inventory is full."
-            msg.message(message)
+            msg.send_visual_message(message, source_entity.position.value)
 
 
 class EquipmentType(Leaf):
@@ -840,7 +840,7 @@ class ThrowerNonBreak(Thrower):
         self.parent.mover.try_move(position, dungeon_level)
         message = "The " + self.parent.description.name.lower() + \
                   " hits the ground with a thud."
-        msg.message(message)
+        msg.send_visual_message(message, position)
 
 
 class ThrowerBreak(Thrower):
@@ -854,7 +854,7 @@ class ThrowerBreak(Thrower):
     def throw_effect(self, dungeon_level, position):
         message = "The " + self.parent.description.name.lower() + \
                   " smashes to the ground and breaks into pieces."
-        msg.message(message)
+        msg.send_visual_message(message, position)
 
 
 def _item_flash_animation(entity, item):

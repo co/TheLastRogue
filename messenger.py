@@ -11,6 +11,7 @@ class Messenger(object):
     def __init__(self):
         self._messages = []
         self._has_new_message = False
+        self.player = None
 
     @property
     def has_new_message(self):
@@ -20,7 +21,14 @@ class Messenger(object):
     def has_new_message(self, value):
         self._has_new_message = value
 
-    def message(self, new_message):
+    def send_visual_message(self, new_message, position):
+        if self.player.dungeon_mask.can_see_point(position):
+            self._message(new_message)
+
+    def send_global_message(self, new_message):
+        self._message(new_message)
+
+    def _message(self, new_message):
         new_message = Message(new_message)
         old_message = next((message for message in self._messages
                            if message.message == new_message.message and
