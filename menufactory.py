@@ -1,3 +1,4 @@
+import action
 import constants
 import colors
 import dungeoncreatorvisualizer
@@ -28,7 +29,7 @@ def _main_menu(ui_state, state_stack, player_name_func):
 
     no_icon = graphic.GraphicChar(None, colors.BLACK, " ")
     gun_icon = graphic.GraphicChar(None, colors.WHITE, icon.GUN)
-    menu_items =[]
+    menu_items = []
 
     continue_game_option = menu.MenuOptionWithSymbols("Continue", gun_icon, no_icon, [continue_game_function],
                                                       gamestate.is_there_a_saved_game)
@@ -109,6 +110,51 @@ def inventory_menu(player, state_stack):
     return state.UIState(dock)
 
 
+def has_item_with_action_tag(player, item_action_tag):
+    for item in player.inventory.get_items_sorted():
+        if len(item.get_children_with_tag(item_action_tag)) > 0:
+            return True
+    return False
+
+
+def filtered_by_action_item_menu(player, state_stack, item_action_tag, heading_text):
+    menu_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=0)
+    heading = gui.TextBox(heading_text, (2, 1), colors.INVENTORY_HEADING, margin=style.menu_theme.margin)
+    menu_stack_panel.append(heading)
+
+    stack_pop_function = menu.BackToGameFunction(state_stack)
+    description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.rogue_classic_theme)
+
+    menu_items = []
+    action_arguments = {"source_entity": player, "target_entity": player}
+    for item in player.inventory.get_items_sorted():
+        if len(item.get_children_with_tag(item_action_tag)) > 0:
+            item_action = item.get_children_with_tag(item_action_tag)[0]
+            menu_items.append(menu.MenuOptionWithSymbols(
+                item.description.name, item.graphic_char, item.graphic_char,
+                [action.DelayedFunctionCall(item_action.act, source_entity=player,
+                                            target_entity=player), stack_pop_function],
+                can_activate=(lambda: item_action.can_act(source_entity=player,
+                                                          target_entity=player)),
+                description=item.description))
+
+    _equip_menu = menu.StaticMenu(rectfactory.right_side_menu_rect().top_left, menu_items, state_stack,
+                                  margin=style.menu_theme.margin, vertical_space=0, description_card=description_card)
+
+    menu_stack_panel.append(_equip_menu)
+
+    menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.MinimalChestStyle())
+    menu_gui = gui.UIElementList([menu_bg, menu_stack_panel])
+
+    inventory_stack_panel = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_BOTTOM)
+    inventory_stack_panel.append(description_card)
+    inventory_stack_panel.append(menu_gui)
+
+    dock = gui.UIDock(rectfactory.full_screen_rect())
+    dock.bottom_right = inventory_stack_panel
+    return state.UIState(dock)
+
+
 def item_actions_menu(item, player, state_stack):
     menu_stack_panel = gui.StackPanelVertical((2, 2), vertical_space=1)
     heading_stack = gui.StackPanelHorizontal((0, 1), horizontal_space=1)
@@ -119,7 +165,8 @@ def item_actions_menu(item, player, state_stack):
 
     item_actions_menu = menu.ItemActionsMenu((0, 0), item, player, state_stack, margin=(2, 2))
     menu_stack_panel.append(item_actions_menu)
-    inventory_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.rogue_classic_theme.rect_style)
+    inventory_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(),
+                                            style.rogue_classic_theme.rect_style)
 
     dock = gui.UIDock(rectfactory.full_screen_rect())
     ui_elements = [inventory_menu_bg, menu_stack_panel]
@@ -133,10 +180,12 @@ def equipment_menu(player, state_stack):
     heading = gui.TextBox("Equipment", (2, 1), colors.INVENTORY_HEADING, (2, 2))
     menu_stack_panel.append(heading)
 
-    equipment_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.rogue_classic_theme.rect_style)
+    equipment_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(),
+                                            style.rogue_classic_theme.rect_style)
 
     description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.rogue_classic_theme)
-    resulting_menu = menu.EquipmentMenu((0, 0), player, state_stack, description_card=description_card, margin=(2, 1))
+    resulting_menu = menu.EquipmentMenu((0, 0), player, state_stack, description_card=description_card,
+                                        margin=(2, 1))
     menu_stack_panel.append(resulting_menu)
 
     equipment_gui = gui.UIElementList([equipment_menu_bg, menu_stack_panel])
@@ -152,9 +201,9 @@ def equipment_menu(player, state_stack):
 
 def equipment_slot_menu(player, equipment_slot, state_stack):
     """
-    Creates a menu which shows the possible actions
-    that can be taken on a given equipment_slot.
-    """
+Creates a menu which shows the possible actions
+that can be taken on a given equipment_slot.
+"""
     menu_stack_panel = gui.StackPanelVertical((0, 0), margin=(0, 0))
     heading = gui.TextBox("Change " + equipment_slot.name, (2, 1), colors.INVENTORY_HEADING, (2, 2))
     menu_stack_panel.append(heading)
@@ -163,7 +212,8 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
     resulting_menu = menu.EquipSlotMenu((0, 0), player, equipment_slot, state_stack, description_card, (2, 1))
     menu_stack_panel.append(resulting_menu)
 
-    equipment_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.rogue_classic_theme.rect_style)
+    equipment_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(),
+                                            style.rogue_classic_theme.rect_style)
     equipment_slot_gui = gui.UIElementList([equipment_menu_bg, menu_stack_panel])
 
     equipment_slot_stack_panel = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_BOTTOM)
@@ -259,7 +309,8 @@ def title_screen(state_stack):
     menu_and_bg = gui.UIElementList([menu_bg, main_menu])
 
     name_heading = gui.TextBox("Name:", (0, 0), colors.CYAN_D, (0, 1))
-    menu_stack_panel = gui.StackPanelVertical((0, 0), (0, 0), vertical_space=0, alignment=gui.StackPanelVertical.ALIGN_CENTER)
+    menu_stack_panel = gui.StackPanelVertical((0, 0), (0, 0), vertical_space=0,
+                                              alignment=gui.StackPanelVertical.ALIGN_CENTER)
     menu_stack_panel.append(name_heading)
     menu_stack_panel.append(hero_name_type_writer)
     menu_stack_panel.append(gui.VerticalSpace(1))
@@ -270,20 +321,22 @@ def title_screen(state_stack):
     dock.bottom = menu_stack_panel
 
     type_writer_highlight_update = \
-        gui.UpdateCallOnlyElement([lambda: type_writer_highlight_update_function(name_heading, hero_name_type_writer,
-                                                                                 main_menu, colors.WHITE,
-                                                                                 colors.GRAY_D, [1, 2])])
+        gui.UpdateCallOnlyElement(
+            [lambda: type_writer_highlight_update_function(name_heading, hero_name_type_writer,
+                                                           main_menu, colors.WHITE,
+                                                           colors.GRAY_D, [1, 2])])
 
     ui_state.ui_element.elements = [bg_rect, bg_sign_rect, title_stack_panel, dock, type_writer_highlight_update]
     return ui_state
 
 
-def type_writer_highlight_update_function(label, type_writer, menu, active_fg_color, inactive_fg_color, active_indices):
+def type_writer_highlight_update_function(label, type_writer, menu, active_fg_color, inactive_fg_color,
+                                          active_indices):
     """
-    Function for manipulating typewriter color, depending on selected menu item.
+Function for manipulating typewriter color, depending on selected menu item.
 
-    This is a ugly hack, remove if some event system is implemented for menus.
-    """
+This is a ugly hack, remove if some event system is implemented for menus.
+"""
     if menu.selected_index in active_indices:
         label.color_fg = active_fg_color
         type_writer.is_active = True
@@ -318,8 +371,7 @@ def victory_screen(state_stack):
     victory_stack_panel.append(long_vspace)
     victory_stack_panel.append(continue_menu)
 
-    grayout_rect = gui.RectangleChangeColor(rectfactory.full_screen_rect(),
-                                            colors.DARK_BROWN, colors.YELLOW_D)
+    grayout_rect = gui.RectangleChangeColor(rectfactory.full_screen_rect(), colors.DARK_BROWN, colors.YELLOW_D)
 
     ui_elements = [grayout_rect, victory_stack_panel]
     ui_state = state.UIState(gui.UIElementList(ui_elements))

@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import logging
-
 import init
 import statestack
 import menufactory

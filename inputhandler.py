@@ -46,7 +46,8 @@ DELETE = 127
 BACKSPACE = 128
 EQUIPMENT = 129
 END = 130
-
+WEAR_WEILD = 131
+DRINK = 132
 
 #Aliases:
 UP = NORTH
@@ -119,6 +120,8 @@ controls = {
     settings.KEY_INVENTORY: INVENTORY,
     settings.KEY_EQUIPMENT: EQUIPMENT,
     settings.KEY_EXAMINE: EXAMINE,
+    settings.KEY_WEAR_WIELD: WEAR_WEILD,
+    settings.KEY_DRINK: DRINK,
     libtcod.KEY_0: ZERO,
     libtcod.KEY_1: ONE,
     libtcod.KEY_2: TWO,

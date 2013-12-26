@@ -13,7 +13,7 @@ ACTION = "action"
 
 class Action(Leaf):
     """
-    Abstract component, all sub components of this type should defina an
+    Abstract component, all sub components of this type should define an
     action. A entity should be able to use the parent entity
     using the action.
     """

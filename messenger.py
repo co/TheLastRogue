@@ -1,6 +1,7 @@
 EQUIP_MESSAGE = "%(source_entity)s equips %(item)s."
 UNEQUIP_MESSAGE = "%(source_entity)s puts away %(item)s."
 HEAL_MESSAGE = "%(source_entity)s heals %(target_entity)s for %(health)s health."
+HEALTH_POTION_MESSAGE = "The health potion heals %(target_entity)s for %(health)s health."
 DISSOLVE_MESSAGE = "%(source_entity)s dissolves %(target_entity)s for %(damage)s damage."
 HIT_MESSAGE = "%(source_entity)s hits %(target_entity)s for %(damage)s damage."
 MISS_MESSAGE = "%(source_entity)s misses %(target_entity)s."

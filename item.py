@@ -4,6 +4,7 @@ from action import Action
 from compositecore import Leaf, Composite
 from attacker import Damage, DamageTypes
 from graphic import GraphicChar, CharPrinter
+import messenger
 from missileaction import PlayerThrowItemAction
 from mover import Mover
 from position import Position, DungeonLevel
@@ -594,6 +595,7 @@ class ReEquipAction(Action):
     def __init__(self):
         super(ReEquipAction, self).__init__()
         self.component_type = "reequip_action"
+        self.tags.add("reequip_action")
         self.name = "Equip"
         self.display_order = 90
 
@@ -650,6 +652,7 @@ class DrinkAction(Action):
     def __init__(self):
         super(DrinkAction, self).__init__()
         self.name = "Drink"
+        self.tags.add("drink_action")
         self.display_order = 90
 
     def act(self, **kwargs):
@@ -693,7 +696,7 @@ class HealingPotionDrinkAction(DrinkAction):
         When an entity drinks a healing potion, it is healed.
         """
         heal = random.randrange(self.min_heal, self.max_heal + 1)
-        heal_effect = entityeffect.Heal(target_entity, heal)
+        heal_effect = entityeffect.Heal(target_entity, heal, heal_message=messenger.HEALTH_POTION_MESSAGE)
         target_entity.effect_queue.add(heal_effect)
 
 

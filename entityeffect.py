@@ -299,7 +299,7 @@ class Unequip(EntityEffect):
                                       time_to_live=1)
         self.item = source_entity.equipment.get(equipment_slot)
         self.equipment_slot = equipment_slot
-        self.unequip_message = messenger.msg.UNEQUIP_MESSAGE
+        self.unequip_message = messenger.UNEQUIP_MESSAGE
 
     def message(self):
         messenger.msg.message(self.unequip_message % {"source_entity": self.source_entity.description.name,
