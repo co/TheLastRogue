@@ -237,12 +237,16 @@ class Path(Leaf):
     def draw(self, camera):
         points = list(self.position_list)
         points.reverse()
+        point = None
         for point in points:
             if not self.parent.mover.can_pass_terrain(
                     self.parent.dungeon_level.value.get_tile_or_unknown(point).get_terrain()):
                 break
             console.set_symbol(camera.dungeon_to_screen_position(point), icon.FOOT_STEPS)
             console.set_color_fg(camera.dungeon_to_screen_position(point), colors.GRAY)
+        if point:
+            console.set_symbol(camera.dungeon_to_screen_position(point), "X")
+            console.set_color_fg(camera.dungeon_to_screen_position(point), colors.LIGHT_ORANGE)
 
     def message(self, message):
         if message == CompositeMessage.DUNGEON_LEVEL_CHANGED:

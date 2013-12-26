@@ -19,15 +19,15 @@ class WalkableDestinatinationsPath(object):
         return class_cache[position]
 
     def _has_destinations(self, entity, position):
-        if(not entity.__class__ in self._cache.keys()):
+        if not entity.__class__ in self._cache.keys():
             return False
         class_cache = self._cache[entity.__class__]
-        if(not position in class_cache.keys()):
+        if not position in class_cache.keys():
             return False
         return True
 
     def _set_destinations(self, entity, click_of_points):
-        if(not entity.__class__ in self._cache.keys()):
+        if not entity.__class__ in self._cache.keys():
             self._cache[entity.__class__] = {}
         class_cache = self._cache[entity.__class__]
         for point in click_of_points:
@@ -43,32 +43,47 @@ class WalkableDestinatinationsPath(object):
                                                                     position)
         return self._get_destinations(entity, position)
 
-    def _calculate_walkable_positions_from_entity_position(self, entity,
-                                                           position):
+    def _calculate_walkable_positions_from_entity_position(self, entity, position):
         visited = set()
         visited.add(position)
         queue = [position]
-        queue.extend(self._get_walkable_neighbors(position, entity))
-        while (len(queue) > 0):
-            position = queue.pop()
-            while(len(queue) > 0 and position in visited):
-                position = queue.pop()
+        queue.extend(_get_walkable_neighbors(position, entity))
+        while len(queue) > 0:
+            position = queue.pop(0)
+            while len(queue) > 0 and position in visited:
+                position = queue.pop(0)
             visited.add(position)
-            neighbors = set(self._get_walkable_neighbors(position, entity))\
-                - visited
+            neighbors = set(_get_walkable_neighbors(position, entity)) - visited
             queue.extend(neighbors)
         visited = list(visited)
         self._set_destinations(entity, visited)
 
-    def _get_walkable_neighbors(self, position, entity):
-        result_positions = []
-        for direction_ in direction.DIRECTIONS:
-            neighbor_position = geo.add_2d(position, direction_)
-            try:
-                neighbor =\
-                    entity.dungeon_level.value.get_tile(neighbor_position)
-                if(entity.mover.can_pass_terrain(neighbor.get_terrain())):
-                    result_positions.append(neighbor_position)
-            except IndexError:
-                pass
-        return result_positions
+
+def get_closest_unseen_walkable_position(entity, position):
+    visited = set()
+    visited.add(position)
+    queue = [position]
+    queue.extend(_get_walkable_neighbors(position, entity))
+    while len(queue) > 0:
+        position = queue.pop(0)
+        while len(queue) > 0 and position in visited:
+            position = queue.pop(0)
+        if not entity.memory_map.has_seen_position(position):
+            return position
+        visited.add(position)
+        neighbors = set(_get_walkable_neighbors(position, entity)) - visited
+        queue.extend(neighbors)
+    return None
+
+
+def _get_walkable_neighbors(position, entity):
+    result_positions = []
+    for direction_ in direction.DIRECTIONS:
+        neighbor_position = geo.add_2d(position, direction_)
+        try:
+            neighbor = entity.dungeon_level.value.get_tile(neighbor_position)
+            if entity.mover.can_pass_terrain(neighbor.get_terrain()):
+                result_positions.append(neighbor_position)
+        except IndexError:
+            pass
+    return result_positions

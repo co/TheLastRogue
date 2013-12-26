@@ -30,6 +30,7 @@ defaults = {
     'fire': 'f',
     'rest': 'r',
     'examine': 'x',
+    'auto_explore': 'o',
     'drink': 'q',
     'activate': 'a',
     'wear_wield': 'w',
@@ -76,6 +77,7 @@ KEY_EQUIPMENT = config.get('KeyBind', 'equipment')
 KEY_FIRE = config.get('KeyBind', 'fire')
 KEY_REST = config.get('KeyBind', 'rest')
 KEY_EXAMINE = config.get('KeyBind', 'examine')
+KEY_AUTO_EXPLORE = config.get('KeyBind', 'auto_explore')
 KEY_DRINK = config.get('KeyBind', 'drink')
 KEY_ACTIVATE = config.get('KeyBind', 'activate')
 KEY_WEAR_WIELD = config.get('KeyBind', 'wear_wield')

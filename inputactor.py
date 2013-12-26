@@ -12,6 +12,7 @@ import gametime
 import inputhandler
 import menufactory
 import positionexaminer
+import util
 
 
 class InputActor(Actor):
@@ -126,6 +127,8 @@ class InputActor(Actor):
             self.newly_spent_energy += gametime.single_turn
         elif key == inputhandler.EXAMINE:
             self.start_examine()
+        elif key == inputhandler.AUTO_EXPLORE:
+            self.auto_explore()
         elif key == inputhandler.INVENTORY:
             self.try_open_inventory()
         elif key == inputhandler.EQUIPMENT:
@@ -177,6 +180,16 @@ class InputActor(Actor):
     def open_equipment(self):
         equipment_menu = menufactory.equipment_menu(self.parent, self.parent.game_state.value.menu_prompt_stack)
         self.parent.game_state.value.start_prompt(equipment_menu)
+
+    def auto_explore(self):
+        closest_enemy = next((entity for entity in self.parent.vision.get_seen_entities_closest_first()
+                             if not entity.position.value == self.parent.position.value), None)
+        if closest_enemy and not closest_enemy.position.value == self.parent.position.value:
+            self.parent.path.compute_path(closest_enemy.position.value)
+        else:
+            destination = util.get_closest_unseen_walkable_position(self.parent, self.parent.position.value)
+            if destination:
+                self.parent.path.compute_path(destination)
 
     def toggle_command_list(self):
         command_list_state = self.parent.game_state.value.command_list_bar.active

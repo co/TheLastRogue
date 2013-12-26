@@ -29,10 +29,8 @@ class Vision(Leaf):
         """
         Gets all seen entities sorted on distance from self not including self.
         """
-        return sorted(self.get_seen_entities(),
-                      key=lambda entity:
-                      (geometry.chess_distance(self.parent.position.value,
-                                               entity.position.value),
+        return sorted(self.get_seen_entities(), key=lambda entity:
+                      (geometry.chess_distance(self.parent.position.value, entity.position.value),
                        -entity.health.hp.ratio_of_full(), hash(entity)))
 
     def get_closest_seen_entity(self):
