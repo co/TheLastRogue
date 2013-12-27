@@ -6,7 +6,7 @@ DISSOLVE_MESSAGE = "%(source_entity)s dissolves %(target_entity)s for %(damage)s
 HIT_MESSAGE = "%(source_entity)s hits %(target_entity)s for %(damage)s damage."
 MISS_MESSAGE = "%(source_entity)s misses %(target_entity)s."
 
-PICK_UP_MESSAGE = "You pick up: %(item)s"
+PICK_UP_MESSAGE = "You pick up %(item)s"
 
 DOWN_STAIRS_HEAL_MESSAGE = "Your feel vitalized by your progress, you regain %(health)s health."
 DRINK_FOUNTAIN_MESSAGE = "You drink from the fountain, your max health increases by %(health)s."

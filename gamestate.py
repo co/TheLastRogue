@@ -40,7 +40,7 @@ class GameStateBase(state.State):
         else:
             self.player.description.name = player_name
         self._init_caches_and_flags()
-        messenger.msg.send_global_message("Welcome to: The Last Rogue!")
+        messenger.msg.send_global_message("Welcome to The Last Rogue!")
 
     def _init_caches_and_flags(self):
         """

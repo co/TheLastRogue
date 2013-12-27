@@ -74,14 +74,13 @@ def get_save_quit_menu(player, state_stack):
                                               [player.health_modifier.kill, exit_menu_function,
                                                (lambda: player.actor.add_energy_spent(gametime.single_turn))]))
 
-    return get_menu_with_options(options, state_stack)
+    return get_menu_with_options(options, state_stack, 6, 5)
 
 
-def get_menu_with_options(options, state_stack):
-    border = 4
+def get_menu_with_options(options, state_stack, x_border=4, y_border=5):
     temp_position = (-1, -1)
     main_menu = menu.StaticMenu(temp_position, options, state_stack, margin=style.menu_theme.margin, vertical_space=1)
-    main_menu_rect = rectfactory.ratio_of_screen_rect(main_menu.width + border, main_menu.height + border - 1, 0.5, 0.8)
+    main_menu_rect = rectfactory.ratio_of_screen_rect(main_menu.width + x_border, main_menu.height + y_border - 1, 0.5, 0.8)
     main_menu.offset = main_menu_rect.top_left
 
     background_rect = get_menu_background(main_menu_rect)
@@ -246,7 +245,8 @@ def context_menu(player, state_stack):
     open_equipment_option = menu.MenuOption("Equipment", [lambda: state_stack.push(equipment_menu_opt)])
     context_options.append(open_equipment_option)
 
-    context_menu_rect = rectfactory.center_of_screen_rect(16, 8)
+    context_menu_rect = rectfactory.center_of_screen_rect(max(option.width for option in context_options) + 4,
+                                                          len(context_options) * 2 + 3)
     resulting_menu = menu.StaticMenu(context_menu_rect.top_left, context_options, state_stack,
                                      margin=style.menu_theme.margin)
     background_rect = get_menu_background(context_menu_rect)
