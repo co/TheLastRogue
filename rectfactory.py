@@ -33,10 +33,6 @@ def message_display_rect():
 def player_status_rect():
     return geo.Rect((0, 0), constants.LEFT_SIDE_BAR_WIDTH, constants.GUI_BOX_HEIGHT)
 
-    x = settings.SCREEN_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH
-    y = 0
-    return geo.Rect((x, y), constants.RIGHT_SIDE_BAR_WIDTH, settings.SCREEN_HEIGHT)
-
 
 def monster_status_rect():
     return geo.Rect(geo.zero2d(), constants.LEFT_SIDE_BAR_WIDTH, constants.MONSTER_STATUS_BAR_HEIGHT)
@@ -48,3 +44,7 @@ def right_side_menu_rect():
 
 def description_rectangle():
     return geo.Rect((0, 0), min(40, settings.SCREEN_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH), 10)
+
+
+def command_list_rectangle():
+    return geo.Rect((0, 0), constants.RIGHT_SIDE_BAR_WIDTH, constants.GUI_BOX_HEIGHT)

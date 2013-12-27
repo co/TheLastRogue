@@ -354,7 +354,6 @@ class StackPanelHorizontal(StackPanel):
 
     @property
     def width(self):
-        print self.elements
         return (sum([element.total_width for element in self.elements])
                 + max(self.horizontal_space * (len(self.elements) - 1), 0))
 
@@ -364,6 +363,7 @@ class StackPanelHorizontal(StackPanel):
         for element in self.elements:
             element.draw(geo.add_2d((0, self.get_y_offset(element)), element_position))
             element_position = geo.add_2d(element_position, (element.total_width + self.horizontal_space, 0))
+
 
     def get_y_offset(self, element):
         if self.alignment == StackPanelHorizontal.ALIGN_TOP:
@@ -392,7 +392,8 @@ class StackPanelVertical(StackPanel):
 
     @property
     def height(self):
-        return sum([element.total_height + self.vertical_space for element in self.elements])
+        return (sum([element.total_height for element in self.elements])
+                + max(self.vertical_space * (len(self.elements) - 1), 0))
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
@@ -413,32 +414,39 @@ class StackPanelVertical(StackPanel):
 class CommandListPanel(UIElement):
     def __init__(self, margin=geo.zero2d()):
         super(CommandListPanel, self).__init__(margin)
-        self._stack_panel = StackPanelVertical(geo.add_2d((0, 0), (2, 2)), vertical_space=0)
+        self._pages = []
+        self._pages.append(StackPanelVertical(geo.add_2d((0, 0), (2, 2)), vertical_space=0))
+        self._pages.append(StackPanelVertical(geo.add_2d((0, 0), (2, 2)), vertical_space=0))
         self.active = True
+        self.current_page_index = 0
 
-        self._stack_panel.append(self.left_right_adjust("Commands", "Key", colors.WHITE))
-        self._stack_panel.append(VerticalSpace(1))
-        self._stack_panel.append(self.left_right_adjust("Walk", "Mouse/Numpad"))
-        self._stack_panel.append(self.left_right_adjust("Pick Up/Use", "Space", colors.LIGHT_PINK))
-        self._stack_panel.append(self.left_right_adjust("Context menu", "Enter"))
-        self._stack_panel.append(self.left_right_adjust("Fire/Throw", settings.KEY_FIRE))
-        self._stack_panel.append(self.left_right_adjust("Wait/Rest", settings.KEY_REST))
-        self._stack_panel.append(self.left_right_adjust("Examine", settings.KEY_EXAMINE))
-        self._stack_panel.append(self.left_right_adjust("Inventory", settings.KEY_INVENTORY))
-        self._stack_panel.append(self.left_right_adjust("Equipment", settings.KEY_EQUIPMENT))
-        self._stack_panel.append(VerticalSpace(1))
-        self._stack_panel.append(self.left_right_adjust("Print Screen", "F12"))
-        self._stack_panel.append(self.left_right_adjust("Toggle View", "Tab", colors.LIGHT_ORANGE))
-        self._stack_panel.append(self.left_right_adjust("Save/Quit", "Esc"))
+        self._bg_rect = StyledRectangle(rectfactory.command_list_rectangle(),
+                                        style.MinimalClassicStyle2(), title="Commands")
 
-        self._bg_rect = StyledRectangle(geo.Rect((0, 0), self._stack_panel.total_width + 4, self._stack_panel.total_height + 3),
-                                        style.MinimalClassicStyle2())
+        self._pages[0].append(self.left_right_adjust("Walk", "Mouse/Numpad"))
+        self._pages[0].append(self.left_right_adjust("Pick Up/Use", "Space", colors.LIGHT_PINK))
+        self._pages[0].append(self.left_right_adjust("Explore", settings.KEY_AUTO_EXPLORE, colors.LIGHT_GREEN))
+        self._pages[0].append(self.left_right_adjust("Fire/Throw", settings.KEY_FIRE))
+        self._pages[0].append(self.left_right_adjust("Wait/Rest", settings.KEY_REST))
+        self._pages[0].append(self.left_right_adjust("Inventory", settings.KEY_INVENTORY))
+        self._pages[0].append(self.left_right_adjust("Equipment", settings.KEY_EQUIPMENT))
+        self._pages[0].append(VerticalSpace(1))
+        self._pages[0].append(self.left_right_adjust("Print Screen", "F12"))
+        self._pages[0].append(self.left_right_adjust("Save/Quit", "Esc"))
+        self._pages[0].append(VerticalSpace(1))
+        self._pages[0].append(self.left_right_adjust("Next Page", "Tab", colors.LIGHT_ORANGE))
+
+        self._pages[1].append(self.left_right_adjust("Examine", settings.KEY_EXAMINE))
+        self._pages[1].append(self.left_right_adjust("Wear/Wield", settings.KEY_WEAR_WIELD))
+        self._pages[1].append(self.left_right_adjust("Drink Potion", settings.KEY_DRINK))
+        self._pages[1].append(VerticalSpace(self._bg_rect.height - self._pages[1].height - 5))
+        self._pages[1].append(self.left_right_adjust("Next Page", "Tab", colors.LIGHT_ORANGE))
 
         text = "Press Tab"
-        offset = (self._stack_panel.width + 3, (self.height - len(text)) / 2)
+        offset = (self._pages[0].width + 4, (self.height - len(text)) / 2)
         self._inactive_text = VerticalTextBox(text, offset, colors.LIGHT_ORANGE)
 
-        self._inactive_line = VerticalLine(graphic.GraphicChar(colors.INTERFACE_BG, colors.BLACK, icon.V_LINE),
+        self._inactive_line = VerticalLine(graphic.GraphicChar(colors.INTERFACE_BG, colors.GRAY_D, icon.V_LINE),
                                            self.height, (self.width - 1, 0))
 
     @property
@@ -453,12 +461,20 @@ class CommandListPanel(UIElement):
         return TextBox(text1 + text2.rjust(constants.RIGHT_SIDE_BAR_WIDTH - len(text1) - 5), (0, 0), color)
 
     def draw(self, offset=geo.zero2d()):
-        if self.active:
-            self._bg_rect.draw(offset)
-            self._stack_panel.draw(offset)
-        else:
+        if self.current_page_index == - 1:
             self._inactive_line.draw(offset)
             self._inactive_text.draw(offset)
+        else:
+            self._bg_rect.draw(offset)
+            self._pages[self.current_page_index].draw(offset)
+
+    def turn_page(self):
+        if self.current_page_index < len(self._pages) - 1:
+            print self.current_page_index
+            self.current_page_index += 1
+        else:
+            print "yy", self.current_page_index
+            self.current_page_index = - 1
 
 
 class PlayerStatusBox(RectangularUIElement):

@@ -28,7 +28,7 @@ class Dungeon(object):
 
         dungeon_level = time_it("dungeon_level_generation",
                                 (lambda: dungeongenerator.generate_dungeon_exploded_rooms(size, depth)))
-        for _ in range(depth + 5):
+        for _ in range(int(depth * 1.5) + 4):
             if rng.coin_flip() and rng.coin_flip():
                 ghost = monster.Ghost(self.game_state)
                 spawner.place_piece_on_random_tile(ghost, dungeon_level)
@@ -40,8 +40,8 @@ class Dungeon(object):
                 cyclops = monster.Cyclops(self.game_state)
                 spawner.place_piece_on_random_tile(cyclops, dungeon_level)
 
-        for _ in range(random.randrange(depth, depth + 3) - 1):
-            if rng.coin_flip():
+        for _ in range(random.randrange(int(depth / 2), int(depth / 2) + 3) - 1):
+            if rng.coin_flip() or rng.coin_flip():
                 slime = monster.Slime(self.game_state)
                 spawner.place_piece_on_random_tile(slime, dungeon_level)
 

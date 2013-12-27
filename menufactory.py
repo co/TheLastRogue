@@ -303,8 +303,8 @@ def title_screen(state_stack):
 
     ui_state = state.UIState(gui.UIElementList(None))
     main_menu = _main_menu(ui_state, state_stack, lambda: hero_name_type_writer.text)
-    border_x = 5
-    border_y = 3
+    border_x = 6
+    border_y = 4
     menu_bg = get_menu_background(geo.Rect((0, 0), main_menu.width + border_x, main_menu.height + border_y))
     menu_and_bg = gui.UIElementList([menu_bg, main_menu])
 

@@ -9,7 +9,7 @@ MISS_MESSAGE = "%(source_entity)s misses %(target_entity)s."
 PICK_UP_MESSAGE = "You pick up: %(item)s"
 
 DOWN_STAIRS_HEAL_MESSAGE = "Your feel vitalized by your progress, you regain %(health)s health."
-DRINK_FOUNTAIN_MESSAGE = "You drink from the fountain, Your max health increases by %(health)s."
+DRINK_FOUNTAIN_MESSAGE = "You drink from the fountain, your max health increases by %(health)s."
 
 
 class Messenger(object):

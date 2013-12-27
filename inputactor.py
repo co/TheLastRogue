@@ -145,8 +145,8 @@ class InputActor(Actor):
             self.try_open_inventory()
         elif key == inputhandler.EQUIPMENT:
             self.open_equipment()
-        elif key == inputhandler.WEAR_WEILD:
-            self.open_wear_weild_item_action_menu()
+        elif key == inputhandler.WEAR_WIELD:
+            self.open_wear_wield_item_action_menu()
         elif key == inputhandler.DRINK:
             self.open_drink_item_action_menu()
         elif key == inputhandler.PRINTSCREEN:
@@ -204,8 +204,7 @@ class InputActor(Actor):
                 self.parent.path.compute_path(destination)
 
     def toggle_command_list(self):
-        command_list_state = self.parent.game_state.value.command_list_bar.active
-        self.parent.game_state.value.command_list_bar.active = not command_list_state
+        self.parent.game_state.value.command_list_bar.turn_page()
 
     def toggle_invisibility(self):
         invisible_flag = StatusFlags.INVISIBILE
@@ -260,12 +259,12 @@ class InputActor(Actor):
         save_quit_menu = menufactory.get_save_quit_menu(self.parent, self.parent.game_state.value.menu_prompt_stack)
         self.parent.game_state.value.start_prompt(save_quit_menu)
 
-    def open_wear_weild_item_action_menu(self):
+    def open_wear_wield_item_action_menu(self):
         reequip_tag = "reequip_action"
         if menufactory.has_item_with_action_tag(self.parent, reequip_tag):
             equip_menu = menufactory.filtered_by_action_item_menu(self.parent,
                                                                   self.parent.game_state.value.menu_prompt_stack,
-                                                                  reequip_tag, "Wear / Weild")
+                                                                  reequip_tag, "Wear / Wield")
             self.parent.game_state.value.start_prompt(equip_menu)
 
     def open_drink_item_action_menu(self):
