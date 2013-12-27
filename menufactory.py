@@ -131,7 +131,7 @@ def filtered_by_action_item_menu(player, state_stack, item_action_tag, heading_t
         if len(item.get_children_with_tag(item_action_tag)) > 0:
             item_action = item.get_children_with_tag(item_action_tag)[0]
             menu_items.append(menu.MenuOptionWithSymbols(
-                item.description.name, item.graphic_char, item.graphic_char,
+                menu.get_item_option_text(item), item.graphic_char, item.graphic_char,
                 [action.DelayedFunctionCall(item_action.act, source_entity=player,
                                             target_entity=player), stack_pop_function],
                 can_activate=(lambda: item_action.can_act(source_entity=player,

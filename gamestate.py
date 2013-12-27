@@ -80,7 +80,7 @@ class GameStateBase(state.State):
         self.gui_dock.bottom_left = self.entity_stack_panel
         self.command_list_bar = gui.CommandListPanel(rectfactory.right_side_menu_rect())
         self.gui_dock.bottom_right = self.command_list_bar
-        self._message_display = gui.MessageDisplay(rectfactory.message_display_rect())
+        self._message_display = gui.MessageDisplay(rectfactory.message_display_rect(), vertical_space=0)
 
     def _init_bg(self):
         for x in range(constants.GAME_STATE_WIDTH):

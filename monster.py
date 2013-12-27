@@ -38,10 +38,8 @@ class Ratman(Composite):
         self.add_child(Mover())
         self.add_child(Stepper())
 
-        self.add_child(EntityMessages("The ratman looks at you.",
-                                      "The ratman is beaten to a pulp."))
-        self.add_child(Description("Ratman",
-                                   "A Rat/Man hybrid it looks hostile."))
+        self.add_child(EntityMessages("The ratman looks at you.", "The ratman is beaten to a pulp."))
+        self.add_child(Description("Ratman", "A Rat/Man hybrid it looks hostile."))
         self.add_child(GraphicChar(None, colors.ORANGE, icon.RATMAN))
         self.add_child(CharPrinter())
 

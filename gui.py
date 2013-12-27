@@ -354,7 +354,9 @@ class StackPanelHorizontal(StackPanel):
 
     @property
     def width(self):
-        return sum([element.total_width + self.horizontal_space for element in self.elements])
+        print self.elements
+        return (sum([element.total_width for element in self.elements])
+                + max(self.horizontal_space * (len(self.elements) - 1), 0))
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
@@ -665,10 +667,8 @@ class DescriptionCard(RectangularUIElement):
 class MessageDisplay(RectangularUIElement):
     def __init__(self, rect, margin=(0, 0), vertical_space=0):
         super(MessageDisplay, self).__init__(rect, margin=margin)
-        self._message_stack_panel = \
-            StackPanelVertical(rect.top_left,
-                               margin=style.interface_theme.margin,
-                               vertical_space=vertical_space)
+        self._message_stack_panel = StackPanelVertical(rect.top_left, margin=style.interface_theme.margin,
+                                                       vertical_space=vertical_space)
         self._offset = (0, 0)
 
     def update(self):

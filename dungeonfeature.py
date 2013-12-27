@@ -2,6 +2,7 @@ import random
 from compositecore import Composite, Leaf
 import entityeffect
 from graphic import GraphicChar, CharPrinter
+import messenger
 from mover import Mover, teleport_monsters
 from position import Position, DungeonLevel
 from stats import GamePieceType
@@ -81,7 +82,9 @@ class DrinkFromFountainAction(action.Action):
 
     def act(self, **kwargs):
         target_entity = kwargs["target_entity"]
-        target_entity.health_modifier.increases_max_hp(random.randrange(3, 7))  # Players gain 3-6 hp for drinking.
+        heal = random.randrange(3, 7)
+        target_entity.health_modifier.increases_max_hp(heal)  # Players gain 3-6 hp for drinking.
+        messenger.msg.send_global_message(messenger.DRINK_FOUNTAIN_MESSAGE % {"health": heal})
         self._dry_up_fountain()
         self.add_energy_spent_to_entity(target_entity)
 
@@ -126,3 +129,4 @@ class DescendStairsAction(action.Action):
         heal = random.randrange(min_heal, max_heal + 1)
         heal_effect = entityeffect.Heal(target_entity, heal)
         target_entity.effect_queue.add(heal_effect)
+        messenger.msg.send_global_message(messenger.DOWN_STAIRS_HEAL_MESSAGE % {"health": heal})

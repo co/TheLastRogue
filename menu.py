@@ -227,14 +227,14 @@ class InventoryMenu(Menu):
             menu_item_action = OpenItemActionMenuAction(self._state_stack, item_rect, item, self._player)
             menu_item_can_activate_function = (lambda: (len(item.get_children_with_tag("user_action")) >= 1))
             item_icon = item.graphic_char
-            menu_option = MenuOptionWithSymbols(_get_item_option_text(item), item_icon, item_icon, [menu_item_action],
+            menu_option = MenuOptionWithSymbols(get_item_option_text(item), item_icon, item_icon, [menu_item_action],
                                                 menu_item_can_activate_function, description=item.description)
             self.menu_items.append(menu_option)
         if self.description_card.description is None:
             self.update_description()
 
 
-def _get_item_option_text(item):
+def get_item_option_text(item):
     if item.has_child("stacker") and item.stacker.size > 1:
         return item.description.name + " (" + str(item.stacker.size) + ")"
     if item.has_child("charge"):

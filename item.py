@@ -147,6 +147,7 @@ class DarknessDevice(Device):
     def __init__(self):
         super(DarknessDevice, self).__init__()
         self.description.name = "Device of Darkness"
+        self.description.description = "This ancient device will dim the vision of all creatures on the floor."
         self.graphic_char.color_fg = colors.GREEN
         self.add_child(DarknessDeviceAction())
 
@@ -155,6 +156,7 @@ class HeartStopDevice(Device):
     def __init__(self):
         super(HeartStopDevice, self).__init__()
         self.description.name = "Dev. of Heart Stop"
+        self.description.description = "This ancient device will cause a random creature on the floor to have a heart attack."
         self.graphic_char.color_fg = colors.BLUE
         self.add_child(HeartStopDeviceAction())
 
@@ -734,9 +736,9 @@ class PickUpItemAction(Action):
             raise Exception("Could not find item on floor.", source_entity, item)
         pickup_succeded = self.parent.inventory.try_add(item)
         if pickup_succeded:
-            message = "Picked up: " + item.description.name
             item.remove_component_of_type("player_auto_pick_up")
-            msg.send_visual_message(message, source_entity.position.value)
+            msg.send_visual_message(messenger.PICK_UP_MESSAGE % {"item": item.description.name},
+                                    source_entity.position.value)
             self.parent.actor.newly_spent_energy += gametime.single_turn
             _item_flash_animation(source_entity, item)
 
