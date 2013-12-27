@@ -59,6 +59,14 @@ class WalkableDestinatinationsPath(object):
         self._set_destinations(entity, visited)
 
 
+def _position_has_item_with_auto_pick_up(position, entity):
+    tile = entity.dungeon_level.value.get_tile(position)
+    item = tile.get_first_item()
+    if item and item.has_child("player_auto_pick_up"):
+        return True
+    return False
+
+
 def get_closest_unseen_walkable_position(entity, position):
     visited = set()
     visited.add(position)
@@ -69,11 +77,21 @@ def get_closest_unseen_walkable_position(entity, position):
         while len(queue) > 0 and position in visited:
             position = queue.pop(0)
         if not entity.memory_map.has_seen_position(position):
+            return position_or_walkable_neighbor(position, entity)
+        elif _position_has_item_with_auto_pick_up(position, entity):
             return position
         visited.add(position)
-        neighbors = set(_get_walkable_neighbors(position, entity)) - visited
+        neighbors = set(_get_walkable_neighbors_or_unseen(position, entity)) - visited
         queue.extend(neighbors)
     return None
+
+
+def position_or_walkable_neighbor(position, entity):
+    tile = entity.dungeon_level.value.get_tile(position)
+    if entity.mover.can_pass_terrain(tile.get_terrain()):
+        return position
+    else:
+        return _get_walkable_neighbors(position, entity)[0]
 
 
 def _get_walkable_neighbors(position, entity):
@@ -83,6 +101,20 @@ def _get_walkable_neighbors(position, entity):
         try:
             neighbor = entity.dungeon_level.value.get_tile(neighbor_position)
             if entity.mover.can_pass_terrain(neighbor.get_terrain()):
+                result_positions.append(neighbor_position)
+        except IndexError:
+            pass
+    return result_positions
+
+
+def _get_walkable_neighbors_or_unseen(position, entity):
+    result_positions = []
+    for direction_ in direction.DIRECTIONS:
+        neighbor_position = geo.add_2d(position, direction_)
+        try:
+            neighbor = entity.dungeon_level.value.get_tile(neighbor_position)
+            if (entity.mover.can_pass_terrain(neighbor.get_terrain()) or
+                    not entity.memory_map.has_seen_position(neighbor_position)):
                 result_positions.append(neighbor_position)
         except IndexError:
             pass

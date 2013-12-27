@@ -53,7 +53,7 @@ class Ratman(Composite):
         self.add_child(BleedWhenDamaged())
 
         self.add_child(AttackSpeed(throw_speed=gametime.single_turn))
-        self.add_child(Strength(5))
+        self.add_child(Strength(4))
         self.add_child(Attacker())
         self.add_child(Dodger())
         self.add_child(Evasion(16))
