@@ -505,7 +505,7 @@ class PlayerStatusBox(RectangularUIElement):
         dock.bottom_right = EquipmentBox(player.equipment, geo.Rect((0, 0), 5, 6))
         self._status_stack_panel.append(dock)
 
-        self.depth_text_box = TextBox("", (2, 0), colors.BLUE_D)
+        self.depth_text_box = TextBox("", (2, 0), colors.CYAN_D)
         self._status_stack_panel.append(self.depth_text_box)
 
     @property

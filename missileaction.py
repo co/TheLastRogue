@@ -253,7 +253,7 @@ class MonsterThrowStoneAction(Action):
 
 
 class MonsterMagicRangeAction(MonsterThrowStoneAction):
-    def __init__(self, damage, skip_chance=0, icon=icon.BIG_CENTER_DOT, color_fg=colors.PURPLE):
+    def __init__(self, damage, skip_chance=0, icon=icon.BIG_CENTER_DOT, color_fg=colors.BLUE):
         super(MonsterThrowStoneAction, self).__init__()
         self.component_type = "monster_range_attack_action"
         self.icon = icon
