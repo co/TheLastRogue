@@ -125,17 +125,17 @@ class MinimalTopCard(RectangleStyle):
 
 class ChestStyle(RectangleStyle):
     def __init__(self):
-        light = colors.RED_D
-        dark = colors.DARK_BROWN
-        self.center = GrahicChar(dark, light, icon.BIG_CENTER_DOT)
-        self.top = GrahicChar(light, dark, libtcod.CHAR_SUBP_N)
-        self.left = GrahicChar(dark, light, libtcod.CHAR_SUBP_E)
-        self.bottom = GrahicChar(dark, light, libtcod.CHAR_SUBP_N)
-        self.right = GrahicChar(light, dark, libtcod.CHAR_SUBP_E)
-        self.top_left = GrahicChar(light, dark, libtcod.CHAR_NW)
-        self.top_right = GrahicChar(light, dark, libtcod.CHAR_NE)
-        self.bottom_left = GrahicChar(light, dark, libtcod.CHAR_SW)
-        self.bottom_right = GrahicChar(light, dark, libtcod.CHAR_SE)
+        self.light = colors.ORANGE_D
+        self.dark = colors.DARK_BROWN
+        self.center = GrahicChar(self.dark, self.light, icon.BIG_CENTER_DOT)
+        self.top = GrahicChar(self.light, self.dark, libtcod.CHAR_SUBP_N)
+        self.left = GrahicChar(self.dark, self.light, libtcod.CHAR_SUBP_E)
+        self.bottom = GrahicChar(self.dark, self.light, libtcod.CHAR_SUBP_N)
+        self.right = GrahicChar(self.light, self.dark, libtcod.CHAR_SUBP_E)
+        self.top_left = GrahicChar(self.light, self.dark, libtcod.CHAR_NW)
+        self.top_right = GrahicChar(self.light, self.dark, libtcod.CHAR_NE)
+        self.bottom_left = GrahicChar(self.light, self.dark, libtcod.CHAR_SW)
+        self.bottom_right = GrahicChar(self.light, self.dark, libtcod.CHAR_SE)
 
         self.title_separator_left = self.top
         self.title_separator_right = self.top
@@ -144,9 +144,7 @@ class ChestStyle(RectangleStyle):
 class MinimalChestStyle(ChestStyle):
     def __init__(self):
         super(MinimalChestStyle, self).__init__()
-        light = colors.RED_D
-        dark = colors.DARK_BROWN
-        self.center = GrahicChar(dark, light, " ")
+        self.center = GrahicChar(self.dark, self.light, " ")
 
 
 class MinimalStyle(RectangleStyle):
