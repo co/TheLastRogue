@@ -424,7 +424,7 @@ class CommandListPanel(UIElement):
                                         style.MinimalClassicStyle2(), title="Commands")
 
         self._pages[0].append(self.left_right_adjust("Walk", "Mouse/Numpad"))
-        self._pages[0].append(self.left_right_adjust("Pick Up/Use", "Space", colors.LIGHT_PINK))
+        self._pages[0].append(self.left_right_adjust("Pick Up/Use", "Space/" + str(settings.KEY_USE_PICK_UP), colors.LIGHT_PINK))
         self._pages[0].append(self.left_right_adjust("Explore", settings.KEY_AUTO_EXPLORE, colors.LIGHT_GREEN))
         self._pages[0].append(self.left_right_adjust("Fire/Throw", settings.KEY_FIRE))
         self._pages[0].append(self.left_right_adjust("Wait/Rest", settings.KEY_REST))

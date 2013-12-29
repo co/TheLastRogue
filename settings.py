@@ -19,21 +19,21 @@ defaults = {
     'up': 'k',
     'down': 'l',
 
-    'up_left': 'u',
-    'up_right': 'i',
-    'down_left': 'n',
-    'down_right': 'm',
+    'up_left': 'y',
+    'up_right': 'u',
+    'down_left': 'b',
+    'down_right': 'n',
 
-    'inventory': 'b',
+    'inventory': 'i',
     'equipment': 'e',
-    'stone': 's',
     'fire': 'f',
-    'rest': 'r',
+    'rest': '.',
     'examine': 'x',
     'auto_explore': 'o',
     'drink': 'q',
     'activate': 'a',
     'wear_wield': 'w',
+    'use_pick_up': ',',
     'default_name': getpass.getuser()
 }
 
@@ -81,5 +81,5 @@ KEY_AUTO_EXPLORE = config.get('KeyBind', 'auto_explore')
 KEY_DRINK = config.get('KeyBind', 'drink')
 KEY_ACTIVATE = config.get('KeyBind', 'activate')
 KEY_WEAR_WIELD = config.get('KeyBind', 'wear_wield')
+KEY_USE_PICK_UP = config.get('KeyBind', 'use_pick_up')
 DEFAULT_PLAYER_NAME = config.get('Misc', 'default_name')
-

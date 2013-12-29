@@ -51,7 +51,7 @@ class Dungeon(object):
 
         spawner.place_items_in_dungeon(dungeon_level)
 
-        dungeon_level.print_statistics()
+        #dungeon_level.print_statistics()
 
         dungeon_level.dungeon = self
         return dungeon_level

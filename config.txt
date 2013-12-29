@@ -1,8 +1,8 @@
 [Screen]
 #  Change resolution here, the deafult/minimum resolution is: 1024x768
 #  The real resolution will be the nearest even divisor of the tile width (default tileset: 16px)
-#resolution_width=1920
-#resolution_height=1200
+resolution_width=1024
+resolution_height=768
 
 #The number of frames each animation frame will show up, will mostly effect blink animations in the game.
 animation_delay=3
@@ -19,17 +19,16 @@ down=j
 up=k
 right=l
 
-up_left=u
-up_right=i
-down_left=n
-down_right=m
+up_left=y
+up_right=u
+down_left=b
+down_right=n
 
-inventory=b
+inventory=i
 equipment=e
-stone=s
 fire=f
-rest=r
+rest=.
 examine=x
 drink=q
-activate=a
+pick_up_use=,
 wear_wield=w

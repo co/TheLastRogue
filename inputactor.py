@@ -127,7 +127,7 @@ class InputActor(Actor):
             console.console.print_screen()
         elif key == inputhandler.TAB:
             self.toggle_command_list()
-        elif key == inputhandler.SPACE:
+        elif key == inputhandler.USE_PICK_UP:
             self.handle_context_action()
         elif key == inputhandler.PICKUP:  # Pick up
             self.handle_pick_up()

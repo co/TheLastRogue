@@ -48,6 +48,7 @@ END = 130
 WEAR_WIELD = 131
 DRINK = 132
 AUTO_EXPLORE = 133
+USE_PICK_UP = 134
 
 #Aliases:
 UP = NORTH
@@ -134,7 +135,8 @@ controls = {
     libtcod.KEY_8: EIGHT,
     libtcod.KEY_9: NINE,
     libtcod.KEY_TAB: TAB,
-    libtcod.KEY_SPACE: SPACE,
+    libtcod.KEY_SPACE: USE_PICK_UP,
+    settings.KEY_USE_PICK_UP: USE_PICK_UP,
     libtcod.KEY_DELETE: DELETE,
     libtcod.KEY_BACKSPACE: BACKSPACE,
     libtcod.KEY_END: END,

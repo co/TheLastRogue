@@ -55,7 +55,7 @@ def place_health_potions(dungeon_level):
     for _ in range(health_potions_to_spawn):
         potion = item.HealthPotion()
         place_piece_on_random_tile_not_on_item_or_feature(potion, dungeon_level)
-    print "HP pots spawned: ", health_potions_to_spawn
+    #print "HP pots spawned: ", health_potions_to_spawn
 
 
 def place_equipment(dungeon_level):
