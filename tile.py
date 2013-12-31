@@ -110,12 +110,12 @@ class Tile(object):
             for piece in piece_list:
                 new_piece = compositecore.Composite()
                 if piece.has_child("game_piece_type"):
-                    new_piece.add_child(piece.game_piece_type.copy())
+                    new_piece.set_child(piece.game_piece_type.copy())
                 if piece.has_child("graphic_char"):
-                    new_piece.add_child(piece.graphic_char.copy())
+                    new_piece.set_child(piece.graphic_char.copy())
                 if piece.has_child("description"):
-                    new_piece.add_child(piece.description.copy())
-                new_piece.add_child(CharPrinter())
+                    new_piece.set_child(piece.description.copy())
+                new_piece.set_child(CharPrinter())
                 copy_tile.add(new_piece)
         return copy_tile
 

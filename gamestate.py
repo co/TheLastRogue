@@ -211,19 +211,19 @@ class TestGameState(GameStateBase):
         cap = item.LeatherCap()
         cap.mover.try_move((23, 10), self.dungeon_level)
 
-        rat = monster.Ratman(self)
+        rat = monster.new_ratman(self)
         rat.mover.try_move((20, 8), self.dungeon_level)
 
-        ghost = monster.Ghost(self)
+        ghost = monster.new_ghost(self)
         ghost.mover.try_move((21, 8), self.dungeon_level)
 
-        slime = monster.Slime(self)
+        slime = monster.new_slime(self)
         slime.mover.try_move((20, 18), self.dungeon_level)
 
-        cyclops = monster.Cyclops(self)
+        cyclops = monster.new_cyclops(self)
         cyclops.mover.try_move((2, 2), self.dungeon_level)
 
-        jericho = monster.Jericho(self)
+        jericho = monster.new_jericho(self)
         jericho.mover.try_move((56, 14), self.dungeon_level)
 
         for i in range(5):

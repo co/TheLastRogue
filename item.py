@@ -47,29 +47,29 @@ class Gun(Composite):
 
     def __init__(self):
         super(Gun, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
-        self.add_child(ItemType(ItemType.WEAPON))
-        self.add_child(RangeWeaponType(RangeWeaponType.GUN))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Mover())
-        self.add_child(Description("Gun",
+        self.set_child(GamePieceType(GamePieceType.ITEM))
+        self.set_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
+        self.set_child(ItemType(ItemType.WEAPON))
+        self.set_child(RangeWeaponType(RangeWeaponType.GUN))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Mover())
+        self.set_child(Description("Gun",
                                    "This was once a fine weapon, \
                                    but age has torn it real bad.\n\
                                    The wooden handle is dry and gray, \
                                    you see rust eating into the iron pipe."))
-        self.add_child(GraphicChar(None, colors.WHITE, icon.GUN))
-        self.add_child(CharPrinter())
-        self.add_child(DamageProvider(15, 10, [DamageTypes.PHYSICAL,
+        self.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
+        self.set_child(CharPrinter())
+        self.set_child(DamageProvider(15, 10, [DamageTypes.PHYSICAL,
                                                DamageTypes.PIERCING]))
-        self.add_child(WeaponRange(15))
-        self.add_child(ReEquipAction())
-        self.add_child(DropAction())
-        self.add_child(PlayerThrowItemAction())
-        self.add_child(ThrowerNonBreak())
-        self.add_child(Weight(5))
-        self.add_child(Hit(13))
+        self.set_child(WeaponRange(15))
+        self.set_child(ReEquipAction())
+        self.set_child(DropAction())
+        self.set_child(PlayerThrowItemAction())
+        self.set_child(ThrowerNonBreak())
+        self.set_child(Weight(5))
+        self.set_child(Hit(13))
 
 
 class Sling(Composite):
@@ -78,25 +78,25 @@ class Sling(Composite):
     """
     def __init__(self):
         super(Sling, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
-        self.add_child(ItemType(ItemType.WEAPON))
-        self.add_child(RangeWeaponType(RangeWeaponType.SLING))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Mover())
-        self.add_child(Description("Sling",
+        self.set_child(GamePieceType(GamePieceType.ITEM))
+        self.set_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
+        self.set_child(ItemType(ItemType.WEAPON))
+        self.set_child(RangeWeaponType(RangeWeaponType.SLING))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Mover())
+        self.set_child(Description("Sling",
                                    "This weapon propels rocks more effectively than throwing them would."))
-        self.add_child(GraphicChar(None, colors.ORANGE, icon.SLING))
-        self.add_child(CharPrinter())
-        self.add_child(WeaponRange(4))
-        self.add_child(ReEquipAction())
-        self.add_child(DropAction())
-        self.add_child(PlayerThrowItemAction())
-        self.add_child(ThrowerNonBreak())
-        self.add_child(DamageProvider(1, 2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
-        self.add_child(Weight(3))
-        self.add_child(Hit(5))
+        self.set_child(GraphicChar(None, colors.ORANGE, icon.SLING))
+        self.set_child(CharPrinter())
+        self.set_child(WeaponRange(4))
+        self.set_child(ReEquipAction())
+        self.set_child(DropAction())
+        self.set_child(PlayerThrowItemAction())
+        self.set_child(ThrowerNonBreak())
+        self.set_child(DamageProvider(1, 2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
+        self.set_child(Weight(3))
+        self.set_child(Hit(5))
 
 
 class RangeWeaponType(DataPoint):
@@ -118,22 +118,22 @@ class Device(Composite):
 
     def __init__(self):
         super(Device, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(ItemType(ItemType.MACHINE))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Mover())
-        self.add_child(Description("Ancient Device",
+        self.set_child(GamePieceType(GamePieceType.ITEM))
+        self.set_child(ItemType(ItemType.MACHINE))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Mover())
+        self.set_child(Description("Ancient Device",
                                    "An ancient device, its creators are "
                                    "long dead. But what is it for?\n"))
-        self.add_child(GraphicChar(None, colors.GREEN, icon.MACHINE))
-        self.add_child(CharPrinter())
-        self.add_child(DropAction())
-        self.add_child(PlayerThrowItemAction())
-        self.add_child(ThrowerNonBreak())
-        self.add_child(Weight(5))
-        self.add_child(Charge(random.randrange(2, 7)))
-        self.add_child(PlayerAutoPickUp())
+        self.set_child(GraphicChar(None, colors.GREEN, icon.MACHINE))
+        self.set_child(CharPrinter())
+        self.set_child(DropAction())
+        self.set_child(PlayerThrowItemAction())
+        self.set_child(ThrowerNonBreak())
+        self.set_child(Weight(5))
+        self.set_child(Charge(random.randrange(2, 7)))
+        self.set_child(PlayerAutoPickUp())
 
 
 class Charge(Leaf):
@@ -149,7 +149,7 @@ class DarknessDevice(Device):
         self.description.name = "Device of Darkness"
         self.description.description = "This ancient device will dim the vision of all creatures on the floor."
         self.graphic_char.color_fg = colors.GREEN
-        self.add_child(DarknessDeviceAction())
+        self.set_child(DarknessDeviceAction())
 
 
 class HeartStopDevice(Device):
@@ -158,7 +158,7 @@ class HeartStopDevice(Device):
         self.description.name = "Dev. of Heart Stop"
         self.description.description = "This ancient device will cause a random creature on the floor to have a heart attack."
         self.graphic_char.color_fg = colors.BLUE
-        self.add_child(HeartStopDeviceAction())
+        self.set_child(HeartStopDeviceAction())
 
 
 class ActivateDeviceAction(Action):
@@ -273,20 +273,20 @@ class Ammunition(Composite):
 
     def __init__(self):
         super(Ammunition, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(ItemType(ItemType.AMMO))
-        self.add_child(Position())
-        self.add_child(IsAmmo())
-        self.add_child(Stacker("ammo", 10, random.randrange(2, 6)))
-        self.add_child(DungeonLevel())
-        self.add_child(Mover())
-        self.add_child(Description("Gun Bullets",
+        self.set_child(GamePieceType(GamePieceType.ITEM))
+        self.set_child(ItemType(ItemType.AMMO))
+        self.set_child(Position())
+        self.set_child(IsAmmo())
+        self.set_child(Stacker("ammo", 10, random.randrange(2, 6)))
+        self.set_child(DungeonLevel())
+        self.set_child(Mover())
+        self.set_child(Description("Gun Bullets",
                                    "These bullets will fit in most guns."))
-        self.add_child(GraphicChar(None, colors.GRAY, icon.AMMO2))
-        self.add_child(DropAction())
-        self.add_child(CharPrinter())
-        self.add_child(Weight(1))
-        self.add_child(PlayerAutoPickUp())
+        self.set_child(GraphicChar(None, colors.GRAY, icon.AMMO2))
+        self.set_child(DropAction())
+        self.set_child(CharPrinter())
+        self.set_child(Weight(1))
+        self.set_child(PlayerAutoPickUp())
 
 
 class EquippedEffect(Leaf):
@@ -310,17 +310,17 @@ class Armor(Composite):
 
     def __init__(self):
         super(Armor, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(ItemType(ItemType.ARMOR))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Mover())
-        self.add_child(CharPrinter())
-        self.add_child(ReEquipAction())
-        self.add_child(DropAction())
-        self.add_child(PlayerThrowItemAction())
-        self.add_child(ThrowerNonBreak())
-        self.add_child(Weight(10))
+        self.set_child(GamePieceType(GamePieceType.ITEM))
+        self.set_child(ItemType(ItemType.ARMOR))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Mover())
+        self.set_child(CharPrinter())
+        self.set_child(ReEquipAction())
+        self.set_child(DropAction())
+        self.set_child(PlayerThrowItemAction())
+        self.set_child(ThrowerNonBreak())
+        self.set_child(Weight(10))
 
 
 class LeatherArmor(Armor):
@@ -330,12 +330,12 @@ class LeatherArmor(Armor):
 
     def __init__(self):
         super(LeatherArmor, self).__init__()
-        self.add_child(Description("Leather Armor",
+        self.set_child(Description("Leather Armor",
                                    "A worn leather armor. It's old, but should still protect you from some damage."))
-        self.add_child(Weight(10))
-        self.add_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
-        self.add_child(StatBonusEquipEffect("armor", 2))
-        self.add_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
+        self.set_child(Weight(10))
+        self.set_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
+        self.set_child(StatBonusEquipEffect("armor", 2))
+        self.set_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
 
 
 class LeatherBoots(Armor):
@@ -345,12 +345,12 @@ class LeatherBoots(Armor):
 
     def __init__(self):
         super(LeatherBoots, self).__init__()
-        self.add_child(Description("Leather Boots",
+        self.set_child(Description("Leather Boots",
                                    "A worn pair of boots, dry mud covers most of the leather."))
-        self.add_child(Weight(4))
-        self.add_child(GraphicChar(None, colors.ORANGE_D, icon.BOOTS))
-        self.add_child(StatBonusEquipEffect("armor", 1))
-        self.add_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
+        self.set_child(Weight(4))
+        self.set_child(GraphicChar(None, colors.ORANGE_D, icon.BOOTS))
+        self.set_child(StatBonusEquipEffect("armor", 1))
+        self.set_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
 
 
 class LeatherCap(Armor):
@@ -360,12 +360,12 @@ class LeatherCap(Armor):
 
     def __init__(self):
         super(LeatherCap, self).__init__()
-        self.add_child(Description("Leather Cap",
+        self.set_child(Description("Leather Cap",
                                    "An old cap made out of leather, this should keep some harm away."))
-        self.add_child(Weight(4))
-        self.add_child(GraphicChar(None, colors.ORANGE_D, icon.HELM))
-        self.add_child(StatBonusEquipEffect("armor", 1))
-        self.add_child(EquipmentType(equipment.EquipmentTypes.HEADGEAR))
+        self.set_child(Weight(4))
+        self.set_child(GraphicChar(None, colors.ORANGE_D, icon.HELM))
+        self.set_child(StatBonusEquipEffect("armor", 1))
+        self.set_child(EquipmentType(equipment.EquipmentTypes.HEADGEAR))
 
 class BlockDamageEquippedEffect(EquippedEffect):
     def __init__(self, block, block_variance, blocked_damage_types):
@@ -390,25 +390,25 @@ class Sword(Composite):
 
     def __init__(self):
         super(Sword, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
-        self.add_child(ItemType(ItemType.WEAPON))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Mover())
-        self.add_child(Description("Iron Sword",
+        self.set_child(GamePieceType(GamePieceType.ITEM))
+        self.set_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
+        self.set_child(ItemType(ItemType.WEAPON))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Mover())
+        self.set_child(Description("Iron Sword",
                                    "This old blade has seen some "
                                    "better days, it's as sharp as "
                                    "ever tough."))
-        self.add_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-        self.add_child(DamageProvider(4, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
-        self.add_child(CharPrinter())
-        self.add_child(ReEquipAction())
-        self.add_child(DropAction())
-        self.add_child(PlayerThrowItemAction())
-        self.add_child(ThrowerNonBreak())
-        self.add_child(Weight(10))
-        self.add_child(Hit(16))
+        self.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
+        self.set_child(DamageProvider(4, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+        self.set_child(CharPrinter())
+        self.set_child(ReEquipAction())
+        self.set_child(DropAction())
+        self.set_child(PlayerThrowItemAction())
+        self.set_child(ThrowerNonBreak())
+        self.set_child(Weight(10))
+        self.set_child(Hit(16))
 
 
 class Knife(Sword):
@@ -434,24 +434,24 @@ class Ring(Composite):
 
     def __init__(self):
         super(Ring, self).__init__()
-        self.add_child(EquipmentType(equipment.EquipmentTypes.RING))
-        self.add_child(ItemType(ItemType.JEWELLRY))
-        self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Mover())
-        self.add_child(GraphicChar(None, colors.YELLOW, icon.RING))
-        self.add_child(CharPrinter())
-        self.add_child(ReEquipAction())
-        self.add_child(DropAction())
+        self.set_child(EquipmentType(equipment.EquipmentTypes.RING))
+        self.set_child(ItemType(ItemType.JEWELLRY))
+        self.set_child(GamePieceType(GamePieceType.ITEM))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Mover())
+        self.set_child(GraphicChar(None, colors.YELLOW, icon.RING))
+        self.set_child(CharPrinter())
+        self.set_child(ReEquipAction())
+        self.set_child(DropAction())
 
 
 class RingOfInvisibility(Ring):
     def __init__(self):
         super(RingOfInvisibility, self).__init__()
         self.graphic_char.color_fg = colors.CYAN
-        self.add_child(SetInvisibilityFlagEquippedEffect())
-        self.add_child(Description("Ring of Invisibility",
+        self.set_child(SetInvisibilityFlagEquippedEffect())
+        self.set_child(Description("Ring of Invisibility",
                                    "The metal is warm to your skin, "
                                    "this ring will make you invisible"))
 
@@ -460,8 +460,8 @@ class RingOfEvasion(Ring):
     def __init__(self):
         super(RingOfEvasion, self).__init__()
         self.graphic_char.color_fg = colors.GREEN
-        self.add_child(StatBonusEquipEffect("evasion", 3))
-        self.add_child(Description("Ring of Evasion",
+        self.set_child(StatBonusEquipEffect("evasion", 3))
+        self.set_child(Description("Ring of Evasion",
                                    "The ring is light on your finger, "
                                    "Its magic powers makes it easier for you to dodge attacks."))
 
@@ -470,8 +470,8 @@ class RingOfStealth(Ring):
     def __init__(self):
         super(RingOfStealth, self).__init__()
         self.graphic_char.color_fg = colors.BLUE
-        self.add_child(StatBonusEquipEffect("stealth", 3))
-        self.add_child(Description("Ring of Stealth",
+        self.set_child(StatBonusEquipEffect("stealth", 3))
+        self.set_child(Description("Ring of Stealth",
                                    "The ring is smooth to your skin, "
                                    "Its magic powers makes it easier for you to sneak past enemies."))
 
@@ -480,8 +480,8 @@ class RingOfStrength(Ring):
     def __init__(self):
         super(RingOfStrength, self).__init__()
         self.graphic_char.color_fg = colors.ORANGE
-        self.add_child(StatBonusEquipEffect("strength", 3))
-        self.add_child(Description("Ring of Strength",
+        self.set_child(StatBonusEquipEffect("strength", 3))
+        self.set_child(Description("Ring of Strength",
                                    "The ring feels unnaturally heavy, "
                                    "Its magic powers makes you stronger."))
 
@@ -520,24 +520,24 @@ class HealthPotion(Composite):
         Abstract class, subclasses of this class are potions,
         """
         super(HealthPotion, self).__init__()
-        self.add_child(ItemType(ItemType.POTION))
-        self.add_child(GamePieceType(GamePieceType.ITEM))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Mover())
-        self.add_child(Description("Health Potion",
+        self.set_child(ItemType(ItemType.POTION))
+        self.set_child(GamePieceType(GamePieceType.ITEM))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Mover())
+        self.set_child(Description("Health Potion",
                                    "An unusual liquid\
                                    contained in a glass bottle."))
-        self.add_child(GraphicChar(None, colors.PINK, icon.POTION))
-        self.add_child(CharPrinter())
-        self.add_child(Stacker("health_potion", 3))
-        self.add_child(HealingPotionDrinkAction())
-        self.add_child(DropAction())
-        self.add_child(PlayerAutoPickUp())
+        self.set_child(GraphicChar(None, colors.PINK, icon.POTION))
+        self.set_child(CharPrinter())
+        self.set_child(Stacker("health_potion", 3))
+        self.set_child(HealingPotionDrinkAction())
+        self.set_child(DropAction())
+        self.set_child(PlayerAutoPickUp())
 
-        self.add_child(ThrowerBreak())
-        self.add_child(Weight(4))
-        self.add_child(PlayerThrowItemAction())
+        self.set_child(ThrowerBreak())
+        self.set_child(Weight(4))
+        self.set_child(PlayerThrowItemAction())
 
 
 class Weight(Leaf):

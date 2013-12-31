@@ -64,108 +64,108 @@ class BumpAction(Leaf):
 class Floor(Composite):
     def __init__(self):
         super(Floor, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.TERRAIN))
-        self.add_child(Mover())
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(GraphicChar(colors.FLOOR_BG,
+        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(Mover())
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(GraphicChar(colors.FLOOR_BG,
                                    colors.FLOOR_FG,
                                    icon.CENTER_DOT))
-        self.add_child(CharPrinter())
-        self.add_child(IsSolid(False))
-        self.add_child(IsTransparent(True))
+        self.set_child(CharPrinter())
+        self.set_child(IsSolid(False))
+        self.set_child(IsTransparent(True))
 
 
 class Water(Composite):
     def __init__(self):
         super(Water, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.TERRAIN))
-        self.add_child(Mover())
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(GraphicChar(colors.BLUE_D,
+        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(Mover())
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(GraphicChar(colors.BLUE_D,
                                    colors.BLUE,
                                    icon.WATER))
-        self.add_child(CharPrinter())
-        self.add_child(IsSolid(False))
-        self.add_child(IsTransparent(True))
+        self.set_child(CharPrinter())
+        self.set_child(IsSolid(False))
+        self.set_child(IsTransparent(True))
 
 
 class GlassWall(Composite):
     def __init__(self):
         super(GlassWall, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.TERRAIN))
-        self.add_child(Mover())
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(GraphicChar(colors.FLOOR_BG, colors.WHITE, icon.GLASS_WALL))
-        self.add_child(CharPrinter())
-        self.add_child(IsSolid(True))
-        self.add_child(IsTransparent(True))
+        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(Mover())
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(GraphicChar(colors.FLOOR_BG, colors.WHITE, icon.GLASS_WALL))
+        self.set_child(CharPrinter())
+        self.set_child(IsSolid(True))
+        self.set_child(IsTransparent(True))
 
 
 class Chasm(Composite):
     def __init__(self):
         super(Chasm, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.TERRAIN))
-        self.add_child(Mover())
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(GraphicChar(colors.DARKNESS, colors.DARK_GREEN, icon.CHASM2))
-        self.add_child(CharPrinter())
-        self.add_child(IsChasm(True))
-        self.add_child(IsSolid(False))
-        self.add_child(IsTransparent(True))
+        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(Mover())
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(GraphicChar(colors.DARKNESS, colors.DARK_GREEN, icon.CHASM2))
+        self.set_child(CharPrinter())
+        self.set_child(IsChasm(True))
+        self.set_child(IsSolid(False))
+        self.set_child(IsTransparent(True))
 
 
 class Unknown(Composite):
     def __init__(self):
         super(Unknown, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.TERRAIN))
-        self.add_child(Mover())
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(CharPrinter())
-        self.add_child(GraphicChar(colors.BLACK,
+        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(Mover())
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(CharPrinter())
+        self.set_child(GraphicChar(colors.BLACK,
                                    colors.BLACK,
                                    ' '))
-        self.add_child(IsSolid(True))
-        self.add_child(IsTransparent(True))
+        self.set_child(IsSolid(True))
+        self.set_child(IsTransparent(True))
 
 
 class Wall (Composite):
     def __init__(self):
         super(Wall, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.TERRAIN))
-        self.add_child(Mover())
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(CharPrinter())
-        self.add_child(GraphicCharTerrainCorners(colors.FLOOR_BG,
+        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(Mover())
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(CharPrinter())
+        self.set_child(GraphicCharTerrainCorners(colors.FLOOR_BG,
                                                  colors.WALL_FG,
                                                  icon.DUNGEON_WALLS_ROW,
                                                  [Wall, Door, Chasm]))
-        self.add_child(IsSolid(True))
-        self.add_child(IsTransparent(False))
+        self.set_child(IsSolid(True))
+        self.set_child(IsTransparent(False))
 
 
 class Door(Composite):
     def __init__(self):
         super(Door, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.TERRAIN))
-        self.add_child(Mover())
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(CharPrinter())
-        self.add_child(GraphicChar(colors.FLOOR_BG,
+        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(Mover())
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(CharPrinter())
+        self.set_child(GraphicChar(colors.FLOOR_BG,
                                    colors.ORANGE_D,
                                    icon.DOOR))
-        self.add_child(IsSolid(True))
-        self.add_child(IsTransparent(False))
+        self.set_child(IsSolid(True))
+        self.set_child(IsTransparent(False))
 
-        self.add_child(OpenDoorAction())
-        self.add_child(OpenDoorBumpAction())
-        self.add_child(IsDoor())
+        self.set_child(OpenDoorAction())
+        self.set_child(OpenDoorBumpAction())
+        self.set_child(IsDoor())
 
 
 class IsDoor(Leaf):

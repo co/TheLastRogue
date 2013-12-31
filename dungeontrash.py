@@ -16,15 +16,15 @@ class Corpse(Composite):
     """
     def __init__(self):
         super(Corpse, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.DUNGEON_TRASH))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Description("A rotting corpse.",
+        self.set_child(GamePieceType(GamePieceType.DUNGEON_TRASH))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Description("A rotting corpse.",
                                    "A rotting corpse."))
-        self.add_child(GraphicChar(None, colors.WHITE,
+        self.set_child(GraphicChar(None, colors.WHITE,
                                    icon.CORPSE))
-        self.add_child(CharPrinter())
-        self.add_child(Mover())
+        self.set_child(CharPrinter())
+        self.set_child(Mover())
 
 
 class PoolOfBlood(Composite):
@@ -34,12 +34,12 @@ class PoolOfBlood(Composite):
     """
     def __init__(self):
         super(PoolOfBlood, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.DUNGEON_TRASH))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Description("A pool of blood.",
+        self.set_child(GamePieceType(GamePieceType.DUNGEON_TRASH))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Description("A pool of blood.",
                                    "A pool of blood."))
-        self.add_child(GraphicChar(None, colors.RED,
+        self.set_child(GraphicChar(None, colors.RED,
                                    random.choice(icon.BLOOD_ICONS)))
-        self.add_child(CharPrinter())
-        self.add_child(Mover())
+        self.set_child(CharPrinter())
+        self.set_child(Mover())

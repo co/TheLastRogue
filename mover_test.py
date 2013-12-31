@@ -33,14 +33,14 @@ class TestComposition(unittest.TestCase):
 
     def set_up_new_entity_with_dungeon(self, dungeon_level):
         entity = Composite()
-        entity.add_child(Mover())
+        entity.set_child(Mover())
 
-        entity.add_child(Position())
-        entity.add_child(GamePieceType
+        entity.set_child(Position())
+        entity.set_child(GamePieceType
                          (GamePieceType.ENTITY))
         dungeon_level_component = DungeonLevel()
         dungeon_level_component.value = dungeon_level
-        entity.add_child(dungeon_level_component)
+        entity.set_child(dungeon_level_component)
 
         return entity
 
@@ -61,7 +61,7 @@ class TestComposition(unittest.TestCase):
     def test_can_pass_door_if_entity_can_open_door(self):
         entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
         status_flags = StatusFlags([StatusFlags.CAN_OPEN_DOORS])
-        entity.add_child(status_flags)
+        entity.set_child(status_flags)
         door = terrain.Door()
         door.mover.replace_move((2, 1), self.dungeon_level)
         self.assertTrue(door.bump_action.can_bump(entity))

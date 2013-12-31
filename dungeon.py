@@ -30,23 +30,23 @@ class Dungeon(object):
                                 (lambda: dungeongenerator.generate_dungeon_exploded_rooms(size, depth)))
         for _ in range(int(depth * 1.5) + 4):
             if rng.coin_flip() and rng.coin_flip():
-                ghost = monster.Ghost(self.game_state)
+                ghost = monster.new_ghost(self.game_state)
                 spawner.place_piece_on_random_tile(ghost, dungeon_level)
             else:
                 spawner.spawn_rat_man(dungeon_level, self.game_state)
 
         for _ in range(random.randrange(depth, depth + 2) - 1):
             if rng.coin_flip() and rng.coin_flip():
-                cyclops = monster.Cyclops(self.game_state)
+                cyclops = monster.new_cyclops(self.game_state)
                 spawner.place_piece_on_random_tile(cyclops, dungeon_level)
 
         for _ in range(random.randrange(int(depth / 2), int(depth / 2) + 3) - 1):
             if rng.coin_flip() or rng.coin_flip():
-                slime = monster.Slime(self.game_state)
+                slime = monster.new_slime(self.game_state)
                 spawner.place_piece_on_random_tile(slime, dungeon_level)
 
         if depth == (len(self._dungeon_levels) - 1):
-            jericho = monster.Jericho(self.game_state)
+            jericho = monster.new_jericho(self.game_state)
             spawner.place_piece_on_random_tile(jericho, dungeon_level)
 
         spawner.place_items_in_dungeon(dungeon_level)

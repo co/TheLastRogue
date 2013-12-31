@@ -18,19 +18,19 @@ class StairsDown(Composite):
     """
     def __init__(self):
         super(StairsDown, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.DUNGEON_FEATURE))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Description("Stairs Down",
+        self.set_child(GamePieceType(GamePieceType.DUNGEON_FEATURE))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Description("Stairs Down",
                                    ("A dark pass way downward.",
                                     "what horrors awaits there?")))
-        self.add_child(GraphicChar(None, colors.WHITE,
+        self.set_child(GraphicChar(None, colors.WHITE,
                                    icon.STAIRS_DOWN))
 
-        self.add_child(CharPrinter())
-        self.add_child(DescendStairsAction())
-        self.add_child(Mover())
-        self.add_child(IsDungeonFeature())
+        self.set_child(CharPrinter())
+        self.set_child(DescendStairsAction())
+        self.set_child(Mover())
+        self.set_child(IsDungeonFeature())
 
 
 class StairsUp(Composite):
@@ -39,17 +39,17 @@ class StairsUp(Composite):
     """
     def __init__(self):
         super(StairsUp, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.DUNGEON_FEATURE))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Description("Stairs Up",
+        self.set_child(GamePieceType(GamePieceType.DUNGEON_FEATURE))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Description("Stairs Up",
                                    ("A way back, when the ",
                                     "nightmare becomes too real.")))
-        self.add_child(GraphicChar(None, colors.WHITE,
+        self.set_child(GraphicChar(None, colors.WHITE,
                                    icon.STAIRS_UP))
-        self.add_child(CharPrinter())
-        self.add_child(Mover())
-        self.add_child(IsDungeonFeature())
+        self.set_child(CharPrinter())
+        self.set_child(Mover())
+        self.set_child(IsDungeonFeature())
 
 
 class Fountain(Composite):
@@ -58,19 +58,19 @@ class Fountain(Composite):
     """
     def __init__(self):
         super(Fountain, self).__init__()
-        self.add_child(GamePieceType(GamePieceType.DUNGEON_FEATURE))
-        self.add_child(Position())
-        self.add_child(DungeonLevel())
-        self.add_child(Description("Fountain",
+        self.set_child(GamePieceType(GamePieceType.DUNGEON_FEATURE))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Description("Fountain",
                                    ("A Fountain full of clean water",
                                     "surely you will become more",
                                     "healthy by drinking this.")))
-        self.add_child(GraphicChar(None, colors.CYAN,
+        self.set_child(GraphicChar(None, colors.CYAN,
                                    icon.FOUNTAIN_FULL))
-        self.add_child(CharPrinter())
-        self.add_child(Mover())
-        self.add_child(IsDungeonFeature())
-        self.add_child(DrinkFromFountainAction())
+        self.set_child(CharPrinter())
+        self.set_child(Mover())
+        self.set_child(IsDungeonFeature())
+        self.set_child(DrinkFromFountainAction())
 
 
 class DrinkFromFountainAction(action.Action):

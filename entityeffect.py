@@ -134,7 +134,7 @@ class StatusAdder(EntityEffect):
     def update(self, time_spent):
         status_flags = StatusFlags([self.status_flag])
         status_flags.to_be_removed = True
-        self.target_entity.add_child(status_flags)
+        self.target_entity.set_child(status_flags)
         self.tick(time_spent)
 
 

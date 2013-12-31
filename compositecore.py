@@ -56,12 +56,6 @@ class Component(object):
         """
         pass
 
-    def precondition(self, *args, **kw):
-        """
-        A method hook for checking if it's valid to update all components.
-        """
-        return True
-
     def update(self, *args, **kw):
         """
         A method hook for updating the component tree.
@@ -131,7 +125,7 @@ class Composite(Component):
     def __getinitargs__(self):
         return ()
 
-    def add_child(self, child):
+    def set_child(self, child):
         """
         Adds a child component to this component.
         If the child already has a parent an exception is thrown.
@@ -150,9 +144,9 @@ class Composite(Component):
             raise Exception("Component {0} tried ta add_child"
                             "component: {1} to its children."
                             "But it already"
-                            "had parent: {2}.".format(str(self),
-                                                      str(child),
-                                                      str(child.parent)))
+                            "had parent: {2}.".format(str(self), str(child), str(child.parent)))
+        if self.has_child(child.component_type):
+            self.remove_component_of_type(child.component_type)
         self._children[child.component_type] = child
         child.parent = self
 

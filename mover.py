@@ -92,7 +92,7 @@ class Mover(Leaf):
         dungeon_level.get_tile(new_position).add(self.parent)
         self.parent.position.value = new_position
         if not self.has_sibling("dungeon_level"):
-            self.parent.add_child(DungeonLevel())
+            self.parent.set_child(DungeonLevel())
         self.parent.dungeon_level.value = dungeon_level
 
     def replace_move(self, new_position, new_dungeon_level=None):
