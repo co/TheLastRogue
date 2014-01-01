@@ -118,7 +118,7 @@ class MissileDestinationSelector(PositionSelector):
         if init_target:
             self.cursor_position = init_target
         self._info_text = gui.InfoTextLine(["DIRECTION to step, SHIFT + DIRECTION to step 5.",
-                                            "ENTER or F to fire/throw."])
+                                            "TAB to cycle targets, ENTER or F to fire/throw."])
 
     def _get_current_path(self):
         result = []
