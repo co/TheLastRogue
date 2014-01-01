@@ -194,8 +194,10 @@ class BleedWhenDamaged(DamageTakenEffect):
             last_result = result
         return result
 
+
 def position_is_solid(position, dungeon_level):
     return dungeon_level.get_tile_or_unknown(position).get_terrain().is_solid.value
+
 
 def spawn_blood_on_position(position, dungeon_level):
     corpse = dungeontrash.PoolOfBlood()

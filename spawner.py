@@ -53,7 +53,7 @@ def place_health_potions(dungeon_level):
         health_potions_to_spawn += 2
     health_potions_to_spawn += 1
     for _ in range(health_potions_to_spawn):
-        potion = item.HealthPotion()
+        potion = item.new_health_potion()
         place_piece_on_random_tile_not_on_item_or_feature(potion, dungeon_level)
     #print "HP pots spawned: ", health_potions_to_spawn
 
@@ -62,16 +62,16 @@ def place_equipment(dungeon_level):
     depth = dungeon_level.depth
 
     if (depth == 0 or depth == 1) and rng.coin_flip():
-        early_weapon = random.choice([item.Knife(), item.Sling()])
+        early_weapon = random.choice([item.new_knife(), item.new_sling()])
         place_piece_on_random_tile(early_weapon, dungeon_level)
 
     for _ in range(random.randrange(depth + 1)):
         if rng.coin_flip():
             if rng.coin_flip() and rng.coin_flip() and rng.coin_flip():  # Rare equipment.
-                equipment = random.choice([item.Sword(), item.Gun()])
+                equipment = random.choice([item.new_sword(), item.new_gun()])
             else:  # Common equipment.
-                equipment = random.choice([item.LeatherBoots(), item.LeatherCap(), item.LeatherArmor(),
-                                           item.Knife(), item.Sling()])
+                equipment = random.choice([item.new_leather_boots(), item.new_leather_cap(), item.new_leather_armor(),
+                                           item.new_knife(), item.new_sling()])
             place_piece_on_random_tile(equipment, dungeon_level)
 
 
@@ -79,7 +79,7 @@ def place_ammo(dungeon_level):
     depth = dungeon_level.depth
     for _ in range(random.randrange(depth / 2 + 1)):
         if rng.coin_flip():
-            ammo = item.Ammunition()
+            ammo = item.new_ammunition()
             place_piece_on_random_tile_not_on_item_or_feature(ammo, dungeon_level)
 
 
@@ -87,13 +87,14 @@ def place_jewellry(dungeon_level):
     depth = dungeon_level.depth
     for _ in range(random.randrange(depth + 1)):
         if rng.coin_flip() and rng.coin_flip() and rng.coin_flip():
-            ring = random.choice([item.RingOfEvasion(), item.RingOfStealth(), item.RingOfEvasion()])
+            ring = random.choice([item.new_ring_of_evasion(), item.new_ring_of_stealth(),
+                                  item.new_ring_of_strength()])
             place_piece_on_random_tile_not_on_item_or_feature(ring, dungeon_level)
 
 
 def place_devices(dungeon_level):
     if rng.coin_flip() and rng.coin_flip():
-        device = random.choice([item.DarknessDevice(), item.HeartStopDevice()])
+        device = random.choice([item.new_darkness_device(), item.new_heart_stop_device()])
         place_piece_on_random_tile(device, dungeon_level)
 
 

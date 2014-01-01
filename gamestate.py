@@ -175,40 +175,40 @@ class TestGameState(GameStateBase):
         self.player.mover.try_move(start_position, self.dungeon_level)
         self.camera.center_on_entity(self.player)
 
-        potion = item.HealthPotion()
+        potion = item.new_health_potion()
         potion.mover.try_move((20, 12), self.dungeon_level)
 
-        ring1 = item.RingOfEvasion()
+        ring1 = item.new_ring_of_evasion()
         ring1.mover.try_move((24, 11), self.dungeon_level)
 
-        ring2 = item.RingOfStealth()
+        ring2 = item.new_ring_of_stealth()
         ring2.mover.try_move((25, 11), self.dungeon_level)
 
-        ring3 = item.RingOfStrength()
+        ring3 = item.new_ring_of_strength()
         ring3.mover.try_move((26, 11), self.dungeon_level)
 
-        device1 = item.DarknessDevice()
+        device1 = item.new_darkness_device()
         device1.mover.try_move((24, 12), self.dungeon_level)
 
-        device2 = item.HeartStopDevice()
+        device2 = item.new_heart_stop_device()
         device2.mover.try_move((25, 12), self.dungeon_level)
 
-        gun = item.Gun()
+        gun = item.new_gun()
         gun.mover.try_move((20, 13), self.dungeon_level)
 
-        sling = item.Sling()
+        sling = item.new_sling()
         sling.mover.try_move((20, 14), self.dungeon_level)
 
-        sword = item.Sword()
+        sword = item.new_sword()
         sword.mover.try_move((19, 13), self.dungeon_level)
 
-        armor = item.LeatherArmor()
+        armor = item.new_leather_armor()
         armor.mover.try_move((21, 10), self.dungeon_level)
 
-        boots = item.LeatherBoots()
+        boots = item.new_leather_boots()
         boots.mover.try_move((22, 10), self.dungeon_level)
 
-        cap = item.LeatherCap()
+        cap = item.new_leather_cap()
         cap.mover.try_move((23, 10), self.dungeon_level)
 
         rat = monster.new_ratman(self)
@@ -227,11 +227,11 @@ class TestGameState(GameStateBase):
         jericho.mover.try_move((56, 14), self.dungeon_level)
 
         for i in range(5):
-            ammo = item.Ammunition()
+            ammo = item.new_ammunition()
             ammo.mover.try_move((21 + i, 13), self.dungeon_level)
 
         for i in range(23):
-            knife = item.Knife()
+            knife = item.new_knife()
             knife.mover.try_move((10 + i, 23), self.dungeon_level)
 
 

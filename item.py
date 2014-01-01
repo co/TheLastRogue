@@ -40,63 +40,56 @@ class ItemType(Leaf):
         self.value = item_type
 
 
-class Gun(Composite):
-    """
-    A composite component representing a Gun item.
-    """
-
-    def __init__(self):
-        super(Gun, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.ITEM))
-        self.set_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
-        self.set_child(ItemType(ItemType.WEAPON))
-        self.set_child(RangeWeaponType(RangeWeaponType.GUN))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Mover())
-        self.set_child(Description("Gun",
-                                   "This was once a fine weapon, \
-                                   but age has torn it real bad.\n\
-                                   The wooden handle is dry and gray, \
-                                   you see rust eating into the iron pipe."))
-        self.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
-        self.set_child(CharPrinter())
-        self.set_child(DamageProvider(15, 10, [DamageTypes.PHYSICAL,
-                                               DamageTypes.PIERCING]))
-        self.set_child(WeaponRange(15))
-        self.set_child(ReEquipAction())
-        self.set_child(DropAction())
-        self.set_child(PlayerThrowItemAction())
-        self.set_child(ThrowerNonBreak())
-        self.set_child(Weight(5))
-        self.set_child(Hit(13))
+def set_item_components(item):
+    item.set_child(Position())
+    item.set_child(DungeonLevel())
+    item.set_child(Mover())
+    item.set_child(GamePieceType(GamePieceType.ITEM))
+    item.set_child(CharPrinter())
+    item.set_child(DropAction())
+    item.set_child(PlayerThrowItemAction())
+    item.set_child(ThrowerNonBreak())
+    return item
 
 
-class Sling(Composite):
-    """
-    A composite component representing a Sling item.
-    """
-    def __init__(self):
-        super(Sling, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.ITEM))
-        self.set_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
-        self.set_child(ItemType(ItemType.WEAPON))
-        self.set_child(RangeWeaponType(RangeWeaponType.SLING))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Mover())
-        self.set_child(Description("Sling",
-                                   "This weapon propels rocks more effectively than throwing them would."))
-        self.set_child(GraphicChar(None, colors.ORANGE, icon.SLING))
-        self.set_child(CharPrinter())
-        self.set_child(WeaponRange(4))
-        self.set_child(ReEquipAction())
-        self.set_child(DropAction())
-        self.set_child(PlayerThrowItemAction())
-        self.set_child(ThrowerNonBreak())
-        self.set_child(DamageProvider(1, 2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
-        self.set_child(Weight(3))
-        self.set_child(Hit(5))
+def set_ranged_weapon_components(item):
+    item.set_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
+    item.set_child(ItemType(ItemType.WEAPON))
+    item.set_child(ReEquipAction())
+
+
+def new_gun():
+    gun = Composite()
+    set_item_components(gun)
+    set_ranged_weapon_components(gun)
+    gun.set_child(RangeWeaponType(RangeWeaponType.GUN))
+    gun.set_child(Description("Gun",
+                               "This was once a fine weapon, \
+                               but age has torn it real bad.\n\
+                               The wooden handle is dry and gray, \
+                               you see rust eating into the iron pipe."))
+    gun.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
+    gun.set_child(DamageProvider(15, 10, [DamageTypes.PHYSICAL,
+                                          DamageTypes.PIERCING]))
+    gun.set_child(WeaponRange(15))
+    gun.set_child(Hit(13))
+    gun.set_child(Weight(5))
+    return gun
+
+
+def new_sling():
+    sling = Composite()
+    set_item_components(sling)
+    set_ranged_weapon_components(sling)
+    sling.set_child(RangeWeaponType(RangeWeaponType.SLING))
+    sling.set_child(Description("Sling",
+                               "This weapon propels rocks more effectively than throwing them would."))
+    sling.set_child(GraphicChar(None, colors.ORANGE, icon.SLING))
+    sling.set_child(WeaponRange(4))
+    sling.set_child(DamageProvider(1, 2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
+    sling.set_child(Weight(3))
+    sling.set_child(Hit(5))
+    return sling
 
 
 class RangeWeaponType(DataPoint):
@@ -111,29 +104,12 @@ class RangeWeaponType(DataPoint):
         super(RangeWeaponType, self).__init__("range_weapon_type", range_weapon_type)
 
 
-class Device(Composite):
-    """
-    A composite component representing a Gun item.
-    """
-
-    def __init__(self):
-        super(Device, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.ITEM))
-        self.set_child(ItemType(ItemType.MACHINE))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Mover())
-        self.set_child(Description("Ancient Device",
-                                   "An ancient device, its creators are "
-                                   "long dead. But what is it for?\n"))
-        self.set_child(GraphicChar(None, colors.GREEN, icon.MACHINE))
-        self.set_child(CharPrinter())
-        self.set_child(DropAction())
-        self.set_child(PlayerThrowItemAction())
-        self.set_child(ThrowerNonBreak())
-        self.set_child(Weight(5))
-        self.set_child(Charge(random.randrange(2, 7)))
-        self.set_child(PlayerAutoPickUp())
+def set_device_components(item):
+    item.set_child(ItemType(ItemType.MACHINE))
+    item.set_child(PlayerAutoPickUp())
+    item.set_child(Charge(random.randrange(2, 7)))
+    item.set_child(Weight(5))
+    return item
 
 
 class Charge(Leaf):
@@ -143,22 +119,26 @@ class Charge(Leaf):
         self.charges = charges
 
 
-class DarknessDevice(Device):
-    def __init__(self):
-        super(DarknessDevice, self).__init__()
-        self.description.name = "Device of Darkness"
-        self.description.description = "This ancient device will dim the vision of all creatures on the floor."
-        self.graphic_char.color_fg = colors.GREEN
-        self.set_child(DarknessDeviceAction())
+def new_darkness_device():
+    device = Composite()
+    set_item_components(device)
+    set_device_components(device)
+    device.set_child(Description("Device of Darkness",
+                                 "This ancient device will dim the vision of all creatures on the floor."))
+    device.set_child(DarknessDeviceAction())
+    device.set_child(GraphicChar(None, colors.GREEN, icon.MACHINE))
+    return device
 
 
-class HeartStopDevice(Device):
-    def __init__(self):
-        super(HeartStopDevice, self).__init__()
-        self.description.name = "Dev. of Heart Stop"
-        self.description.description = "This ancient device will cause a random creature on the floor to have a heart attack."
-        self.graphic_char.color_fg = colors.BLUE
-        self.set_child(HeartStopDeviceAction())
+def new_heart_stop_device():
+    device = Composite()
+    set_item_components(device)
+    set_device_components(device)
+    device.set_child(Description("Dev. of Heart Stop",
+                                 "This ancient device will cause a random creature on the floor to have a heart attack."))
+    device.set_child(DarknessDeviceAction())
+    device.set_child(GraphicChar(None, colors.BLUE, icon.MACHINE))
+    return device
 
 
 class ActivateDeviceAction(Action):
@@ -266,27 +246,21 @@ class Stacker(Leaf):
         return self.size >= self.max_size
 
 
-class Ammunition(Composite):
+def new_ammunition():
     """
     A composite component representing a gun ammunition item.
     """
-
-    def __init__(self):
-        super(Ammunition, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.ITEM))
-        self.set_child(ItemType(ItemType.AMMO))
-        self.set_child(Position())
-        self.set_child(IsAmmo())
-        self.set_child(Stacker("ammo", 10, random.randrange(2, 6)))
-        self.set_child(DungeonLevel())
-        self.set_child(Mover())
-        self.set_child(Description("Gun Bullets",
-                                   "These bullets will fit in most guns."))
-        self.set_child(GraphicChar(None, colors.GRAY, icon.AMMO2))
-        self.set_child(DropAction())
-        self.set_child(CharPrinter())
-        self.set_child(Weight(1))
-        self.set_child(PlayerAutoPickUp())
+    ammo = Composite()
+    set_item_components(ammo)
+    ammo.set_child(ItemType(ItemType.AMMO))
+    ammo.set_child(IsAmmo())
+    ammo.set_child(Stacker("ammo", 10, random.randrange(2, 6)))
+    ammo.set_child(Description("Gun Bullets",
+                               "These bullets will fit in most guns."))
+    ammo.set_child(GraphicChar(None, colors.GRAY, icon.AMMO2))
+    ammo.set_child(Weight(1))
+    ammo.set_child(PlayerAutoPickUp())
+    return ammo
 
 
 class EquippedEffect(Leaf):
@@ -303,187 +277,152 @@ class EquippedEffect(Leaf):
         pass
 
 
-class Armor(Composite):
+def set_armor_components(item):
+    item.set_child(ItemType(ItemType.ARMOR))
+    item.set_child(ReEquipAction())
+    return item
+
+
+def new_leather_armor():
     """
     A composite component representing a Armor item.
     """
-
-    def __init__(self):
-        super(Armor, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.ITEM))
-        self.set_child(ItemType(ItemType.ARMOR))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Mover())
-        self.set_child(CharPrinter())
-        self.set_child(ReEquipAction())
-        self.set_child(DropAction())
-        self.set_child(PlayerThrowItemAction())
-        self.set_child(ThrowerNonBreak())
-        self.set_child(Weight(10))
+    armor = Composite()
+    set_item_components(armor)
+    set_armor_components(armor)
+    armor.set_child(Description("Leather Armor",
+                                "A worn leather armor. It's old, but should still protect you from some damage."))
+    armor.set_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
+    armor.set_child(StatBonusEquipEffect("armor", 2))
+    armor.set_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
+    armor.set_child(Weight(10))
+    return  armor
 
 
-class LeatherArmor(Armor):
+def new_leather_boots():
+    """
+    A composite component representing a Boots Armor item.
+    """
+    boots = Composite()
+    set_item_components(boots)
+    set_armor_components(boots)
+    boots.set_child(Description("Leather Boots",
+                               "A worn pair of boots, dry mud covers most of the leather."))
+    boots.set_child(Weight(4))
+    boots.set_child(GraphicChar(None, colors.ORANGE_D, icon.BOOTS))
+    boots.set_child(StatBonusEquipEffect("armor", 1))
+    boots.set_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
+    return boots
+
+
+def new_leather_cap():
     """
     A composite component representing a Armor item.
     """
-
-    def __init__(self):
-        super(LeatherArmor, self).__init__()
-        self.set_child(Description("Leather Armor",
-                                   "A worn leather armor. It's old, but should still protect you from some damage."))
-        self.set_child(Weight(10))
-        self.set_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
-        self.set_child(StatBonusEquipEffect("armor", 2))
-        self.set_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
-
-
-class LeatherBoots(Armor):
-    """
-    A composite component representing a Armor item.
-    """
-
-    def __init__(self):
-        super(LeatherBoots, self).__init__()
-        self.set_child(Description("Leather Boots",
-                                   "A worn pair of boots, dry mud covers most of the leather."))
-        self.set_child(Weight(4))
-        self.set_child(GraphicChar(None, colors.ORANGE_D, icon.BOOTS))
-        self.set_child(StatBonusEquipEffect("armor", 1))
-        self.set_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
+    cap = Composite()
+    set_item_components(cap)
+    set_armor_components(cap)
+    cap.set_child(Description("Leather Cap",
+                              "An old cap made out of leather, this should keep some harm away."))
+    cap.set_child(Weight(4))
+    cap.set_child(GraphicChar(None, colors.ORANGE_D, icon.HELM))
+    cap.set_child(StatBonusEquipEffect("armor", 1))
+    cap.set_child(EquipmentType(equipment.EquipmentTypes.HEADGEAR))
+    return cap
 
 
-class LeatherCap(Armor):
-    """
-    A composite component representing a Armor item.
-    """
-
-    def __init__(self):
-        super(LeatherCap, self).__init__()
-        self.set_child(Description("Leather Cap",
-                                   "An old cap made out of leather, this should keep some harm away."))
-        self.set_child(Weight(4))
-        self.set_child(GraphicChar(None, colors.ORANGE_D, icon.HELM))
-        self.set_child(StatBonusEquipEffect("armor", 1))
-        self.set_child(EquipmentType(equipment.EquipmentTypes.HEADGEAR))
-
-class BlockDamageEquippedEffect(EquippedEffect):
-    def __init__(self, block, block_variance, blocked_damage_types):
-        super(BlockDamageEquippedEffect, self).__init__()
-        self.block = block
-        self.block_variance = block_variance
-        self.blocked_damage_types = blocked_damage_types
-
-    def effect(self, entity):
-        """
-        Causes the entity that to block some damage.
-        """
-        entity.add_spoof_child(BlockDamageHealthSpoof(self.block,
-                                                      self.block_variance,
-                                                      self.blocked_damage_types))
+def set_melee_weapon_component(item):
+    item.set_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
+    item.set_child(ItemType(ItemType.WEAPON))
 
 
-class Sword(Composite):
+def new_sword():
     """
     A composite component representing a Sword item.
     """
-
-    def __init__(self):
-        super(Sword, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.ITEM))
-        self.set_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
-        self.set_child(ItemType(ItemType.WEAPON))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Mover())
-        self.set_child(Description("Iron Sword",
-                                   "This old blade has seen some "
-                                   "better days, it's as sharp as "
-                                   "ever tough."))
-        self.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-        self.set_child(DamageProvider(4, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
-        self.set_child(CharPrinter())
-        self.set_child(ReEquipAction())
-        self.set_child(DropAction())
-        self.set_child(PlayerThrowItemAction())
-        self.set_child(ThrowerNonBreak())
-        self.set_child(Weight(10))
-        self.set_child(Hit(16))
+    sword = Composite()
+    set_item_components(sword)
+    set_melee_weapon_component(sword)
+    sword.set_child(Description("Iron Sword",
+                               "This old blade has seen some "
+                               "better days, it's as sharp as "
+                               "ever tough."))
+    sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
+    sword.set_child(DamageProvider(4, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+    sword.set_child(Weight(10))
+    sword.set_child(Hit(16))
+    return sword
 
 
-class Knife(Sword):
+def new_knife():
     """
-    A composite component representing a Sword item.
+    A composite component representing a Knife item.
     """
-
-    def __init__(self):
-        super(Knife, self).__init__()
-        self.description.name = "Knife"
-        self.description.description = "A trusty knife, small and precise but will only inflict small wounds."
-        self.graphic_char.icon = icon.KNIFE
-        self.weight.value = 6
-        self.hit.value = 21
-        self.damage_provider.damage = 2
-        self.damage_provider.variance = 1
-
-
-class Ring(Composite):
-    """
-    The Ring of Invisibility will make the entity who equips it invisible.
-    """
-
-    def __init__(self):
-        super(Ring, self).__init__()
-        self.set_child(EquipmentType(equipment.EquipmentTypes.RING))
-        self.set_child(ItemType(ItemType.JEWELLRY))
-        self.set_child(GamePieceType(GamePieceType.ITEM))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Mover())
-        self.set_child(GraphicChar(None, colors.YELLOW, icon.RING))
-        self.set_child(CharPrinter())
-        self.set_child(ReEquipAction())
-        self.set_child(DropAction())
+    knife = Composite()
+    set_item_components(knife)
+    set_melee_weapon_component(knife)
+    knife.set_child(Description("Knife",
+                                "A trusty knife, small and precise but will only inflict small wounds."))
+    knife.set_child(GraphicChar(None, colors.GRAY, icon.KNIFE))
+    knife.set_child(DamageProvider(2, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+    knife.set_child(Weight(5))
+    knife.set_child(Hit(21))
+    return knife
 
 
-class RingOfInvisibility(Ring):
-    def __init__(self):
-        super(RingOfInvisibility, self).__init__()
-        self.graphic_char.color_fg = colors.CYAN
-        self.set_child(SetInvisibilityFlagEquippedEffect())
-        self.set_child(Description("Ring of Invisibility",
-                                   "The metal is warm to your skin, "
-                                   "this ring will make you invisible"))
+def set_ring_components(item):
+    item.set_child(EquipmentType(equipment.EquipmentTypes.RING))
+    item.set_child(ItemType(ItemType.JEWELLRY))
+    item.set_child(ReEquipAction())
+    item.set_child(Weight(2))
 
 
-class RingOfEvasion(Ring):
-    def __init__(self):
-        super(RingOfEvasion, self).__init__()
-        self.graphic_char.color_fg = colors.GREEN
-        self.set_child(StatBonusEquipEffect("evasion", 3))
-        self.set_child(Description("Ring of Evasion",
-                                   "The ring is light on your finger, "
-                                   "Its magic powers makes it easier for you to dodge attacks."))
+def new_ring_of_invisibility():
+    ring = Composite()
+    set_item_components(ring)
+    set_ring_components(ring)
+    ring.set_child(GraphicChar(None, colors.CYAN, icon.RING))
+    ring.set_child(SetInvisibilityFlagEquippedEffect())
+    ring.set_child(Description("Ring of Invisibility",
+                               "The metal is warm to your skin, "
+                               "this ring will make you invisible"))
+    return ring
 
 
-class RingOfStealth(Ring):
-    def __init__(self):
-        super(RingOfStealth, self).__init__()
-        self.graphic_char.color_fg = colors.BLUE
-        self.set_child(StatBonusEquipEffect("stealth", 3))
-        self.set_child(Description("Ring of Stealth",
-                                   "The ring is smooth to your skin, "
-                                   "Its magic powers makes it easier for you to sneak past enemies."))
+def new_ring_of_evasion():
+    ring = Composite()
+    set_item_components(ring)
+    set_ring_components(ring)
+    ring.set_child(GraphicChar(None, colors.GREEN, icon.RING))
+    ring.set_child(StatBonusEquipEffect("evasion", 3))
+    ring.set_child(Description("Ring of Evasion",
+                               "The ring is light on your finger, "
+                               "Its magic powers makes it easier for you to dodge attacks."))
+    return ring
 
 
-class RingOfStrength(Ring):
-    def __init__(self):
-        super(RingOfStrength, self).__init__()
-        self.graphic_char.color_fg = colors.ORANGE
-        self.set_child(StatBonusEquipEffect("strength", 3))
-        self.set_child(Description("Ring of Strength",
-                                   "The ring feels unnaturally heavy, "
-                                   "Its magic powers makes you stronger."))
+def new_ring_of_stealth():
+    ring = Composite()
+    set_item_components(ring)
+    set_ring_components(ring)
+    ring.set_child(GraphicChar(None, colors.BLUE, icon.RING))
+    ring.set_child(StatBonusEquipEffect("stealth", 3))
+    ring.set_child(Description("Ring of Stealth",
+                               "The ring is smooth to your skin, "
+                               "Its magic powers makes it easier for you to sneak past enemies."))
+    return ring
+
+
+def new_ring_of_strength():
+    ring = Composite()
+    set_item_components(ring)
+    set_ring_components(ring)
+    ring.set_child(GraphicChar(None, colors.ORANGE, icon.RING))
+    ring.set_child(StatBonusEquipEffect("strength", 3))
+    ring.set_child(Description("Ring of Strength",
+                               "The ring feels unnaturally heavy, "
+                               "Its magic powers makes you stronger."))
+    return ring
 
 
 class StatBonusEquipEffect(EquippedEffect):
@@ -514,30 +453,25 @@ class SetInvisibilityFlagEquippedEffect(EquippedEffect):
         self.parent.effect_queue.add(invisibility_effect)
 
 
-class HealthPotion(Composite):
-    def __init__(self):
-        """
-        Abstract class, subclasses of this class are potions,
-        """
-        super(HealthPotion, self).__init__()
-        self.set_child(ItemType(ItemType.POTION))
-        self.set_child(GamePieceType(GamePieceType.ITEM))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Mover())
-        self.set_child(Description("Health Potion",
-                                   "An unusual liquid\
-                                   contained in a glass bottle."))
-        self.set_child(GraphicChar(None, colors.PINK, icon.POTION))
-        self.set_child(CharPrinter())
-        self.set_child(Stacker("health_potion", 3))
-        self.set_child(HealingPotionDrinkAction())
-        self.set_child(DropAction())
-        self.set_child(PlayerAutoPickUp())
+def set_potion_components(item):
+    item.set_child(ItemType(ItemType.POTION))
+    item.set_child(GamePieceType(GamePieceType.ITEM))
+    item.set_child(PlayerAutoPickUp())
+    item.set_child(ThrowerBreak())
+    item.set_child(Weight(4))
+    #potion.set_child(Stacker("health_potion", 3))
 
-        self.set_child(ThrowerBreak())
-        self.set_child(Weight(4))
-        self.set_child(PlayerThrowItemAction())
+
+def new_health_potion():
+    potion = Composite()
+    set_item_components(potion)
+    set_potion_components(potion)
+    potion.set_child(GraphicChar(None, colors.PINK, icon.POTION))
+    potion.set_child(HealthPotionDrinkAction())
+    potion.set_child(Description("Health Potion",
+                                 "An unusually thick liquid contained in a glass bottle."
+                                 "Drinking from it will heal you."))
+    return potion
 
 
 class Weight(Leaf):
@@ -685,13 +619,13 @@ class DrinkAction(Action):
         pass
 
 
-class HealingPotionDrinkAction(DrinkAction):
+class HealthPotionDrinkAction(DrinkAction):
     """
     Defines the healing potion drink action.
     """
 
     def __init__(self):
-        super(HealingPotionDrinkAction, self).__init__()
+        super(HealthPotionDrinkAction, self).__init__()
         self.component_type = "health_potion_drink_action"
         self.min_heal = 10
         self.max_heal = 15
