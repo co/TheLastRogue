@@ -1,0 +1,9 @@
+Ratman
+    health 8
+    strength 3
+    evasion 16
+    hit 13
+    armor 4
+    stealth 7
+    awareness 5
+    monsterThrowStoneAction 30

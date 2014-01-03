@@ -65,7 +65,6 @@ def new_ratman(gamestate):
     set_monster_components(ratman, gamestate)
     set_humanoid_components(ratman)
 
-    #Ratman
     ratman.set_child(Description("Ratman", "A Rat/Man hybrid it looks hostile."))
     ratman.set_child(EntityMessages("The ratman looks at you.", "The ratman is beaten to a pulp."))
     ratman.set_child(GraphicChar(None, colors.ORANGE, icon.RATMAN))

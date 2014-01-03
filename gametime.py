@@ -10,5 +10,6 @@ half_turn = 60
 two_thirds_turn = 80
 three_quarter_turn = 90
 single_turn = 120
+single_turn_and_one_third = 160
 one_and_half_turn = 180
 double_turn = 240
