@@ -1,3 +1,5 @@
+# Lines starting with # will be ignored.
+
 [Screen]
 #  Change resolution here, the deafult/minimum resolution is: 1024x768
 #  The real resolution will be the nearest even divisor of the tile width (default tileset: 16px)
