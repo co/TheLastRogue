@@ -68,15 +68,4 @@ class ConsoleVisual(object):
     def print_screen(self):
         libtcod.sys_save_screenshot()
 
-
-class GrahicChar(object):
-    """
-    Composites holding this has a graphical representation as a char.
-    """
-    def __init__(self, color_bg, color_fg, icon):
-        super(GrahicChar, self).__init__()
-        self.icon = icon
-        self.color_bg = color_bg
-        self.color_fg = color_fg
-
 console = ConsoleVisual(settings.SCREEN_WIDTH, settings.SCREEN_HEIGHT)

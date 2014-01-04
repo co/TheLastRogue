@@ -1,7 +1,7 @@
+from graphic import GraphicChar
 import icon
 import colors
 import libtcodpy as libtcod
-from console import GrahicChar
 import settings
 
 
@@ -37,15 +37,15 @@ class RectangleStyle3D(RectangleStyle):
         dark = colors.DARK_BLUE
         very_dark = colors.BLACK
         very_light = colors.WHITE
-        self.center = GrahicChar(medium, medium, ' ')
-        self.top = GrahicChar(light, light, ' ')
+        self.center = GraphicChar(medium, medium, ' ')
+        self.top = GraphicChar(light, light, ' ')
         self.left = self.top
-        self.bottom = GrahicChar(dark, dark, ' ')
+        self.bottom = GraphicChar(dark, dark, ' ')
         self.right = self.bottom
-        self.top_left = GrahicChar(light, very_light, '\\')
-        self.top_right = GrahicChar(light, dark, 243)
-        self.bottom_left = GrahicChar(light, dark, 243)
-        self.bottom_right = GrahicChar(dark, very_dark, '\\')
+        self.top_left = GraphicChar(light, very_light, '\\')
+        self.top_right = GraphicChar(light, dark, 243)
+        self.bottom_left = GraphicChar(light, dark, 243)
+        self.bottom_right = GraphicChar(dark, very_dark, '\\')
 
         self.title_separator_left = self.top
         self.title_separator_right = self.top
@@ -55,12 +55,12 @@ class FinalFantasyClassicStyle(RectangleStyle):
     def __init__(self):
         white = colors.WHITE
         blue = colors.BLUE_D
-        self.center = GrahicChar(blue, blue, ' ')
-        self.top = GrahicChar(blue, white, libtcod.CHAR_HLINE)
-        self.left = GrahicChar(blue, white, libtcod.CHAR_VLINE)
+        self.center = GraphicChar(blue, blue, ' ')
+        self.top = GraphicChar(blue, white, libtcod.CHAR_HLINE)
+        self.left = GraphicChar(blue, white, libtcod.CHAR_VLINE)
         self.bottom = self.top
         self.right = self.left
-        self.top_left = GrahicChar(blue, white, libtcod.CHAR_DIAMOND)
+        self.top_left = GraphicChar(blue, white, libtcod.CHAR_DIAMOND)
         self.top_right = self.top_left
         self.bottom_left = self.top_left
         self.bottom_right = self.top_left
@@ -73,69 +73,69 @@ class MinimalClassicStyle(RectangleStyle):
     def __init__(self):
         bg = colors.INTERFACE_BG
         fg = colors.INTERFACE_FG
-        self.center = GrahicChar(bg, bg, ' ')
-        self.top = GrahicChar(bg, fg, libtcod.CHAR_DHLINE)
-        self.left = GrahicChar(bg, fg, libtcod.CHAR_DVLINE)
+        self.center = GraphicChar(bg, bg, ' ')
+        self.top = GraphicChar(bg, fg, libtcod.CHAR_DHLINE)
+        self.left = GraphicChar(bg, fg, libtcod.CHAR_DVLINE)
         self.bottom = self.top
         self.right = self.left
-        self.top_left = GrahicChar(bg, fg, libtcod.CHAR_DNW)
-        self.top_right = GrahicChar(bg, fg, libtcod.CHAR_DNE)
-        self.bottom_left = GrahicChar(bg, fg, libtcod.CHAR_DSW)
-        self.bottom_right = GrahicChar(bg, fg, libtcod.CHAR_DSE)
+        self.top_left = GraphicChar(bg, fg, libtcod.CHAR_DNW)
+        self.top_right = GraphicChar(bg, fg, libtcod.CHAR_DNE)
+        self.bottom_left = GraphicChar(bg, fg, libtcod.CHAR_DSW)
+        self.bottom_right = GraphicChar(bg, fg, libtcod.CHAR_DSE)
 
-        self.title_separator_left = GrahicChar(bg, fg, 181)
-        self.title_separator_right = GrahicChar(bg, fg, 198)
+        self.title_separator_left = GraphicChar(bg, fg, 181)
+        self.title_separator_right = GraphicChar(bg, fg, 198)
 
 
 class MinimalClassicStyle2(RectangleStyle):
     def __init__(self):
         bg = colors.INTERFACE_BG
         fg = colors.INTERFACE_FG
-        self.center = GrahicChar(bg, bg, ' ')
-        self.top = GrahicChar(bg, fg, libtcod.CHAR_DHLINE)
-        self.left = GrahicChar(bg, fg, libtcod.CHAR_VLINE)
+        self.center = GraphicChar(bg, bg, ' ')
+        self.top = GraphicChar(bg, fg, libtcod.CHAR_DHLINE)
+        self.left = GraphicChar(bg, fg, libtcod.CHAR_VLINE)
         self.bottom = self.top
         self.right = self.left
-        self.top_left = GrahicChar(bg, fg, 213)
-        self.top_right = GrahicChar(bg, fg, 184)
-        self.bottom_left = GrahicChar(bg, fg, 212)
-        self.bottom_right = GrahicChar(bg, fg, 190)
+        self.top_left = GraphicChar(bg, fg, 213)
+        self.top_right = GraphicChar(bg, fg, 184)
+        self.bottom_left = GraphicChar(bg, fg, 212)
+        self.bottom_right = GraphicChar(bg, fg, 190)
 
-        self.title_separator_left = GrahicChar(bg, fg, 181)
-        self.title_separator_right = GrahicChar(bg, fg, 198)
+        self.title_separator_left = GraphicChar(bg, fg, 181)
+        self.title_separator_right = GraphicChar(bg, fg, 198)
 
 
 class MinimalTopCard(RectangleStyle):
     def __init__(self):
         bg = colors.INTERFACE_BG
         fg = colors.INTERFACE_FG
-        self.center = GrahicChar(bg, bg, ' ')
-        self.top = GrahicChar(bg, fg, libtcod.CHAR_DHLINE)
-        self.left = GrahicChar(bg, fg, libtcod.CHAR_VLINE)
+        self.center = GraphicChar(bg, bg, ' ')
+        self.top = GraphicChar(bg, fg, libtcod.CHAR_DHLINE)
+        self.left = GraphicChar(bg, fg, libtcod.CHAR_VLINE)
         self.bottom = self.center
         self.right = self.left
-        self.top_left = GrahicChar(bg, fg, 213)
-        self.top_right = GrahicChar(bg, fg, 184)
+        self.top_left = GraphicChar(bg, fg, 213)
+        self.top_right = GraphicChar(bg, fg, 184)
         self.bottom_left = self.left
         self.bottom_right = self.right
 
-        self.title_separator_left = GrahicChar(bg, fg, 181)
-        self.title_separator_right = GrahicChar(bg, fg, 198)
+        self.title_separator_left = GraphicChar(bg, fg, 181)
+        self.title_separator_right = GraphicChar(bg, fg, 198)
 
 
 class ChestStyle(RectangleStyle):
     def __init__(self):
         self.light = colors.ORANGE_D
         self.dark = colors.DARK_BROWN
-        self.center = GrahicChar(self.dark, self.light, icon.BIG_CENTER_DOT)
-        self.top = GrahicChar(self.light, self.dark, libtcod.CHAR_SUBP_N)
-        self.left = GrahicChar(self.dark, self.light, libtcod.CHAR_SUBP_E)
-        self.bottom = GrahicChar(self.dark, self.light, libtcod.CHAR_SUBP_N)
-        self.right = GrahicChar(self.light, self.dark, libtcod.CHAR_SUBP_E)
-        self.top_left = GrahicChar(self.light, self.dark, libtcod.CHAR_NW)
-        self.top_right = GrahicChar(self.light, self.dark, libtcod.CHAR_NE)
-        self.bottom_left = GrahicChar(self.light, self.dark, libtcod.CHAR_SW)
-        self.bottom_right = GrahicChar(self.light, self.dark, libtcod.CHAR_SE)
+        self.center = GraphicChar(self.dark, self.light, icon.BIG_CENTER_DOT)
+        self.top = GraphicChar(self.light, self.dark, libtcod.CHAR_SUBP_N)
+        self.left = GraphicChar(self.dark, self.light, libtcod.CHAR_SUBP_E)
+        self.bottom = GraphicChar(self.dark, self.light, libtcod.CHAR_SUBP_N)
+        self.right = GraphicChar(self.light, self.dark, libtcod.CHAR_SUBP_E)
+        self.top_left = GraphicChar(self.light, self.dark, libtcod.CHAR_NW)
+        self.top_right = GraphicChar(self.light, self.dark, libtcod.CHAR_NE)
+        self.bottom_left = GraphicChar(self.light, self.dark, libtcod.CHAR_SW)
+        self.bottom_right = GraphicChar(self.light, self.dark, libtcod.CHAR_SE)
 
         self.title_separator_left = self.top
         self.title_separator_right = self.top
@@ -144,22 +144,22 @@ class ChestStyle(RectangleStyle):
 class MinimalChestStyle(ChestStyle):
     def __init__(self):
         super(MinimalChestStyle, self).__init__()
-        self.center = GrahicChar(self.dark, self.light, " ")
+        self.center = GraphicChar(self.dark, self.light, " ")
 
 
 class MinimalStyle(RectangleStyle):
     def __init__(self):
         bg = colors.INTERFACE_BG
         fg = colors.INTERFACE_FG
-        self.center = GrahicChar(bg, bg, ' ')
-        self.top = GrahicChar(bg, fg, ' ')
-        self.left = GrahicChar(bg, fg, ' ')
+        self.center = GraphicChar(bg, bg, ' ')
+        self.top = GraphicChar(bg, fg, ' ')
+        self.left = GraphicChar(bg, fg, ' ')
         self.bottom = self.top
         self.right = self.left
-        self.top_left = GrahicChar(bg, fg, libtcod.CHAR_NW)
-        self.top_right = GrahicChar(bg, fg, libtcod.CHAR_NE)
-        self.bottom_left = GrahicChar(bg, fg, libtcod.CHAR_SW)
-        self.bottom_right = GrahicChar(bg, fg, libtcod.CHAR_SE)
+        self.top_left = GraphicChar(bg, fg, libtcod.CHAR_NW)
+        self.top_right = GraphicChar(bg, fg, libtcod.CHAR_NE)
+        self.bottom_left = GraphicChar(bg, fg, libtcod.CHAR_SW)
+        self.bottom_right = GraphicChar(bg, fg, libtcod.CHAR_SE)
 
         self.title_separator_left = self.top
         self.title_separator_right = self.top
