@@ -8,6 +8,7 @@ resolution_height=768
 
 #The number of frames each animation frame will show up, will mostly effect blink animations in the game.
 animation_delay=3
+missile_animation_delay=2
 
 #Max frames per second, a higher value may speed up the game.
 fps=20

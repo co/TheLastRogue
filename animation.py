@@ -1,4 +1,5 @@
 from console import console
+import settings
 
 
 class InstantAnimation(object):
@@ -19,9 +20,10 @@ class MissileAnimation(InstantAnimation):
 
     def run_animation(self):
         for point in self.path:
-            self.game_state.force_draw()
+            self.game_state.prepare_draw()
             self.print_missile_at_point(point)
-            console.flush()
+            for _ in range(settings.MISSILE_ANIMATION_DELAY):
+                console.flush()
 
     def print_missile_at_point(self, point):
         x, y = self.camera.dungeon_to_screen_position(point)

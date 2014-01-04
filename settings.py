@@ -11,6 +11,7 @@ defaults = {
     'resolution_width': '1024',
     'resolution_height': '768',
     'animation_delay': '3',
+    'missile_animation_delay': '2',
     'fps': '20',
     'full_screen': 'False',
 
@@ -59,6 +60,7 @@ MINIMUM_HEIGHT = MINIMUM_RESOLUTION_HEIGHT / 16
 SCREEN_WIDTH = max(config.getint('Screen', 'resolution_width'), MINIMUM_RESOLUTION_WIDTH) / tile_width
 SCREEN_HEIGHT = max(config.getint('Screen', 'resolution_height'), MINIMUM_RESOLUTION_HEIGHT) / tile_width
 ANIMATION_DELAY = config.getint('Screen', 'animation_delay')
+MISSILE_ANIMATION_DELAY = config.getint('Screen', 'missile_animation_delay')
 FULL_SCREEN = config.getboolean('Screen', 'full_screen')
 FPS = config.getint('Screen', 'fps')
 
