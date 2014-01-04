@@ -13,8 +13,7 @@ from mover import Mover, Stepper, CanShareTileEntityMover, ImmobileStepper
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
 import rng
-import settings
-from stats import AttackSpeed, Faction, GameState, Evasion, Stealth, Awareness, Armor
+from stats import AttackSpeed, Faction, GameState, Evasion, Stealth, Awareness, Armor, Flag
 from stats import MovementSpeed, Strength, GamePieceType, Hit
 from statusflags import StatusFlags
 from text import Description, EntityMessages
@@ -57,7 +56,8 @@ def set_monster_components(monster_composite, game_state):
 
 def set_humanoid_components(humanoid_component):
     humanoid_component.set_child(BleedWhenDamaged())
-    humanoid_component.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.HAS_MIND, StatusFlags.IS_ALIVE]))
+    humanoid_component.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.HAS_MIND,
+                                              StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
     humanoid_component.set_child(LeaveCorpseOnDeath())
 
 
@@ -68,7 +68,7 @@ def new_ratman(gamestate):
 
     #Ratman
     ratman.set_child(Description("Ratman", "A Rat/Man hybrid it looks hostile."))
-    ratman.set_child(EntityMessages("The ratman looks at you.", "The ratman is beaten to a pulp."))
+    ratman.set_child(EntityMessages("The ratman looks at you.", "The ratman falls dead."))
     ratman.set_child(GraphicChar(None, colors.ORANGE, icon.RATMAN))
 
     ratman.set_child(Health(8))
@@ -86,8 +86,8 @@ def new_cyclops(game_state):
     cyclops = Composite()
     set_monster_components(cyclops, game_state)
     set_humanoid_components(cyclops)
-    cyclops.set_child(EntityMessages("The cyclops looks at you.",
-                                     "The cyclops is mangled to the floor."))
+    cyclops.set_child(EntityMessages("The eye of the cyclops watches at you.",
+                                     "The cyclops is dead."))
     cyclops.set_child(Description("Cyclops",
                                   "A Giant with a single disgusting eye, it's looking for prey."))
     cyclops.set_child(GraphicChar(None, colors.CYAN, icon.CYCLOPS))
@@ -110,6 +110,7 @@ def new_jericho(gamestate):
     jericho = new_ratman(gamestate)
     jericho.description.name = "Jericho"
     jericho.entity_messages.death_message = "Jericho the quick is no more."
+    jericho.set_child(Flag("is_named"))
     jericho.graphic_char.color_fg = colors.YELLOW
     jericho.actor.energy_recovery = gametime.double_energy_gain
     return jericho
@@ -124,10 +125,8 @@ def new_ghost(gamestate):
     set_monster_components(ghost, gamestate)
     set_ghost_components(ghost)
 
-    ghost.set_child(EntityMessages("The ghost sees you.",
-                                   "The ghost fades away."))
-    ghost.set_child(Description("Ghost",
-                                "A spirit of a hunted creature."))
+    ghost.set_child(EntityMessages("The ghost sees you.", "The ghost fades away."))
+    ghost.set_child(Description("Ghost", "A spirit of a hunted creature."))
     ghost.set_child(GraphicChar(None, colors.BLUE, icon.GHOST))
     ghost.set_child(Health(1))
     ghost.set_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
@@ -159,7 +158,7 @@ class AddGhostReviveToSeenEntities(Leaf):
             if (entity.status_flags.has_status(StatusFlags.IS_ALIVE) and
                     entity.status_flags.has_status(StatusFlags.HAS_MIND) and
                     not entity.has_child("is_player")):
-                effect = ReviveAsGhostOnDeath()
+                effect = ReviveAsGhostOnDeath(self.parent)
                 entity.effect_queue.add(AddSpoofChild(self.parent, effect, 1))
 
 
@@ -168,20 +167,28 @@ class ReviveAsGhostOnDeath(Leaf):
     Will remove the parent from the dungeon when parent Entity dies.
     """
 
-    def __init__(self):
+    def __init__(self, source_entity):
         super(ReviveAsGhostOnDeath, self).__init__()
         self.component_type = "revive_as_ghost_on_death"
+        self.source_entity = source_entity
 
     def on_tick(self, time):
         if self.parent.health.is_dead():
             ghost = new_ghost(self.parent.game_state.value)
             ghost.mover.replace_move(self.parent.position.value, self.parent.dungeon_level.value)
             self._animate(ghost)
+            self._send_revive_message()
             _skip_turn(ghost)
 
     def _animate(self, ghost):
         ghost.char_printer.append_default_graphic_frame()
         ghost.char_printer.append_graphic_char_temporary_frames([self.parent.graphic_char])
+
+    def _send_revive_message(self):
+        messenger.msg.send_visual_message(
+            messenger.HAUNT_MESSAGE % {"source_entity": self.source_entity.description.name,
+                                       "target_entity": self.parent.description.name},
+            self.parent.position.value)
 
 
 def _skip_turn(entity):
@@ -202,11 +209,9 @@ def new_slime(game_state):
 
     slime.set_child(CanShareTileEntityMover())
     slime.set_child(DissolveEntitySlimeShareTileEffect())
-    slime.set_child(EntityMessages("The slime seems to wobble with happiness.",
-                                   "The slime melts away."))
+    slime.set_child(EntityMessages("The slime seems to wobble with happiness.", "The slime melts away."))
     slime.set_child(Description("Slime",
-                                "Slime, slime, slime. Ugh, I hate Slimes."
-                                "The slime seem to sense at you..."))
+                                "Slime, slime, slime. Ugh, I hate Slimes." "The slime seem to sense at you..."))
     slime.set_child(GraphicChar(None, colors.GREEN, icon.SLIME))
     slime.set_child(Health(35))
     slime.set_child(Strength(2))

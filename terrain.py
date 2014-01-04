@@ -2,7 +2,7 @@ from compositecore import Leaf, Composite
 from graphic import GraphicChar, CharPrinter, GraphicCharTerrainCorners
 from mover import Mover
 from position import Position, DungeonLevel
-from stats import GamePieceType
+from stats import GamePieceType, Flag
 from statusflags import StatusFlags
 import colors
 import icon
@@ -27,6 +27,7 @@ class TerrainFactory(object):
 terrain_factory = TerrainFactory()
 
 
+# TODO: Why not use Flag?
 class IsSolid(Leaf):
     def __init__(self, is_solid=True):
         super(IsSolid, self).__init__()
@@ -165,13 +166,7 @@ class Door(Composite):
 
         self.set_child(OpenDoorAction())
         self.set_child(OpenDoorBumpAction())
-        self.set_child(IsDoor())
-
-
-class IsDoor(Leaf):
-    def __init__(self):
-        super(IsDoor, self).__init__()
-        self.component_type = "is_door"
+        self.set_child(Flag("is_door"))
 
 
 class OpenDoorAction(Leaf):

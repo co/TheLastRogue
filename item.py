@@ -9,7 +9,8 @@ from missileaction import PlayerThrowItemAction
 from mover import Mover
 from position import Position, DungeonLevel
 import rng
-from stats import GamePieceType, Hit, DataPointBonusSpoof, DataPoint
+from stats import GamePieceType, Hit, DataPointBonusSpoof, DataPoint, Flag
+from statusflags import StatusFlags
 from text import Description
 import action
 import colors
@@ -136,7 +137,7 @@ def new_heart_stop_device():
     set_device_components(device)
     device.set_child(Description("Dev. of Heart Stop",
                                  "This ancient device will cause a random creature on the floor to have a heart attack."))
-    device.set_child(DarknessDeviceAction())
+    device.set_child(HeartStopDeviceAction())
     device.set_child(GraphicChar(None, colors.BLUE, icon.MACHINE))
     return device
 
@@ -208,24 +209,13 @@ class HeartStopDeviceAction(ActivateDeviceAction):
         and define the activate action here.
         """
         ttl = gametime.single_turn * (random.randrange(3) + 2)
-        entities = source_entity.dungeon_level.value.entities
-        if source_entity in entities:
-            entities.remove(source_entity)
+        entities = [entity for entity in source_entity.dungeon_level.value.entities
+                    if entity.status_flags.has_status(StatusFlags.HAS_HEART) and not entity is source_entity]
         if len(entities) < 1:
             return
         target = random.sample(entities, 1)[0]
         heart_stop_effect = entityeffect.HeartStop(source_entity, time_to_live=ttl)
         target.effect_queue.add(heart_stop_effect)
-
-
-class IsAmmo(Leaf):
-    """
-    Parent component holding this is some kind of ammo.
-    """
-
-    def __init__(self):
-        super(IsAmmo, self).__init__()
-        self.component_type = "is_ammo"
 
 
 class Stacker(Leaf):
@@ -253,7 +243,7 @@ def new_ammunition():
     ammo = Composite()
     set_item_components(ammo)
     ammo.set_child(ItemType(ItemType.AMMO))
-    ammo.set_child(IsAmmo())
+    ammo.set_child(Flag("is_ammo"))
     ammo.set_child(Stacker("ammo", 10, random.randrange(2, 6)))
     ammo.set_child(Description("Gun Bullets",
                                "These bullets will fit in most guns."))

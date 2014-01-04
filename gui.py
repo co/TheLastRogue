@@ -470,10 +470,8 @@ class CommandListPanel(UIElement):
 
     def turn_page(self):
         if self.current_page_index < len(self._pages) - 1:
-            print self.current_page_index
             self.current_page_index += 1
         else:
-            print "yy", self.current_page_index
             self.current_page_index = - 1
 
 

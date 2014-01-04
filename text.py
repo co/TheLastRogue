@@ -8,8 +8,22 @@ class Description(Leaf):
     def __init__(self, name, description):
         super(Description, self).__init__()
         self.component_type = "description"
-        self.name = name
+        self._name = name
         self.description = description
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def long_name(self):
+        if self.parent.has_child("is_named"):
+            return self._name
+        else:
+            return "the " + self._name
+    @name.setter
+    def name(self, value):
+        self._name = value
 
     def copy(self):
         """

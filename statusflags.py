@@ -11,6 +11,7 @@ class StatusFlags(Leaf):
     HAS_MIND = 3
     IS_ALIVE = 4
     CAN_OPEN_DOORS = 5
+    HAS_HEART = 6
 
     def __init__(self, status_flags=[]):
         super(StatusFlags, self).__init__()

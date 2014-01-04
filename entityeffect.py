@@ -112,13 +112,20 @@ class StatusRemover(EntityEffect):
 
 
 class HeartStop(EntityEffect):
-    def __init__(self, source_entity, time_to_live=1):
+    def __init__(self, source_entity, time_to_live=1, message=messenger.HEART_STOP_MESSAGE):
         super(HeartStop, self).__init__(source_entity, time_to_live, EffectTypes.STATUS_REMOVER)
+        self.message = message
+
+    def send_message(self):
+        messenger.msg.send_visual_message(self.message % {"source_entity": self.source_entity.description.long_name,
+                                                          "target_entity": self.target_entity.description.long_name},
+                                          self.target_entity.position.value)
 
     def update(self, time_spent):
         if self.is_new_round(time_spent):
             gray_heart = GraphicChar(None, colors.GRAY, icon.HEART)
             self.target_entity.char_printer.append_graphic_char_temporary_frames([gray_heart])
+            self.send_message()
         self.tick(time_spent)
 
     def _on_remove_effect(self):
@@ -170,13 +177,13 @@ class DamageEntityEffect(EntityEffect):
         self.hit_message = hit_message
 
     def send_miss_message(self):
-        messenger.msg.send_visual_message(self.miss_message % {"source_entity": self.source_entity.description.name,
-                                                   "target_entity": self.target_entity.description.name},
+        messenger.msg.send_visual_message(self.miss_message % {"source_entity": self.source_entity.description.long_name,
+                                                   "target_entity": self.target_entity.description.long_name},
                                           self.target_entity.position.value)
 
     def send_hit_message(self, damage_caused):
-        m = self.hit_message % {"source_entity": self.source_entity.description.name,
-                                "target_entity": self.target_entity.description.name,
+        m = self.hit_message % {"source_entity": self.source_entity.description.long_name,
+                                "target_entity": self.target_entity.description.long_name,
                                 "damage": str(damage_caused)}
         messenger.msg.send_visual_message(m,
                                           self.target_entity.position.value)
@@ -217,8 +224,8 @@ class UndodgeableDamagAndBlockSameEffect(EntityEffect):
         self.damage_message = damage_message
 
     def send_damage_message(self, damage_caused):
-        messenger.msg.send_visual_message(self.damage_message % {"source_entity": self.source_entity.description.name,
-                                                     "target_entity": self.target_entity.description.name,
+        messenger.msg.send_visual_message(self.damage_message % {"source_entity": self.source_entity.description.long_name,
+                                                     "target_entity": self.target_entity.description.long_name,
                                                      "damage": str(damage_caused)},
                                           self.target_entity.position.value)
 
@@ -239,8 +246,8 @@ class Heal(EntityEffect):
         self.heal_message = heal_message
 
     def message(self):
-        messenger.msg.send_visual_message(self.heal_message % {"source_entity": self.source_entity.description.name,
-                                                   "target_entity": self.target_entity.description.name,
+        messenger.msg.send_visual_message(self.heal_message % {"source_entity": self.source_entity.description.long_name,
+                                                   "target_entity": self.target_entity.description.long_name,
                                                    "health": str(self.health)},
                                           self.target_entity.position.value)
 
@@ -271,9 +278,9 @@ class Equip(EntityEffect):
         self.equip_message = equip_message
 
     def message(self):
-        messenger.msg.send_visual_message(self.equip_message % {"source_entity": self.source_entity.description.name,
-                                                    "target_entity": self.target_entity.description.name,
-                                                    "item": self.item.description.name},
+        messenger.msg.send_visual_message(self.equip_message % {"source_entity": self.source_entity.description.long_name,
+                                                    "target_entity": self.target_entity.description.long_name,
+                                                    "item": self.item.description.long_name},
                                           self.target_entity.position.value)
 
     def update(self, time_spent):
@@ -307,9 +314,9 @@ class Unequip(EntityEffect):
         self.unequip_message = messenger.UNEQUIP_MESSAGE
 
     def message(self):
-        messenger.msg.send_visual_message(self.unequip_message % {"source_entity": self.source_entity.description.name,
-                                                      "target_entity": self.target_entity.description.name,
-                                                      "item": self.item.description.name},
+        messenger.msg.send_visual_message(self.unequip_message % {"source_entity": self.source_entity.description.long_name,
+                                                      "target_entity": self.target_entity.description.long_name,
+                                                      "item": self.item.description.long_name},
                                           self.target_entity.position.value)
 
     def update(self, time_spent):
@@ -331,8 +338,8 @@ class ReEquip(EntityEffect):
         self.item = item
 
     def message(self):
-        message = "%s equips %s." % (self.source_entity.description.name,
-                                     self.item.description.name)
+        message = "%s equips %s." % (self.source_entity.description.long_name,
+                                     self.item.description.long_name)
         messenger.msg.send_visual_message(message,
                                           self.target_entity.position.value)
 

@@ -6,6 +6,9 @@ DISSOLVE_MESSAGE = "%(source_entity)s dissolves %(target_entity)s for %(damage)s
 HIT_MESSAGE = "%(source_entity)s hits %(target_entity)s for %(damage)s damage."
 MISS_MESSAGE = "%(source_entity)s misses %(target_entity)s."
 
+HAUNT_MESSAGE = "%(source_entity)s haunts the %(target_entity)s!"
+
+HEART_STOP_MESSAGE = "%(target_entity)s, clutches its heart."
 PICK_UP_MESSAGE = "You pick up %(item)s"
 
 DOWN_STAIRS_HEAL_MESSAGE = "Your feel vitalized by your progress, you regain %(health)s health."
@@ -34,7 +37,7 @@ class Messenger(object):
         self._message(new_message)
 
     def _message(self, new_message):
-        new_message = Message(new_message)
+        new_message = Message(new_message.capitalize())
         old_message = next((message for message in self._messages
                            if message.message == new_message.message and
                               message.ttl == new_message.ttl), None)

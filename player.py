@@ -12,8 +12,9 @@ from missileaction import PlayerThrowStoneAction
 from mover import Mover, Stepper
 from ondeath import LeaveCorpseOnDeath
 from position import Position, DungeonLevel
-from stats import AttackSpeed, Faction, GameState, GamePieceType, Stealth, Awareness, Armor
-from stats import MovementSpeed, Strength, IsPlayer, Evasion, Hit
+from stats import AttackSpeed, Faction, GameState, GamePieceType, Stealth, Awareness, Armor, Flag
+from stats import MovementSpeed, Strength, Evasion, Hit
+
 from statusflags import StatusFlags
 from text import Description
 from vision import Vision, SightRadius, AwarenessChecker
@@ -30,7 +31,8 @@ class Player(Composite):
     def __init__(self, game_state):
         super(Player, self).__init__()
         self.set_child(GamePieceType(GamePieceType.ENTITY))
-        self.set_child(IsPlayer())
+        self.set_child(Flag("is_player"))
+        self.set_child(Flag("is_named"))
 
         self.set_child(Position())
         self.set_child(DungeonLevel())

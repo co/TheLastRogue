@@ -12,6 +12,15 @@ class DataPoint(Leaf):
         self.value = value
 
 
+class Flag(Leaf):
+    """
+    Component which only has a component type. Composites with this component has this flag.
+    """
+    def __init__(self, component_type):
+        super(Flag, self).__init__()
+        self.component_type = component_type
+
+
 class DataPointBonusSpoof(Leaf):
     """
     Defines a bonus value, if this is added to an entity as spoof.
@@ -38,22 +47,13 @@ class Strength(DataPoint):
     def __init__(self, strength):
         super(Strength, self).__init__("strength", strength)
 
+
 class Armor(DataPoint):
     """
     Composites holding this has the armor attribute.
     """
     def __init__(self, strength):
         super(Armor, self).__init__("armor", strength)
-
-class IsPlayer(Leaf):
-    """
-    Component that marks the player.
-
-    Only the player should have this component.
-    """
-    def __init__(self):
-        super(IsPlayer, self).__init__()
-        self.component_type = "is_player"
 
 
 class Hit(DataPoint):
