@@ -13,6 +13,7 @@ from mover import Mover, Stepper, CanShareTileEntityMover, ImmobileStepper
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
 import rng
+import settings
 from stats import AttackSpeed, Faction, GameState, Evasion, Stealth, Awareness, Armor
 from stats import MovementSpeed, Strength, GamePieceType, Hit
 from statusflags import StatusFlags
@@ -114,12 +115,6 @@ def new_jericho(gamestate):
     return jericho
 
 
-class Ghost(Composite):
-    """
-    A composite component representing a Ghost monster.
-    """
-
-
 def set_ghost_components(ghost):
     ghost.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.HAS_MIND, StatusFlags.FLYING]))
 
@@ -162,7 +157,8 @@ class AddGhostReviveToSeenEntities(Leaf):
         seen_entities = self.parent.vision.get_seen_entities()
         for entity in seen_entities:
             if (entity.status_flags.has_status(StatusFlags.IS_ALIVE) and
-                    entity.status_flags.has_status(StatusFlags.HAS_MIND)):
+                    entity.status_flags.has_status(StatusFlags.HAS_MIND) and
+                    not entity.has_child("is_player")):
                 effect = ReviveAsGhostOnDeath()
                 entity.effect_queue.add(AddSpoofChild(self.parent, effect, 1))
 
@@ -179,8 +175,19 @@ class ReviveAsGhostOnDeath(Leaf):
     def on_tick(self, time):
         if self.parent.health.is_dead():
             ghost = new_ghost(self.parent.game_state.value)
-            ghost.mover.try_move_roll_over(self.parent.position.value,
-                                           self.parent.dungeon_level.value)
+            ghost.mover.replace_move(self.parent.position.value, self.parent.dungeon_level.value)
+            self._animate(ghost)
+            _skip_turn(ghost)
+
+    def _animate(self, ghost):
+        ghost.char_printer.append_default_graphic_frame()
+        ghost.char_printer.append_graphic_char_temporary_frames([self.parent.graphic_char])
+
+
+def _skip_turn(entity):
+    immobile_stepper = ImmobileStepper()
+    add_spoof_effect = AddSpoofChild(entity, immobile_stepper, gametime.single_turn)
+    entity.effect_queue.add(add_spoof_effect)
 
 
 def set_slime_components(slime):

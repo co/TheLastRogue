@@ -7,6 +7,7 @@ import geometry
 from graphic import GraphicChar
 import icon
 import rng
+import settings
 import shapegenerator
 import terrain
 
@@ -55,8 +56,8 @@ class HealthModifier(Leaf):
         """
         Adds a blink animation to hurt entity.
         """
-        self.parent.char_printer.append_fg_color_blink_frames([colors.LIGHT_PINK,
-                                                               colors.RED])
+        frame_length = max(settings.ANIMATION_DELAY / 2, 1)
+        self.parent.char_printer.append_fg_color_blink_frames([colors.LIGHT_PINK, colors.RED], frame_length)
 
     def heal(self, health):
         """

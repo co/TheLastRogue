@@ -52,7 +52,6 @@ class CharPrinter(Leaf):
         super(CharPrinter, self).__init__()
         self.component_type = "char_printer"
         self._temp_animation_frames = []
-        self._current_frame = settings.ANIMATION_DELAY
 
     @staticmethod
     def _draw(position, graphic_char, the_console=0):
@@ -71,17 +70,8 @@ class CharPrinter(Leaf):
     def _tick_animation(self):
         frame = None
         if len(self._temp_animation_frames) > 0:
-            if self._current_frame <= 0:
-                self._current_frame = settings.ANIMATION_DELAY
-                frame = self._temp_animation_frames.pop(0)
-            else:
-                self._current_frame -= 1
-                frame = self._temp_animation_frames[0]
+            frame = self._temp_animation_frames.pop(0)
         return frame
-
-    def reset_animation(self):
-        self._current_frame = settings.ANIMATION_DELAY
-        self._temp_animation_frames = []
 
     def draw(self, position, the_console=0):
         """
@@ -103,16 +93,17 @@ class CharPrinter(Leaf):
                                               self.parent.graphic_char.icon,
                                               console=the_console)
 
-    def append_graphic_char_temporary_frames(self, graphic_char_frames):
+    def append_graphic_char_temporary_frames(self, graphic_char_frames, animation_delay=settings.ANIMATION_DELAY):
         """
         Appends frames to the graphic char animation frame queue.
 
         These chars will be drawn as an effect,
         the regular chars won't be drawn until the animation frame queue is empty.
         """
-        self._temp_animation_frames.extend(graphic_char_frames)
+        frames = _expand_frames(graphic_char_frames, animation_delay)
+        self._temp_animation_frames.extend(frames)
 
-    def append_fg_color_blink_frames(self, frame_colors):
+    def append_fg_color_blink_frames(self, frame_colors, animation_delay=settings.ANIMATION_DELAY):
         """
             Appends frames to  the graphic char animation frame queue. With only fg_color changed.
 
@@ -122,7 +113,18 @@ class CharPrinter(Leaf):
         color_bg = self.parent.graphic_char.color_bg
         symbol = self.parent.graphic_char.icon
         frames = [GraphicChar(color_bg, color, symbol) for color in frame_colors]
-        self.append_graphic_char_temporary_frames(frames)
+        self.append_graphic_char_temporary_frames(frames, animation_delay)
+
+    def append_default_graphic_frame(self, frames=settings.ANIMATION_DELAY):
+        self.append_graphic_char_temporary_frames([self.parent.graphic_char], frames)
+
+
+def _expand_frames(graphic_char_frames, animation_delay):
+    frames = []
+    for frame in graphic_char_frames:
+        for _ in range(animation_delay):
+            frames.append(frame)
+    return frames
 
 
 class GraphicCharTerrainCorners(GraphicChar):
