@@ -211,13 +211,13 @@ class ImmobileStepper(Stepper):
         return self.parent.movement_speed.value
 
 
-class CanShareTileEntityMover(Mover):
+class SlimeCanShareTileEntityMover(Mover):
     """
     Parent entities with this mover may enter tiles of other entities.
     """
 
     def __init__(self):
-        super(CanShareTileEntityMover, self).__init__()
+        super(SlimeCanShareTileEntityMover, self).__init__()
 
     def _can_fit_on_tile(self, tile):
         """
@@ -227,9 +227,10 @@ class CanShareTileEntityMover(Mover):
         """
         piece_type = self.parent.game_piece_type.value
         entities_on_tile = tile.game_pieces[piece_type]
-        if len(entities_on_tile) > 1:
-            return False
-        return True
+        if (len(entities_on_tile) == 0 or
+                (len(entities_on_tile) == 1 and not entities_on_tile[0].has_child("is_slime"))):
+            return True
+        return False
 
 
 def teleport_monsters(player):

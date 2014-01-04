@@ -42,7 +42,10 @@ class Dungeon(object):
 
         for _ in range(random.randrange(int(depth / 2), int(depth / 2) + 3) - 1):
             if rng.coin_flip() or rng.coin_flip():
-                slime = monster.new_slime(self.game_state)
+                if rng.coin_flip() and rng.coin_flip():
+                    slime = monster.new_dark_slime(self.game_state)
+                else:
+                    slime = monster.new_slime(self.game_state)
                 spawner.place_piece_on_random_tile(slime, dungeon_level)
 
         if depth == (len(self._dungeon_levels) - 1):

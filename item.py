@@ -65,7 +65,7 @@ def new_gun():
     set_ranged_weapon_components(gun)
     gun.set_child(RangeWeaponType(RangeWeaponType.GUN))
     gun.set_child(Description("Gun",
-                               "This was once a fine weapon, \
+                              "This was once a fine weapon, \
                                but age has torn it real bad.\n\
                                The wooden handle is dry and gray, \
                                you see rust eating into the iron pipe."))
@@ -84,7 +84,7 @@ def new_sling():
     set_ranged_weapon_components(sling)
     sling.set_child(RangeWeaponType(RangeWeaponType.SLING))
     sling.set_child(Description("Sling",
-                               "This weapon propels rocks more effectively than throwing them would."))
+                                "This weapon propels rocks more effectively than throwing them would."))
     sling.set_child(GraphicChar(None, colors.ORANGE, icon.SLING))
     sling.set_child(WeaponRange(4))
     sling.set_child(DamageProvider(1, 2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
@@ -286,7 +286,7 @@ def new_leather_armor():
     armor.set_child(StatBonusEquipEffect("armor", 2))
     armor.set_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
     armor.set_child(Weight(10))
-    return  armor
+    return armor
 
 
 def new_leather_boots():
@@ -297,7 +297,7 @@ def new_leather_boots():
     set_item_components(boots)
     set_armor_components(boots)
     boots.set_child(Description("Leather Boots",
-                               "A worn pair of boots, dry mud covers most of the leather."))
+                                "A worn pair of boots, dry mud covers most of the leather."))
     boots.set_child(Weight(4))
     boots.set_child(GraphicChar(None, colors.ORANGE_D, icon.BOOTS))
     boots.set_child(StatBonusEquipEffect("armor", 1))
@@ -324,6 +324,7 @@ def new_leather_cap():
 def set_melee_weapon_component(item):
     item.set_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
     item.set_child(ItemType(ItemType.WEAPON))
+    item.set_child(ReEquipAction())
 
 
 def new_sword():
@@ -334,9 +335,7 @@ def new_sword():
     set_item_components(sword)
     set_melee_weapon_component(sword)
     sword.set_child(Description("Iron Sword",
-                               "This old blade has seen some "
-                               "better days, it's as sharp as "
-                               "ever tough."))
+                                "This old blade has seen some better days, it's as sharp as ever tough."))
     sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
     sword.set_child(DamageProvider(4, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
     sword.set_child(Weight(10))
@@ -351,8 +350,7 @@ def new_knife():
     knife = Composite()
     set_item_components(knife)
     set_melee_weapon_component(knife)
-    knife.set_child(Description("Knife",
-                                "A trusty knife, small and precise but will only inflict small wounds."))
+    knife.set_child(Description("Knife", "A trusty knife, small and precise but will only inflict small wounds."))
     knife.set_child(GraphicChar(None, colors.GRAY, icon.KNIFE))
     knife.set_child(DamageProvider(2, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
     knife.set_child(Weight(5))

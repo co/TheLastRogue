@@ -258,10 +258,11 @@ class Heal(EntityEffect):
 
 
 class AddSpoofChild(EntityEffect):
-    def __init__(self, source_entity, spoof_child, time_to_live):
+    def __init__(self, source_entity, spoof_child, time_to_live, no_stack_id=None):
         super(AddSpoofChild, self).__init__(source_entity=source_entity,
                                             effect_type=EffectTypes.ADD_SPOOF_CHILD,
-                                            time_to_live=time_to_live)
+                                            time_to_live=time_to_live,
+                                            no_stack_id=no_stack_id)
         self.spoof_child = spoof_child
 
     def update(self, time_spent):

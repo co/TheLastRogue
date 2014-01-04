@@ -220,6 +220,9 @@ class TestGameState(GameStateBase):
         slime = monster.new_slime(self)
         slime.mover.try_move((20, 18), self.dungeon_level)
 
+        dark_slime = monster.new_dark_slime(self)
+        dark_slime.mover.try_move((24, 18), self.dungeon_level)
+
         cyclops = monster.new_cyclops(self)
         cyclops.mover.try_move((2, 2), self.dungeon_level)
 

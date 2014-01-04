@@ -9,7 +9,7 @@ from inventory import Inventory
 import messenger
 from missileaction import MonsterThrowStoneAction, MonsterMagicRangeAction
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor
-from mover import Mover, Stepper, CanShareTileEntityMover, ImmobileStepper
+from mover import Mover, Stepper, SlimeCanShareTileEntityMover, ImmobileStepper
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
 import rng
@@ -66,7 +66,6 @@ def new_ratman(gamestate):
     set_monster_components(ratman, gamestate)
     set_humanoid_components(ratman)
 
-    #Ratman
     ratman.set_child(Description("Ratman", "A Rat/Man hybrid it looks hostile."))
     ratman.set_child(EntityMessages("The ratman looks at you.", "The ratman falls dead."))
     ratman.set_child(GraphicChar(None, colors.ORANGE, icon.RATMAN))
@@ -127,7 +126,7 @@ def new_ghost(gamestate):
 
     ghost.set_child(EntityMessages("The ghost sees you.", "The ghost fades away."))
     ghost.set_child(Description("Ghost", "A spirit of a hunted creature."))
-    ghost.set_child(GraphicChar(None, colors.BLUE, icon.GHOST))
+    ghost.set_child(GraphicChar(None, colors.LIGHT_BLUE, icon.GHOST))
     ghost.set_child(Health(1))
     ghost.set_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
     ghost.set_child(Strength(2))
@@ -199,6 +198,7 @@ def _skip_turn(entity):
 
 def set_slime_components(slime):
     slime.set_child(StatusFlags([StatusFlags.IS_ALIVE]))
+    slime.set_child(Flag("is_slime"))
     slime.remove_component_of_type("attacker")
 
 
@@ -207,7 +207,7 @@ def new_slime(game_state):
     set_monster_components(slime, game_state)
     set_slime_components(slime)
 
-    slime.set_child(CanShareTileEntityMover())
+    slime.set_child(SlimeCanShareTileEntityMover())
     slime.set_child(DissolveEntitySlimeShareTileEffect())
     slime.set_child(EntityMessages("The slime seems to wobble with happiness.", "The slime melts away."))
     slime.set_child(Description("Slime",
@@ -220,6 +220,29 @@ def new_slime(game_state):
     slime.set_child(Hit(15))
     slime.set_child(Stealth(7))
     slime.set_child(Awareness(5))
+    slime.set_child(Armor(3))
+    return slime
+
+
+def new_dark_slime(game_state):
+    slime = Composite()
+    set_monster_components(slime, game_state)
+    set_slime_components(slime)
+
+    slime.set_child(SlimeCanShareTileEntityMover())
+    slime.set_child(DissolveEntitySlimeShareTileEffect())
+    slime.set_child(BlockVisionShareTileEffect())
+    slime.set_child(EntityMessages("The dark slime seems to wobble with happiness.", "The dark slime melts away."))
+    slime.set_child(Description("Dark Slime",
+                                "Slime, slime, slime. Ugh, I hate Slimes." "The dark slime seem to sense at you..."))
+    slime.set_child(GraphicChar(None, colors.BLUE, icon.SLIME))
+    slime.set_child(Health(45))
+    slime.set_child(Strength(2))
+    slime.set_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
+    slime.set_child(Evasion(8))
+    slime.set_child(Hit(15))
+    slime.set_child(Stealth(7))
+    slime.set_child(Awareness(6))
     slime.set_child(Armor(3))
     return slime
 
@@ -291,3 +314,15 @@ class StuckInSlimeStepperSpoof(Stepper):
         immobile_stepper = ImmobileStepper()
         add_spoof_effect = AddSpoofChild(self.parent, immobile_stepper, gametime.single_turn)
         self._slime.effect_queue.add(add_spoof_effect)
+
+
+class BlockVisionShareTileEffect(EntityShareTileEffect):
+    def __init__(self):
+        super(BlockVisionShareTileEffect, self).__init__()
+        self.component_type = "block_vision_share_tile_effect"
+
+    def _effect(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        source_entity = kwargs["source_entity"]
+        darkness_effect = AddSpoofChild(source_entity, SightRadius(1), time_to_live=1)
+        target_entity.effect_queue.add(darkness_effect)

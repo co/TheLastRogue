@@ -17,9 +17,12 @@ class MissileAnimation(InstantAnimation):
         self.color_fg = color_fg
         self.path = path
         self.camera = game_state.current_stack.get_game_state().camera
+        self.player = game_state.player
 
     def run_animation(self):
         for point in self.path:
+            if not self.player.dungeon_mask.can_see_point(point):
+                continue
             self.game_state.prepare_draw()
             self.print_missile_at_point(point)
             for _ in range(settings.MISSILE_ANIMATION_DELAY):
