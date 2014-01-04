@@ -10,6 +10,13 @@ If you are on windows and don't need the latest build, you can download and play
 
 Download and unzip [this](http://coern.com/TLR_latest.7z "The Last Rogue"), run main.exe.
 
+##Getting started
+Configure your game by editing the config.txt, lines starting with # will be ignored. You probably want to increase the resolution.
+
+Start a new game, the available commands can be seen in the bottom left corner, it's not much so read all of it, all pages. 
+
+You're all set! Don't die, beware of cyclops.
+
 ##Installation
 ###Linux
 
