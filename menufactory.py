@@ -89,12 +89,15 @@ def get_menu_with_options(options, state_stack, x_border=4, y_border=5):
 
 
 def inventory_menu(player, state_stack):
-    menu_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=0)
-    heading = gui.TextBox("Inventory", (2, 1), colors.INVENTORY_HEADING, margin=style.menu_theme.margin)
-    menu_stack_panel.append(heading)
+    menu_stack_panel = gui.StackPanelVertical((2, 2), vertical_space=1)
+    heading_stack = gui.StackPanelHorizontal((0, 1), horizontal_space=1)
+    heading_stack.append(gui.SymbolUIElement((0, 0), graphic.GraphicChar(None, colors.INVENTORY_HEADING,
+                                                                         icon.INVENTORY_ICON)))
+    heading_stack.append(gui.TextBox("Inventory", (0, 0), colors.INVENTORY_HEADING))
+    menu_stack_panel.append(heading_stack)
 
     description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.rogue_classic_theme)
-    inventory_menu = menu.InventoryMenu((0, 0), player, state_stack, description_card, (2, 1), vertical_space=0)
+    inventory_menu = menu.InventoryMenu((0, 1), player, state_stack, description_card, (0, 0), vertical_space=0)
     menu_stack_panel.append(inventory_menu)
 
     inventory_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.MinimalChestStyle())
@@ -125,7 +128,6 @@ def filtered_by_action_item_menu(player, state_stack, item_action_tag, heading_t
     description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.rogue_classic_theme)
 
     menu_items = []
-    action_arguments = {"source_entity": player, "target_entity": player}
     for item in player.inventory.get_items_sorted():
         if len(item.get_children_with_tag(item_action_tag)) > 0:
             item_action = item.get_children_with_tag(item_action_tag)[0]
