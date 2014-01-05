@@ -192,6 +192,7 @@ class DarknessDeviceAction(ActivateDeviceAction):
         for entity in entities:
             darkness_effect = entityeffect.AddSpoofChild(source_entity, SightRadius(1), time_to_live=ttl)
             entity.effect_queue.add(darkness_effect)
+            msg.send_global_message(messenger.DARKNESS_MESSAGE)
 
 
 class HeartStopDeviceAction(ActivateDeviceAction):

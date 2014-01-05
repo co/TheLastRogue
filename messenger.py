@@ -9,6 +9,7 @@ MISS_MESSAGE = "%(source_entity)s misses %(target_entity)s."
 HAUNT_MESSAGE = "%(source_entity)s haunts the %(target_entity)s!"
 
 HEART_STOP_MESSAGE = "%(target_entity)s, clutches its heart."
+DARKNESS_MESSAGE = "An unnatural darkness fills the dungeon."
 PICK_UP_MESSAGE = "You pick up %(item)s"
 
 DOWN_STAIRS_HEAL_MESSAGE = "Your feel vitalized by your progress, you regain %(health)s health."
