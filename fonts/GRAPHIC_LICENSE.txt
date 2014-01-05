@@ -1,9 +1,9 @@
-This license file specifies the license of the graphic in the:
+﻿This license file specifies the license of the graphic in the:
 terminal16x16_gs_roh.png file.
 
 Attribution 4.0 International (CC BY 4.0)
 The license can be read at: http://creativecommons.org/licenses/by/4.0/deed.en_US
 
 Authors:
-Fredrik Rambo Högbom
+Fredrik Högbom
 Carl-Oscar Erneholm
