@@ -29,7 +29,7 @@ class DungeonCreatorVisualizer(state.State):
     def generate_dungeon_level(self):
         size = 700
         depth = 1
-        self.dungeon_level = dgen.generate_dungeon_exploded_rooms(size, depth)
+        self.dungeon_level = dgen.generate_dungeon_floor(size, depth)
 
     def random_explosion(self):
         dungeon_level = self.dungeon_level

@@ -27,7 +27,7 @@ class Dungeon(object):
         size = 600 + depth * 20
 
         dungeon_level = time_it("dungeon_level_generation",
-                                (lambda: dungeongenerator.generate_dungeon_exploded_rooms(size, depth)))
+                                (lambda: dungeongenerator.generate_dungeon_floor(size, depth)))
         for _ in range(int(depth * 1.5) + 4):
             if rng.coin_flip() and rng.coin_flip():
                 ghost = monster.new_ghost(self.game_state)

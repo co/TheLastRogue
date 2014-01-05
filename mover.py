@@ -127,8 +127,7 @@ class Mover(Leaf):
             return True
         if self.has_sibling("status_flags"):
             status_flags = self.parent.status_flags
-            if (terrain_to_pass.has_child("is_chasm") and terrain_to_pass.is_chasm.value
-                and status_flags.has_status(StatusFlags.FLYING)):
+            if terrain_to_pass.has_child("is_chasm") and status_flags.has_status(StatusFlags.FLYING):
                 return True
             if(status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
                terrain_to_pass.has_child("is_door")):

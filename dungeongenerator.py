@@ -13,26 +13,6 @@ import geometry as geo
 import tile
 
 
-def generate_dungeon_level(depth):
-    dungeon_level = generate_terrain_dungeon_level(depth)
-    while not place_up_down_stairs_at_center(dungeon_level):
-        dungeon_level = generate_terrain_dungeon_level(depth)
-    return dungeon_level
-
-
-def generate_terrain_dungeon_level(depth):
-    dungeon_level = get_full_wall_dungeon(40, 40, depth)
-    center_position = (dungeon_level.width / 2,
-                       dungeon_level.height / 2)
-    brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
-    end_condition_func = CountDownCondition(dungeon_level.width *
-                                            dungeon_level.height * 0.4)
-    move_list = list(direction.DIRECTIONS)
-    drunkard_walk(center_position, dungeon_level, brush,
-                  end_condition_func, move_list)
-    return dungeon_level
-
-
 def place_up_down_stairs_at_center(dungeon_level):
     center = (dungeon_level.width / 2,
               dungeon_level.height / 2)
@@ -55,7 +35,7 @@ def get_full_of_terrain_dungeon(terrain_class, width, height, depth):
     dungeon = get_empty_dungeon(width, height, depth)
     for y in range(height):
         for x in range(width):
-            wall = terrain.Wall()
+            wall = terrain_class()
             wall.mover.try_move((x, y), dungeon)
     return dungeon
 
@@ -173,9 +153,18 @@ def _apply_cellular_automata_rule_on_tile(dungeon_level, position,
         terrain.Floor().mover.replace_move(position, dungeon_level)
 
 
-def generate_dungeon_exploded_rooms(open_area, depth):
-    rooms = random.randrange(4, 9)
-    room_area = open_area * 0.7 / rooms
+def generate_dungeon_floor(open_area, depth):
+    if rng.coin_flip():
+        rooms = random.randrange(4, 9)
+        room_area = open_area * 0.7 / rooms
+        return generate_dungeon_exploded_rooms(depth, rooms, room_area, 0.3)
+    else:
+        rooms = random.randrange(10, 14)
+        room_area = open_area * 0.4 / rooms
+        return generate_dungeon_exploded_rooms(depth, rooms, room_area, 0.5)
+
+
+def generate_dungeon_exploded_rooms(depth, rooms, room_area, rectangle_room_chance):
     aprox_room_radius = math.sqrt(room_area) * 1.2
 
     room_distance = aprox_room_radius
@@ -202,9 +191,12 @@ def generate_dungeon_exploded_rooms(open_area, depth):
 
     #  Corridor and small corner room shape generation
     open_points = corridors_points
+    used_roms_positions = []
     for position in room_positions:
-        room_points = shapegenerator.random_explosion(position, room_area, direction.AXIS_DIRECTIONS)
-        open_points.update(room_points)
+        if random.random() > rectangle_room_chance:
+            used_roms_positions.append(position)
+            room_points = shapegenerator.random_explosion(position, room_area, direction.AXIS_DIRECTIONS)
+            open_points.update(room_points)
 
     for position in minor_room_positions:
         room_points = shapegenerator.random_explosion(position, room_area / 4, direction.AXIS_DIRECTIONS)
@@ -212,9 +204,22 @@ def generate_dungeon_exploded_rooms(open_area, depth):
     open_points = shapegenerator.smooth_shape(open_points)
     open_points = shapegenerator.smooth_shape(open_points)
 
+    possible_door_points = set()
+    for position in set(room_positions) - set(used_roms_positions):
+        width = random.randrange(3, 8)
+        height = random.randrange(3, 8)
+        offset_x = random.randrange(width)
+        offset_y = random.randrange(height)
+        top_left_corner = geo.sub_2d(position, (offset_x, offset_y))
+        bottom_right_corner = geo.add_2d(top_left_corner, (width, height))
+        room_points = shapegenerator.get_rectangle_shape(top_left_corner, bottom_right_corner)
+        surrounding_points = shapegenerator.get_rectangle_shape(geo.sub_2d(top_left_corner, (1, 1)),
+                                                                geo.add_2d(bottom_right_corner, (1, 1))) - room_points
+        open_points.update(room_points)
+        possible_door_points |= surrounding_points
+
     # Redraw corridors to make sure no dead rooms appear.
     open_points.update(corridors_points)
-
 
     #  Chasm shape generation
     chasm_points = set()
@@ -232,10 +237,14 @@ def generate_dungeon_exploded_rooms(open_area, depth):
     frame = (2, 2)  # Just to be safe we won't try to draw outside Dungeon.
     level_shape = shapegenerator.Shape(open_points)
     chasm_shape = shapegenerator.Shape(chasm_points)
+    possible_door_shape = shapegenerator.Shape(possible_door_points)
     dungeon_rect = shapegenerator.Shape(open_points | chasm_points).calc_rect()
     dungeon_rect_with_frame = dungeon_rect.expanded_by(frame)
     normalized_chasm_points = chasm_shape.offset_points(geo.sub_2d(frame, dungeon_rect.top_left))
+    normalized_possible_door_points = possible_door_shape.offset_points(geo.sub_2d(frame, dungeon_rect.top_left))
     normalized_open_points = level_shape.offset_points(geo.sub_2d(frame, dungeon_rect.top_left))
+
+
 
     # Apply shapes to dungeon
     dungeon_level = get_full_wall_dungeon(dungeon_rect_with_frame.width, dungeon_rect_with_frame.height, depth)
@@ -246,52 +255,13 @@ def generate_dungeon_exploded_rooms(open_area, depth):
     brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
     apply_brush_to_points(dungeon_level, normalized_open_points, brush)
 
+    door_brush = DoorIfSuitableBrush()
+    apply_brush_to_points(dungeon_level, normalized_possible_door_points, door_brush)
+
     feature_positions = random.sample(normalized_open_points, 3)
     place_up_down_stairs(dungeon_level, feature_positions[0], feature_positions[1])
     _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(), dungeon_level, feature_positions[2])
 
-    return dungeon_level
-
-
-def generate_dungeon_cave_floor(size, depth):
-    """
-    Unused
-    """
-    corridor_room_area_ratio = 0.25
-    corridor_area = size * corridor_room_area_ratio
-    corridors_directions = direction.AXIS_DIRECTIONS
-    corridors_shape = \
-        shapegenerator.dfs_tunnler_with_random_restart((0, 0), 10, 16,
-                                                       corridor_area,
-                                                       corridors_directions)
-
-    rooms = random.randrange(4, 8)
-    room_positions = random.sample(corridors_shape, rooms)
-    open_points = corridors_shape
-    total_room_area = size * (1 - corridor_room_area_ratio)
-    for position in room_positions:
-        room_points = \
-            shapegenerator.random_explosion(position, total_room_area / rooms,
-                                            direction.AXIS_DIRECTIONS)
-        #open_points.update(room_points)
-
-    frame = 2
-    level_shape = shapegenerator.Shape(open_points)
-    dungeon_rect = level_shape.calc_rect().expanded_by(frame)
-
-    dungeon_level = get_full_wall_dungeon(dungeon_rect.width,
-                                          dungeon_rect.height, depth)
-    normalized_open_points = level_shape.calc_normalized_points(frame / 2)
-    brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
-    apply_brush_to_points(dungeon_level, normalized_open_points, brush)
-
-    feature_positions = random.sample(normalized_open_points, 2)
-    place_up_down_stairs(dungeon_level, feature_positions[0], feature_positions[1])
-
-    drinks = 1 if rng.coin_flip() else 0
-    _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(drinks),
-                                              dungeon_level,
-                                              feature_positions[2])
     return dungeon_level
 
 
@@ -317,6 +287,39 @@ class SingleShapeBrush(TileBrush):
         for point in self.shape:
             dungeon_position = geo.add_2d(point, position)
             self.tile_modifier.modify(dungeon_level, dungeon_position)
+
+
+def suitable_for_door(dungeon_level, position):
+    current_terrain = dungeon_level.get_tile_or_unknown(position).get_terrain()
+    if current_terrain.is_solid.value or current_terrain.has_child("is_chasm"):
+        return False
+
+    up_terrain = dungeon_level.get_tile_or_unknown(geo.add_2d(position, direction.UP)).get_terrain()
+    down_terrain = dungeon_level.get_tile_or_unknown(geo.add_2d(position, direction.DOWN)).get_terrain()
+    left_terrain = dungeon_level.get_tile_or_unknown(geo.add_2d(position, direction.LEFT)).get_terrain()
+    right_terrain = dungeon_level.get_tile_or_unknown(geo.add_2d(position, direction.RIGHT)).get_terrain()
+
+    # No door next to other door or chasm, it looks silly.
+    terrains = [up_terrain, down_terrain, left_terrain, right_terrain]
+    if any([terrain.has_child("is_door") or terrain.has_child("is_chasm") for terrain in terrains]):
+        return False
+
+    # Are there any walls to connect with the door?
+    up = up_terrain.is_solid.value
+    down = down_terrain.is_solid.value
+    left = left_terrain.is_solid.value
+    right = right_terrain.is_solid.value
+    return ((up and down and not (left or right)) or
+            (left and right and not (up or down)))
+
+
+class DoorIfSuitableBrush(TileBrush):
+    def __init__(self):
+        self.tile_modifier = ReplaceTerrain(terrain.Door)
+
+    def apply_brush(self, dungeon_level, position):
+        if suitable_for_door(dungeon_level, position):
+            self.tile_modifier.modify(dungeon_level, position)
 
 
 class RandomShapeBrush(TileBrush):
