@@ -157,7 +157,7 @@ class MissileDestinationSelector(PositionSelector):
                 return
             entities_on_cursor =\
                 self.entity.dungeon_level.value.get_tile_or_unknown(self.cursor_position).get_entities()
-            current_entity = next((entity for entity in entities_on_cursor if not entity.has_child("is_player")), None)
+            current_entity = next((entity for entity in entities_on_cursor if not entity.has("is_player")), None)
             if current_entity is None:
                 self.cursor_position = seen_entities[0].position.value
             else:
@@ -177,7 +177,7 @@ class MissileDestinationSelector(PositionSelector):
         terrain = self.entity.dungeon_level.value.\
             get_tile_or_unknown(point).get_terrain()
         if(self.entity.dungeon_mask.can_see_point(point) and
-           terrain.is_solid.value):
+           terrain.has("is_solid")):
             console.set_symbol(screen_position, ' ')
             console.set_color_bg(screen_position, colors.BLOCKED_PATH)
         else:

@@ -70,7 +70,7 @@ class InputActor(Actor):
         dungeon_level = self.parent.dungeon_level.value
         position = self.parent.position.value
         item = dungeon_level.get_tile(position).get_first_item()
-        if item and item.has_child("player_auto_pick_up"):
+        if item and item.has("player_auto_pick_up"):
             self.handle_pick_up()
 
     def handle_dev_mode_commands(self, key):

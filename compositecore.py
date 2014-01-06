@@ -97,7 +97,7 @@ class Component(object):
                             "of component {1} but it "
                             "has no parent!".format(str(component_type),
                                                     str(self)))
-        return self.parent.has_child(component_type)
+        return self.parent.has(component_type)
 
 
 class Leaf(Component):
@@ -145,7 +145,7 @@ class Composite(Component):
                             "component: {1} to its children."
                             "But it already"
                             "had parent: {2}.".format(str(self), str(child), str(child.parent)))
-        if self.has_child(child.component_type):
+        if self.has(child.component_type):
             self.remove_component_of_type(child.component_type)
         self._children[child.component_type] = child
         child.parent = self
@@ -289,7 +289,7 @@ class Composite(Component):
                             "But it doesn't exist.".format(str(component_type),
                                                            str(self)))
 
-    def has_child(self, component_type):
+    def has(self, component_type):
         """
         Returns true if this component has a child of the given type.
 

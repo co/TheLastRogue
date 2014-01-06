@@ -204,7 +204,7 @@ class BleedWhenDamaged(DamageTakenEffect):
 
 
 def position_is_solid(position, dungeon_level):
-    return dungeon_level.get_tile_or_unknown(position).get_terrain().is_solid.value
+    return dungeon_level.get_tile_or_unknown(position).get_terrain().has("is_solid")
 
 
 def spawn_blood_on_position(position, dungeon_level):

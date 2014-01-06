@@ -127,12 +127,12 @@ class Mover(Leaf):
             return True
         if self.has_sibling("status_flags"):
             status_flags = self.parent.status_flags
-            if terrain_to_pass.has_child("is_chasm") and status_flags.has_status(StatusFlags.FLYING):
+            if terrain_to_pass.has("is_chasm") and status_flags.has_status(StatusFlags.FLYING):
                 return True
             if(status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
-               terrain_to_pass.has_child("is_door")):
+               terrain_to_pass.has("is_door")):
                 return True
-        if not terrain_to_pass.is_solid.value and not terrain_to_pass.has_child("is_chasm"):
+        if not terrain_to_pass.has("is_solid") and not terrain_to_pass.has("is_chasm"):
             return True
         return False
 
@@ -189,11 +189,11 @@ class Stepper(Leaf):
         """
         terrain_to_step =\
             self.parent.dungeon_level.value.get_tile_or_unknown(position).get_terrain()
-        if(terrain_to_step.has_child("bump_action") and
+        if(terrain_to_step.has("bump_action") and
            terrain_to_step.bump_action.can_bump(self.parent)):
             terrain_to_step.bump_action.bump(self.parent)
             return self.parent.movement_speed.value
-        if(self.parent.has_child("attacker") and
+        if(self.parent.has("attacker") and
            self.parent.attacker.try_hit(position)):
             return self.parent.attack_speed.melee
         if self.parent.mover.try_move(position):
@@ -227,7 +227,7 @@ class SlimeCanShareTileEntityMover(Mover):
         piece_type = self.parent.game_piece_type.value
         entities_on_tile = tile.game_pieces[piece_type]
         if (len(entities_on_tile) == 0 or
-                (len(entities_on_tile) == 1 and not entities_on_tile[0].has_child("is_slime"))):
+                (len(entities_on_tile) == 1 and not entities_on_tile[0].has("is_slime"))):
             return True
         return False
 

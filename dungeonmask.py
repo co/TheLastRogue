@@ -139,10 +139,8 @@ class DungeonMask(Leaf):
             for x in range(dungeon_level.width):
                 terrain = \
                     dungeon_level.get_tile_or_unknown((x, y)).get_terrain()
-                libtcod.map_set_properties(self.dungeon_map, x, y,
-                                           terrain.is_transparent.value,
-                                           self.parent.
-                                           mover.can_pass_terrain(terrain))
+                libtcod.map_set_properties(self.dungeon_map, x, y, terrain.has("is_transparent"),
+                                           self.parent. mover.can_pass_terrain(terrain))
         self.last_dungeon_map_update_timestamp = turn.current_turn
         self.update_fov()
 

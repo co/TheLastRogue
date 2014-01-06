@@ -131,7 +131,7 @@ class Equipment(Leaf):
 
     def _equip_into_slot(self, equipment, slot):
         self._equipment[slot] = equipment
-        if equipment.has_child("on_equip_effect"):
+        if equipment.has("on_equip_effect"):
             equipment.on_equip_effect.effect(self.parent)
 
     def before_tick(self, time_spent):

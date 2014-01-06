@@ -75,13 +75,13 @@ class MonsterActor(Actor):
 
     def can_see_player(self):
         seen_entities = self.parent.vision.get_seen_entities()
-        return any(entity.has_child("is_player")
+        return any(entity.has("is_player")
                    for entity in seen_entities)
 
     def get_player_if_seen(self):
         seen_entities = self.parent.vision.get_seen_entities()
         found_player = next((entity for entity in seen_entities
-                             if (entity.has_child("is_player"))), None)
+                             if (entity.has("is_player"))), None)
         if (not found_player is None and
                 not found_player.status_flags.has_status(StatusFlags.INVISIBILE)):
             return found_player
@@ -130,7 +130,7 @@ class MonsterActor(Actor):
         player = self.get_player_if_seen()
         if player is None or MonsterActorState.HUNTING != self.parent.monster_actor_state.value:
             return False
-        if (not self.parent.has_child("monster_range_attack_action") or
+        if (not self.parent.has("monster_range_attack_action") or
                 not self.parent.monster_range_attack_action.can_act(player.position.value)):
             return False
         range_attack = self.parent.monster_range_attack_action
@@ -251,5 +251,5 @@ class HuntPlayerIfHurtMe(DamageTakenEffect):
         self.component_type = "hunt_player_if_hurt_me"
 
     def effect(self, _, source_entity):
-        if source_entity.has_child("is_player"):
+        if source_entity.has("is_player"):
             self.parent.monster_actor_state.value = MonsterActorState.HUNTING

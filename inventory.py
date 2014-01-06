@@ -46,7 +46,7 @@ class Inventory(Leaf):
         if not self.has_room_for_item(item):
             return False
         else:
-            if item.has_child("stacker"):
+            if item.has("stacker"):
                 self.try_stack_item(item)
                 if item.stacker.size == 0:
                     item.mover.try_remove_from_dungeon()
@@ -59,7 +59,7 @@ class Inventory(Leaf):
         Returns true if the inventory has room for another item.
         """
         stack_successful = False
-        if other_item.has_child("stacker"):
+        if other_item.has("stacker"):
             stack_successful = self.can_stack_new_item(other_item)
         return stack_successful or len(self._items) + 1 <= self._item_capacity
 
@@ -72,7 +72,7 @@ class Inventory(Leaf):
 
     def get_stackable_items_of_type(self, stack_type):
         return [item for item in self._items
-                if item.has_child("stacker") and
+                if item.has("stacker") and
                    item.stacker.stack_type == stack_type]
 
     def can_drop_item(self, item):
@@ -106,7 +106,7 @@ class Inventory(Leaf):
 
         Works like remove_item but does not remove an entire stack of items.
         """
-        if item.has_child("stacker"):
+        if item.has("stacker"):
             item.stacker.size -= 1
             if item.stacker.size <= 0:
                 self._items.remove(item)
@@ -130,5 +130,5 @@ class Inventory(Leaf):
         Returns a list of all items in the inventory of the given type.
         """
         return [item for item in self._items
-                if item.has_child("equipment_type") and
+                if item.has("equipment_type") and
                    item.equipment_type.value == type_]

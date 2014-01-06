@@ -27,25 +27,11 @@ class TerrainFactory(object):
 terrain_factory = TerrainFactory()
 
 
-# TODO: Why not use Flag?
-class IsSolid(Leaf):
-    def __init__(self, is_solid=True):
-        super(IsSolid, self).__init__()
-        self.component_type = "is_solid"
-        self.value = is_solid
-
-class IsTransparent(Leaf):
-    def __init__(self, is_transparent=False):
-        super(IsTransparent, self).__init__()
-        self.component_type = "is_transparent"
-        self.value = is_transparent
-
-
 class BumpAction(Leaf):
     """
     Defines what happens if the player bumps into this terrain.
     """
-    def __init__(self, is_transparent=False):
+    def __init__(self):
         super(BumpAction, self).__init__()
         self.component_type = "bump_action"
 
@@ -67,8 +53,7 @@ class Floor(Composite):
                                    colors.FLOOR_FG,
                                    icon.CENTER_DOT))
         self.set_child(CharPrinter())
-        self.set_child(IsSolid(False))
-        self.set_child(IsTransparent(True))
+        self.set_child(Flag("is_transparent"))
 
 
 class Water(Composite):
@@ -82,8 +67,7 @@ class Water(Composite):
                                    colors.BLUE,
                                    icon.WATER))
         self.set_child(CharPrinter())
-        self.set_child(IsSolid(False))
-        self.set_child(IsTransparent(True))
+        self.set_child(Flag("is_transparent"))
 
 
 class GlassWall(Composite):
@@ -95,8 +79,8 @@ class GlassWall(Composite):
         self.set_child(DungeonLevel())
         self.set_child(GraphicChar(colors.FLOOR_BG, colors.WHITE, icon.GLASS_WALL))
         self.set_child(CharPrinter())
-        self.set_child(IsSolid(True))
-        self.set_child(IsTransparent(True))
+        self.set_child(Flag("is_solid"))
+        self.set_child(Flag("is_transparent"))
 
 
 class Chasm(Composite):
@@ -109,8 +93,7 @@ class Chasm(Composite):
         self.set_child(GraphicChar(colors.DARKNESS, colors.DARK_GREEN, icon.CHASM2))
         self.set_child(CharPrinter())
         self.set_child(Flag("is_chasm"))
-        self.set_child(IsSolid(False))
-        self.set_child(IsTransparent(True))
+        self.set_child(Flag("is_transparent"))
 
 
 class Unknown(Composite):
@@ -124,8 +107,8 @@ class Unknown(Composite):
         self.set_child(GraphicChar(colors.BLACK,
                                    colors.BLACK,
                                    ' '))
-        self.set_child(IsSolid(True))
-        self.set_child(IsTransparent(True))
+        self.set_child(Flag("is_solid"))
+        self.set_child(Flag("is_transparent"))
 
 
 class Wall (Composite):
@@ -140,8 +123,7 @@ class Wall (Composite):
                                                  colors.WALL_FG,
                                                  icon.DUNGEON_WALLS_ROW,
                                                  [Wall, Door, Chasm]))
-        self.set_child(IsSolid(True))
-        self.set_child(IsTransparent(False))
+        self.set_child(Flag("is_solid"))
 
 
 class Door(Composite):
@@ -155,8 +137,7 @@ class Door(Composite):
         self.set_child(GraphicChar(colors.FLOOR_BG,
                                    colors.ORANGE_D,
                                    icon.DOOR))
-        self.set_child(IsSolid(True))
-        self.set_child(IsTransparent(False))
+        self.set_child(Flag("is_solid"))
 
         self.set_child(OpenDoorAction())
         self.set_child(OpenDoorBumpAction())
@@ -170,8 +151,9 @@ class OpenDoorAction(Leaf):
         self.component_type = "open_door_action"
 
     def open_door(self):
-        self.parent.is_solid.value = False
-        self.parent.is_transparent.value = True
+        if self.parent.has("is_solid"):
+            self.parent.remove_component_of_type("is_solid")
+        self.parent.set_child(Flag("is_transparent"))
         self.parent.graphic_char.icon = icon.DOOR_OPEN
         self.parent.dungeon_level.value.signal_terrain_changed()
 
@@ -180,7 +162,7 @@ class OpenDoorBumpAction(BumpAction):
     """
     Defines what happens if the player bumps into this terrain.
     """
-    def __init__(self, is_transparent=False):
+    def __init__(self):
         super(OpenDoorBumpAction, self).__init__()
         self.component_type = "bump_action"
 
@@ -188,6 +170,6 @@ class OpenDoorBumpAction(BumpAction):
         self.parent.open_door_action.open_door()
 
     def can_bump(self, source_entity):
-        return (self.parent.is_solid.value and
+        return (self.parent.has("is_solid") and
                 (source_entity.status_flags.
                  has_status(StatusFlags.CAN_OPEN_DOORS)))

@@ -58,7 +58,7 @@ def is_solid_ratio(dungeon_level):
     for y in range(dungeon_level.height):
         for x in range(dungeon_level.width):
             tile = dungeon_level.get_tile((x, y))
-            if tile.get_terrain().is_solid.value:
+            if tile.get_terrain().has("is_solid"):
                 solid += 1
     result = float(solid) / float(dungeon_level.width * dungeon_level.height)
     return result
@@ -136,7 +136,7 @@ def cellular_automata(dungeon_level):
             solid_neighbors = 0
             for point in neighbors:
                 if (not dungeon_level.has_tile(point) or
-                        dungeon_level.get_tile(point).get_terrain().is_solid.value):
+                        dungeon_level.get_tile(point).get_terrain().has("is_solid")):
                     solid_neighbors += 1
             _apply_cellular_automata_rule_on_tile(dungeon_level, position,
                                                   solid_neighbors)
@@ -146,7 +146,7 @@ def _apply_cellular_automata_rule_on_tile(dungeon_level, position,
                                           number_of_solid_neighbors):
     this_terrain = dungeon_level.get_tile(position).get_terrain()
     solid_neighborhood_size = \
-        number_of_solid_neighbors + (1 if this_terrain.is_solid.value else 0)
+        number_of_solid_neighbors + (1 if this_terrain.has("is_solid") else 0)
     if solid_neighborhood_size >= 5:
         terrain.Wall().mover.replace_move(position, dungeon_level)
     else:
@@ -291,7 +291,7 @@ class SingleShapeBrush(TileBrush):
 
 def suitable_for_door(dungeon_level, position):
     current_terrain = dungeon_level.get_tile_or_unknown(position).get_terrain()
-    if current_terrain.is_solid.value or current_terrain.has_child("is_chasm"):
+    if current_terrain.has("is_solid") or current_terrain.has("is_chasm"):
         return False
 
     up_terrain = dungeon_level.get_tile_or_unknown(geo.add_2d(position, direction.UP)).get_terrain()
@@ -301,14 +301,14 @@ def suitable_for_door(dungeon_level, position):
 
     # No door next to other door or chasm, it looks silly.
     terrains = [up_terrain, down_terrain, left_terrain, right_terrain]
-    if any([terrain.has_child("is_door") or terrain.has_child("is_chasm") for terrain in terrains]):
+    if any([terrain.has("is_door") or terrain.has("is_chasm") for terrain in terrains]):
         return False
 
     # Are there any walls to connect with the door?
-    up = up_terrain.is_solid.value
-    down = down_terrain.is_solid.value
-    left = left_terrain.is_solid.value
-    right = right_terrain.is_solid.value
+    up = up_terrain.has("is_solid")
+    down = down_terrain.has("is_solid")
+    left = left_terrain.has("is_solid")
+    right = right_terrain.has("is_solid")
     return ((up and down and not (left or right)) or
             (left and right and not (up or down)))
 

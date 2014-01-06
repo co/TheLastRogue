@@ -235,9 +235,9 @@ class InventoryMenu(Menu):
 
 
 def get_item_option_text(item):
-    if item.has_child("stacker") and item.stacker.size > 1:
+    if item.has("stacker") and item.stacker.size > 1:
         return item.description.name + " (" + str(item.stacker.size) + ")"
-    if item.has_child("charge"):
+    if item.has("charge"):
         return item.description.name + " [" + str(item.charge.charges) + "]"
     return item.description.name
 

@@ -17,7 +17,7 @@ class Description(Leaf):
 
     @property
     def long_name(self):
-        if self.parent.has_child("is_named"):
+        if self.parent.has("is_named"):
             return self._name
         else:
             return "the " + self._name

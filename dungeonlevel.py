@@ -32,7 +32,7 @@ class DungeonLevel(object):
     def __getstate__(self):
         if len(self.entities) == 0:
             return dict(self.__dict__)
-        if any(entity.has_child("is_player") for entity in self.entities):
+        if any(entity.has("is_player") for entity in self.entities):
             return dict(self.__dict__)
         else:
             return False
@@ -83,7 +83,7 @@ class DungeonLevel(object):
 
     def _get_player_if_available(self):
         return next((entity for entity in self.entities
-                     if entity.has_child("is_player")), None)
+                     if entity.has("is_player")), None)
 
     def add_dungeon_feature_if_not_present(self, new_dungeon_feature):
         if not new_dungeon_feature in self.dungeon_features:
@@ -133,9 +133,9 @@ class DungeonLevel(object):
         for y, row in enumerate(self.tile_matrix):
             line = ""
             for x, tile in enumerate(row):
-                if tile.get_terrain().is_solid.value:
+                if tile.get_terrain().has("is_solid"):
                     line += "#"
-                elif tile.get_terrain().has_child("is_chasm"):
+                elif tile.get_terrain().has("is_chasm"):
                     line += "_"
                 else:
                     line += "."

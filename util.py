@@ -62,7 +62,7 @@ class WalkableDestinatinationsPath(object):
 def _position_has_item_with_auto_pick_up(position, entity):
     tile = entity.dungeon_level.value.get_tile(position)
     item = tile.get_first_item()
-    if item and item.has_child("player_auto_pick_up"):
+    if item and item.has("player_auto_pick_up"):
         return True
     return False
 

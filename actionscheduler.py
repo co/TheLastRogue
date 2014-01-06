@@ -34,8 +34,8 @@ class ActionScheduler(object):
         self.sharing_tile_effects_tick(current_actor.parent)
 
     def sharing_tile_effects_tick(self, current_piece):
-        if(current_piece.has_child("dungeon_level") and
-           current_piece.has_child("position")):
+        if(current_piece.has("dungeon_level") and
+           current_piece.has("position")):
             tile = (current_piece.dungeon_level.value.
                     get_tile(current_piece.position.value))
             for piece in tile.get_all_pieces():

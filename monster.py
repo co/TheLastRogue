@@ -200,7 +200,7 @@ class AddGhostReviveToSeenEntities(Leaf):
         for entity in seen_entities:
             if (entity.status_flags.has_status(StatusFlags.IS_ALIVE) and
                         entity.intelligence.value >= Intelligence.NORMAL and
-                    not entity.has_child("is_player")):
+                    not entity.has("is_player")):
                 effect = ReviveAsGhostOnDeath(self.parent)
                 entity.effect_queue.add(AddSpoofChild(self.parent, effect, 1))
 

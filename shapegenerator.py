@@ -102,7 +102,7 @@ def random_explosion_not_through_solid(start_pos, size, dungeon_level, move_list
 
 
 def position_is_solid(position, dungeon_level):
-    return dungeon_level.get_tile_or_unknown(position).get_terrain().is_solid.value
+    return dungeon_level.get_tile_or_unknown(position).get_terrain().has("is_solid")
 
 
 def triangle_points(distance, width, height):

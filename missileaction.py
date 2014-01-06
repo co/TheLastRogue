@@ -174,7 +174,7 @@ class PlayerShootWeaponAction(PlayerMissileAction):
     def can_act(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
         ammo_items = [item for item in source_entity.inventory.items
-                      if item.has_child("is_ammo")]
+                      if item.has("is_ammo")]
         return len(ammo_items) > 0
 
     def hit_position(self, dungeon_level, position, source_entity):
@@ -188,7 +188,7 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         return self.ranged_weapon.weapon_range.value
 
     def remove_ammo_from_inventory(self, inventory):
-        ammo_items = [item for item in inventory.items if item.has_child("is_ammo")]
+        ammo_items = [item for item in inventory.items if item.has("is_ammo")]
         ammo_item_with_least_ammo = min(ammo_items, key=lambda e: e.stacker.size)
         inventory.remove_one_item_from_stack(ammo_item_with_least_ammo)
 
