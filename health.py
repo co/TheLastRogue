@@ -1,4 +1,5 @@
 import logging
+from attacker import DamageTypes
 from compositecore import Leaf
 import counter
 import colors
@@ -37,7 +38,7 @@ class HealthModifier(Leaf):
         super(HealthModifier, self).__init__()
         self.component_type = "health_modifier"
 
-    def hurt(self, damage, entity=None):
+    def hurt(self, damage, entity=None, damage_types=[]):
         """
         Damages the entity by reducing hp by damage.
         """
@@ -46,18 +47,24 @@ class HealthModifier(Leaf):
         if damage == 0:
             return damage
         self.parent.health.hp.decrease(damage)
-        self._animate_hurt()
+        self._animate_hurt(damage_types)
         if self.parent.health.is_dead():
             self.parent.health.killer = entity
         self._call_damage_taken_effect(damage, entity)
         return damage
 
-    def _animate_hurt(self):
+    def _animate_hurt(self, damage_types):
         """
         Adds a blink animation to hurt entity.
         """
         frame_length = max(settings.ANIMATION_DELAY / 2, 1)
-        self.parent.char_printer.append_fg_color_blink_frames([colors.LIGHT_PINK, colors.RED], frame_length)
+        hurt_colors = self._get_hurt_colors(damage_types)
+        self.parent.char_printer.append_fg_color_blink_frames(hurt_colors, frame_length)
+
+    def _get_hurt_colors(self, damage_types):
+        if DamageTypes.POISON in damage_types:
+            return [colors.GREEN, colors.GREEN_D]
+        return [colors.LIGHT_PINK, colors.RED]
 
     def heal(self, health):
         """

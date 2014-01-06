@@ -12,7 +12,7 @@ from missileaction import PlayerThrowStoneAction
 from mover import Mover, Stepper
 from ondeath import LeaveCorpseOnDeath
 from position import Position, DungeonLevel
-from stats import AttackSpeed, Faction, GameState, GamePieceType, Stealth, Awareness, Armor, Flag
+from stats import AttackSpeed, Faction, GameState, GamePieceType, Stealth, Awareness, Armor, Flag, Intelligence
 from stats import MovementSpeed, Strength, Evasion, Hit
 
 from statusflags import StatusFlags
@@ -60,7 +60,8 @@ class Player(Composite):
         self.set_child(MovementSpeed(gametime.single_turn))
         self.set_child(AttackSpeed())
         self.set_child(PlayerThrowStoneAction())
-        self.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.HAS_MIND, StatusFlags.IS_ALIVE]))
+        self.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.IS_ALIVE]))
+        self.set_child(Intelligence(Intelligence.NORMAL))
 
         self.set_child(DungeonMask())
         self.set_child(SightRadius(6))

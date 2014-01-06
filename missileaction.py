@@ -1,6 +1,6 @@
 import random
 from action import Action, SOURCE_ENTITY, GAME_STATE
-from attacker import DamageTypes, Damage, UndodgeableDamage
+from attacker import DamageTypes, Attack, UndodgeableAttack
 from compositecore import Leaf
 import gametime
 import geometry
@@ -275,5 +275,5 @@ def magic_hit_position(damage, dungeon_level, position, source_entity):
     if target_entity is None:
         return
     damage_types = [DamageTypes.MAGIC]
-    thrown_damage = UndodgeableDamage(damage, 0, damage_types)
+    thrown_damage = UndodgeableAttack(damage, 0, damage_types)
     thrown_damage.damage_entity(source_entity, target_entity)

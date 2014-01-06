@@ -158,3 +158,23 @@ class GamePieceType(DataPoint):
         Makes a copy of this component.
         """
         return GamePieceType(self.value)
+
+
+class Intelligence(DataPoint):
+    MINDLESS = 0
+    PLANT = 1
+    ANIMAL = 2
+    NORMAL = 3
+    HIGH = 4
+
+    def __init__(self, intelligence):
+        super(Intelligence, self).__init__("intelligence", intelligence)
+
+
+class UnArmedHitTargetEntityEffectFactory(DataPoint):
+    def __init__(self, effect_factory_function):
+        super(UnArmedHitTargetEntityEffectFactory, self).__init__("unarmed_hit_target_entity_effect_factory_" +
+                                                                  str(effect_factory_function), effect_factory_function)
+        self.tags.add("unarmed_hit_target_entity_effect_factory")
+
+

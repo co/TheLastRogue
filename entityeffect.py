@@ -1,3 +1,4 @@
+from audioop import add
 import random
 import colors
 
@@ -163,10 +164,11 @@ class Teleport(EntityEffect):
         self.tick(time_spent)
 
 
-class DamageEntityEffect(EntityEffect):
+class AttackEntityEffect(EntityEffect):
     def __init__(self, source_entity, damage, damage_types, hit, hit_message=messenger.HIT_MESSAGE,
-                 miss_message=messenger.MISS_MESSAGE, no_stack_id=None, time_to_live=1):
-        super(DamageEntityEffect, self).__init__(source_entity=source_entity,
+                 miss_message=messenger.MISS_MESSAGE, no_stack_id=None, time_to_live=1,
+                 target_entity_effects=[]):
+        super(AttackEntityEffect, self).__init__(source_entity=source_entity,
                                                  effect_type=EffectTypes.DAMAGE,
                                                  no_stack_id=no_stack_id,
                                                  time_to_live=time_to_live)
@@ -175,6 +177,7 @@ class DamageEntityEffect(EntityEffect):
         self.damage_types = damage_types
         self.miss_message = miss_message
         self.hit_message = hit_message
+        self.target_entity_effects = target_entity_effects
 
     def send_miss_message(self):
         messenger.msg.send_visual_message(self.miss_message % {"source_entity": self.source_entity.description.long_name,
@@ -191,26 +194,66 @@ class DamageEntityEffect(EntityEffect):
     def is_a_hit(self):
         return self.target_entity.dodger.is_a_hit(self.hit)
 
+    def hit_target(self):
+        self.add_effects_to_target()
+        damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
+        damage_caused = self.target_entity.health_modifier.hurt(damage_after_armor, entity=self.source_entity)
+        return damage_caused
+
     def update(self, time_spent):
         if self.is_a_hit():
-            damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
-            damage_caused = self.target_entity.health_modifier.hurt(damage_after_armor, entity=self.source_entity)
+            damage_caused = self.hit_target()
             self.send_hit_message(damage_caused)
         else:
             self.send_miss_message()
         self.tick(time_spent)
 
+    def add_effects_to_target(self):
+        for effect in self.target_entity_effects:
+            self.target_entity.effect_queue.add(effect)
 
-class UndodgeableDamageEntityEffect(DamageEntityEffect):
+
+class UndodgeableAttackEntityEffect(AttackEntityEffect):
     def __init__(self, source_entity, damage, damage_types, hit_message=messenger.HIT_MESSAGE,
                  no_stack_id=None, time_to_live=1):
-        super(UndodgeableDamageEntityEffect, self).__init__(source_entity, damage, damage_types, -1,
+        super(UndodgeableAttackEntityEffect, self).__init__(source_entity, damage, damage_types, -1,
                                                             hit_message=hit_message,
                                                             no_stack_id=no_stack_id,
                                                             time_to_live=time_to_live)
 
     def is_a_hit(self):
         return True
+
+
+class DamageOverTimeEffect(EntityEffect):
+    def __init__(self, source_entity, damage, damage_types, turn_interval, turns_to_live, damage_message, no_stack_id=None):
+        super(DamageOverTimeEffect, self).__init__(source_entity=source_entity, effect_type=EffectTypes.DAMAGE,
+                                                   no_stack_id=no_stack_id, time_to_live=turns_to_live * gametime.single_turn)
+        self.damage = damage
+        self.damage_types = damage_types
+        self.time_interval = turn_interval * gametime.single_turn
+        self.damage_message = damage_message
+        self.time_until_next_damage = self.time_interval
+
+    def send_damage_message(self, damage_caused):
+        m = self.damage_message % {"source_entity": self.source_entity.description.long_name,
+                                   "target_entity": self.target_entity.description.long_name,
+                                   "damage": str(damage_caused)}
+        messenger.msg.send_visual_message(m, self.target_entity.position.value)
+
+    def damage_target(self):
+        damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
+        damage_caused = self.target_entity.health_modifier.hurt(damage_after_armor, entity=self.source_entity,
+                                                                damage_types=self.damage_types)
+        return damage_caused
+
+    def update(self, time_spent):
+        if self.time_until_next_damage <= 0:
+            damage_caused = self.damage_target()
+            self.send_damage_message(damage_caused)
+            self.time_until_next_damage = self.time_interval
+        self.time_until_next_damage -= time_spent
+        self.tick(time_spent)
 
 
 class UndodgeableDamagAndBlockSameEffect(EntityEffect):
@@ -280,8 +323,8 @@ class Equip(EntityEffect):
 
     def message(self):
         messenger.msg.send_visual_message(self.equip_message % {"source_entity": self.source_entity.description.long_name,
-                                                    "target_entity": self.target_entity.description.long_name,
-                                                    "item": self.item.description.long_name},
+                                                                "target_entity": self.target_entity.description.long_name,
+                                                                "item": self.item.description.long_name},
                                           self.target_entity.position.value)
 
     def update(self, time_spent):
@@ -323,8 +366,7 @@ class Unequip(EntityEffect):
     def update(self, time_spent):
         equipment = self.target_entity.equipment
         if equipment.can_unequip_to_inventory(self.equipment_slot):
-            underlip_succeeded = \
-                equipment.unequip_to_inventory(self.equipment_slot)
+            underlip_succeeded =  equipment.unequip_to_inventory(self.equipment_slot)
             if underlip_succeeded:
                 self.message()
         self.tick(time_spent)

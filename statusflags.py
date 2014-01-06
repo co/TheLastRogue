@@ -8,10 +8,9 @@ class StatusFlags(Leaf):
     INVISIBILE = 0
     SEE_INVISIBILITY = 1
     FLYING = 2
-    HAS_MIND = 3
-    IS_ALIVE = 4
-    CAN_OPEN_DOORS = 5
-    HAS_HEART = 6
+    IS_ALIVE = 3
+    CAN_OPEN_DOORS = 4
+    HAS_HEART = 5
 
     def __init__(self, status_flags=[]):
         super(StatusFlags, self).__init__()

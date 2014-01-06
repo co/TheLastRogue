@@ -43,7 +43,7 @@ class Attacker(Leaf):
         Makes entity to hit the target entity with the force of a thrown rock.
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
-        thrown_damage = Damage(self.throw_rock_mean_damage, self.throw_rock_damage_variance,
+        thrown_damage = Attack(self.throw_rock_mean_damage, self.throw_rock_damage_variance,
                                damage_types, self.parent.hit.value)
         thrown_damage.damage_entity(self.parent, target_entity)
 
@@ -65,7 +65,11 @@ class Attacker(Leaf):
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
         damage_strength = int(self.parent.strength.value * self.melee_damage_modifier)
-        return Damage(1 + damage_strength / 2, damage_strength / 4, damage_types, self.parent.hit.value)
+        target_entity_effects_factories = [effect_factory_data_point.value for effect_factory_data_point in
+                                           self.parent.get_children_with_tag("unarmed_hit_target_entity_effect_factory")]
+        return Attack(1 + damage_strength / 2, damage_strength / 4,
+                      damage_types, self.parent.hit.value,
+                      target_entity_effects_factories=target_entity_effects_factories)
 
 
 class Dodger(Leaf):
@@ -106,6 +110,7 @@ class ArmorChecker(Leaf):
             return max(damage - rng.random_variance_no_negative(damage_reduction_mid, damage_reduction_mid), 0)
         return damage
 
+
 class DamageTypes(object):
     PHYSICAL = 0
     MAGIC = 1
@@ -113,25 +118,29 @@ class DamageTypes(object):
     PIERCING = 3
     CUTTING = 4
     ACID = 5
+    POISON = 6
 
 
-class Damage(object):
+class Attack(object):
     def __init__(self, damage, variance,
-                 damage_types, hit, damage_multiplier=1):
+                 damage_types, hit, damage_multiplier=1, target_entity_effects_factories=[]):
         self.damage = damage
         self.variance = variance
         self.damage_multiplier = damage_multiplier
         self.damage_types = damage_types
         self.hit = hit
+        self.target_entity_effects_factories = target_entity_effects_factories
 
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0, damage_multiplier=1):
         damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
-        damage_effect = entityeffect.DamageEntityEffect(source_entity, damage * self.damage_multiplier,
-                                                        self.damage_types, self.hit + bonus_hit)
+        target_entity_effects = [effect_factory() for effect_factory in self.target_entity_effects_factories]
+        damage_effect = entityeffect.AttackEntityEffect(source_entity, damage * self.damage_multiplier,
+                                                        self.damage_types, self.hit + bonus_hit,
+                                                        target_entity_effects=target_entity_effects)
         target_entity.effect_queue.add(damage_effect)
 
 
-class UndodgeableDamage(object):
+class UndodgeableAttack(object):
     def __init__(self, damage, variance, damage_types, damage_multiplier=1):
         self.damage = damage
         self.variance = variance
@@ -140,9 +149,8 @@ class UndodgeableDamage(object):
 
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, damage_multiplier=1):
         damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
-        damage_effect = \
-            entityeffect.UndodgeableDamageEntityEffect(source_entity, damage * self.damage_multiplier,
-                                                       self.damage_types)
+        damage_effect = entityeffect.UndodgeableAttackEntityEffect(source_entity, damage * self.damage_multiplier,
+                                                                   self.damage_types)
         target_entity.effect_queue.add(damage_effect)
 
 

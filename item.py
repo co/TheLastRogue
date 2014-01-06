@@ -2,7 +2,7 @@ import random
 
 from action import Action
 from compositecore import Leaf, Composite
-from attacker import Damage, DamageTypes
+from attacker import Attack, DamageTypes
 from graphic import GraphicChar, CharPrinter
 import messenger
 from missileaction import PlayerThrowItemAction
@@ -708,7 +708,7 @@ class DamageProvider(Leaf):
 
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
         damage_strength = self.damage + source_entity.strength.value / 2
-        damage = Damage(damage_strength, self.variance,
+        damage = Attack(damage_strength, self.variance,
                         self.types, self.parent.hit.value)
         return damage.damage_entity(source_entity, target_entity,
                                     bonus_damage=bonus_damage, bonus_hit=bonus_hit)

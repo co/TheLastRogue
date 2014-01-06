@@ -1,8 +1,9 @@
+import random
 from attacker import Attacker, Dodger, DamageTypes, ArmorChecker
 from compositecore import Composite, Leaf
 import constants
 from dungeonmask import DungeonMask, Path
-from entityeffect import EffectQueue, AddSpoofChild, EffectStackID, UndodgeableDamagAndBlockSameEffect
+from entityeffect import EffectQueue, AddSpoofChild, EffectStackID, UndodgeableDamagAndBlockSameEffect, DamageOverTimeEffect
 from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
@@ -13,7 +14,7 @@ from mover import Mover, Stepper, SlimeCanShareTileEntityMover, ImmobileStepper
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
 import rng
-from stats import AttackSpeed, Faction, GameState, Evasion, Stealth, Awareness, Armor, Flag
+from stats import AttackSpeed, Faction, GameState, Evasion, Stealth, Awareness, Armor, Flag, Intelligence, UnArmedHitTargetEntityEffectFactory
 from stats import MovementSpeed, Strength, GamePieceType, Hit
 from statusflags import StatusFlags
 from text import Description, EntityMessages
@@ -56,8 +57,9 @@ def set_monster_components(monster_composite, game_state):
 
 def set_humanoid_components(humanoid_component):
     humanoid_component.set_child(BleedWhenDamaged())
-    humanoid_component.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.HAS_MIND,
+    humanoid_component.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS,
                                               StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
+    humanoid_component.set_child(Intelligence(Intelligence.NORMAL))
     humanoid_component.set_child(LeaveCorpseOnDeath())
 
 
@@ -79,6 +81,47 @@ def new_ratman(gamestate):
     ratman.set_child(Awareness(5))
     ratman.set_child(MonsterThrowStoneAction(30))
     return ratman
+
+
+def set_insect_components(humanoid_component):
+    humanoid_component.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.IS_ALIVE]))
+    humanoid_component.set_child(Intelligence(Intelligence.ANIMAL))
+
+
+def new_spider(gamestate):
+    spider = Composite()
+    set_monster_components(spider, gamestate)
+    set_insect_components(spider)
+
+    spider.set_child(Description("Spider", "A giant spider, its attacks are poisonous."))
+    spider.set_child(EntityMessages("The spider looks at you.", "The spider stops moving."))
+    spider.set_child(GraphicChar(None, colors.CHAMPAGNE_D, "s"))
+
+    spider.set_child(Health(7))
+    spider.set_child(Strength(1))
+    spider.set_child(Evasion(13))
+    spider.set_child(Hit(13))
+    spider.set_child(Armor(5))
+    spider.set_child(Stealth(7))
+    spider.set_child(Awareness(5))
+
+    spider.set_child(UnArmedHitTargetEntityEffectFactory(PoisonEntityEffectFactory(spider,
+                                                                                   1, 3,
+                                                                                   random.randrange(9, 18))))
+    return spider
+
+
+class PoisonEntityEffectFactory(object):
+    def __init__(self, source_entity, damage, turn_interval, turns_to_live):
+        self.source_entity = source_entity
+        self.damage = damage
+        self.turn_interval = turn_interval
+        self.turns_to_live = turns_to_live
+
+    def __call__(self):
+        return DamageOverTimeEffect(self.source_entity, self.damage, [DamageTypes.POISON],
+                                    self.turn_interval, self.turns_to_live,
+                                    messenger.POISON_MESSAGE, no_stack_id="poison")
 
 
 def new_cyclops(game_state):
@@ -116,7 +159,8 @@ def new_jericho(gamestate):
 
 
 def set_ghost_components(ghost):
-    ghost.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.HAS_MIND, StatusFlags.FLYING]))
+    ghost.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.FLYING]))
+    ghost.set_child(Intelligence(Intelligence.NORMAL))
 
 
 def new_ghost(gamestate):
@@ -155,7 +199,7 @@ class AddGhostReviveToSeenEntities(Leaf):
         seen_entities = self.parent.vision.get_seen_entities()
         for entity in seen_entities:
             if (entity.status_flags.has_status(StatusFlags.IS_ALIVE) and
-                    entity.status_flags.has_status(StatusFlags.HAS_MIND) and
+                        entity.intelligence.value >= Intelligence.NORMAL and
                     not entity.has_child("is_player")):
                 effect = ReviveAsGhostOnDeath(self.parent)
                 entity.effect_queue.add(AddSpoofChild(self.parent, effect, 1))
@@ -198,6 +242,7 @@ def _skip_turn(entity):
 
 def set_slime_components(slime):
     slime.set_child(StatusFlags([StatusFlags.IS_ALIVE]))
+    slime.set_child(Intelligence(Intelligence.PLANT))
     slime.set_child(Flag("is_slime"))
     slime.remove_component_of_type("attacker")
 
