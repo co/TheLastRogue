@@ -3,6 +3,7 @@ from compositecore import Leaf
 import direction
 import geometry
 from position import DungeonLevel
+from stats import max_instances_of_composite_on_tile
 from statusflags import StatusFlags
 
 
@@ -116,8 +117,7 @@ class Mover(Leaf):
         Checks if the parent can fit on the tile.
         """
         piece_type = self.parent.game_piece_type
-        return (len(tile.game_pieces[piece_type.value]) <
-                piece_type.max_instances_in_tile)
+        return len(tile.game_pieces[piece_type.value]) < max_instances_of_composite_on_tile(self.parent)
 
     def can_pass_terrain(self, terrain_to_pass):
         """
@@ -195,7 +195,7 @@ class Stepper(Leaf):
             return self.parent.movement_speed.value
         if(self.parent.has("attacker") and
            self.parent.attacker.try_hit(position)):
-            return self.parent.attack_speed.melee
+            return self.parent.melee_speed.value
         if self.parent.mover.try_move(position):
             return self.parent.movement_speed.value
         return 0

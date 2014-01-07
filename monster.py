@@ -14,53 +14,58 @@ from mover import Mover, Stepper, SlimeCanShareTileEntityMover, ImmobileStepper
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
 import rng
-from stats import AttackSpeed, Faction, GameState, Evasion, Stealth, Awareness, Armor, Flag, Intelligence, UnArmedHitTargetEntityEffectFactory
-from stats import MovementSpeed, Strength, GamePieceType, Hit
+from stats import Flag, UnArmedHitTargetEntityEffectFactory, DataPoint, DataTypes, Factions, IntelligenceLevels
+from stats import GamePieceTypes
 from statusflags import StatusFlags
 from text import Description, EntityMessages
-from vision import Vision, SightRadius, AwarenessChecker
+from vision import Vision, AwarenessChecker
 import colors
 from equipment import Equipment
 import gametime
 import icon
 
 
-def set_monster_components(monster_composite, game_state):
-    monster_composite.set_child(GamePieceType(GamePieceType.ENTITY))
-    monster_composite.set_child(Position())
-    monster_composite.set_child(DungeonLevel())
-    monster_composite.set_child(Mover())
-    monster_composite.set_child(Stepper())
-    monster_composite.set_child(CharPrinter())
-    monster_composite.set_child(Faction(Faction.MONSTER))
-    monster_composite.set_child(HealthModifier())
-    monster_composite.set_child(MovementSpeed(gametime.single_turn))
-    monster_composite.set_child(AttackSpeed(throw_speed=gametime.single_turn))
-    monster_composite.set_child(Dodger())
-    monster_composite.set_child(ArmorChecker())
-    monster_composite.set_child(SightRadius(constants.COMMON_SIGHT_RADIUS))
-    monster_composite.set_child(AwarenessChecker())
-    monster_composite.set_child(DungeonMask())
-    monster_composite.set_child(Vision())
-    monster_composite.set_child(Path())
-    monster_composite.set_child(ChasePlayerActor())
-    monster_composite.set_child(MonsterActorState())
-    monster_composite.set_child(HuntPlayerIfHurtMe())
-    monster_composite.set_child(GameState(game_state))
-    monster_composite.set_child(Equipment())
-    monster_composite.set_child(Inventory())
-    monster_composite.set_child(EffectQueue())
-    monster_composite.set_child(RemoveEntityOnDeath())
-    monster_composite.set_child(PrintDeathMessageOnDeath())
-    monster_composite.set_child(Attacker())
+def set_monster_components(monster, game_state):
+    monster.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ENTITY))
+    monster.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn))
+    monster.set_child(DataPoint(DataTypes.MELEE_SPEED, gametime.single_turn))
+    monster.set_child(DataPoint(DataTypes.THROW_SPEED, gametime.single_turn))
+    monster.set_child(DataPoint(DataTypes.SHOOT_SPEED, gametime.single_turn))
+    monster.set_child(DataPoint(DataTypes.SIGHT_RADIUS, constants.COMMON_SIGHT_RADIUS))
+    monster.set_child(DataPoint(DataTypes.FACTION, Factions.MONSTER))
+    monster.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
+    monster.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.NORMAL))
+
+    monster.set_child(Position())
+    monster.set_child(CharPrinter())
+    monster.set_child(DungeonLevel())
+
+    monster.set_child(Mover())
+    monster.set_child(Stepper())
+
+    monster.set_child(HealthModifier())
+    monster.set_child(Dodger())
+    monster.set_child(ArmorChecker())
+    monster.set_child(AwarenessChecker())
+    monster.set_child(DungeonMask())
+    monster.set_child(Vision())
+    monster.set_child(Path())
+    monster.set_child(ChasePlayerActor())
+    monster.set_child(MonsterActorState())
+    monster.set_child(HuntPlayerIfHurtMe())
+    monster.set_child(Equipment())
+    monster.set_child(Inventory())
+    monster.set_child(EffectQueue())
+    monster.set_child(Attacker())
+    monster.set_child(RemoveEntityOnDeath())
+    monster.set_child(PrintDeathMessageOnDeath())
 
 
-def set_humanoid_components(humanoid_component):
-    humanoid_component.set_child(BleedWhenDamaged())
-    humanoid_component.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS,
-                                              StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
-    humanoid_component.set_child(Intelligence(Intelligence.NORMAL))
-    humanoid_component.set_child(LeaveCorpseOnDeath())
+def set_humanoid_components(composite):
+    composite.set_child(BleedWhenDamaged())
+    composite.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS,
+                                     StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
+    composite.set_child(LeaveCorpseOnDeath())
 
 
 def new_ratman(gamestate):
@@ -73,19 +78,18 @@ def new_ratman(gamestate):
     ratman.set_child(GraphicChar(None, colors.ORANGE, icon.RATMAN))
 
     ratman.set_child(Health(8))
-    ratman.set_child(Strength(3))
-    ratman.set_child(Evasion(16))
-    ratman.set_child(Hit(13))
-    ratman.set_child(Armor(4))
-    ratman.set_child(Stealth(7))
-    ratman.set_child(Awareness(5))
+    ratman.set_child(DataPoint(DataTypes.STRENGTH, 8))
+    ratman.set_child(DataPoint(DataTypes.EVASION, 16))
+    ratman.set_child(DataPoint(DataTypes.HIT, 13))
+    ratman.set_child(DataPoint(DataTypes.ARMOR, 4))
+    ratman.set_child(DataPoint(DataTypes.AWARENESS, 5))
     ratman.set_child(MonsterThrowStoneAction(30))
     return ratman
 
 
-def set_insect_components(humanoid_component):
-    humanoid_component.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.IS_ALIVE]))
-    humanoid_component.set_child(Intelligence(Intelligence.ANIMAL))
+def set_insect_components(composite):
+    composite.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.IS_ALIVE]))
+    composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.ANIMAL))
 
 
 def new_spider(gamestate):
@@ -98,12 +102,11 @@ def new_spider(gamestate):
     spider.set_child(GraphicChar(None, colors.CHAMPAGNE_D, "s"))
 
     spider.set_child(Health(7))
-    spider.set_child(Strength(1))
-    spider.set_child(Evasion(13))
-    spider.set_child(Hit(13))
-    spider.set_child(Armor(5))
-    spider.set_child(Stealth(7))
-    spider.set_child(Awareness(5))
+    spider.set_child(DataPoint(DataTypes.STRENGTH, 1))
+    spider.set_child(DataPoint(DataTypes.EVASION, 13))
+    spider.set_child(DataPoint(DataTypes.HIT, 5))
+    spider.set_child(DataPoint(DataTypes.ARMOR, 7))
+    spider.set_child(DataPoint(DataTypes.AWARENESS, 5))
 
     spider.set_child(UnArmedHitTargetEntityEffectFactory(PoisonEntityEffectFactory(spider,
                                                                                    1, 3,
@@ -132,18 +135,19 @@ def new_cyclops(game_state):
                                      "The cyclops is dead."))
     cyclops.set_child(Description("Cyclops",
                                   "A Giant with a single disgusting eye, it's looking for prey."))
-    cyclops.set_child(GraphicChar(None, colors.CYAN, icon.CYCLOPS))
+    cyclops.set_child(GraphicChar(None, colors.LIGHT_ORANGE, icon.CYCLOPS))
     cyclops.set_child(Health(45))
-    cyclops.set_child(MovementSpeed(gametime.one_and_half_turn))
-    cyclops.set_child(AttackSpeed(gametime.single_turn, throw_speed=gametime.double_turn))
-    cyclops.set_child(Strength(14))
-    cyclops.set_child(Attacker(0.8, 1.5))
-    cyclops.set_child(Evasion(5))
-    cyclops.set_child(Hit(11))
-    cyclops.set_child(Armor(6))
+    cyclops.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn))
+    cyclops.set_child(DataPoint(DataTypes.THROW_SPEED, gametime.double_turn))
+    cyclops.set_child(DataPoint(DataTypes.STRENGTH, 21))
+    cyclops.set_child(DataPoint(DataTypes.EVASION, 5))
+    cyclops.set_child(DataPoint(DataTypes.HIT, 11))
+    cyclops.set_child(DataPoint(DataTypes.ARMOR, 6))
+    cyclops.set_child(DataPoint(DataTypes.AWARENESS, 3))
+    cyclops.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.one_and_half_turn))
+    cyclops.set_child(DataPoint(DataTypes.THROW_SPEED, gametime.double_turn))
+    cyclops.set_child(DataPoint(DataTypes.MELEE_DAMAGE_MULTIPLIER, 0.5))
 
-    cyclops.set_child(Stealth(7))
-    cyclops.set_child(Awareness(3))
     cyclops.set_child(MonsterThrowStoneAction(10, icon=icon.DUNGEON_WALLS_ROW))
     return cyclops
 
@@ -158,9 +162,8 @@ def new_jericho(gamestate):
     return jericho
 
 
-def set_ghost_components(ghost):
-    ghost.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.FLYING]))
-    ghost.set_child(Intelligence(Intelligence.NORMAL))
+def set_ghost_components(composite):
+    composite.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.FLYING]))
 
 
 def new_ghost(gamestate):
@@ -172,14 +175,13 @@ def new_ghost(gamestate):
     ghost.set_child(Description("Ghost", "A spirit of a hunted creature."))
     ghost.set_child(GraphicChar(None, colors.LIGHT_BLUE, icon.GHOST))
     ghost.set_child(Health(1))
-    ghost.set_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
-    ghost.set_child(Strength(2))
-    ghost.set_child(Evasion(22))
-    ghost.set_child(Hit(14))
-    ghost.set_child(Armor(0))
+    ghost.set_child(DataPoint(DataTypes.STRENGTH, 2))
+    ghost.set_child(DataPoint(DataTypes.EVASION, 22))
+    ghost.set_child(DataPoint(DataTypes.HIT, 14))
+    ghost.set_child(DataPoint(DataTypes.ARMOR, 0))
+    ghost.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn + gametime.one_third_turn))
+    ghost.set_child(DataPoint(DataTypes.AWARENESS, 8))
 
-    ghost.set_child(Stealth(7))
-    ghost.set_child(Awareness(8))
     ghost.set_child(KeepPlayerAtDistanceActor(4))
     ghost.set_child(MonsterMagicRangeAction(1, 60))
     ghost.set_child(AddGhostReviveToSeenEntities())
@@ -199,7 +201,7 @@ class AddGhostReviveToSeenEntities(Leaf):
         seen_entities = self.parent.vision.get_seen_entities()
         for entity in seen_entities:
             if (entity.status_flags.has_status(StatusFlags.IS_ALIVE) and
-                        entity.intelligence.value >= Intelligence.NORMAL and
+                        entity.intelligence.value >= IntelligenceLevels.NORMAL and
                     not entity.has("is_player")):
                 effect = ReviveAsGhostOnDeath(self.parent)
                 entity.effect_queue.add(AddSpoofChild(self.parent, effect, 1))
@@ -242,7 +244,8 @@ def _skip_turn(entity):
 
 def set_slime_components(slime):
     slime.set_child(StatusFlags([StatusFlags.IS_ALIVE]))
-    slime.set_child(Intelligence(Intelligence.PLANT))
+    slime.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.PLANT))
+    slime.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn + gametime.one_third_turn))
     slime.set_child(Flag("is_slime"))
     slime.remove_component_of_type("attacker")
 
@@ -259,13 +262,12 @@ def new_slime(game_state):
                                 "Slime, slime, slime. Ugh, I hate Slimes." "The slime seem to sense at you..."))
     slime.set_child(GraphicChar(None, colors.GREEN, icon.SLIME))
     slime.set_child(Health(35))
-    slime.set_child(Strength(2))
-    slime.set_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
-    slime.set_child(Evasion(7))
-    slime.set_child(Hit(15))
-    slime.set_child(Stealth(7))
-    slime.set_child(Awareness(5))
-    slime.set_child(Armor(3))
+    slime.set_child(DataPoint(DataTypes.STRENGTH, 2))
+    slime.set_child(DataPoint(DataTypes.EVASION, 7))
+    slime.set_child(DataPoint(DataTypes.HIT, 15))
+    slime.set_child(DataPoint(DataTypes.ARMOR, 3))
+    slime.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn + gametime.one_third_turn))
+    slime.set_child(DataPoint(DataTypes.AWARENESS, 5))
     return slime
 
 
@@ -282,13 +284,11 @@ def new_dark_slime(game_state):
                                 "Slime, slime, slime. Ugh, I hate Slimes." "The dark slime seem to sense at you..."))
     slime.set_child(GraphicChar(None, colors.BLUE, icon.SLIME))
     slime.set_child(Health(45))
-    slime.set_child(Strength(2))
-    slime.set_child(MovementSpeed(gametime.single_turn + gametime.one_third_turn))
-    slime.set_child(Evasion(8))
-    slime.set_child(Hit(15))
-    slime.set_child(Stealth(7))
-    slime.set_child(Awareness(6))
-    slime.set_child(Armor(3))
+    slime.set_child(DataPoint(DataTypes.STRENGTH, 2))
+    slime.set_child(DataPoint(DataTypes.EVASION, 8))
+    slime.set_child(DataPoint(DataTypes.HIT, 15))
+    slime.set_child(DataPoint(DataTypes.ARMOR, 3))
+    slime.set_child(DataPoint(DataTypes.AWARENESS, 6))
     return slime
 
 
@@ -369,5 +369,6 @@ class BlockVisionShareTileEffect(EntityShareTileEffect):
     def _effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
-        darkness_effect = AddSpoofChild(source_entity, SightRadius(1), time_to_live=1)
+        sight_radius_spoof = DataPoint(DataTypes.SIGHT_RADIUS, 1)
+        darkness_effect = AddSpoofChild(source_entity, sight_radius_spoof, time_to_live=1)
         target_entity.effect_queue.add(darkness_effect)

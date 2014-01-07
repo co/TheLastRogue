@@ -43,17 +43,6 @@ class Vision(Leaf):
         return closest_seen_entities[0]  # The first is oneself.
 
 
-class SightRadius(Leaf):
-    """
-    Composites holding this has the sight_radius attribute.
-    """
-
-    def __init__(self, sight_radius):
-        super(SightRadius, self).__init__()
-        self.component_type = "sight_radius"
-        self.value = sight_radius
-
-
 class AwarenessChecker(Leaf):
     """
     Composites holding this can make awareness checks.

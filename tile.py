@@ -1,5 +1,5 @@
 from graphic import CharPrinter
-from stats import GamePieceType
+from stats import GamePieceTypes, DataPoint, DataTypes
 import compositecore
 import frame
 import terrain
@@ -8,14 +8,14 @@ import terrain
 class Tile(object):
     def __init__(self):
         self.game_pieces = {
-            GamePieceType.ENTITY: [],
-            GamePieceType.CLOUD: [],
-            GamePieceType.ITEM: [],
-            GamePieceType.DUNGEON_FEATURE: [],
-            GamePieceType.DUNGEON_TRASH: [],
-            GamePieceType.TERRAIN: []
+            GamePieceTypes.ENTITY: [],
+            GamePieceTypes.CLOUD: [],
+            GamePieceTypes.ITEM: [],
+            GamePieceTypes.DUNGEON_FEATURE: [],
+            GamePieceTypes.DUNGEON_TRASH: [],
+            GamePieceTypes.TERRAIN: []
         }
-        self._top_level = GamePieceType.TERRAIN
+        self._top_level = GamePieceTypes.TERRAIN
 
     def draw(self, console, screen_position, is_seen):
         piece_list = self.game_pieces[self._top_level]
@@ -31,7 +31,7 @@ class Tile(object):
                               if self.has_piece_of_type(piece_type))
             self._top_level = piece_type
         except StopIteration:
-            self._top_level = GamePieceType.TERRAIN
+            self._top_level = GamePieceTypes.TERRAIN
 
     def _cycle_through_pieces(self, piece_list):
         """
@@ -69,38 +69,38 @@ class Tile(object):
         piece_list[0].char_printer.draw_unseen(screen_position, console)
 
     def get_first_item(self):
-        return self.get_first_piece_of_type(GamePieceType.ITEM)
+        return self.get_first_piece_of_type(GamePieceTypes.ITEM)
 
     def get_first_entity(self):
-        return self.get_first_piece_of_type(GamePieceType.ENTITY)
+        return self.get_first_piece_of_type(GamePieceTypes.ENTITY)
 
     def get_first_cloud(self):
-        return self.get_first_piece_of_type(GamePieceType.CLOUD)
+        return self.get_first_piece_of_type(GamePieceTypes.CLOUD)
 
     def get_entities(self):
-        return self.game_pieces[GamePieceType.ENTITY]
+        return self.game_pieces[GamePieceTypes.ENTITY]
 
     def get_terrain(self):
-        return self.get_first_piece_of_type(GamePieceType.TERRAIN)
+        return self.get_first_piece_of_type(GamePieceTypes.TERRAIN)
 
     def get_dungeon_feature(self):
         return self.\
-            get_first_piece_of_type(GamePieceType.DUNGEON_FEATURE)
+            get_first_piece_of_type(GamePieceTypes.DUNGEON_FEATURE)
 
     def get_all_pieces(self):
         return [piece for piece_list in self.game_pieces.values()
                 for piece in piece_list]
 
     def get_first_piece_of_type(self, piece_type):
-        if(len(self.game_pieces[piece_type]) < 1):
+        if len(self.game_pieces[piece_type]) < 1:
             return None
         return self.game_pieces[piece_type][0]
 
     def has_entity(self):
-        return self.has_piece_of_type(GamePieceType.ENTITY)
+        return self.has_piece_of_type(GamePieceTypes.ENTITY)
 
     def has_piece_of_type(self, piece_type):
-        if(len(self.game_pieces[piece_type]) < 1):
+        if len(self.game_pieces[piece_type]) < 1:
             return False
         return True
 
@@ -110,7 +110,7 @@ class Tile(object):
             for piece in piece_list:
                 new_piece = compositecore.Composite()
                 if piece.has("game_piece_type"):
-                    new_piece.set_child(piece.game_piece_type.copy())
+                    new_piece.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, piece.game_piece_type.value))
                 if piece.has("graphic_char"):
                     new_piece.set_child(piece.graphic_char.copy())
                 if piece.has("description"):

@@ -87,7 +87,7 @@ class Equipment(Leaf):
 
     def unequip(self, equipment_slot):
         equipment = self._equipment[equipment_slot]
-        if equipment.has_child("unequip_effect"):
+        if equipment.has("unequip_effect"):
             equipment.unequip_effect.effect()
         self._equipment[equipment_slot] = None
         return equipment
@@ -141,7 +141,7 @@ class Equipment(Leaf):
         for equipment_slot in EquipmentSlots.ALL:
             if self.slot_is_equiped(equipment_slot):
                 equipment = self._equipment[equipment_slot]
-                if equipment.has_child("equipped_effect"):
+                if equipment.has("equipped_effect"):
                     equipment.equipped_effect.effect(self.parent)
 
     def print_equipment(self):

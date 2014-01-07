@@ -9,7 +9,7 @@ from missileaction import PlayerThrowItemAction
 from mover import Mover
 from position import Position, DungeonLevel
 import rng
-from stats import GamePieceType, Hit, DataPointBonusSpoof, DataPoint, Flag
+from stats import DataPointBonusSpoof, DataPoint, Flag, DataTypes, GamePieceTypes
 from statusflags import StatusFlags
 from text import Description
 import action
@@ -19,7 +19,6 @@ import equipment
 import gametime
 from messenger import msg
 import icon
-from vision import SightRadius
 
 
 class ItemType(Leaf):
@@ -45,7 +44,7 @@ def set_item_components(item):
     item.set_child(Position())
     item.set_child(DungeonLevel())
     item.set_child(Mover())
-    item.set_child(GamePieceType(GamePieceType.ITEM))
+    item.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ITEM))
     item.set_child(CharPrinter())
     item.set_child(DropAction())
     item.set_child(PlayerThrowItemAction())
@@ -72,9 +71,9 @@ def new_gun():
     gun.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
     gun.set_child(DamageProvider(15, 10, [DamageTypes.PHYSICAL,
                                           DamageTypes.PIERCING]))
-    gun.set_child(WeaponRange(15))
-    gun.set_child(Hit(13))
-    gun.set_child(Weight(5))
+    gun.set_child(DataPoint(DataTypes.WEAPON_RANGE, 15))
+    gun.set_child(DataPoint(DataTypes.HIT, 13))
+    gun.set_child(DataPoint(DataTypes.WEIGHT, 5))
     return gun
 
 
@@ -86,10 +85,10 @@ def new_sling():
     sling.set_child(Description("Sling",
                                 "This weapon propels rocks more effectively than throwing them would."))
     sling.set_child(GraphicChar(None, colors.ORANGE, icon.SLING))
-    sling.set_child(WeaponRange(4))
+    sling.set_child(DataPoint(DataTypes.WEAPON_RANGE, 4))
     sling.set_child(DamageProvider(1, 2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
-    sling.set_child(Weight(3))
-    sling.set_child(Hit(5))
+    sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
+    sling.set_child(DataPoint(DataTypes.HIT, 5))
     return sling
 
 
@@ -109,7 +108,7 @@ def set_device_components(item):
     item.set_child(ItemType(ItemType.MACHINE))
     item.set_child(PlayerAutoPickUp())
     item.set_child(Charge(random.randrange(2, 7)))
-    item.set_child(Weight(5))
+    item.set_child(DataPoint(DataTypes.WEIGHT, 5))
     return item
 
 
@@ -190,7 +189,8 @@ class DarknessDeviceAction(ActivateDeviceAction):
         ttl = gametime.single_turn * rng.random_variance(10, 5)
         entities = source_entity.dungeon_level.value.entities
         for entity in entities:
-            darkness_effect = entityeffect.AddSpoofChild(source_entity, SightRadius(1), time_to_live=ttl)
+            sight_radius_spoof = DataPoint(DataTypes.SIGHT_RADIUS, 1)
+            darkness_effect = entityeffect.AddSpoofChild(source_entity, sight_radius_spoof, time_to_live=ttl)
             entity.effect_queue.add(darkness_effect)
             msg.send_global_message(messenger.DARKNESS_MESSAGE)
 
@@ -249,7 +249,7 @@ def new_ammunition():
     ammo.set_child(Description("Gun Bullets",
                                "These bullets will fit in most guns."))
     ammo.set_child(GraphicChar(None, colors.GRAY, icon.AMMO2))
-    ammo.set_child(Weight(1))
+    ammo.set_child(DataPoint(DataTypes.WEIGHT, 1))
     ammo.set_child(PlayerAutoPickUp())
     return ammo
 
@@ -286,7 +286,7 @@ def new_leather_armor():
     armor.set_child(GraphicChar(None, colors.ORANGE_D, icon.ARMOR))
     armor.set_child(StatBonusEquipEffect("armor", 2))
     armor.set_child(EquipmentType(equipment.EquipmentTypes.ARMOR))
-    armor.set_child(Weight(10))
+    armor.set_child(DataPoint(DataTypes.WEIGHT, 10))
     return armor
 
 
@@ -299,7 +299,7 @@ def new_leather_boots():
     set_armor_components(boots)
     boots.set_child(Description("Leather Boots",
                                 "A worn pair of boots, dry mud covers most of the leather."))
-    boots.set_child(Weight(4))
+    boots.set_child(DataPoint(DataTypes.WEIGHT, 4))
     boots.set_child(GraphicChar(None, colors.ORANGE_D, icon.BOOTS))
     boots.set_child(StatBonusEquipEffect("armor", 1))
     boots.set_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
@@ -315,7 +315,7 @@ def new_leather_cap():
     set_armor_components(cap)
     cap.set_child(Description("Leather Cap",
                               "An old cap made out of leather, this should keep some harm away."))
-    cap.set_child(Weight(4))
+    cap.set_child(DataPoint(DataTypes.WEIGHT, 4))
     cap.set_child(GraphicChar(None, colors.ORANGE_D, icon.HELM))
     cap.set_child(StatBonusEquipEffect("armor", 1))
     cap.set_child(EquipmentType(equipment.EquipmentTypes.HEADGEAR))
@@ -339,8 +339,8 @@ def new_sword():
                                 "This old blade has seen some better days, it's as sharp as ever tough."))
     sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
     sword.set_child(DamageProvider(4, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
-    sword.set_child(Weight(10))
-    sword.set_child(Hit(16))
+    sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
+    sword.set_child(DataPoint(DataTypes.HIT, 16))
     return sword
 
 
@@ -354,8 +354,8 @@ def new_knife():
     knife.set_child(Description("Knife", "A trusty knife, small and precise but will only inflict small wounds."))
     knife.set_child(GraphicChar(None, colors.GRAY, icon.KNIFE))
     knife.set_child(DamageProvider(2, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
-    knife.set_child(Weight(5))
-    knife.set_child(Hit(21))
+    knife.set_child(DataPoint(DataTypes.WEIGHT, 5))
+    knife.set_child(DataPoint(DataTypes.HIT, 21))
     return knife
 
 
@@ -363,7 +363,7 @@ def set_ring_components(item):
     item.set_child(EquipmentType(equipment.EquipmentTypes.RING))
     item.set_child(ItemType(ItemType.JEWELLRY))
     item.set_child(ReEquipAction())
-    item.set_child(Weight(2))
+    item.set_child(DataPoint(DataTypes.WEIGHT, 2))
 
 
 def new_ring_of_invisibility():
@@ -436,18 +436,16 @@ class SetInvisibilityFlagEquippedEffect(EquippedEffect):
         Causes the entity that equips this item to become invisible.
         """
         invisible_flag = entity.StatusFlags.INVISIBILE
-        invisibility_effect = entityeffect. \
-            StatusAdder(self.parent, self.parent,
-                        invisible_flag, time_to_live=1)
+        invisibility_effect = entityeffect.StatusAdder(self.parent, self.parent,
+                                                       invisible_flag, time_to_live=1)
         self.parent.effect_queue.add(invisibility_effect)
 
 
 def set_potion_components(item):
     item.set_child(ItemType(ItemType.POTION))
-    item.set_child(GamePieceType(GamePieceType.ITEM))
     item.set_child(PlayerAutoPickUp())
     item.set_child(ThrowerBreak())
-    item.set_child(Weight(4))
+    item.set_child(DataPoint(DataTypes.WEIGHT, 4))
     #potion.set_child(Stacker("health_potion", 3))
 
 
@@ -461,30 +459,6 @@ def new_health_potion():
                                  "An unusually thick liquid contained in a glass bottle."
                                  "Drinking from it will heal you."))
     return potion
-
-
-class Weight(Leaf):
-    """
-    Limits how far the parent item can be thrown.
-
-    A heavier item can't be thrown as far.
-    """
-
-    def __init__(self, weight):
-        super(Weight, self).__init__()
-        self.component_type = "weight"
-        self.value = weight
-
-
-class WeaponRange(Leaf):
-    """
-    Limits how far the parent weapon can reach.
-    """
-
-    def __init__(self, range=5):
-        super(WeaponRange, self).__init__()
-        self.component_type = "weapon_range"
-        self.value = range
 
 
 class DropAction(Action):

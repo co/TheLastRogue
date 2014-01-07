@@ -4,7 +4,7 @@ from graphic import GraphicChar, CharPrinter
 import icon
 from mover import Mover
 from position import Position, DungeonLevel
-from stats import GamePieceType
+from stats import GamePieceTypes, DataTypes, DataPoint
 from text import Description
 import colors
 
@@ -16,7 +16,7 @@ class Corpse(Composite):
     """
     def __init__(self):
         super(Corpse, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.DUNGEON_TRASH))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_TRASH))
         self.set_child(Position())
         self.set_child(DungeonLevel())
         self.set_child(Description("A rotting corpse.",
@@ -34,7 +34,7 @@ class PoolOfBlood(Composite):
     """
     def __init__(self):
         super(PoolOfBlood, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.DUNGEON_TRASH))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_TRASH))
         self.set_child(Position())
         self.set_child(DungeonLevel())
         self.set_child(Description("A pool of blood.",

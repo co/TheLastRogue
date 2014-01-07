@@ -5,7 +5,7 @@ from graphic import GraphicChar, CharPrinter
 import messenger
 from mover import Mover, teleport_monsters
 from position import Position, DungeonLevel
-from stats import GamePieceType
+from stats import DataPoint, DataTypes, GamePieceTypes
 from text import Description
 import action
 import colors
@@ -18,7 +18,7 @@ class StairsDown(Composite):
     """
     def __init__(self):
         super(StairsDown, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.DUNGEON_FEATURE))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
         self.set_child(Position())
         self.set_child(DungeonLevel())
         self.set_child(Description("Stairs Down",
@@ -39,7 +39,7 @@ class StairsUp(Composite):
     """
     def __init__(self):
         super(StairsUp, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.DUNGEON_FEATURE))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
         self.set_child(Position())
         self.set_child(DungeonLevel())
         self.set_child(Description("Stairs Up",
@@ -58,7 +58,7 @@ class Fountain(Composite):
     """
     def __init__(self):
         super(Fountain, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.DUNGEON_FEATURE))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
         self.set_child(Position())
         self.set_child(DungeonLevel())
         self.set_child(Description("Fountain",

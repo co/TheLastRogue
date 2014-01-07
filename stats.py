@@ -1,10 +1,9 @@
 from compositecore import Leaf
-import gametime
 
 
 class DataPoint(Leaf):
     """
-    Base class for components holding a single data point.
+    Class for components holding a single data point.
     """
     def __init__(self, component_type, value):
         super(DataPoint, self).__init__()
@@ -40,97 +39,48 @@ class DataPointBonusSpoof(Leaf):
         self.next.value = new_value
 
 
-class Strength(DataPoint):
-    """
-    Composites holding this has the strength attribute.
-    """
-    def __init__(self, strength):
-        super(Strength, self).__init__("strength", strength)
+class DataTypes:
+    STRENGTH = "strength"
+    ARMOR = "armor"
+    HIT = "hit"
+    STEALTH = "stealth"
+    AWARENESS = "awareness"
+    EVASION = "evasion"
+
+    MELEE_SPEED = "melee_speed"
+    SHOOT_SPEED = "shoot_speed"
+    THROW_SPEED = "throw_speed"
+
+    MELEE_DAMAGE_MULTIPLIER = "melee_damage_multiplier"
+    THROW_DAMAGE_MULTIPLIER = "throw_damage_multiplier"
+
+    INTELLIGENCE = "intelligence"
+    GAME_PIECE_TYPE = "game_piece_type"
+    MOVEMENT_SPEED = "movement_speed"
+    FACTION = "faction"
+
+    WEIGHT = "weight"
+    WEAPON_RANGE = "weapon_range"
+
+    SIGHT_RADIUS = "sight_radius"
+
+    GAME_STATE = "game_state"
 
 
-class Armor(DataPoint):
-    """
-    Composites holding this has the armor attribute.
-    """
-    def __init__(self, strength):
-        super(Armor, self).__init__("armor", strength)
+class IntelligenceLevels(DataPoint):
+    MINDLESS = 0
+    PLANT = 1
+    ANIMAL = 2
+    NORMAL = 3
+    HIGH = 4
 
 
-class Hit(DataPoint):
-    """
-    A value determining how likely you are to hit something.
-    """
-    def __init__(self, hit):
-        super(Hit, self).__init__("hit", hit)
-
-
-class Stealth(DataPoint):
-    """
-    A value determining how good you are to go unnoticed.
-    """
-    def __init__(self, stealth):
-        super(Stealth, self).__init__("stealth", stealth)
-
-
-class Awareness(DataPoint):
-    """
-    A value determining how good you are to noticing things.
-    """
-    def __init__(self, awareness):
-        super(Awareness, self).__init__("awareness", awareness)
-
-
-class Evasion(DataPoint):
-    """
-    High evasion means parent entity is harder to hit.
-    """
-    def __init__(self, evasion):
-        super(Evasion, self).__init__("evasion", evasion)
-
-
-class AttackSpeed(Leaf):
-    """
-    Composites holding this has the attack_speed attribute.
-    """
-    def __init__(self, melee_speed=gametime.single_turn, throw_speed=gametime.double_turn, shoot_speed=gametime.single_turn):
-        super(AttackSpeed, self).__init__()
-        self.component_type = "attack_speed"
-        self.melee = melee_speed
-        self.throw = throw_speed
-        self.shoot = shoot_speed
-
-
-class GameState(DataPoint):
-    """
-    Composites holding this has the attack_speed attribute.
-    """
-    def __init__(self, value):
-        super(GameState, self).__init__("game_state", value)
-
-
-class MovementSpeed(DataPoint):
-    """
-    Composites holding this has the attack_speed attribute.
-    """
-    def __init__(self, value):
-        super(MovementSpeed, self).__init__("movement_speed", value)
-
-
-class Faction(DataPoint):
-    """
-    The faction attribute keeps track of the faction.
-
-    All other factions are considered hostile.
-    """
-
+class Factions(DataPoint):
     PLAYER = 0
     MONSTER = 1
 
-    def __init__(self, faction):
-        super(Faction, self).__init__("faction", faction)
 
-
-class GamePieceType(DataPoint):
+class GamePieceTypes(DataPoint):
     ENTITY = 0
     CLOUD = 1
     ITEM = 2
@@ -138,37 +88,16 @@ class GamePieceType(DataPoint):
     DUNGEON_TRASH = 4
     TERRAIN = 5
 
-    _MAX_INSTANCES_OF_PIECE_TYPE_ON_TILE = {ENTITY: 1,
-                                            CLOUD: 1,
-                                            ITEM: 1,
-                                            DUNGEON_FEATURE: 1,
-                                            DUNGEON_TRASH: 1,
-                                            TERRAIN: 1}
-
-    def __init__(self, piece_type=None):
-        super(GamePieceType, self).__init__("game_piece_type", piece_type)
-
-    @property
-    def max_instances_in_tile(self):
-        return self.__class__.\
-            _MAX_INSTANCES_OF_PIECE_TYPE_ON_TILE[self.value]
-
-    def copy(self):
-        """
-        Makes a copy of this component.
-        """
-        return GamePieceType(self.value)
+    MAX_INSTANCES_ON_TILE = {ENTITY: 1,
+                             CLOUD: 1,
+                             ITEM: 1,
+                             DUNGEON_FEATURE: 1,
+                             DUNGEON_TRASH: 1,
+                             TERRAIN: 1}
 
 
-class Intelligence(DataPoint):
-    MINDLESS = 0
-    PLANT = 1
-    ANIMAL = 2
-    NORMAL = 3
-    HIGH = 4
-
-    def __init__(self, intelligence):
-        super(Intelligence, self).__init__("intelligence", intelligence)
+def max_instances_of_composite_on_tile(composite):
+    return GamePieceTypes.MAX_INSTANCES_ON_TILE[composite.game_piece_type.value]
 
 
 class UnArmedHitTargetEntityEffectFactory(DataPoint):
@@ -176,5 +105,3 @@ class UnArmedHitTargetEntityEffectFactory(DataPoint):
         super(UnArmedHitTargetEntityEffectFactory, self).__init__("unarmed_hit_target_entity_effect_factory_" +
                                                                   str(effect_factory_function), effect_factory_function)
         self.tags.add("unarmed_hit_target_entity_effect_factory")
-
-

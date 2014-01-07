@@ -2,7 +2,7 @@ from compositecore import Leaf, Composite
 from graphic import GraphicChar, CharPrinter, GraphicCharTerrainCorners
 from mover import Mover
 from position import Position, DungeonLevel
-from stats import GamePieceType, Flag
+from stats import Flag, DataPoint, DataTypes, GamePieceTypes
 from statusflags import StatusFlags
 import colors
 import icon
@@ -45,7 +45,7 @@ class BumpAction(Leaf):
 class Floor(Composite):
     def __init__(self):
         super(Floor, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.TERRAIN))
         self.set_child(Mover())
         self.set_child(Position())
         self.set_child(DungeonLevel())
@@ -59,7 +59,7 @@ class Floor(Composite):
 class Water(Composite):
     def __init__(self):
         super(Water, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.TERRAIN))
         self.set_child(Mover())
         self.set_child(Position())
         self.set_child(DungeonLevel())
@@ -73,7 +73,7 @@ class Water(Composite):
 class GlassWall(Composite):
     def __init__(self):
         super(GlassWall, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.TERRAIN))
         self.set_child(Mover())
         self.set_child(Position())
         self.set_child(DungeonLevel())
@@ -86,7 +86,7 @@ class GlassWall(Composite):
 class Chasm(Composite):
     def __init__(self):
         super(Chasm, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.TERRAIN))
         self.set_child(Mover())
         self.set_child(Position())
         self.set_child(DungeonLevel())
@@ -99,7 +99,7 @@ class Chasm(Composite):
 class Unknown(Composite):
     def __init__(self):
         super(Unknown, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.TERRAIN))
         self.set_child(Mover())
         self.set_child(Position())
         self.set_child(DungeonLevel())
@@ -114,7 +114,7 @@ class Unknown(Composite):
 class Wall (Composite):
     def __init__(self):
         super(Wall, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.TERRAIN))
         self.set_child(Mover())
         self.set_child(Position())
         self.set_child(DungeonLevel())
@@ -129,7 +129,7 @@ class Wall (Composite):
 class Door(Composite):
     def __init__(self):
         super(Door, self).__init__()
-        self.set_child(GamePieceType(GamePieceType.TERRAIN))
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.TERRAIN))
         self.set_child(Mover())
         self.set_child(Position())
         self.set_child(DungeonLevel())

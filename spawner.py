@@ -1,6 +1,6 @@
 import random
 import logging
-from stats import GamePieceType
+from stats import GamePieceTypes
 
 import dungeontrash
 import item
@@ -113,8 +113,8 @@ def place_piece_on_random_tile_not_on_item_or_feature(piece, dungeon_level):
     for position in positions:
         x, y = position
         tile = dungeon_level.get_tile(position)
-        if (tile.has_piece_of_type(GamePieceType.ITEM) or
-                tile.has_piece_of_type(GamePieceType.DUNGEON_FEATURE)):
+        if (tile.has_piece_of_type(GamePieceTypes.ITEM) or
+                tile.has_piece_of_type(GamePieceTypes.DUNGEON_FEATURE)):
             continue
         move_succeeded = piece.mover.try_move((x, y), dungeon_level)
         if move_succeeded:

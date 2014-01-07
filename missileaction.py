@@ -90,7 +90,7 @@ class PlayerThrowStoneAction(PlayerMissileAction):
         """
         Help method for spending energy for the act performing entity.
         """
-        entity.actor.newly_spent_energy += entity.attack_speed.throw
+        entity.actor.newly_spent_energy += entity.throw_speed.value
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         animate_flight(game_state, path, self.icon, self.color_fg)
@@ -129,7 +129,7 @@ class PlayerSlingStoneAction(PlayerMissileAction):
         """
         Help method for spending energy for the act performing entity.
         """
-        entity.actor.newly_spent_energy += entity.attack_speed.throw
+        entity.actor.newly_spent_energy += entity.throw_speed.value
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         animate_flight(game_state, path, self.icon, self.color_fg)
@@ -164,7 +164,7 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         """
         Help method for spending energy for the act performing entity.
         """
-        entity.actor.newly_spent_energy += entity.attack_speed.shoot
+        entity.actor.newly_spent_energy += entity.shoot_speed.value
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         self.remove_ammo_from_inventory(source_entity.inventory)
@@ -205,7 +205,7 @@ class MonsterThrowStoneAction(Action):
         """
         Help method for spending energy for the act performing entity.
         """
-        entity.actor.newly_spent_energy += entity.attack_speed.throw
+        entity.actor.newly_spent_energy += entity.throw_speed.value
 
     def can_act(self, destination):
         if random.randrange(100) > self.skip_chance:
@@ -253,7 +253,7 @@ class MonsterThrowStoneAction(Action):
 
 
 class MonsterMagicRangeAction(MonsterThrowStoneAction):
-    def __init__(self, damage, skip_chance=0, icon=icon.BIG_CENTER_DOT, color_fg=colors.BLUE):
+    def __init__(self, damage, skip_chance=0, icon=icon.BIG_CENTER_DOT, color_fg=colors.LIGHT_BLUE):
         super(MonsterThrowStoneAction, self).__init__()
         self.component_type = "monster_range_attack_action"
         self.icon = icon

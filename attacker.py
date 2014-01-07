@@ -9,15 +9,16 @@ class Attacker(Leaf):
     """
     Component for attacking and checking if an attacking is legal.
     """
-    def __init__(self, melee_damage_modifier=1.0, rock_damage_modifier=1.0):
+    def __init__(self):
         super(Attacker, self).__init__()
         self.component_type = "attacker"
-        self.melee_damage_modifier = melee_damage_modifier
-        self.rock_damage_modifier = rock_damage_modifier
 
     @property
     def throw_rock_mean_damage(self):
-        return int(2 * self.parent.strength.value * self.rock_damage_modifier / 3)
+        damage_multiplier = 1
+        if self.parent.has("throw_damage_multiplier"):
+            damage_multiplier = self.parent.throw_damage_multiplier.value
+        return int(2 * self.parent.strength.value * damage_multiplier / 3)
 
     @property
     def throw_rock_damage_variance(self):
@@ -64,7 +65,10 @@ class Attacker(Leaf):
         caused by an unarmed hit by the entity.
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
-        damage_strength = int(self.parent.strength.value * self.melee_damage_modifier)
+        damage_multiplier = 1
+        if self.parent.has("melee_damage_multiplier"):
+            damage_multiplier = self.parent.melee_damage_multiplier.value
+        damage_strength = int(self.parent.strength.value * damage_multiplier)
         target_entity_effects_factories = [effect_factory_data_point.value for effect_factory_data_point in
                                            self.parent.get_children_with_tag("unarmed_hit_target_entity_effect_factory")]
         return Attack(1 + damage_strength / 2, damage_strength / 4,
