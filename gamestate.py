@@ -2,6 +2,7 @@ import os
 from os.path import isfile
 from os import listdir, getcwd
 import cPickle as pickle
+from cloud import new_steam_cloud
 import colors
 from dungeon import Dungeon
 from dungeonlevelfactory import dungeon_level_from_file
@@ -174,6 +175,9 @@ class TestGameState(GameStateBase):
         self.dungeon_level = dungeon_level_from_file("test.level")
         self.player.mover.try_move(start_position, self.dungeon_level)
         self.camera.center_on_entity(self.player)
+
+        cloud = new_steam_cloud(32)
+        cloud.mover.try_move((16, 10), self.dungeon_level)
 
         potion = item.new_health_potion()
         potion.mover.try_move((20, 12), self.dungeon_level)

@@ -1,11 +1,67 @@
-import gamepiece
-import actor
+from actor import Actor
 import colors
+from compositecore import Composite
 import direction
-import geometry as geo
 import gametime
+import geometry
+from graphic import CharPrinter, GraphicChar
+from mover import Mover
+from position import Position, DungeonLevel
 import rng
+from stats import DataTypes, DataPoint, GamePieceTypes
+import turn
 
+
+def set_cloud_components(cloud, density):
+    cloud.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.CLOUD))
+    cloud.set_child(CharPrinter())
+    cloud.set_child(Position())
+    cloud.set_child(DungeonLevel())
+    cloud.set_child(Mover())
+    cloud.set_child(GraphicChar(None, None, 178))
+    cloud.set_child(DataPoint(DataTypes.DENSITY, density))
+
+
+def new_steam_cloud(density):
+    steam = Composite()
+    set_cloud_components(steam, density)
+    steam.graphic_char.color_fg = colors.WHITE
+    steam.set_child(CloudActor())
+    return steam
+
+
+class CloudActor(Actor):
+    def __init__(self):
+        super(CloudActor, self).__init__()
+
+    def _float_to_position(self, position, density):
+        original_cloud = self.parent.dungeon_level.value.get_tile_or_unknown(position).get_first_cloud()
+        if original_cloud is None:
+            new_cloud = new_steam_cloud(density)
+            new_cloud.mover.try_move(position, self.parent.dungeon_level.value)
+        else:
+            original_cloud.density.value += density
+        self.parent.density.value -= density
+
+    def tick(self):
+        self.energy += self.energy_recovery
+        while self.energy > 0:
+            self.energy -= self.act()
+        turn.current_turn += 1
+
+    def act(self):
+        if self.parent.density.value < 2:
+            self.parent.mover.try_remove_from_dungeon()
+            return gametime.single_turn
+
+        density_per_tile = max(self.parent.density.value / 4, 1)
+        neighbours = [geometry.add_2d(offset, self.parent.position.value) for offset in direction.AXIS_DIRECTIONS]
+        for neighbour in neighbours:
+            if not (rng.coin_flip() and rng.coin_flip()):
+                self._float_to_position(neighbour, density_per_tile)
+            if self.parent.density.value < density_per_tile:
+                break
+        return gametime.single_turn
 
 #class Cloud(actor.Actor):
 #    def __init__(self, density):

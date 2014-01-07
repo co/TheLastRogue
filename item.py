@@ -1,6 +1,7 @@
 import random
 
 from action import Action
+from cloud import new_steam_cloud
 from compositecore import Leaf, Composite
 from attacker import Attack, DamageTypes
 from graphic import GraphicChar, CharPrinter
@@ -444,7 +445,7 @@ class SetInvisibilityFlagEquippedEffect(EquippedEffect):
 def set_potion_components(item):
     item.set_child(ItemType(ItemType.POTION))
     item.set_child(PlayerAutoPickUp())
-    item.set_child(ThrowerBreak())
+    item.set_child(ThrowerCreateSteam())
     item.set_child(DataPoint(DataTypes.WEIGHT, 4))
     #potion.set_child(Stacker("health_potion", 3))
 
@@ -771,6 +772,23 @@ class ThrowerBreak(Thrower):
                   " smashes to the ground and breaks into pieces."
         msg.send_visual_message(message, position)
 
+
+class ThrowerCreateSteam(Thrower):
+    """
+    Items with this component will create and create a puff of steam.
+    """
+
+    def __init__(self):
+        super(ThrowerCreateSteam, self).__init__()
+
+    def throw_effect(self, dungeon_level, position):
+        message = "The " + self.parent.description.name.lower() + \
+                  " smashes to the ground and breaks into pieces."
+        msg.send_visual_message(message, position)
+        print self.parent.description.name
+        print self.parent._children
+        steam = new_steam_cloud(32)
+        steam.mover.try_move(position, dungeon_level)
 
 def _item_flash_animation(entity, item):
     entity.char_printer.append_graphic_char_temporary_frames([item.graphic_char])
