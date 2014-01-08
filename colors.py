@@ -92,7 +92,7 @@ CHAMPAGNE = palette.CHAMPAGNE
 CHAMPAGNE_D = palette.CHAMPAGNE_D
 BLACK = palette.BLACK
 DARKNESS = palette.DARKNESS
-DARK_GRAY = libtcodpy.Color(21, 25, 32)
+DARK_GRAY = libtcodpy.Color(17, 19, 22)
 
 ################################
 # Color Assignments
@@ -101,7 +101,7 @@ DARK_GRAY = libtcodpy.Color(21, 25, 32)
 UNINITIALIZED_BG = LIGHT_PINK
 UNINITIALIZED_FG = DARK_PURPLE
 
-UNSEEN_BG = BLACK
+UNSEEN_BG = DARK_GRAY
 UNSEEN_FG = BLUE_D
 
 FLOOR_BG = DARK_BROWN

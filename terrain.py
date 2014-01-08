@@ -90,7 +90,7 @@ class Chasm(Composite):
         self.set_child(Mover())
         self.set_child(Position())
         self.set_child(DungeonLevel())
-        self.set_child(GraphicChar(colors.DARKNESS, colors.DARK_GREEN, icon.CHASM2))
+        self.set_child(GraphicChar(colors.BLACK, colors.DARKNESS, icon.CHASM2))
         self.set_child(CharPrinter())
         self.set_child(Flag("is_chasm"))
         self.set_child(Flag("is_transparent"))

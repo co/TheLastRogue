@@ -1,5 +1,5 @@
 import libtcodpy as libtcod
-BLACK = libtcod.Color(13, 15, 17)
+BLACK = libtcod.Color(7, 8, 9)
 DARKNESS = libtcod.Color(24, 33, 38)
 DARK_BLUE = libtcod.Color(26, 42, 51)
 BLUE_D = libtcod.Color(34, 50, 99)
