@@ -78,7 +78,7 @@ def new_ratman(gamestate):
     ratman.set_child(GraphicChar(None, colors.ORANGE, icon.RATMAN))
 
     ratman.set_child(Health(8))
-    ratman.set_child(DataPoint(DataTypes.STRENGTH, 8))
+    ratman.set_child(DataPoint(DataTypes.STRENGTH, 3))
     ratman.set_child(DataPoint(DataTypes.EVASION, 16))
     ratman.set_child(DataPoint(DataTypes.HIT, 13))
     ratman.set_child(DataPoint(DataTypes.ARMOR, 4))
