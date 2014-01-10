@@ -1,9 +1,13 @@
 import random
-from attacker import Attacker, Dodger, DamageTypes, ArmorChecker
+from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity
+from cloud import new_fire_cloud
+from compositecommon import EntityShareTileEffect
 from compositecore import Composite, Leaf
 import constants
+import direction
 from dungeonmask import DungeonMask, Path
-from entityeffect import EffectQueue, AddSpoofChild, EffectStackID, UndodgeableDamagAndBlockSameEffect, DamageOverTimeEffect
+from entityeffect import EffectQueue, AddSpoofChild, EffectStackID, UndodgeableDamagAndBlockSameEffect, DamageOverTimeEffect, HealthRegain
+import geometry
 from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
@@ -46,6 +50,7 @@ def set_monster_components(monster, game_state):
     monster.set_child(HealthModifier())
     monster.set_child(Dodger())
     monster.set_child(ArmorChecker())
+    monster.set_child(ResistanceChecker())
     monster.set_child(AwarenessChecker())
     monster.set_child(DungeonMask())
     monster.set_child(Vision())
@@ -87,8 +92,15 @@ def new_ratman(gamestate):
     return ratman
 
 
+def set_beast_components(composite):
+    composite.set_child(StatusFlags([StatusFlags.IS_ALIVE]))
+    composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.ANIMAL))
+    composite.set_child(LeaveCorpseOnDeath())
+    composite.set_child(BleedWhenDamaged())
+
+
 def set_insect_components(composite):
-    composite.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.IS_ALIVE]))
+    composite.set_child(StatusFlags([StatusFlags.IS_ALIVE]))
     composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.ANIMAL))
 
 
@@ -112,6 +124,68 @@ def new_spider(gamestate):
                                                                                    1, 3,
                                                                                    random.randrange(9, 18))))
     return spider
+
+
+def set_insect_components(composite):
+    composite.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.IS_ALIVE]))
+    composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.ANIMAL))
+
+
+def new_salamander(gamestate):
+    salamander = Composite()
+    set_monster_components(salamander, gamestate)
+    set_beast_components(salamander)
+
+    salamander.set_child(Description("Salamander", "A salamander, it can start small fires."))
+    salamander.set_child(EntityMessages("The salamander looks at you.", "The salamander stops moving."))
+    salamander.set_child(GraphicChar(None, colors.RED, icon.SALAMANDER))
+
+    salamander.set_child(Health(20))
+    salamander.set_child(DataPoint(DataTypes.STRENGTH, 3))
+    salamander.set_child(DataPoint(DataTypes.EVASION, 12))
+    salamander.set_child(DataPoint(DataTypes.HIT, 15))
+    salamander.set_child(DataPoint(DataTypes.ARMOR, 4))
+    salamander.set_child(DataPoint(DataTypes.AWARENESS, 5))
+
+    salamander.set_child(NaturalHealthRegain())
+    salamander.set_child(PutAdjacentTilesOnFire())
+    salamander.set_child(FireImmunity())
+
+    return salamander
+
+
+class PutAdjacentTilesOnFire(Leaf):
+    def __init__(self):
+        super(PutAdjacentTilesOnFire, self).__init__()
+        self.component_type = "put_adjacent_tiles_on_fire"
+        self.fire_chance_per_turn = 0.5
+        self.time_interval = gametime.single_turn
+        self.time_to_next_burn_attempt = self.time_interval
+
+    def after_tick(self, time):
+        self.time_to_next_burn_attempt -= time
+        if self.time_to_next_burn_attempt > 0:
+            return
+        my_position = self.parent.position.value
+        chance = self.fire_chance_per_turn / float(len(direction.DIRECTIONS))
+        for d in direction.DIRECTIONS:
+            point = geometry.add_2d(my_position, d)
+            dungeon_level = self.parent.dungeon_level.value
+            if random.random() < chance and len(dungeon_level.get_tile_or_unknown(point).get_entities()) == 0:
+                fire = new_fire_cloud(random.randrange(6, 10))
+                fire.mover.try_move(point, dungeon_level)
+        self.time_to_next_burn_attempt = self.time_interval
+
+
+class NaturalHealthRegain(Leaf):
+    def __init__(self):
+        super(NaturalHealthRegain, self).__init__()
+        self.component_type = "natural_health_regain"
+
+    def before_tick(self, time):
+        health_regain = HealthRegain(self.parent, 3, 4, float("inf"), no_stack_id="natural_health_regain")
+        self.parent.effect_queue.add(health_regain)
+        self.parent.remove_component(self)
 
 
 class PoisonEntityEffectFactory(object):
@@ -292,23 +366,6 @@ def new_dark_slime(game_state):
     return slime
 
 
-class EntityShareTileEffect(Leaf):
-    """
-    Defines an effect that sharing tile with this parent entity will result in.
-    """
-
-    def __init__(self):
-        super(EntityShareTileEffect, self).__init__()
-        self.tags = ["entity_share_tile_effect"]
-
-    def share_tile_effect_tick(self, sharing_entity, time_spent):
-        if not sharing_entity is self.parent:
-            self._effect(source_entity=self.parent, target_entity=sharing_entity, time=time_spent)
-
-    def _effect(self, **kwargs):
-        pass
-
-
 class DissolveEntitySlimeShareTileEffect(EntityShareTileEffect):
     def __init__(self):
         super(DissolveEntitySlimeShareTileEffect, self).__init__()
@@ -319,6 +376,8 @@ class DissolveEntitySlimeShareTileEffect(EntityShareTileEffect):
         source_entity = kwargs["source_entity"]
         strength = source_entity.strength.value
         damage = rng.random_variance(strength, 1)
+        if not target_entity.has("effect_queue"):
+            return
 
         if len(target_entity.get_children_with_tag("entity_share_tile_effect")) > 0:
             #Merge with other slime.
@@ -369,6 +428,7 @@ class BlockVisionShareTileEffect(EntityShareTileEffect):
     def _effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
-        sight_radius_spoof = DataPoint(DataTypes.SIGHT_RADIUS, 1)
-        darkness_effect = AddSpoofChild(source_entity, sight_radius_spoof, time_to_live=1)
-        target_entity.effect_queue.add(darkness_effect)
+        if target_entity.has("effect_queue"):
+            sight_radius_spoof = DataPoint(DataTypes.SIGHT_RADIUS, 1)
+            darkness_effect = AddSpoofChild(source_entity, sight_radius_spoof, time_to_live=1)
+            target_entity.effect_queue.add(darkness_effect)

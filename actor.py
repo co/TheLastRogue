@@ -33,6 +33,7 @@ class Actor(Leaf):
     def add_energy_spent(self, energy):
         self.newly_spent_energy += energy
 
+
 class DoNothingActor(Actor):
     """
     Entities with this actor will do nothing.

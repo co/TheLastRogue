@@ -1,7 +1,7 @@
 import constants
 from equipment import Equipment
 from item import PickUpItemAction
-from attacker import Attacker, Dodger, ArmorChecker
+from attacker import Attacker, Dodger, ArmorChecker, ResistanceChecker
 from compositecore import Composite
 from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue
@@ -61,6 +61,7 @@ class Player(Composite):
         self.set_child(Attacker())
         self.set_child(Dodger())
         self.set_child(ArmorChecker())
+        self.set_child(ResistanceChecker())
 
         self.set_child(Description("CO", "The Brave"))
         self.set_child(GraphicChar(None, colors.WHITE, icon.GUNSLINGER_THIN))

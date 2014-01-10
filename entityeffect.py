@@ -33,7 +33,7 @@ class EffectQueue(Leaf):
     def __init__(self):
         super(EffectQueue, self).__init__()
         self.component_type = "effect_queue"
-        self._effect_queue = [None for x in range(len(EffectTypes.ALLTYPES))]
+        self._effect_queue = [None for _ in range(len(EffectTypes.ALLTYPES))]
         for effect_type in EffectTypes.ALLTYPES:
             self._effect_queue[effect_type] = []
 
@@ -197,7 +197,8 @@ class AttackEntityEffect(EntityEffect):
     def hit_target(self):
         self.add_effects_to_target()
         damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
-        damage_caused = self.target_entity.health_modifier.hurt(damage_after_armor, entity=self.source_entity)
+        damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
+        damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity)
         return damage_caused
 
     def update(self, time_spent):
@@ -225,6 +226,22 @@ class UndodgeableAttackEntityEffect(AttackEntityEffect):
         return True
 
 
+class HealthRegain(EntityEffect):
+    def __init__(self, source_entity, health, turn_interval, time_to_live, no_stack_id=None):
+        super(HealthRegain, self).__init__(source_entity=source_entity, effect_type=EffectTypes.HEAL,
+                                           no_stack_id=no_stack_id, time_to_live=time_to_live)
+        self.health = health
+        self.time_interval = turn_interval * gametime.single_turn
+        self.time_until_next_heal = self.time_interval
+
+    def update(self, time_spent):
+        if self.time_until_next_heal <= 0:
+            self.target_entity.health_modifier.heal(self.health)
+            self.time_until_next_heal = self.time_interval
+        self.time_until_next_heal -= time_spent
+        self.tick(time_spent)
+
+
 class DamageOverTimeEffect(EntityEffect):
     def __init__(self, source_entity, damage, damage_types, turn_interval, turns_to_live, damage_message, no_stack_id=None):
         super(DamageOverTimeEffect, self).__init__(source_entity=source_entity, effect_type=EffectTypes.DAMAGE,
@@ -243,7 +260,8 @@ class DamageOverTimeEffect(EntityEffect):
 
     def damage_target(self):
         damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
-        damage_caused = self.target_entity.health_modifier.hurt(damage_after_armor, entity=self.source_entity,
+        damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
+        damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity,
                                                                 damage_types=self.damage_types)
         return damage_caused
 
@@ -275,7 +293,8 @@ class UndodgeableDamagAndBlockSameEffect(EntityEffect):
     def update(self, time_spent):
         if self.time_alive == 0:
             damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
-            damage_caused = self.target_entity.health_modifier.hurt(damage_after_armor, entity=self.source_entity)
+            damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
+            damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity)
             self.send_damage_message(damage_caused)
         self.tick(time_spent)
 

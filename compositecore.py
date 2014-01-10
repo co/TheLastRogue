@@ -125,6 +125,12 @@ class Composite(Component):
     def __getinitargs__(self):
         return ()
 
+    def __repr__(self):
+        if self.has("description"):
+            return self.description.name + " " + super(Composite, self).__repr__()
+        else:
+            return str(super(Composite, self).__repr__())
+
     def set_child(self, child):
         """
         Adds a child component to this component.

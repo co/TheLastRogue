@@ -115,6 +115,25 @@ class ArmorChecker(Leaf):
         return damage
 
 
+class ResistanceChecker(Leaf):
+    """
+    Component for calculating dodge.
+    """
+    def __init__(self):
+        super(ResistanceChecker, self).__init__()
+        self.component_type = "resistance_checker"
+
+    def get_damage_after_resistance(self, damage, damage_types):
+        """
+        Returns the damage taken after it goes through the armor.
+        """
+        immunities = [component.immunity for component in self.parent.get_children_with_tag("immunity")]
+        for immunity in immunities:
+            if immunity in damage_types:
+                return 0
+        return damage
+
+
 class DamageTypes(object):
     PHYSICAL = 0
     MAGIC = 1
@@ -123,6 +142,15 @@ class DamageTypes(object):
     CUTTING = 4
     ACID = 5
     POISON = 6
+    FIRE = 7
+
+
+class FireImmunity(Leaf):
+    def __init__(self):
+        super(FireImmunity, self).__init__()
+        self.component_type = "fire"
+        self.tags.add("immunity")
+        self.immunity = DamageTypes.FIRE
 
 
 class Attack(object):

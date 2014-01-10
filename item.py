@@ -1,9 +1,11 @@
 import random
 
 from action import Action
-from cloud import new_steam_cloud
+from cloud import new_steam_cloud, new_explosion_cloud
 from compositecore import Leaf, Composite
 from attacker import Attack, DamageTypes
+import direction
+import geometry
 from graphic import GraphicChar, CharPrinter
 import messenger
 from missileaction import PlayerThrowItemAction
@@ -27,13 +29,14 @@ class ItemType(Leaf):
     Enumerator class denoting different item types. Inventory is sorted on ItemType.
     """
     POTION = 0
-    MACHINE = 1
-    WEAPON = 2
-    ARMOR = 3
-    JEWELLRY = 4
-    AMMO = 5
+    BOMB = 1
+    MACHINE = 2
+    WEAPON = 3
+    ARMOR = 4
+    JEWELLRY = 5
+    AMMO = 6
 
-    ALL = [POTION, MACHINE, WEAPON, ARMOR, JEWELLRY, AMMO]
+    ALL = [POTION, BOMB, MACHINE, WEAPON, ARMOR, JEWELLRY, AMMO]
 
     def __init__(self, item_type):
         super(ItemType, self).__init__()
@@ -462,6 +465,20 @@ def new_health_potion():
     return potion
 
 
+def new_bomb():
+    bomb = Composite()
+    set_item_components(bomb)
+    bomb.set_child(ItemType(ItemType.BOMB))
+    bomb.set_child(PlayerAutoPickUp())
+    bomb.set_child(GraphicChar(None, colors.DARK_GRAY, icon.BOMB))
+    bomb.set_child(DataPoint(DataTypes.WEIGHT, 4))
+    bomb.set_child(Description("Bomb",
+                               "A ball filled gunpowder, with a fuse attached."
+                               "Throwing it will cause some serious damage."))
+    bomb.set_child(ThrowerCreateExplosion())
+    return bomb
+
+
 class DropAction(Action):
     """
     An entity holding the parent item in its inventory should be able to drop
@@ -785,10 +802,34 @@ class ThrowerCreateSteam(Thrower):
         message = "The " + self.parent.description.name.lower() + \
                   " smashes to the ground and breaks into pieces."
         msg.send_visual_message(message, position)
-        print self.parent.description.name
-        print self.parent._children
         steam = new_steam_cloud(32)
         steam.mover.try_move(position, dungeon_level)
+
+
+class ThrowerCreateExplosion(Thrower):
+    """
+    Items with this component will create and create a puff of steam.
+    """
+
+    def __init__(self):
+        super(ThrowerCreateExplosion, self).__init__()
+
+    def throw_effect(self, dungeon_level, position):
+        message = "The " + self.parent.description.name.lower() + " Explodes!."
+        msg.send_visual_message(message, position)
+        explosion = new_explosion_cloud(1)
+        explosion.graphic_char.color_fg = colors.RED
+        explosion.mover.replace_move(position, dungeon_level)
+        for d in direction.DIRECTIONS:
+            if d in direction.AXIS_DIRECTIONS:
+                color = colors.ORANGE
+            else:
+                color = colors.YELLOW
+            point = geometry.add_2d(d, position)
+            explosion = new_explosion_cloud(1)
+            explosion.graphic_char.color_fg = color
+            explosion.mover.replace_move(point, dungeon_level)
+
 
 def _item_flash_animation(entity, item):
     entity.char_printer.append_graphic_char_temporary_frames([item.graphic_char])

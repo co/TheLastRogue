@@ -19,6 +19,7 @@ class Flag(Leaf):
         super(Flag, self).__init__()
         self.component_type = component_type
 
+
 class DataPointBonusSpoof(Leaf):
     """
     Defines a bonus value, if this is added to an entity as spoof.
@@ -64,6 +65,7 @@ class DataTypes:
     SIGHT_RADIUS = "sight_radius"
 
     DENSITY = "density"
+    NEW_CLOUD_FUNCTION = "new_cloud_function"
 
     GAME_STATE = "game_state"
 

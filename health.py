@@ -70,8 +70,9 @@ class HealthModifier(Leaf):
         """
         Heals increases the current hp by health.
         """
-        self.parent.health.hp.increase(health)
-        self._animate_heal()
+        if not self.parent.health.hp.value == self.parent.health.hp.max_value:
+            self.parent.health.hp.increase(health)
+            self._animate_heal()
         return health
 
     def _animate_heal(self):

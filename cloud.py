@@ -1,14 +1,19 @@
 from actor import Actor
+from attacker import DamageTypes
 import colors
+from compositecommon import EntityShareTileEffect
 from compositecore import Composite
 import direction
+from entityeffect import UndodgeableDamagAndBlockSameEffect
 import gametime
 import geometry
 from graphic import CharPrinter, GraphicChar
+import messenger
 from mover import Mover
 from position import Position, DungeonLevel
 import rng
 from stats import DataTypes, DataPoint, GamePieceTypes
+from text import Description
 import turn
 
 
@@ -27,18 +32,101 @@ def new_steam_cloud(density):
     set_cloud_components(steam, density)
     steam.graphic_char.color_fg = colors.WHITE
     steam.set_child(CloudActor())
+    steam.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_steam_cloud))
     return steam
+
+
+def new_explosion_cloud(density):
+    explosion = Composite()
+    set_cloud_components(explosion, density)
+    explosion.graphic_char.color_fg = colors.YELLOW
+    explosion.set_child(Description("Explosion", "Don't go near it."))
+    explosion.set_child(DisappearCloudActor())
+    explosion.set_child(ExplosionDamageShareTileEffect())
+    explosion.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_explosion_cloud))
+    return explosion
+
+
+def new_fire_cloud(density):
+    explosion = Composite()
+    set_cloud_components(explosion, density)
+    explosion.graphic_char.icon = 'W'
+    explosion.graphic_char.color_fg = colors.RED
+    explosion.set_child(Description("Fire", "Don't get burnt."))
+    explosion.set_child(DisappearCloudActor())
+    explosion.set_child(FireDamageShareTileEffect())
+    explosion.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_explosion_cloud))
+    return explosion
+
+
+class FireDamageShareTileEffect(EntityShareTileEffect):
+    def __init__(self):
+        super(FireDamageShareTileEffect, self).__init__()
+        self.component_type = "explosion_damage_share_tile_effect"
+
+    def _effect(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        source_entity = kwargs["source_entity"]
+        damage_mid = 3
+        damage_var = 6
+        damage = rng.random_variance(damage_mid, damage_var)
+        if not target_entity.has("effect_queue"):
+            return
+
+        damage_effect = UndodgeableDamagAndBlockSameEffect(source_entity, damage, [DamageTypes.FIRE],
+                                                           messenger.HURT_BY_FIRE, "fire_damage",
+                                                           time_to_live=gametime.single_turn)
+        target_entity.effect_queue.add(damage_effect)
+
+
+class ExplosionDamageShareTileEffect(EntityShareTileEffect):
+    def __init__(self):
+        super(ExplosionDamageShareTileEffect, self).__init__()
+        self.component_type = "explosion_damage_share_tile_effect"
+
+    def _effect(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        source_entity = kwargs["source_entity"]
+        damage_mid = 20
+        damage_var = 10
+        damage = rng.random_variance(damage_mid, damage_var)
+        if not target_entity.has("effect_queue"):
+            return
+
+        damage_effect = UndodgeableDamagAndBlockSameEffect(source_entity, damage, [DamageTypes.PHYSICAL],
+                                                           messenger.HURT_BY_EXPLOSION, "explosion_damage",
+                                                           time_to_live=gametime.single_turn)
+        target_entity.effect_queue.add(damage_effect)
+
+
+class DisappearCloudActor(Actor):
+    def __init__(self):
+        super(DisappearCloudActor, self).__init__()
+        self.energy = -gametime.single_turn
+
+    def tick(self):
+        self.energy += self.energy_recovery
+        while self.energy > 0:
+            self.energy -= self.act()
+        turn.current_turn += 1
+
+    def act(self):
+        self.parent.density.value -= 1
+        if self.parent.density.value <= 0:
+            self.parent.mover.try_remove_from_dungeon()
+        return gametime.single_turn
 
 
 class CloudActor(Actor):
     def __init__(self):
         super(CloudActor, self).__init__()
+        self.energy = -gametime.normal_energy_gain
 
     def _float_to_position(self, position, density):
         original_cloud = self.parent.dungeon_level.value.get_tile_or_unknown(position).get_first_cloud()
         if original_cloud is None:
-            new_cloud = new_steam_cloud(density)
-            new_cloud.mover.try_move(position, self.parent.dungeon_level.value)
+            new_cloud = self.parent.new_cloud_function.value(density)
+            new_cloud.mover.replace_move(position, self.parent.dungeon_level.value)
         else:
             original_cloud.density.value += density
         self.parent.density.value -= density
@@ -50,10 +138,13 @@ class CloudActor(Actor):
         turn.current_turn += 1
 
     def act(self):
+        self.spread()
+        return gametime.single_turn
+
+    def spread(self):
         if self.parent.density.value < 2:
             self.parent.mover.try_remove_from_dungeon()
             return gametime.single_turn
-
         density_per_tile = max(self.parent.density.value / 4, 1)
         neighbours = [geometry.add_2d(offset, self.parent.position.value) for offset in direction.AXIS_DIRECTIONS]
         for neighbour in neighbours:
@@ -61,7 +152,6 @@ class CloudActor(Actor):
                 self._float_to_position(neighbour, density_per_tile)
             if self.parent.density.value < density_per_tile:
                 break
-        return gametime.single_turn
 
 #class Cloud(actor.Actor):
 #    def __init__(self, density):

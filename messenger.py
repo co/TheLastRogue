@@ -16,6 +16,9 @@ POISON_MESSAGE = "%(target_entity)s takes %(damage)s in poison damage."
 DOWN_STAIRS_HEAL_MESSAGE = "Your feel vitalized by your progress, you regain %(health)s health."
 DRINK_FOUNTAIN_MESSAGE = "You drink from the fountain, your max health increases by %(health)s."
 
+HURT_BY_EXPLOSION = "The explosion blasts %(target_entity)s for %(damage)s damage."
+HURT_BY_FIRE = "The fire burns %(target_entity)s for %(damage)s damage."
+
 
 class Messenger(object):
     def __init__(self):

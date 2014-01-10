@@ -83,6 +83,13 @@ def place_ammo(dungeon_level):
             place_piece_on_random_tile_not_on_item_or_feature(ammo, dungeon_level)
 
 
+def place_bomb(dungeon_level):
+    depth = dungeon_level.depth
+    for _ in range(random.randrange(depth / 2 + 2)):
+        if rng.coin_flip():
+            bomb = item.new_bomb()
+            place_piece_on_random_tile_not_on_item_or_feature(bomb, dungeon_level)
+
 def place_jewellry(dungeon_level):
     depth = dungeon_level.depth
     for _ in range(random.randrange(depth + 1)):

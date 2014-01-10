@@ -2,7 +2,7 @@ import os
 from os.path import isfile
 from os import listdir, getcwd
 import cPickle as pickle
-from cloud import new_steam_cloud
+from cloud import new_steam_cloud, ExplosionDamageShareTileEffect
 import colors
 from dungeon import Dungeon
 from dungeonlevelfactory import dungeon_level_from_file
@@ -167,6 +167,7 @@ class GameStateBase(state.State):
                                     settings.SCREEN_HEIGHT / 2), text)
         console.console.flush()
 
+
 class TestGameState(GameStateBase):
     def __init__(self, player_name=""):
         super(TestGameState, self).__init__(player_name)
@@ -178,6 +179,10 @@ class TestGameState(GameStateBase):
 
         cloud = new_steam_cloud(32)
         cloud.mover.try_move((16, 10), self.dungeon_level)
+
+        for i in range(5):
+            bomb = item.new_bomb()
+            bomb.mover.try_move((18, 12 + i), self.dungeon_level)
 
         potion = item.new_health_potion()
         potion.mover.try_move((20, 12), self.dungeon_level)
@@ -220,6 +225,9 @@ class TestGameState(GameStateBase):
 
         spider = monster.new_spider(self)
         spider.mover.try_move((25, 8), self.dungeon_level)
+
+        salamander = monster.new_salamander(self)
+        salamander.mover.try_move((25, 12), self.dungeon_level)
 
         ghost = monster.new_ghost(self)
         ghost.mover.try_move((21, 8), self.dungeon_level)
