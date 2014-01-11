@@ -818,13 +818,13 @@ class ThrowerCreateExplosion(Thrower):
         message = "The " + self.parent.description.name.lower() + " Explodes!."
         msg.send_visual_message(message, position)
         explosion = new_explosion_cloud(1)
-        explosion.graphic_char.color_fg = colors.RED
+        explosion.graphic_char.color_fg = colors.YELLOW
         explosion.mover.replace_move(position, dungeon_level)
         for d in direction.DIRECTIONS:
             if d in direction.AXIS_DIRECTIONS:
                 color = colors.ORANGE
             else:
-                color = colors.YELLOW
+                color = colors.RED
             point = geometry.add_2d(d, position)
             explosion = new_explosion_cloud(1)
             explosion.graphic_char.color_fg = color

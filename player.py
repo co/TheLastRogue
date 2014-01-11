@@ -14,7 +14,7 @@ from missileaction import PlayerThrowStoneAction
 from mover import Mover, Stepper
 from ondeath import LeaveCorpseOnDeath
 from position import Position, DungeonLevel
-from stats import GamePieceTypes, Flag, DataPoint, DataTypes, Factions, IntelligenceLevels
+from stats import GamePieceTypes, Flag, DataPoint, DataTypes, Factions, IntelligenceLevel
 
 from statusflags import StatusFlags
 from text import Description
@@ -48,7 +48,7 @@ class Player(Composite):
         self.set_child(DataPoint(DataTypes.SHOOT_SPEED, gametime.single_turn))
         self.set_child(DataPoint(DataTypes.SIGHT_RADIUS, constants.COMMON_SIGHT_RADIUS))
         self.set_child(DataPoint(DataTypes.FACTION, Factions.PLAYER))
-        self.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.NORMAL))
+        self.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.NORMAL))
 
         self.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
 

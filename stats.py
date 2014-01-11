@@ -70,7 +70,7 @@ class DataTypes:
     GAME_STATE = "game_state"
 
 
-class IntelligenceLevels(DataPoint):
+class IntelligenceLevel(DataPoint):
     MINDLESS = 0
     PLANT = 1
     ANIMAL = 2

@@ -16,4 +16,3 @@ class EntityShareTileEffect(Leaf):
 
     def _effect(self, **kwargs):
         pass
-

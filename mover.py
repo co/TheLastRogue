@@ -3,7 +3,7 @@ from compositecore import Leaf
 import direction
 import geometry
 from position import DungeonLevel
-from stats import max_instances_of_composite_on_tile
+from stats import max_instances_of_composite_on_tile, IntelligenceLevel
 from statusflags import StatusFlags
 
 
@@ -174,6 +174,19 @@ class Stepper(Leaf):
     def try_step_in_direction(self, direction):
         return self.try_move_or_bump(geometry.add_2d(self.parent.position.value, direction))
 
+    def try_bump_terrain(self, position):
+        terrain_to_step = \
+            self.parent.dungeon_level.value.get_tile_or_unknown(position).get_terrain()
+        if (terrain_to_step.has("bump_action") and
+                terrain_to_step.bump_action.can_bump(self.parent)):
+            terrain_to_step.bump_action.bump(self.parent)
+            return True
+        return False
+
+    def try_attack(self, position):
+        return (self.parent.has("attacker") and
+                self.parent.attacker.try_hit(position))
+
     def try_move_or_bump(self, position):
         """
         Tries to move the entity to a position.
@@ -187,16 +200,68 @@ class Stepper(Leaf):
         Returns:
             Energy spent
         """
-        terrain_to_step =\
-            self.parent.dungeon_level.value.get_tile_or_unknown(position).get_terrain()
-        if(terrain_to_step.has("bump_action") and
-           terrain_to_step.bump_action.can_bump(self.parent)):
-            terrain_to_step.bump_action.bump(self.parent)
+        if self.try_bump_terrain(position):
             return self.parent.movement_speed.value
-        if(self.parent.has("attacker") and
-           self.parent.attacker.try_hit(position)):
+        if self.try_attack(position):
             return self.parent.melee_speed.value
         if self.parent.mover.try_move(position):
+            return self.parent.movement_speed.value
+        return 0
+
+
+def is_tile_dangerous(tile, entity):
+    if entity.intelligence.value == IntelligenceLevel.PLANT:
+        return False  # Low intelligence ch
+    cloud = tile.get_first_cloud()
+    if not cloud:
+        return False
+    damage_effects = [effect for effect in cloud.get_children_with_tag("entity_share_tile_effect")
+                      if hasattr(effect, 'damage_types')]
+
+    tolerated_damage_types = [c.damage_type for c in entity.get_children_with_tag("tolerate_damage")]
+    for effect in damage_effects:
+        for damage_type in effect.damage_types:
+            if not damage_type in tolerated_damage_types:
+                return True
+    return False
+
+
+class TolerateDamage(Leaf):
+    """
+    Signifies that that the entity won't minde taking damage of a type.
+    """
+    def __init__(self, damage_type):
+        super(TolerateDamage, self).__init__()
+        self.component_type = "tolerate_damage_" + str(damage_type)
+        self.tags.add("tolerate_damage")
+        self.damage_type = damage_type
+
+
+class CautiousStepper(Stepper):
+    def __init__(self):
+        super(CautiousStepper, self).__init__()
+        self.component_type = "stepper"
+
+    def try_move_or_bump(self, position):
+        """
+        Tries to move the entity to a position.
+
+        If there is a door in the way try to open it.
+        If there is a unfriendly entity in the way hit it instead.
+        **If there is a danger on that tile don't step.**
+        If an action is taken return True otherwise return False.
+
+        Args:
+            position (int, int): The position the entity tries to move to.
+        Returns:
+            Energy spent
+        """
+        if self.try_bump_terrain(position):
+            return self.parent.movement_speed.value
+        if self.try_attack(position):
+            return self.parent.melee_speed.value
+        if (not is_tile_dangerous(self.parent.dungeon_level.value.get_tile_or_unknown(position), self.parent)
+            and self.parent.mover.try_move(position)):
             return self.parent.movement_speed.value
         return 0
 

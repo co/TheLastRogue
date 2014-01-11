@@ -48,21 +48,22 @@ def new_explosion_cloud(density):
 
 
 def new_fire_cloud(density):
-    explosion = Composite()
-    set_cloud_components(explosion, density)
-    explosion.graphic_char.icon = 'W'
-    explosion.graphic_char.color_fg = colors.RED
-    explosion.set_child(Description("Fire", "Don't get burnt."))
-    explosion.set_child(DisappearCloudActor())
-    explosion.set_child(FireDamageShareTileEffect())
-    explosion.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_explosion_cloud))
-    return explosion
+    fire = Composite()
+    set_cloud_components(fire, density)
+    fire.graphic_char.icon = 'W'
+    fire.graphic_char.color_fg = colors.RED
+    fire.set_child(Description("Fire", "Don't get burnt."))
+    fire.set_child(DisappearCloudActor())
+    fire.set_child(FireDamageShareTileEffect())
+    fire.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_explosion_cloud))
+    return fire
 
 
 class FireDamageShareTileEffect(EntityShareTileEffect):
     def __init__(self):
         super(FireDamageShareTileEffect, self).__init__()
-        self.component_type = "explosion_damage_share_tile_effect"
+        self.component_type = "fire_damage_share_tile_effect"
+        self.damage_types = [DamageTypes.FIRE]
 
     def _effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
@@ -73,7 +74,7 @@ class FireDamageShareTileEffect(EntityShareTileEffect):
         if not target_entity.has("effect_queue"):
             return
 
-        damage_effect = UndodgeableDamagAndBlockSameEffect(source_entity, damage, [DamageTypes.FIRE],
+        damage_effect = UndodgeableDamagAndBlockSameEffect(source_entity, damage, self.damage_types,
                                                            messenger.HURT_BY_FIRE, "fire_damage",
                                                            time_to_live=gametime.single_turn)
         target_entity.effect_queue.add(damage_effect)

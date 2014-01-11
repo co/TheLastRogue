@@ -14,11 +14,11 @@ from inventory import Inventory
 import messenger
 from missileaction import MonsterThrowStoneAction, MonsterMagicRangeAction
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor
-from mover import Mover, Stepper, SlimeCanShareTileEntityMover, ImmobileStepper
+from mover import Mover, Stepper, SlimeCanShareTileEntityMover, ImmobileStepper, CautiousStepper, TolerateDamage
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
 import rng
-from stats import Flag, UnArmedHitTargetEntityEffectFactory, DataPoint, DataTypes, Factions, IntelligenceLevels
+from stats import Flag, UnArmedHitTargetEntityEffectFactory, DataPoint, DataTypes, Factions, IntelligenceLevel
 from stats import GamePieceTypes
 from statusflags import StatusFlags
 from text import Description, EntityMessages
@@ -38,14 +38,14 @@ def set_monster_components(monster, game_state):
     monster.set_child(DataPoint(DataTypes.SIGHT_RADIUS, constants.COMMON_SIGHT_RADIUS))
     monster.set_child(DataPoint(DataTypes.FACTION, Factions.MONSTER))
     monster.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
-    monster.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.NORMAL))
+    monster.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.NORMAL))
 
     monster.set_child(Position())
     monster.set_child(CharPrinter())
     monster.set_child(DungeonLevel())
 
     monster.set_child(Mover())
-    monster.set_child(Stepper())
+    monster.set_child(CautiousStepper())
 
     monster.set_child(HealthModifier())
     monster.set_child(Dodger())
@@ -94,14 +94,14 @@ def new_ratman(gamestate):
 
 def set_beast_components(composite):
     composite.set_child(StatusFlags([StatusFlags.IS_ALIVE]))
-    composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.ANIMAL))
+    composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.ANIMAL))
     composite.set_child(LeaveCorpseOnDeath())
     composite.set_child(BleedWhenDamaged())
 
 
 def set_insect_components(composite):
     composite.set_child(StatusFlags([StatusFlags.IS_ALIVE]))
-    composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.ANIMAL))
+    composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.ANIMAL))
 
 
 def new_spider(gamestate):
@@ -128,7 +128,7 @@ def new_spider(gamestate):
 
 def set_insect_components(composite):
     composite.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.IS_ALIVE]))
-    composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.ANIMAL))
+    composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.ANIMAL))
 
 
 def new_salamander(gamestate):
@@ -150,6 +150,7 @@ def new_salamander(gamestate):
     salamander.set_child(NaturalHealthRegain())
     salamander.set_child(PutAdjacentTilesOnFire())
     salamander.set_child(FireImmunity())
+    salamander.set_child(TolerateDamage(DamageTypes.FIRE))
 
     return salamander
 
@@ -275,7 +276,7 @@ class AddGhostReviveToSeenEntities(Leaf):
         seen_entities = self.parent.vision.get_seen_entities()
         for entity in seen_entities:
             if (entity.status_flags.has_status(StatusFlags.IS_ALIVE) and
-                        entity.intelligence.value >= IntelligenceLevels.NORMAL and
+                        entity.intelligence.value >= IntelligenceLevel.NORMAL and
                     not entity.has("is_player")):
                 effect = ReviveAsGhostOnDeath(self.parent)
                 entity.effect_queue.add(AddSpoofChild(self.parent, effect, 1))
@@ -318,7 +319,7 @@ def _skip_turn(entity):
 
 def set_slime_components(slime):
     slime.set_child(StatusFlags([StatusFlags.IS_ALIVE]))
-    slime.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevels.PLANT))
+    slime.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.PLANT))
     slime.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn + gametime.one_third_turn))
     slime.set_child(Flag("is_slime"))
     slime.remove_component_of_type("attacker")
