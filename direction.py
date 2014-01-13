@@ -53,6 +53,20 @@ def turn_left(direction):
     return DIRECTIONS[left_index]
 
 
+def turn_slight_right(direction):
+    index = DIRECTIONS.index(direction)
+    turn_45_delta = len(DIRECTIONS) / 8
+    right_index = (index + turn_45_delta) % len(DIRECTIONS)
+    return DIRECTIONS[right_index]
+
+
+def turn_slight_left(direction):
+    index = DIRECTIONS.index(direction)
+    turn_45_delta = len(DIRECTIONS) / 8
+    left_index = (index - turn_45_delta) % len(DIRECTIONS)
+    return DIRECTIONS[left_index]
+
+
 def turn_left_or_right(direction):
     if(rng.coin_flip()):
         return turn_left(direction)

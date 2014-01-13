@@ -1,6 +1,8 @@
+import random
 import colors
 from compositecore import Leaf, CompositeMessage
 from console import console
+import direction
 import geometry
 import icon
 import libtcodpy as libtcod
@@ -206,8 +208,25 @@ class Path(Leaf):
             self.set_line_path(next_point)
         energy_spent = self.parent.stepper.try_move_or_bump(next_point)
         if energy_spent <= 0:
-            self.clear()
+            energy_spent = self.try_step_left_or_right(next_point)
+            if energy_spent <= 0:
+                self.clear()
         return energy_spent
+
+    def try_step_left_or_right(self, next_point):
+        step_direction = geometry.sub_2d(next_point, self.parent.position.value)
+        if step_direction not in direction.DIRECTIONS:
+            return False
+        alternate_directions = [direction.turn_slight_left(step_direction),
+                                direction.turn_slight_right(step_direction)]
+        print self.parent.description.name, step_direction, alternate_directions
+        random.shuffle(alternate_directions)
+        for d in alternate_directions:
+            new_position = geometry.add_2d(d, self.parent.position.value)
+            energy_spent = self.parent.stepper.try_move_or_bump(new_position)
+            if energy_spent > 0:
+                return energy_spent
+        return 0
 
     def compute_path(self, destination):
         sx, sy = self.parent.position.value
