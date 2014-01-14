@@ -1,10 +1,15 @@
 import random
+from compositecommon import EntityShareTileEffect
 from compositecore import Composite, Leaf
+import direction
 import entityeffect
+import gametime
+import geometry
 from graphic import GraphicChar, CharPrinter
 import messenger
-from mover import Mover, teleport_monsters
+from mover import Mover, teleport_monsters, Stepper
 from position import Position, DungeonLevel
+import rng
 from stats import DataPoint, DataTypes, GamePieceTypes
 from text import Description
 import action
@@ -50,6 +55,58 @@ class StairsUp(Composite):
         self.set_child(CharPrinter())
         self.set_child(Mover())
         self.set_child(IsDungeonFeature())
+
+
+class SpiderWeb(Composite):
+    """
+    Spider web the player or other entities can get caught in.
+    """
+    def __init__(self):
+        super(SpiderWeb, self).__init__()
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Description("Spider Web",
+                                   "A spider made this web, touch it and you might get stuck"))
+        self.set_child(GraphicChar(None, colors.WHITE, "#"))
+
+        self.set_child(CharPrinter())
+        self.set_child(Mover())
+        self.set_child(DataPoint(DataTypes.STRENGTH, 13))
+        self.set_child(IsDungeonFeature())
+        self.set_child(StuckInSpiderWebShareTileEffect())
+
+
+class StuckInSpiderWebShareTileEffect(EntityShareTileEffect):
+    def __init__(self):
+        super(StuckInSpiderWebShareTileEffect, self).__init__()
+        self.component_type = "stuck_in_spider_web_share_tile_effect"
+
+    def _effect(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        source_entity = kwargs["source_entity"]
+
+        if not target_entity.has("immune_to_web") and target_entity.has("effect_queue"):
+            stuck_in_web = StuckInWebStepperSpoof(self.parent)
+            add_spoof_effect = entityeffect.AddSpoofChild(source_entity, stuck_in_web, time_to_live=1)
+            target_entity.effect_queue.add(add_spoof_effect)
+
+
+class StuckInWebStepperSpoof(Stepper):
+    def __init__(self, web):
+        super(StuckInWebStepperSpoof, self).__init__()
+        self.component_type = "stepper"
+        self.web = web
+        self.strength = web.strength.value
+
+    def try_move_or_bump(self, position):
+        my_strength = self.parent.strength.value
+        if rng.stat_check(my_strength, self.strength + 8):
+            messenger.msg.send_visual_message(messenger.BREAKS_OUT_OF_WEB_MESSAGE % {"target_entity": self.parent.description.long_name}, self.parent.position.value)
+            self.web.mover.try_remove_from_dungeon()
+            return self.next.try_move_or_bump(position)
+        messenger.msg.send_visual_message(messenger.WONT_BREAK_OUT_OF_WEB_MESSAGE % {"target_entity": self.parent.description.long_name}, self.parent.position.value)
+        return self.parent.movement_speed.value
 
 
 class Fountain(Composite):

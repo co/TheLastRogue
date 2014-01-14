@@ -19,6 +19,9 @@ DRINK_FOUNTAIN_MESSAGE = "You drink from the fountain, your max health increases
 HURT_BY_EXPLOSION = "The explosion blasts %(target_entity)s for %(damage)s damage."
 HURT_BY_FIRE = "The fire burns %(target_entity)s for %(damage)s damage."
 
+WONT_BREAK_OUT_OF_WEB_MESSAGE = "%(target_entity)s is stuck in the spider web."
+BREAKS_OUT_OF_WEB_MESSAGE = "%(target_entity)s breaks free."
+
 
 class Messenger(object):
     def __init__(self):

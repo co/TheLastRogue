@@ -5,6 +5,7 @@ from compositecommon import EntityShareTileEffect
 from compositecore import Composite, Leaf
 import constants
 import direction
+from dungeonfeature import SpiderWeb
 from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue, AddSpoofChild, EffectStackID, UndodgeableDamagAndBlockSameEffect, DamageOverTimeEffect, HealthRegain
 import geometry
@@ -120,10 +121,35 @@ def new_spider(gamestate):
     spider.set_child(DataPoint(DataTypes.ARMOR, 7))
     spider.set_child(DataPoint(DataTypes.AWARENESS, 5))
 
+    spider.set_child(MakeSpiderWebs())
     spider.set_child(UnArmedHitTargetEntityEffectFactory(PoisonEntityEffectFactory(spider,
                                                                                    1, 3,
                                                                                    random.randrange(9, 18))))
     return spider
+
+
+class MakeSpiderWebs(Leaf):
+    def __init__(self):
+        super(MakeSpiderWebs, self).__init__()
+        self.component_type = "put_adjacent_tiles_on_fire"
+        self.fire_chance_per_turn = 0.1
+        self.time_interval = gametime.single_turn
+        self.time_to_next_attempt = self.time_interval
+
+    def after_tick(self, time):
+        self.time_to_next_attempt -= time
+        if self.time_to_next_attempt > 0:
+            return
+        my_position = self.parent.position.value
+        chance = self.fire_chance_per_turn / float(len(direction.DIRECTIONS))
+        for d in direction.DIRECTIONS:
+            point = geometry.add_2d(my_position, d)
+            dungeon_level = self.parent.dungeon_level.value
+            if random.random() < chance and len(dungeon_level.get_tile_or_unknown(point).get_entities()) == 0:
+                fire = SpiderWeb()
+                fire.mover.try_move(point, dungeon_level)
+        self.time_to_next_attempt = self.time_interval
+
 
 
 def set_insect_components(composite):
