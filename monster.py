@@ -1,6 +1,6 @@
 import random
 from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity
-from cloud import new_fire_cloud
+from cloud import new_fire_cloud, new_dust_cloud
 from compositecommon import EntityShareTileEffect
 from compositecore import Composite, Leaf
 import constants
@@ -128,6 +128,47 @@ def new_spider(gamestate):
     return spider
 
 
+def new_dust_demon(gamestate):
+    spider = Composite()
+    set_monster_components(spider, gamestate)
+    set_insect_components(spider)
+
+    spider.set_child(Description("Dust Demon", "The demon constantly creates dust clouds."))
+    spider.set_child(EntityMessages("The dust demon notices you.", "The demon falls to the ground."))
+    spider.set_child(GraphicChar(None, colors.GRAY, "i"))
+
+    spider.set_child(Health(7))
+    spider.set_child(DataPoint(DataTypes.STRENGTH, 1))
+    spider.set_child(DataPoint(DataTypes.EVASION, 13))
+    spider.set_child(DataPoint(DataTypes.HIT, 5))
+    spider.set_child(DataPoint(DataTypes.ARMOR, 7))
+    spider.set_child(DataPoint(DataTypes.AWARENESS, 5))
+
+    spider.set_child(MakeDustClouds())
+    return spider
+
+
+class MakeDustClouds(Leaf):
+    def __init__(self):
+        super(MakeSpiderWebs, self).__init__()
+        self.component_type = "make_dust_clouds"
+        self.time_interval = gametime.single_turn
+        self.time_to_next_attempt = self.time_interval
+
+    def _spawn_dust_cloud(self):
+        my_position = self.parent.position.value
+        dungeon_level = self.parent.dungeon_level.value
+        dust = new_dust_cloud(16)
+        dust.mover.try_move(my_position, dungeon_level)
+
+    def after_tick(self, time):
+        self.time_to_next_attempt -= time
+        if self.time_to_next_attempt > 0:
+            return
+        self._spawn_dust_cloud()
+        self.time_to_next_attempt = self.time_interval
+
+
 class MakeSpiderWebs(Leaf):
     def __init__(self):
         super(MakeSpiderWebs, self).__init__()
@@ -142,14 +183,13 @@ class MakeSpiderWebs(Leaf):
             return
         my_position = self.parent.position.value
         chance = self.fire_chance_per_turn / float(len(direction.DIRECTIONS))
+        dungeon_level = self.parent.dungeon_level.value
         for d in direction.DIRECTIONS:
             point = geometry.add_2d(my_position, d)
-            dungeon_level = self.parent.dungeon_level.value
             if random.random() < chance and len(dungeon_level.get_tile_or_unknown(point).get_entities()) == 0:
                 fire = SpiderWeb()
                 fire.mover.try_move(point, dungeon_level)
         self.time_to_next_attempt = self.time_interval
-
 
 
 def set_insect_components(composite):

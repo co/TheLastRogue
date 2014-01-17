@@ -69,6 +69,7 @@ class Attacker(Leaf):
         if self.parent.has("melee_damage_multiplier"):
             damage_multiplier = self.parent.melee_damage_multiplier.value
         damage_strength = int(self.parent.strength.value * damage_multiplier)
+        print "strength", self.parent.description.name, self.parent.strength.value
         target_entity_effects_factories = [effect_factory_data_point.value for effect_factory_data_point in
                                            self.parent.get_children_with_tag("unarmed_hit_target_entity_effect_factory")]
         return Attack(1 + damage_strength / 2, damage_strength / 4,

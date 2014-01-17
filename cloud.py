@@ -4,7 +4,7 @@ import colors
 from compositecommon import EntityShareTileEffect
 from compositecore import Composite
 import direction
-from entityeffect import UndodgeableDamagAndBlockSameEffect
+from entityeffect import UndodgeableDamagAndBlockSameEffect, AddSpoofChild
 import gametime
 import geometry
 from graphic import CharPrinter, GraphicChar
@@ -34,6 +34,15 @@ def new_steam_cloud(density):
     steam.set_child(CloudActor())
     steam.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_steam_cloud))
     return steam
+
+
+def new_dust_cloud(density):
+    cloud = Composite()
+    set_cloud_components(cloud, density)
+    cloud.graphic_char.color_fg = colors.LIGHT_ORANGE
+    cloud.set_child(CloudActor())
+    cloud.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_dust_cloud))
+    return cloud
 
 
 def new_explosion_cloud(density):
@@ -79,6 +88,26 @@ class FireDamageShareTileEffect(EntityShareTileEffect):
                                                            time_to_live=gametime.single_turn)
         target_entity.effect_queue.add(damage_effect)
 
+
+class DustLowerHitOfEntityShareTileEffect(EntityShareTileEffect):
+    def __init__(self):
+        super(DustLowerHitOfEntityShareTileEffect, self).__init__()
+        self.component_type = "dust_lower_hit_of_entity_share_tile_effect"
+
+    def _effect(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        source_entity = kwargs["source_entity"]
+        damage_mid = 20
+        damage_var = 10
+        damage = rng.random_variance(damage_mid, damage_var)
+        if not target_entity.has("effect_queue"):
+            return
+
+
+        damage_effect = AddSpoofChild(source_entity, damage, [DamageTypes.PHYSICAL],
+                                                           messenger.HURT_BY_EXPLOSION, "explosion_damage",
+                                                           time_to_live=gametime.single_turn)
+        target_entity.effect_queue.add(damage_effect)
 
 class ExplosionDamageShareTileEffect(EntityShareTileEffect):
     def __init__(self):
