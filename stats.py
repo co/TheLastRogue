@@ -65,6 +65,7 @@ class DataTypes:
     SIGHT_RADIUS = "sight_radius"
 
     DENSITY = "density"
+    CLOUD_TYPE = "cloud_type"
     NEW_CLOUD_FUNCTION = "new_cloud_function"
 
     GAME_STATE = "game_state"

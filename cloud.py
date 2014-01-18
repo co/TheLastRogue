@@ -17,6 +17,12 @@ from text import Description
 import turn
 
 
+class CloudTypes:
+    EXPLOSION = "explosion"
+    STEAM = "steam"
+    FIRE = "fire"
+    DUST = "dust"
+
 def set_cloud_components(cloud, density):
     cloud.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.CLOUD))
     cloud.set_child(CharPrinter())
@@ -33,6 +39,7 @@ def new_steam_cloud(density):
     steam.graphic_char.color_fg = colors.WHITE
     steam.set_child(CloudActor())
     steam.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_steam_cloud))
+    steam.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.STEAM))
     return steam
 
 
@@ -44,6 +51,7 @@ def new_dust_cloud(density):
     cloud.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_dust_cloud))
     cloud.set_child(DustLowerHitOfEntityShareTileEffect())
     cloud.set_child(CloudChangeAppearanceShareTileEffect())
+    cloud.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.DUST))
     return cloud
 
 
@@ -55,6 +63,7 @@ def new_explosion_cloud(density):
     explosion.set_child(DisappearCloudActor())
     explosion.set_child(ExplosionDamageShareTileEffect())
     explosion.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_explosion_cloud))
+    explosion.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.EXPLOSION))
     return explosion
 
 
@@ -67,6 +76,7 @@ def new_fire_cloud(density):
     fire.set_child(DisappearCloudActor())
     fire.set_child(FireDamageShareTileEffect())
     fire.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_explosion_cloud))
+    fire.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.FIRE))
     return fire
 
 
@@ -166,10 +176,11 @@ class CloudActor(Actor):
         original_cloud = self.parent.dungeon_level.value.get_tile_or_unknown(position).get_first_cloud()
         if original_cloud is None:
             new_cloud = self.parent.new_cloud_function.value(density)
-            new_cloud.mover.replace_move(position, self.parent.dungeon_level.value)
-        else:
+            new_cloud.mover.try_move(position, self.parent.dungeon_level.value)
+            self.parent.density.value -= density
+        elif original_cloud.cloud_type.value == self.parent.cloud_type.value:
             original_cloud.density.value += density
-        self.parent.density.value -= density
+            self.parent.density.value -= density
 
     def tick(self):
         self.energy += self.energy_recovery
