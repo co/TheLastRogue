@@ -10,7 +10,7 @@ import messenger
 from mover import Mover, teleport_monsters, Stepper
 from position import Position, DungeonLevel
 import rng
-from stats import DataPoint, DataTypes, GamePieceTypes
+from stats import DataPoint, DataTypes, GamePieceTypes, Immunities
 from text import Description
 import action
 import colors
@@ -86,7 +86,7 @@ class StuckInSpiderWebShareTileEffect(EntityShareTileEffect):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
 
-        if not target_entity.has("immune_to_web") and target_entity.has("effect_queue"):
+        if not target_entity.has(Immunities.SPIDER_WEB) and target_entity.has("effect_queue"):
             stuck_in_web = StuckInWebStepperSpoof(self.parent)
             add_spoof_effect = entityeffect.AddSpoofChild(source_entity, stuck_in_web, time_to_live=1)
             target_entity.effect_queue.add(add_spoof_effect)

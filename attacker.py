@@ -152,7 +152,7 @@ class DamageTypes(object):
 class FireImmunity(Leaf):
     def __init__(self):
         super(FireImmunity, self).__init__()
-        self.component_type = "fire"
+        self.component_type = "fire_immunity"
         self.tags.add("immunity")
         self.immunity = DamageTypes.FIRE
 

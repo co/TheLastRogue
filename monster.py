@@ -19,7 +19,7 @@ from mover import Mover, Stepper, SlimeCanShareTileEntityMover, ImmobileStepper,
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
 import rng
-from stats import Flag, UnArmedHitTargetEntityEffectFactory, DataPoint, DataTypes, Factions, IntelligenceLevel
+from stats import Flag, UnArmedHitTargetEntityEffectFactory, DataPoint, DataTypes, Factions, IntelligenceLevel, Immunities
 from stats import GamePieceTypes
 from statusflags import StatusFlags
 from text import Description, EntityMessages
@@ -122,8 +122,8 @@ def new_spider(gamestate):
     spider.set_child(DataPoint(DataTypes.AWARENESS, 5))
 
     spider.set_child(MakeSpiderWebs())
-    spider.set_child(UnArmedHitTargetEntityEffectFactory(PoisonEntityEffectFactory(spider,
-                                                                                   1, 3,
+    spider.set_child(Flag(Immunities.SPIDER_WEB))
+    spider.set_child(UnArmedHitTargetEntityEffectFactory(PoisonEntityEffectFactory(spider, 1, 3,
                                                                                    random.randrange(9, 18))))
     return spider
 
@@ -175,7 +175,7 @@ class MakeDustClouds(Leaf):
 class MakeSpiderWebs(Leaf):
     def __init__(self):
         super(MakeSpiderWebs, self).__init__()
-        self.component_type = "put_adjacent_tiles_on_fire"
+        self.component_type = "make_spider_webs"
         self.fire_chance_per_turn = 0.1
         self.time_interval = gametime.single_turn
         self.time_to_next_attempt = self.time_interval

@@ -71,6 +71,10 @@ class DataTypes:
     GAME_STATE = "game_state"
 
 
+class Immunities(object):
+    SPIDER_WEB = "spider_web_immunity"
+
+
 class IntelligenceLevel(DataPoint):
     MINDLESS = 0
     PLANT = 1
