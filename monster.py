@@ -2,7 +2,7 @@ import random
 from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity
 from cloud import new_fire_cloud, new_dust_cloud
 from compositecommon import EntityShareTileEffect
-from compositecore import Composite, Leaf
+from compositecore import Composite, Leaf, Component
 import constants
 import direction
 from dungeonfeature import SpiderWeb
@@ -409,7 +409,6 @@ def new_slime(game_state):
     slime.set_child(DataPoint(DataTypes.EVASION, 7))
     slime.set_child(DataPoint(DataTypes.HIT, 15))
     slime.set_child(DataPoint(DataTypes.ARMOR, 3))
-    slime.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn + gametime.one_third_turn))
     slime.set_child(DataPoint(DataTypes.AWARENESS, 5))
     return slime
 
@@ -433,6 +432,44 @@ def new_dark_slime(game_state):
     slime.set_child(DataPoint(DataTypes.ARMOR, 3))
     slime.set_child(DataPoint(DataTypes.AWARENESS, 6))
     return slime
+
+
+def new_giant_amoeba(game_state):
+    amoeba = Composite()
+    set_monster_components(amoeba, game_state)
+    amoeba.set_child(StatusFlags([StatusFlags.IS_ALIVE]))
+    amoeba.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.PLANT))
+
+    amoeba.set_child(EntityMessages("The amoeba seems to wobble with happiness.", "The amoeba melts away."))
+    amoeba.set_child(Description("Giant Amoeba",
+                                 "A giant amoeba... How is this even possible?"
+                                 "The amoeba seems to wobble in your direction..."))
+    amoeba.set_child(GraphicChar(None, colors.LIGHT_GREEN, "0"))
+    amoeba.set_child(Health(20))
+    amoeba.set_child(DataPoint(DataTypes.STRENGTH, 4))
+    amoeba.set_child(DataPoint(DataTypes.EVASION, 5))
+    amoeba.set_child(DataPoint(DataTypes.HIT, 15))
+    amoeba.set_child(DataPoint(DataTypes.ARMOR, 4))
+    amoeba.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn + gametime.one_third_turn))
+    amoeba.set_child(DataPoint(DataTypes.AWARENESS, 5))
+
+    amoeba.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_giant_amoeba))
+    amoeba.set_child(NaturalHealthRegain())
+    amoeba.set_child(SplitAtFullHealth())
+    return amoeba
+
+
+class SplitAtFullHealth(Component):
+    def __init__(self):
+        super(SplitAtFullHealth, self).__init__()
+        self.component_type = "split_at_full_health"
+
+    def after_tick(self, time):
+        if self.parent.health.hp.is_full():
+            new_entity = self.parent.clone_function.value(self.parent.game_state.value)
+            if new_entity.mover.try_move_roll_over(self.parent.position.value, self.parent.dungeon_level.value):
+                self.parent.health.hp.decrease(self.parent.health.hp.max_value / 2)
+                new_entity.health.hp.decrease(self.parent.health.hp.max_value / 2)
 
 
 class DissolveEntitySlimeShareTileEffect(EntityShareTileEffect):

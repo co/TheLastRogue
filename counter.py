@@ -14,6 +14,9 @@ class Counter(object):
     def ratio_of_full(self):
         return float(self.value - self.min_value) / float(self.size())
 
+    def is_full(self):
+        return self.value == self.max_value
+
     def size(self):
         return self.max_value - self.min_value
 

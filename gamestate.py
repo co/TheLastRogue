@@ -160,6 +160,7 @@ class GameStateBase(state.State):
     def _draw_bg(self):
         libtcodpy.console_blit(self._background_console, 0, 0, constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT,
                                0, 0, 0)
+
     def draw_loading_screen(self, text):
         libtcodpy.console_blit(self._background_console, 0, 0, constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT,
                                0, 0, 0)
@@ -180,8 +181,11 @@ class TestGameState(GameStateBase):
         cloud = new_steam_cloud(32)
         cloud.mover.try_move((16, 10), self.dungeon_level)
 
-        demon = monster.new_dust_demon(self)
-        demon.mover.try_move((24, 16), self.dungeon_level)
+        #demon = monster.new_dust_demon(self)
+        #demon.mover.try_move((24, 16), self.dungeon_level)
+
+        amoeba = monster.new_giant_amoeba(self)
+        amoeba.mover.try_move((26, 14), self.dungeon_level)
 
         for i in range(5):
             bomb = item.new_bomb()
@@ -223,29 +227,29 @@ class TestGameState(GameStateBase):
         cap = item.new_leather_cap()
         cap.mover.try_move((23, 10), self.dungeon_level)
 
-        rat = monster.new_ratman(self)
-        rat.mover.try_move((20, 8), self.dungeon_level)
+        #rat = monster.new_ratman(self)
+        #rat.mover.try_move((20, 8), self.dungeon_level)
 
-        spider = monster.new_spider(self)
-        spider.mover.try_move((25, 8), self.dungeon_level)
+        #spider = monster.new_spider(self)
+        #spider.mover.try_move((25, 8), self.dungeon_level)
 
-        salamander = monster.new_salamander(self)
-        salamander.mover.try_move((25, 12), self.dungeon_level)
+        #salamander = monster.new_salamander(self)
+        #salamander.mover.try_move((25, 12), self.dungeon_level)
 
-        ghost = monster.new_ghost(self)
-        ghost.mover.try_move((21, 8), self.dungeon_level)
+        #ghost = monster.new_ghost(self)
+        #ghost.mover.try_move((21, 8), self.dungeon_level)
 
-        slime = monster.new_slime(self)
-        slime.mover.try_move((20, 18), self.dungeon_level)
+        #slime = monster.new_slime(self)
+        #slime.mover.try_move((20, 18), self.dungeon_level)
 
-        dark_slime = monster.new_dark_slime(self)
-        dark_slime.mover.try_move((24, 18), self.dungeon_level)
+        #dark_slime = monster.new_dark_slime(self)
+        #dark_slime.mover.try_move((24, 18), self.dungeon_level)
 
-        cyclops = monster.new_cyclops(self)
-        cyclops.mover.try_move((2, 2), self.dungeon_level)
+        #cyclops = monster.new_cyclops(self)
+        #cyclops.mover.try_move((2, 2), self.dungeon_level)
 
-        jericho = monster.new_jericho(self)
-        jericho.mover.try_move((56, 14), self.dungeon_level)
+        #jericho = monster.new_jericho(self)
+        #jericho.mover.try_move((56, 14), self.dungeon_level)
 
         for i in range(5):
             ammo = item.new_ammunition()

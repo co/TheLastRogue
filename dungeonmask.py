@@ -219,7 +219,6 @@ class Path(Leaf):
             return False
         alternate_directions = [direction.turn_slight_left(step_direction),
                                 direction.turn_slight_right(step_direction)]
-        print self.parent.description.name, step_direction, alternate_directions
         random.shuffle(alternate_directions)
         for d in alternate_directions:
             new_position = geometry.add_2d(d, self.parent.position.value)

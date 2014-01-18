@@ -66,7 +66,7 @@ class DataTypes:
 
     DENSITY = "density"
     CLOUD_TYPE = "cloud_type"
-    NEW_CLOUD_FUNCTION = "new_cloud_function"
+    CLONE_FUNCTION = "clone_function"
 
     GAME_STATE = "game_state"
 
