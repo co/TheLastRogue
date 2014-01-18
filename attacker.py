@@ -69,7 +69,6 @@ class Attacker(Leaf):
         if self.parent.has("melee_damage_multiplier"):
             damage_multiplier = self.parent.melee_damage_multiplier.value
         damage_strength = int(self.parent.strength.value * damage_multiplier)
-        print "strength", self.parent.description.name, self.parent.strength.value
         target_entity_effects_factories = [effect_factory_data_point.value for effect_factory_data_point in
                                            self.parent.get_children_with_tag("unarmed_hit_target_entity_effect_factory")]
         return Attack(1 + damage_strength / 2, damage_strength / 4,
@@ -89,7 +88,6 @@ class Dodger(Leaf):
         """
         Returns true if it is a hit, false otherwise.
         """
-        print self.parent.hit.value, self.parent.description.name
         hit = max(hit, 1)
         evasion = max(self.parent.evasion.value, 1)
         return rng.stat_check(hit, evasion)
@@ -131,11 +129,16 @@ class ResistanceChecker(Leaf):
         """
         Returns the damage taken after it goes through the armor.
         """
+        if self.is_immune(damage_types):
+            return 0
+        return damage
+
+    def is_immune(self, damage_types):
         immunities = [component.immunity for component in self.parent.get_children_with_tag("immunity")]
         for immunity in immunities:
             if immunity in damage_types:
-                return 0
-        return damage
+                return True
+        return False
 
 
 class DamageTypes(object):

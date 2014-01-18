@@ -23,6 +23,7 @@ class CloudTypes:
     FIRE = "fire"
     DUST = "dust"
 
+
 def set_cloud_components(cloud, density):
     cloud.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.CLOUD))
     cloud.set_child(CharPrinter())
@@ -89,8 +90,8 @@ class FireDamageShareTileEffect(EntityShareTileEffect):
     def _effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
-        damage_mid = 3
-        damage_var = 6
+        damage_mid = 5
+        damage_var = 3
         damage = rng.random_variance(damage_mid, damage_var)
         if not target_entity.has("effect_queue"):
             return

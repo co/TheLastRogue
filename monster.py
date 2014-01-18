@@ -131,7 +131,7 @@ def new_spider(gamestate):
 def new_dust_demon(gamestate):
     spider = Composite()
     set_monster_components(spider, gamestate)
-    set_insect_components(spider)
+    set_humanoid_components(spider)
 
     spider.set_child(Description("Dust Demon", "The demon constantly creates dust clouds."))
     spider.set_child(EntityMessages("The dust demon notices you.", "The demon falls to the ground."))
@@ -165,7 +165,6 @@ class MakeDustClouds(Leaf):
 
     def after_tick(self, time):
         self.time_to_next_attempt -= time
-        print self.time_to_next_attempt, time
         if self.time_to_next_attempt > 0:
             return
         self._spawn_dust_cloud()
@@ -176,7 +175,7 @@ class MakeSpiderWebs(Leaf):
     def __init__(self):
         super(MakeSpiderWebs, self).__init__()
         self.component_type = "make_spider_webs"
-        self.fire_chance_per_turn = 0.1
+        self.web_chance_per_turn = 0.1
         self.time_interval = gametime.single_turn
         self.time_to_next_attempt = self.time_interval
 
@@ -185,7 +184,7 @@ class MakeSpiderWebs(Leaf):
         if self.time_to_next_attempt > 0:
             return
         my_position = self.parent.position.value
-        chance = self.fire_chance_per_turn / float(len(direction.DIRECTIONS))
+        chance = self.web_chance_per_turn / float(len(direction.DIRECTIONS))
         dungeon_level = self.parent.dungeon_level.value
         for d in direction.DIRECTIONS:
             point = geometry.add_2d(my_position, d)

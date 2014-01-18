@@ -188,8 +188,7 @@ class AttackEntityEffect(EntityEffect):
         m = self.hit_message % {"source_entity": self.source_entity.description.long_name,
                                 "target_entity": self.target_entity.description.long_name,
                                 "damage": str(damage_caused)}
-        messenger.msg.send_visual_message(m,
-                                          self.target_entity.position.value)
+        messenger.msg.send_visual_message(m, self.target_entity.position.value)
 
     def is_a_hit(self):
         return self.target_entity.dodger.is_a_hit(self.hit)
@@ -202,7 +201,9 @@ class AttackEntityEffect(EntityEffect):
         return damage_caused
 
     def update(self, time_spent):
-        if self.is_a_hit():
+        if self.target_entity.resistance_checker.is_immune(self.damage_types):
+            pass
+        elif self.is_a_hit():
             damage_caused = self.hit_target()
             self.send_hit_message(damage_caused)
         else:
@@ -266,7 +267,8 @@ class DamageOverTimeEffect(EntityEffect):
         return damage_caused
 
     def update(self, time_spent):
-        if self.time_until_next_damage <= 0:
+        if (self.time_until_next_damage <= 0 and
+                not self.target_entity.resistance_checker.is_immune(self.damage_types)):
             damage_caused = self.damage_target()
             self.send_damage_message(damage_caused)
             self.time_until_next_damage = self.time_interval
@@ -291,7 +293,8 @@ class UndodgeableDamagAndBlockSameEffect(EntityEffect):
                                           self.target_entity.position.value)
 
     def update(self, time_spent):
-        if self.time_alive == 0:
+        if (self.time_alive == 0 and
+                not self.target_entity.resistance_checker.is_immune(self.damage_types)):
             damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
             damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
             damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity)
