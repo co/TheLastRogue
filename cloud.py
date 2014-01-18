@@ -12,7 +12,7 @@ import messenger
 from mover import Mover
 from position import Position, DungeonLevel
 import rng
-from stats import DataTypes, DataPoint, GamePieceTypes
+from stats import DataTypes, DataPoint, GamePieceTypes, DataPointBonusSpoof
 from text import Description
 import turn
 
@@ -42,6 +42,8 @@ def new_dust_cloud(density):
     cloud.graphic_char.color_fg = colors.LIGHT_ORANGE
     cloud.set_child(CloudActor())
     cloud.set_child(DataPoint(DataTypes.NEW_CLOUD_FUNCTION, new_dust_cloud))
+    cloud.set_child(DustLowerHitOfEntityShareTileEffect())
+    cloud.set_child(CloudChangeAppearanceShareTileEffect())
     return cloud
 
 
@@ -89,25 +91,33 @@ class FireDamageShareTileEffect(EntityShareTileEffect):
         target_entity.effect_queue.add(damage_effect)
 
 
-class DustLowerHitOfEntityShareTileEffect(EntityShareTileEffect):
+class AddSpoofChildShareEntityEffect(EntityShareTileEffect):
     def __init__(self):
-        super(DustLowerHitOfEntityShareTileEffect, self).__init__()
-        self.component_type = "dust_lower_hit_of_entity_share_tile_effect"
+        super(AddSpoofChildShareEntityEffect, self).__init__()
+        self.spoof_child_creator = None
 
     def _effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
-        source_entity = kwargs["source_entity"]
-        damage_mid = 20
-        damage_var = 10
-        damage = rng.random_variance(damage_mid, damage_var)
         if not target_entity.has("effect_queue"):
             return
+        if not self.spoof_child_creator:
+            raise Exception("Spoof child not implemented")
+        target_entity.effect_queue.add(AddSpoofChild(self.parent, self.spoof_child_creator(), 1))
 
 
-        damage_effect = AddSpoofChild(source_entity, damage, [DamageTypes.PHYSICAL],
-                                                           messenger.HURT_BY_EXPLOSION, "explosion_damage",
-                                                           time_to_live=gametime.single_turn)
-        target_entity.effect_queue.add(damage_effect)
+class CloudChangeAppearanceShareTileEffect(AddSpoofChildShareEntityEffect):
+    def __init__(self):
+        super(CloudChangeAppearanceShareTileEffect, self).__init__()
+        self.component_type = "cloud_change_appearance_share_tile_effect"
+        self.spoof_child_creator = lambda: GraphicChar(self.parent.graphic_char.color_fg, colors.GRAY_D, None)
+
+
+class DustLowerHitOfEntityShareTileEffect(AddSpoofChildShareEntityEffect):
+    def __init__(self):
+        super(DustLowerHitOfEntityShareTileEffect, self).__init__()
+        self.component_type = "dust_lower_hit_of_entity_share_tile_effect"
+        self.spoof_child_creator = lambda: DataPointBonusSpoof("hit", -10)
+
 
 class ExplosionDamageShareTileEffect(EntityShareTileEffect):
     def __init__(self):

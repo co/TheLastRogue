@@ -3,7 +3,6 @@ import direction
 
 
 class TestSolver(TestCase):
-
     def test_left_turn_back_returns_right(self):
         left_turn_back = direction.turn_back(direction.LEFT)
         self.assertEqual(left_turn_back, direction.RIGHT)

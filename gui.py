@@ -619,9 +619,7 @@ class EntityStatus(UIElement):
         super(EntityStatus, self).__init__(margin)
         self._width = rect.width
         element_width = self.width - style.interface_theme.margin[0] * 2 - 2
-        monster_health_bar = CounterBar(entity.health.hp, element_width,
-                                        colors.HP_BAR_FULL,
-                                        colors.HP_BAR_EMPTY)
+        monster_health_bar = CounterBar(entity.health.hp, element_width, colors.HP_BAR_FULL, colors.HP_BAR_EMPTY)
 
         entity_symbol = SymbolUIElement((0, 0), entity.graphic_char)
 
@@ -629,8 +627,8 @@ class EntityStatus(UIElement):
         self._hp_stack_panel.append(entity_symbol)
         self._hp_stack_panel.append(monster_health_bar)
 
-        self._rectangle_bg = StyledRectangle(rect, style.monster_list_card,
-                                             entity.description.name, entity.graphic_char.color_fg)
+        self._rectangle_bg = StyledRectangle(rect, style.monster_list_card, entity.description.name,
+                                             entity.get_original_child("graphic_char").color_fg)
 
         self._status_stack_panel = StackPanelVertical(rect.top_left, margin)
         self._status_stack_panel.append(self._hp_stack_panel)
@@ -919,9 +917,9 @@ class SymbolUIElement(UIElement):
 
     def draw(self, offset=geo.zero2d()):
         x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
-        if not self.graphic_char.color_fg is None:
+        if self.graphic_char.color_fg:
             console.set_color_fg((x, y), self.graphic_char.color_fg)
-        if not self.graphic_char.color_bg is None:
+        if self.graphic_char.color_bg:
             console.set_color_bg((x, y), self.graphic_char.color_bg)
         console.set_symbol((x, y), self.graphic_char.icon)
 

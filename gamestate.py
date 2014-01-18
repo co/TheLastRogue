@@ -180,6 +180,9 @@ class TestGameState(GameStateBase):
         cloud = new_steam_cloud(32)
         cloud.mover.try_move((16, 10), self.dungeon_level)
 
+        demon = monster.new_dust_demon(self)
+        demon.mover.try_move((24, 16), self.dungeon_level)
+
         for i in range(5):
             bomb = item.new_bomb()
             bomb.mover.try_move((18, 12 + i), self.dungeon_level)

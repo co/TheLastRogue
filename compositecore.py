@@ -41,6 +41,8 @@ class Component(object):
         Gets the next sibling of the same type,
         allows components to decorate components of the same type.
         """
+        if not self.has_parent():
+            return None
         if self.parent.get_original_child(self.component_type) is self:
             return None
         siblings =\
@@ -125,12 +127,6 @@ class Composite(Component):
     def __getinitargs__(self):
         return ()
 
-    def __repr__(self):
-        if self.has("description"):
-            return self.description.name + " " + super(Composite, self).__repr__()
-        else:
-            return str(super(Composite, self).__repr__())
-
     def set_child(self, child):
         """
         Adds a child component to this component.
@@ -175,9 +171,7 @@ class Composite(Component):
             raise Exception("Component {0} tried to add_child "
                             "component: {1} to its children. "
                             "But it already "
-                            "had parent: {2}.".format(str(self),
-                                                      str(child),
-                                                      str(child.parent)))
+                            "had parent: {2}.".format(str(self), str(child), str(child.parent)))
         if not child.component_type in self._spoofed_children:
             self._spoofed_children[child.component_type] = []
         self._spoofed_children[child.component_type].append(child)

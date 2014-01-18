@@ -137,11 +137,11 @@ def new_dust_demon(gamestate):
     spider.set_child(EntityMessages("The dust demon notices you.", "The demon falls to the ground."))
     spider.set_child(GraphicChar(None, colors.GRAY, "i"))
 
-    spider.set_child(Health(7))
-    spider.set_child(DataPoint(DataTypes.STRENGTH, 1))
+    spider.set_child(Health(10))
+    spider.set_child(DataPoint(DataTypes.STRENGTH, 3))
     spider.set_child(DataPoint(DataTypes.EVASION, 13))
-    spider.set_child(DataPoint(DataTypes.HIT, 5))
-    spider.set_child(DataPoint(DataTypes.ARMOR, 7))
+    spider.set_child(DataPoint(DataTypes.HIT, 25))
+    spider.set_child(DataPoint(DataTypes.ARMOR, 6))
     spider.set_child(DataPoint(DataTypes.AWARENESS, 5))
 
     spider.set_child(MakeDustClouds())
@@ -150,7 +150,7 @@ def new_dust_demon(gamestate):
 
 class MakeDustClouds(Leaf):
     def __init__(self):
-        super(MakeSpiderWebs, self).__init__()
+        super(MakeDustClouds, self).__init__()
         self.component_type = "make_dust_clouds"
         self.time_interval = gametime.single_turn
         self.time_to_next_attempt = self.time_interval
@@ -158,11 +158,14 @@ class MakeDustClouds(Leaf):
     def _spawn_dust_cloud(self):
         my_position = self.parent.position.value
         dungeon_level = self.parent.dungeon_level.value
-        dust = new_dust_cloud(16)
-        dust.mover.try_move(my_position, dungeon_level)
+        dust = new_dust_cloud(24)
+        if dust.mover.replace_move(my_position, dungeon_level):
+            return
+        dungeon_level.get_tile_or_unknown(my_position).get_first_cloud()
 
     def after_tick(self, time):
         self.time_to_next_attempt -= time
+        print self.time_to_next_attempt, time
         if self.time_to_next_attempt > 0:
             return
         self._spawn_dust_cloud()

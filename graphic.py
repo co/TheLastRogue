@@ -18,7 +18,12 @@ class GraphicChar(Leaf):
 
     @property
     def color_bg(self):
-        return self._color_bg
+        if self._color_bg:
+            return self._color_bg
+        elif self.next:
+            return self.next.color_bg
+        return None
+
 
     @color_bg.setter
     def color_bg(self, value):
@@ -26,7 +31,11 @@ class GraphicChar(Leaf):
 
     @property
     def color_fg(self):
-        return self._color_fg
+        if self._color_fg:
+            return self._color_fg
+        elif self.next:
+            return self.next.color_fg
+        return None
 
     @color_fg.setter
     def color_fg(self, value):
@@ -34,7 +43,11 @@ class GraphicChar(Leaf):
 
     @property
     def icon(self):
-        return self._icon
+        if self._icon:
+            return self._icon
+        elif self.next:
+            return self.next.icon
+        return None
 
     @icon.setter
     def icon(self, value):

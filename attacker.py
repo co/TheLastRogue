@@ -89,7 +89,10 @@ class Dodger(Leaf):
         """
         Returns true if it is a hit, false otherwise.
         """
-        return rng.stat_check(hit, self.parent.evasion.value)
+        print self.parent.hit.value, self.parent.description.name
+        hit = max(hit, 1)
+        evasion = max(self.parent.evasion.value, 1)
+        return rng.stat_check(hit, evasion)
 
 
 class ArmorChecker(Leaf):
