@@ -64,7 +64,8 @@ class Mover(Leaf):
         """
         if self.try_move(new_position, new_dungeon_level):
             return True
-        directions = direction.DIRECTIONS
+        directions = list(direction.DIRECTIONS)
+        #TODO Dont shuffle public constants!
         random.shuffle(directions)
         for d in directions:
             destination = geometry.add_2d(d, new_position)

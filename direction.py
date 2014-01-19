@@ -1,3 +1,4 @@
+import geometry
 import rng
 
 CENTER = (0, 0)
@@ -7,10 +8,10 @@ DOWN = (0, 1)
 RIGHT = (1, 0)
 LEFT = (-1, 0)
 
-UP_LEFT = (-1, -1)
-UP_RIGHT = (1, -1)
-DOWN_RIGHT = (1, 1)
-DOWN_LEFT = (-1, 1)
+UP_LEFT = geometry.add_2d(UP, LEFT)
+UP_RIGHT = geometry.add_2d(UP, RIGHT)
+DOWN_RIGHT = geometry.add_2d(DOWN, RIGHT)
+DOWN_LEFT = geometry.add_2d(DOWN, LEFT)
 
 DIRECTIONS = [UP,
               UP_RIGHT,
@@ -68,7 +69,7 @@ def turn_slight_left(direction):
 
 
 def turn_left_or_right(direction):
-    if(rng.coin_flip()):
+    if rng.coin_flip():
         return turn_left(direction)
     else:
         return turn_right(direction)
