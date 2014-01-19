@@ -154,7 +154,7 @@ def new_dust_demon(gamestate):
 
 
 def set_insect_components(composite):
-    composite.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.IS_ALIVE]))
+    composite.set_child(StatusFlags([StatusFlags.IS_ALIVE]))
     composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.ANIMAL))
 
 
