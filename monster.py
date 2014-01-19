@@ -349,7 +349,7 @@ class MakeSpiderWebs(Leaf):
     def __init__(self):
         super(MakeSpiderWebs, self).__init__()
         self.component_type = "make_spider_webs"
-        self.web_chance_per_turn = 0.1
+        self.web_chance_per_turn = 0.8
         self.time_interval = gametime.single_turn
         self.time_to_next_attempt = self.time_interval
 
@@ -362,10 +362,22 @@ class MakeSpiderWebs(Leaf):
         dungeon_level = self.parent.dungeon_level.value
         for d in direction.DIRECTIONS:
             point = geometry.add_2d(my_position, d)
-            if random.random() < chance and dungeon_level and len(dungeon_level.get_tile_or_unknown(point).get_entities()) == 0:
-                fire = SpiderWeb()
-                fire.mover.try_move(point, dungeon_level)
+            if (random.random() < chance and dungeon_level and
+                        len(dungeon_level.get_tile_or_unknown(point).get_entities()) == 0 and
+                    self.position_can_have_web(dungeon_level, point)):
+                web = SpiderWeb()
+                web.mover.try_move(point, dungeon_level)
         self.time_to_next_attempt = self.time_interval
+
+    def position_can_have_web(self, dungeon_level, position):
+        surrounding_tiles = [dungeon_level.get_tile_or_unknown(geometry.add_2d(position, d))
+                             for d in direction.DIRECTIONS]
+        surrounding_solid_terrains = len([tile for tile in surrounding_tiles
+                                          if tile.get_terrain().has("is_solid")])
+        surrounding_dungeon_features = len([tile for tile in surrounding_tiles
+                                          if tile.get_dungeon_feature()])
+        print surrounding_solid_terrains, surrounding_dungeon_features
+        return surrounding_dungeon_features + surrounding_solid_terrains > 2
 
 
 class PutAdjacentTilesOnFire(Leaf):

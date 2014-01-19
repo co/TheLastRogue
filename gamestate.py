@@ -184,8 +184,8 @@ class TestGameState(GameStateBase):
         #demon = monster.new_dust_demon(self)
         #demon.mover.try_move((24, 16), self.dungeon_level)
 
-        amoeba = monster.new_giant_amoeba(self)
-        amoeba.mover.try_move((26, 14), self.dungeon_level)
+        #amoeba = monster.new_giant_amoeba(self)
+        #amoeba.mover.try_move((26, 14), self.dungeon_level)
 
         for i in range(5):
             bomb = item.new_bomb()
@@ -230,8 +230,8 @@ class TestGameState(GameStateBase):
         #rat = monster.new_ratman(self)
         #rat.mover.try_move((20, 8), self.dungeon_level)
 
-        #spider = monster.new_spider(self)
-        #spider.mover.try_move((25, 8), self.dungeon_level)
+        spider = monster.new_spider(self)
+        spider.mover.try_move((25, 8), self.dungeon_level)
 
         #salamander = monster.new_salamander(self)
         #salamander.mover.try_move((25, 12), self.dungeon_level)
