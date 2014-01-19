@@ -68,6 +68,8 @@ class DataTypes:
     CLOUD_TYPE = "cloud_type"
     CLONE_FUNCTION = "clone_function"
 
+    MINIMUM_DEPTH = "minimum_depth"
+
     GAME_STATE = "game_state"
 
 

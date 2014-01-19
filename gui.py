@@ -516,7 +516,7 @@ class PlayerStatusBox(RectangularUIElement):
 
     def update(self):
         self._status_stack_panel.update()
-        self.depth_text_box.text = ("Depth:" + str(self._player.dungeon_level.value.depth + 1).rjust(2))
+        self.depth_text_box.text = ("Depth:" + str(self._player.dungeon_level.value.depth).rjust(2))
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(offset, self.margin)

@@ -1,6 +1,7 @@
 import random
 import dungeongenerator
 from geometry import add_2d
+from monstertables import from_table_pick_n_monsters_for_depth, dungeon_table
 import spawner
 import monster
 import rng
@@ -11,15 +12,15 @@ from tools import time_it
 class Dungeon(object):
     def __init__(self, game_state):
         self.level_count = 10
-        self._dungeon_levels = []
+        self._dungeon_levels = [None]
         self.game_state = game_state
 
     def get_dungeon_level(self, depth):
         if depth >= self.level_count:
             self.game_state.has_won = True
             return None
-        if len(self._dungeon_levels) <= depth:
-            self._dungeon_levels.append(self._generate_dungeon_level(depth))
+        while len(self._dungeon_levels) <= depth:
+            self._dungeon_levels.append(self._generate_dungeon_level(len(self._dungeon_levels)))
         return self._dungeon_levels[depth]
 
     def _generate_dungeon_level(self, depth):
@@ -28,25 +29,13 @@ class Dungeon(object):
 
         dungeon_level = time_it("dungeon_level_generation",
                                 (lambda: dungeongenerator.generate_dungeon_floor(size, depth)))
-        for _ in range(int(depth * 1.5) + 4):
-            if rng.coin_flip() and rng.coin_flip():
-                ghost = monster.new_ghost(self.game_state)
-                spawner.place_piece_on_random_tile(ghost, dungeon_level)
-            else:
-                spawner.spawn_rat_man(dungeon_level, self.game_state)
-
-        for _ in range(random.randrange(depth, depth + 2) - 1):
-            if rng.coin_flip() and rng.coin_flip():
-                cyclops = monster.new_cyclops(self.game_state)
-                spawner.place_piece_on_random_tile(cyclops, dungeon_level)
-
-        for _ in range(random.randrange(int(depth / 2), int(depth / 2) + 3) - 1):
-            if rng.coin_flip() or rng.coin_flip():
-                if rng.coin_flip() and rng.coin_flip():
-                    slime = monster.new_dark_slime(self.game_state)
-                else:
-                    slime = monster.new_slime(self.game_state)
-                spawner.place_piece_on_random_tile(slime, dungeon_level)
+        minimum_monsters = int(4 + depth * 1.2)
+        monsters_to_spawn = random.randrange(minimum_monsters, minimum_monsters + 3)
+        monsters = from_table_pick_n_monsters_for_depth(dungeon_table, monsters_to_spawn,
+                                                        depth, self.game_state)
+        print monsters
+        for monster in monsters:
+            spawner.place_piece_on_random_tile(monster, dungeon_level)
 
         if depth == (len(self._dungeon_levels) - 1):
             jericho = monster.new_jericho(self.game_state)

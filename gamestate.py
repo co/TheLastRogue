@@ -267,7 +267,7 @@ class GameState(GameStateBase):
         self._init_player_position()
 
     def _init_player_position(self):
-        first_level = self.dungeon.get_dungeon_level(0)
+        first_level = self.dungeon.get_dungeon_level(1)
         self.dungeon_level = first_level
         for stairs in first_level.up_stairs:
             move_succeded = self.player.mover.move_push_over(stairs.position.value, first_level)
