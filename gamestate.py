@@ -181,8 +181,8 @@ class TestGameState(GameStateBase):
         cloud = new_steam_cloud(32)
         cloud.mover.try_move((16, 10), self.dungeon_level)
 
-        #demon = monster.new_dust_demon(self)
-        #demon.mover.try_move((24, 16), self.dungeon_level)
+        demon = monster.new_dust_demon(self)
+        demon.mover.try_move((24, 16), self.dungeon_level)
 
         #amoeba = monster.new_giant_amoeba(self)
         #amoeba.mover.try_move((26, 14), self.dungeon_level)
@@ -239,8 +239,8 @@ class TestGameState(GameStateBase):
         #ghost = monster.new_ghost(self)
         #ghost.mover.try_move((21, 8), self.dungeon_level)
 
-        slime = monster.new_slime(self)
-        slime.mover.try_move((18, 16), self.dungeon_level)
+        #slime = monster.new_slime(self)
+        #slime.mover.try_move((18, 16), self.dungeon_level)
 
         #dark_slime = monster.new_dark_slime(self)
         #dark_slime.mover.try_move((24, 18), self.dungeon_level)

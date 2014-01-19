@@ -72,7 +72,7 @@ class SpiderWeb(Composite):
 
         self.set_child(CharPrinter())
         self.set_child(Mover())
-        self.set_child(DataPoint(DataTypes.STRENGTH, 13))
+        self.set_child(DataPoint(DataTypes.STRENGTH, 10))
         self.set_child(IsDungeonFeature())
         self.set_child(StuckInSpiderWebShareTileEffect())
 
@@ -101,7 +101,7 @@ class StuckInWebStepperSpoof(Stepper):
 
     def try_move_or_bump(self, position):
         my_strength = self.parent.strength.value
-        if rng.stat_check(my_strength, self.strength + 8):
+        if rng.stat_check(my_strength, self.strength):
             messenger.msg.send_visual_message(messenger.BREAKS_OUT_OF_WEB_MESSAGE % {"target_entity": self.parent.description.long_name}, self.parent.position.value)
             self.web.mover.try_remove_from_dungeon()
             return self.next.try_move_or_bump(position)

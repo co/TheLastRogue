@@ -141,15 +141,15 @@ def new_dust_demon(gamestate):
     demon.set_child(EntityMessages("The dust demon notices you.", "The demon falls to the ground."))
     demon.set_child(GraphicChar(None, colors.GRAY, "i"))
 
-    demon.set_child(Health(10))
-    demon.set_child(DataPoint(DataTypes.STRENGTH, 3))
-    demon.set_child(DataPoint(DataTypes.EVASION, 13))
+    demon.set_child(Health(12))
+    demon.set_child(DataPoint(DataTypes.STRENGTH, 5))
+    demon.set_child(DataPoint(DataTypes.EVASION, 12))
     demon.set_child(DataPoint(DataTypes.HIT, 25))
-    demon.set_child(DataPoint(DataTypes.ARMOR, 6))
-    demon.set_child(DataPoint(DataTypes.AWARENESS, 5))
+    demon.set_child(DataPoint(DataTypes.ARMOR, 8))
+    demon.set_child(DataPoint(DataTypes.AWARENESS, 4))
 
     demon.set_child(MakeDustClouds())
-    demon.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 3))
+    demon.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 4))
     return demon
 
 
@@ -350,7 +350,7 @@ class MakeSpiderWebs(Leaf):
     def __init__(self):
         super(MakeSpiderWebs, self).__init__()
         self.component_type = "make_spider_webs"
-        self.web_chance_per_turn = 0.8
+        self.web_chance_per_turn = 0.6
         self.time_interval = gametime.single_turn
         self.time_to_next_attempt = self.time_interval
 
@@ -557,6 +557,7 @@ class StuckInSlimeStepperSpoof(Stepper):
             health = self._slime.health.hp.value / 2
             self._slime.health.hp.value = health
             new_slime.health.hp.value = health
+            new_slime.monster_actor_state.value = MonsterActorState.HUNTING
 
 
 class BlockVisionShareTileEffect(EntityShareTileEffect):
