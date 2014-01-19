@@ -272,6 +272,7 @@ def new_slime(game_state):
     slime.set_child(DataPoint(DataTypes.ARMOR, 3))
     slime.set_child(DataPoint(DataTypes.AWARENESS, 5))
     slime.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 3))
+    slime.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_slime))
     return slime
 
 
@@ -294,6 +295,7 @@ def new_dark_slime(game_state):
     slime.set_child(DataPoint(DataTypes.ARMOR, 3))
     slime.set_child(DataPoint(DataTypes.AWARENESS, 6))
     slime.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 3))
+    slime.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_dark_slime))
     return slime
 
 
@@ -333,9 +335,8 @@ class MakeDustClouds(Leaf):
         my_position = self.parent.position.value
         dungeon_level = self.parent.dungeon_level.value
         dust = new_dust_cloud(24)
-        if dust.mover.replace_move(my_position, dungeon_level):
+        if dungeon_level and dust.mover.replace_move(my_position, dungeon_level):
             return
-        dungeon_level.get_tile_or_unknown(my_position).get_first_cloud()
 
     def after_tick(self, time):
         self.time_to_next_attempt -= time
@@ -538,6 +539,7 @@ class StuckInSlimeStepperSpoof(Stepper):
         if self.has_sibling("attacker"):
             self.parent.attacker.hit(self._slime)
         if rng.stat_check(my_strength, slime_strength + 8):
+            self._split_slime(geometry.sub_2d(self._slime.position.value, position))
             self._make_slime_skip_turn()
             return self.next.try_move_or_bump(position)
         return self.parent.movement_speed.value
@@ -546,6 +548,15 @@ class StuckInSlimeStepperSpoof(Stepper):
         immobile_stepper = ImmobileStepper()
         add_spoof_effect = AddSpoofChild(self.parent, immobile_stepper, gametime.single_turn)
         self._slime.effect_queue.add(add_spoof_effect)
+
+    def _split_slime(self, split_direction):
+        if self._slime.health.hp.value < 3:
+            return
+        new_slime = self._slime.clone_function.value(self._slime.game_state.value)
+        if new_slime.mover.try_move_roll_over(geometry.add_2d(self._slime.position.value, split_direction), self._slime.dungeon_level.value):
+            health = self._slime.health.hp.value / 2
+            self._slime.health.hp.value = health
+            new_slime.health.hp.value = health
 
 
 class BlockVisionShareTileEffect(EntityShareTileEffect):

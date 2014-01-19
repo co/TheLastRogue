@@ -21,7 +21,7 @@ class Mover(Leaf):
         """
         if new_dungeon_level is None:
             new_dungeon_level = self.parent.dungeon_level.value
-        if not new_dungeon_level.has_tile(new_position):
+        if not new_dungeon_level.get_tile_or_unknown(new_position):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
         return (self._can_fit_on_tile(new_tile) and
