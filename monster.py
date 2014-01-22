@@ -1,4 +1,5 @@
 import random
+from animation import animate_flight
 from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity
 from cloud import new_fire_cloud, new_dust_cloud
 from compositecommon import EntityShareTileEffect
@@ -398,8 +399,11 @@ class PutAdjacentTilesOnFire(Leaf):
         for d in direction.DIRECTIONS:
             point = geometry.add_2d(my_position, d)
             dungeon_level = self.parent.dungeon_level.value
-            if random.random() < chance and len(dungeon_level.get_tile_or_unknown(point).get_entities()) == 0:
-                fire = new_fire_cloud(random.randrange(6, 10))
+            fire = new_fire_cloud(random.randrange(6, 10))
+            if (random.random() < chance and len(dungeon_level.get_tile_or_unknown(point).get_entities()) == 0 and
+                    fire.mover.can_move(point, dungeon_level)):
+                animate_flight(self.parent.game_state.value, [my_position, point],
+                               fire.graphic_char.icon, fire.graphic_char.color_fg)
                 fire.mover.try_move(point, dungeon_level)
         self.time_to_next_burn_attempt = self.time_interval
 

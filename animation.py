@@ -32,3 +32,8 @@ class MissileAnimation(InstantAnimation):
         x, y = self.camera.dungeon_to_screen_position(point)
         console.set_color_fg((x, y), self.color_fg)
         console.set_symbol((x, y), self.symbol)
+
+
+def animate_flight(game_state, path, symbol_char, color_fg):
+    flight_animation = MissileAnimation(game_state, symbol_char, color_fg, path)
+    flight_animation.run_animation()

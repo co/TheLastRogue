@@ -1,12 +1,10 @@
 import random
 from action import Action, SOURCE_ENTITY, GAME_STATE
-from attacker import DamageTypes, Attack, UndodgeableAttack
-from compositecore import Leaf
-import gametime
+from animation import animate_flight
+from attacker import DamageTypes, UndodgeableAttack
 import geometry
 import libtcodpy as libtcod
 import shoot
-import animation
 import colors
 import icon
 
@@ -36,12 +34,6 @@ class PlayerMissileAction(Action):
 
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         pass
-
-
-def animate_flight(game_state, path, symbol_char, color_fg):
-    flight_animation =\
-        animation.MissileAnimation(game_state, symbol_char, color_fg, path)
-    flight_animation.run_animation()
 
 
 class PlayerThrowItemAction(PlayerMissileAction):
