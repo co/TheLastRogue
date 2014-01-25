@@ -14,7 +14,7 @@ from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
 import messenger
-from missileaction import MonsterThrowStoneAction, MonsterMagicRangeAction, MonsterThrowRockAction, SpiritMissile
+from missileaction import MonsterThrowStoneAction, MonsterMagicRangeAction, MonsterThrowRockAction, SpiritMissile, MonsterHealEntityEffect
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor, MonsterWeightedStepAction
 from mover import Mover, Stepper, SlimeCanShareTileEntityMover, ImmobileStepper, CautiousStepper, TolerateDamage
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
@@ -247,6 +247,31 @@ def new_ghost(gamestate):
     ghost.set_child(AddGhostReviveToSeenEntities())
     ghost.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 2))
     return ghost
+
+
+def new_pixie(gamestate):
+    pixie = Composite()
+    set_monster_components(pixie, gamestate)
+    set_humanoid_components(pixie)
+    pixie.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.FLYING]))
+
+    pixie.set_child(EntityMessages("The pixie sees you.", "The pixie fades away."))
+    pixie.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS,
+                                     StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
+    pixie.set_child(Description("Pixie", "A small humanoid with insect wings."))
+    pixie.set_child(GraphicChar(None, colors.PINK, "y"))
+    pixie.set_child(Health(10))
+    pixie.set_child(DataPoint(DataTypes.STRENGTH, 2))
+    pixie.set_child(DataPoint(DataTypes.EVASION, 22))
+    pixie.set_child(DataPoint(DataTypes.HIT, 14))
+    pixie.set_child(DataPoint(DataTypes.ARMOR, 2))
+    pixie.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.two_thirds_turn))
+    pixie.set_child(DataPoint(DataTypes.AWARENESS, 8))
+
+    pixie.set_child(KeepPlayerAtDistanceActor(4))
+    pixie.set_child(MonsterHealEntityEffect())
+    pixie.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 3))
+    return pixie
 
 
 def set_slime_components(slime):

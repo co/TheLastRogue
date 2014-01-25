@@ -3,6 +3,7 @@ import symbol
 from action import Action, SOURCE_ENTITY, GAME_STATE, DESTINATION
 from animation import animate_flight
 from attacker import DamageTypes, UndodgeableAttack
+from entityeffect import Heal
 import geometry
 from graphic import GraphicChar
 import libtcodpy as libtcod
@@ -29,13 +30,15 @@ class PlayerMissileAction(Action):
         path_taken = hit_detector.get_path_taken(path, dungeon_level)
         if path_taken is None or len(path_taken) < 1:
             return False
-        self.send_missile(dungeon_level, path_taken, game_state, source_entity)
+        animate_flight(game_state, path, self.parent.graphic_char.icon,
+                       self.parent.graphic_char.color_fg)
+        self.missile_hit_effect(dungeon_level, path_taken, game_state, source_entity)
         self.add_energy_spent_to_entity(source_entity)
 
     def max_missile_distance(self, **kwargs):
         pass
 
-    def send_missile(self, dungeon_level, path, game_state, source_entity):
+    def missile_hit_effect(self, dungeon_level, path, game_state, source_entity):
         pass
 
 
@@ -63,14 +66,12 @@ class PlayerThrowItemAction(PlayerMissileAction):
         """
         source_entity.inventory.remove_item(self.parent)
 
-    def send_missile(self, dungeon_level, path, game_state, source_entity):
+    def missile_hit_effect(self, dungeon_level, position, game_state, source_entity):
         """
         The final step of the throw.
         """
         self.remove_from_inventory(source_entity)
-        animate_flight(game_state, path, self.parent.graphic_char.icon,
-                       self.parent.graphic_char.color_fg)
-        self.parent.thrower.throw_effect(dungeon_level, path[-1])
+        self.parent.thrower.throw_effect(dungeon_level, position)
 
 
 class PlayerThrowStoneAction(PlayerMissileAction):
@@ -88,9 +89,8 @@ class PlayerThrowStoneAction(PlayerMissileAction):
         """
         entity.actor.newly_spent_energy += entity.throw_speed.value
 
-    def send_missile(self, dungeon_level, path, game_state, source_entity):
-        animate_flight(game_state, path, self.icon, self.color_fg)
-        rock_hit_position(dungeon_level, path[-1], source_entity)
+    def missile_hit_effect(self, dungeon_level, position, game_state, source_entity):
+        rock_hit_position(dungeon_level, position, source_entity)
 
     def max_missile_distance(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
@@ -124,9 +124,8 @@ class PlayerSlingStoneAction(PlayerMissileAction):
         """
         entity.actor.newly_spent_energy += entity.throw_speed.value
 
-    def send_missile(self, dungeon_level, path, game_state, source_entity):
-        animate_flight(game_state, path, self.icon, self.color_fg)
-        self.hit_position(dungeon_level, path[-1], source_entity)
+    def missile_hit_effect(self, dungeon_level, position, game_state, source_entity):
+        self.hit_position(dungeon_level, position, source_entity)
 
     def hit_position(self, dungeon_level, position, source_entity):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
@@ -159,10 +158,9 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         """
         entity.actor.newly_spent_energy += entity.shoot_speed.value
 
-    def send_missile(self, dungeon_level, path, game_state, source_entity):
+    def missile_hit_effect(self, dungeon_level, position, game_state, source_entity):
         self.remove_ammo_from_inventory(source_entity.inventory)
-        animate_flight(game_state, path, self.icon, self.color_fg)
-        self.hit_position(dungeon_level, path[-1], source_entity)
+        self.hit_position(dungeon_level, position, source_entity)
 
     def can_act(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
@@ -227,7 +225,8 @@ class MonsterMissileAction(MonsterTargetAction):
         path_taken = hit_detector.get_path_taken(path, dungeon_level)
         if path_taken is None or len(path_taken) < 1:
             return False
-        self.send_missile(dungeon_level, path_taken)
+        animate_flight(self.parent.game_state.value, path, self.missile_graphic.icon, self.missile_graphic.color_fg)
+        self.missile_hit_effect(dungeon_level, path[-1])
         self.add_energy_spent_to_entity(self.parent)
 
     def _get_path(self, destination):
@@ -243,7 +242,7 @@ class MonsterMissileAction(MonsterTargetAction):
         return result
 
     # implemented by subclasses
-    def send_missile(self, dungeon_level, path):
+    def missile_hit_effect(self, dungeon_level, position):
         pass
 
 
@@ -259,10 +258,8 @@ class MonsterThrowStoneAction(MonsterMissileAction):
         """
         entity.actor.newly_spent_energy += entity.throw_speed.value
 
-    def send_missile(self, dungeon_level, path):
-        animate_flight(self.parent.game_state.value, path, self.missile_graphic.icon,
-                       self.missile_graphic.color_fg)
-        rock_hit_position(dungeon_level, path[-1], self.parent)
+    def missile_hit_effect(self, dungeon_level, position):
+        rock_hit_position(dungeon_level, position, self.parent)
 
 
 class MonsterThrowRockAction(MonsterThrowStoneAction):
@@ -278,9 +275,8 @@ class MonsterMagicRangeAction(MonsterMissileAction):
         self.component_type = "monster_range_attack_action"
         self.damage = damage
 
-    def send_missile(self, dungeon_level, path):
-        animate_flight(self.parent.game_state.value, path, self.missile_graphic.icon, self.missile_graphic.color_fg)
-        magic_hit_position(self.damage, dungeon_level, path[-1], self.parent)
+    def missile_hit_effect(self, dungeon_level, position):
+        magic_hit_position(self.damage, dungeon_level, position, self.parent)
 
     def is_destination_within_range(self, destination):
         return (1 < geometry.chess_distance(self.parent.position.value, destination) <=
@@ -300,3 +296,24 @@ def magic_hit_position(damage, dungeon_level, position, source_entity):
     damage_types = [DamageTypes.MAGIC]
     thrown_damage = UndodgeableAttack(damage, 0, damage_types)
     thrown_damage.damage_entity(source_entity, target_entity)
+
+
+class MonsterMissileApplyEntityEffect(MonsterMissileAction):
+    def __init__(self, entity_effect_factory, min_range, max_range, missile_graphic, weight=100):
+        super(MonsterMissileApplyEntityEffect, self).__init__(min_range, max_range, missile_graphic, weight)
+        self.entity_effect_factory = entity_effect_factory
+
+    def missile_hit_effect(self, dungeon_level, position):
+        target_entity = dungeon_level.get_tile_or_unknown(position).get_first_entity()
+        target_entity.effect_queue.add(self.entity_effect_factory())
+
+    def hit_animation(self, dungeon_level, position):
+        pass
+
+
+class MonsterHealEntityEffect(MonsterMissileApplyEntityEffect):
+    def __init__(self,  weight=100):
+        heart_graphic = GraphicChar(None, colors.RED, icon.HEART)
+        health_effect_factory = lambda: Heal(self.parent, random.randrange(4, 10))
+        super(MonsterHealEntityEffect, self).__init__(health_effect_factory, 2, 4, heart_graphic, weight)
+        self.component_type = "monster_range_heal_action"

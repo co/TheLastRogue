@@ -268,7 +268,6 @@ class MonsterWeightedAction(Action):
         self.weight = weight
 
 
-#TODO USE THIS.
 class MonsterWeightedStepAction(MonsterWeightedAction):
     def __init__(self, weight=100):
         super(MonsterWeightedStepAction, self).__init__(weight)
