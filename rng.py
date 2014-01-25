@@ -36,3 +36,14 @@ def stat_check(stat1, stat2):
     else:
         return False
 
+
+def weighted_choice(options, weight_function=(lambda option: option.weight)):
+    total = sum(weight_function(option) for option in options)
+    random_choice = random.uniform(0, total)
+    upto = 0
+    for option in options:
+        weight = weight_function(option)
+        if upto + weight > random_choice:
+            return option
+        upto += weight
+    raise Exception("Weighted choice error.")

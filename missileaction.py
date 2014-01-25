@@ -1,9 +1,12 @@
 import random
-from action import Action, SOURCE_ENTITY, GAME_STATE
+import symbol
+from action import Action, SOURCE_ENTITY, GAME_STATE, DESTINATION
 from animation import animate_flight
 from attacker import DamageTypes, UndodgeableAttack
 import geometry
+from graphic import GraphicChar
 import libtcodpy as libtcod
+from monsteractor import MonsterWeightedAction
 import shoot
 import colors
 import icon
@@ -13,7 +16,7 @@ class PlayerMissileAction(Action):
     def act(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
         game_state = kwargs[GAME_STATE]
-        max_missile_distance =\
+        max_missile_distance = \
             self.max_missile_distance(source_entity=source_entity)
         path = shoot.player_select_missile_path(source_entity,
                                                 max_missile_distance,
@@ -40,6 +43,7 @@ class PlayerThrowItemAction(PlayerMissileAction):
     """
     This action will prompt the player to throw the parent item.
     """
+
     def __init__(self):
         super(PlayerThrowItemAction, self).__init__()
         self.component_type = "action"
@@ -87,9 +91,6 @@ class PlayerThrowStoneAction(PlayerMissileAction):
     def send_missile(self, dungeon_level, path, game_state, source_entity):
         animate_flight(game_state, path, self.icon, self.color_fg)
         rock_hit_position(dungeon_level, path[-1], source_entity)
-
-    def can_act(self, **kwargs):
-        return True
 
     def max_missile_distance(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
@@ -185,24 +186,37 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         inventory.remove_one_item_from_stack(ammo_item_with_least_ammo)
 
 
-class MonsterThrowStoneAction(Action):
-    def __init__(self, skip_chance=0, icon=icon.STONE, color_fg=colors.GRAY):
-        super(MonsterThrowStoneAction, self).__init__()
-        self.component_type = "monster_range_attack_action"
-        self.icon = icon
-        self.color_fg = color_fg
-        self.skip_chance = skip_chance
+class MonsterTargetAction(MonsterWeightedAction):
 
-    def add_energy_spent_to_entity(self, entity):
-        """
-        Help method for spending energy for the act performing entity.
-        """
-        entity.actor.newly_spent_energy += entity.throw_speed.value
+    def __init__(self, min_range, max_range, weight=100):
+        super(MonsterTargetAction, self).__init__(weight)
+        self.tags.add("monster_target_action")
+        self.weight = weight
+        self.min_range = min_range
+        self.max_range = max_range
 
-    def can_act(self, destination):
-        if random.randrange(100) > self.skip_chance:
-            return True
-        return False
+
+class MonsterMissileAction(MonsterTargetAction):
+    def __init__(self, min_range, max_range, missile_graphic, weight=100):
+        super(MonsterMissileAction, self).__init__(min_range, max_range, weight)
+        self.missile_graphic = missile_graphic
+
+    def can_act(self, **kwargs):
+        destination = kwargs[DESTINATION]
+        return self.is_destination_within_range(destination) and not self.is_something_blocking(destination)
+
+    def is_destination_within_range(self, destination):
+        return self.min_range <= geometry.chess_distance(self.parent.position.value, destination) <= self.max_range
+
+    def is_something_blocking(self, destination):
+        """
+        What about selfish creatures? that don't care about other creatures. Must know what kind of obstacle is blocking
+        """
+        path = self._get_path(destination)
+        hit_detector = shoot.MissileHitDetection(False, False)
+        dungeon_level = self.parent.dungeon_level.value
+        path_taken = hit_detector.get_path_taken(path, dungeon_level)
+        return geometry.chess_distance(self.parent.position.value, destination) != len(path_taken)
 
     def act(self, destination):
         path = self._get_path(destination)
@@ -228,38 +242,55 @@ class MonsterThrowStoneAction(Action):
         result.append(destination)
         return result
 
-    def is_destination_within_range(self, destination):
-        return (1 < geometry.chess_distance(self.parent.position.value, destination) <=
-                max_throw_distance(self.parent.strength.value))
+    # implemented by subclasses
+    def send_missile(self, dungeon_level, path):
+        pass
 
-    def is_something_blocking(self, destination):
-        path = self._get_path(destination)
-        hit_detector = shoot.MissileHitDetection(False, False)
-        dungeon_level = self.parent.dungeon_level.value
-        path_taken = hit_detector.get_path_taken(path, dungeon_level)
-        return geometry.chess_distance(self.parent.position.value, destination) != len(path_taken)
+
+#TODO: Most of content has moved to super class and should be removed.
+class MonsterThrowStoneAction(MonsterMissileAction):
+    def __init__(self, weight=100):
+        super(MonsterThrowStoneAction, self).__init__(2, 4, GraphicChar(None, colors.GRAY, icon.STONE), weight)
+        self.component_type = "monster_throw_stone_action"
+
+    def add_energy_spent_to_entity(self, entity):
+        """
+        Help method for spending energy for the act performing entity.
+        """
+        entity.actor.newly_spent_energy += entity.throw_speed.value
 
     def send_missile(self, dungeon_level, path):
-        animate_flight(self.parent.game_state.value, path, self.icon, self.color_fg)
+        animate_flight(self.parent.game_state.value, path, self.missile_graphic.icon,
+                       self.missile_graphic.color_fg)
         rock_hit_position(dungeon_level, path[-1], self.parent)
 
 
-class MonsterMagicRangeAction(MonsterThrowStoneAction):
-    def __init__(self, damage, skip_chance=0, icon=icon.BIG_CENTER_DOT, color_fg=colors.LIGHT_BLUE):
-        super(MonsterThrowStoneAction, self).__init__()
+class MonsterThrowRockAction(MonsterThrowStoneAction):
+    def __init__(self, weight):
+        super(MonsterThrowRockAction, self).__init__(weight=weight)
+        self.component_type = "monster_throw_rock_action"
+        self.missile_graphic = GraphicChar(None, colors.GRAY, icon.DUNGEON_WALLS_ROW)
+
+
+class MonsterMagicRangeAction(MonsterMissileAction):
+    def __init__(self, damage, graphic_char, weight=100):
+        super(MonsterMagicRangeAction, self).__init__(2, 4, graphic_char, weight)
         self.component_type = "monster_range_attack_action"
-        self.icon = icon
-        self.color_fg = color_fg
-        self.skip_chance = skip_chance
         self.damage = damage
 
     def send_missile(self, dungeon_level, path):
-        animate_flight(self.parent.game_state.value, path, self.icon, self.color_fg)
+        animate_flight(self.parent.game_state.value, path, self.missile_graphic.icon, self.missile_graphic.color_fg)
         magic_hit_position(self.damage, dungeon_level, path[-1], self.parent)
 
     def is_destination_within_range(self, destination):
         return (1 < geometry.chess_distance(self.parent.position.value, destination) <=
                 self.parent.sight_radius.value)
+
+
+class SpiritMissile(MonsterMagicRangeAction):
+    def __init__(self, weight=100):
+        super(SpiritMissile, self).__init__(1, GraphicChar(None, colors.LIGHT_BLUE, icon.BIG_CENTER_DOT), weight)
+        self.component_type = "monster_range_attack_action"
 
 
 def magic_hit_position(damage, dungeon_level, position, source_entity):

@@ -9,6 +9,7 @@ TARGET_ENTITY = "target_entity"
 GAME_STATE = "game_state"
 EQUIPMENT_SLOT = "equipment_slot"
 ACTION = "action"
+DESTINATION = "destination"
 
 
 class Action(Leaf):

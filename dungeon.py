@@ -1,11 +1,7 @@
 import random
 import dungeongenerator
-from geometry import add_2d
 from monstertables import from_table_pick_n_monsters_for_depth, dungeon_table
 import spawner
-import monster
-import rng
-import item
 from tools import time_it
 
 

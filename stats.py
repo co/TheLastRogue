@@ -63,6 +63,7 @@ class DataTypes:
     WEAPON_RANGE = "weapon_range"
 
     SIGHT_RADIUS = "sight_radius"
+    SKIP_ACTION_CHANCE = "skip_action_chance"
 
     DENSITY = "density"
     CLOUD_TYPE = "cloud_type"

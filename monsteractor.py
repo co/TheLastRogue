@@ -1,4 +1,5 @@
 import random
+from action import Action
 import colors
 from compositecore import Leaf
 import gametime
@@ -114,28 +115,30 @@ class MonsterActor(Actor):
         position = self.parent.position.value
         return dungeon_level.get_walkable_positions(self.parent, position)
 
-    def do_range_attack(self):
+    def do_weighted_action(self):
         """
         Does the ranged attack, assumes that can_do_ranged_attack returned True.
         """
         player = self.get_player_if_seen()
         if player is None:
             return 0
-        return self.parent.monster_range_attack_action.act(player.position.value)
+        targeted_actions = [action for action in self.parent.get_children_with_tag("monster_weighted_action")
+                            if action.can_act(destination=player.position.value)]
+        print targeted_actions
+        choosen_action = rng.weighted_choice(targeted_actions)
+        return choosen_action.act(destination=player.position.value)
 
-    def can_do_ranged_attack(self):
+    def can_do_weighted_attack(self):
         """
         Returns true if it's possible for the monster to do a ranged attack at the player.
         """
         player = self.get_player_if_seen()
         if player is None or MonsterActorState.HUNTING != self.parent.monster_actor_state.value:
             return False
-        if (not self.parent.has("monster_range_attack_action") or
-                not self.parent.monster_range_attack_action.can_act(player.position.value)):
-            return False
-        range_attack = self.parent.monster_range_attack_action
-        return (range_attack.is_destination_within_range(player.position.value) and
-                not range_attack.is_something_blocking(player.position.value))
+        for action in self.parent.get_children_with_tag("monster_target_action"):
+            if action.can_act(destination=player.position.value):
+                return True
+        return False
 
 
 class StepRandomDirectionActor(MonsterActor):
@@ -158,6 +161,9 @@ class ChasePlayerActor(MonsterActor):
     def __init__(self):
         super(ChasePlayerActor, self).__init__()
 
+    def no_action_taken(self):
+        return self.newly_spent_energy <= 0
+
     def act(self):
         self.parent.dungeon_mask.update_fov()
         self.newly_spent_energy = 0
@@ -174,11 +180,11 @@ class ChasePlayerActor(MonsterActor):
             self.set_path_to_random_walkable_point()
 
         #  Do action
-        if self.newly_spent_energy <= 0 and self.can_do_ranged_attack():
-            self.do_range_attack()
-        if self.newly_spent_energy <= 0 and self.parent.path.has_path():
+        if self.no_action_taken() and self.can_do_weighted_attack():
+            self.do_weighted_action()
+        if self.no_action_taken() and self.parent.path.has_path():
             self.newly_spent_energy += self.parent.path.try_step_path()
-        if self.newly_spent_energy <= 0: #  If no action was taken skip turn.
+        if self.no_action_taken():
             self.newly_spent_energy += gametime.single_turn
         return self.newly_spent_energy
 
@@ -207,8 +213,8 @@ class KeepPlayerAtDistanceActor(MonsterActor):
         elif rng.coin_flip() and rng.coin_flip() and rng.coin_flip():
             self.parent.monster_actor_state.value = MonsterActorState.WANDERING
 
-        if self.can_do_ranged_attack():
-            self.do_range_attack()
+        if self.can_do_weighted_attack():
+            self.do_weighted_action()
         elif not self._keep_player_at_distance():
             self.try_step_random_direction()
 
@@ -253,3 +259,20 @@ class HuntPlayerIfHurtMe(DamageTakenEffect):
     def effect(self, _, source_entity):
         if source_entity.has("is_player"):
             self.parent.monster_actor_state.value = MonsterActorState.HUNTING
+
+
+class MonsterWeightedAction(Action):
+    def __init__(self, weight=100):
+        super(MonsterWeightedAction, self).__init__()
+        self.tags.add("monster_weighted_action")
+        self.weight = weight
+
+
+#TODO USE THIS.
+class MonsterWeightedStepAction(MonsterWeightedAction):
+    def __init__(self, weight=100):
+        super(MonsterWeightedStepAction, self).__init__(weight)
+        self.component_type = "monster_weighted_step_action"
+
+    def act(self, **kwargs):
+        self.parent.actor.newly_spent_energy += self.parent.path.try_step_path()

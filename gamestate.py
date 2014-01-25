@@ -236,8 +236,8 @@ class TestGameState(GameStateBase):
         salamander = monster.new_salamander(self)
         salamander.mover.try_move((25, 12), self.dungeon_level)
 
-        #ghost = monster.new_ghost(self)
-        #ghost.mover.try_move((21, 8), self.dungeon_level)
+        ghost = monster.new_ghost(self)
+        ghost.mover.try_move((21, 8), self.dungeon_level)
 
         #slime = monster.new_slime(self)
         #slime.mover.try_move((18, 16), self.dungeon_level)

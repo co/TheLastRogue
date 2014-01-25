@@ -14,8 +14,8 @@ from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
 import messenger
-from missileaction import MonsterThrowStoneAction, MonsterMagicRangeAction
-from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor
+from missileaction import MonsterThrowStoneAction, MonsterMagicRangeAction, MonsterThrowRockAction, SpiritMissile
+from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor, MonsterWeightedStepAction
 from mover import Mover, Stepper, SlimeCanShareTileEntityMover, ImmobileStepper, CautiousStepper, TolerateDamage
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
@@ -41,6 +41,7 @@ def set_monster_components(monster, game_state):
     monster.set_child(DataPoint(DataTypes.FACTION, Factions.MONSTER))
     monster.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
     monster.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.NORMAL))
+    monster.set_child(DataPoint(DataTypes.SKIP_ACTION_CHANCE, IntelligenceLevel.NORMAL))
 
     monster.set_child(Position())
     monster.set_child(CharPrinter())
@@ -66,6 +67,7 @@ def set_monster_components(monster, game_state):
     monster.set_child(Attacker())
     monster.set_child(RemoveEntityOnDeath())
     monster.set_child(PrintDeathMessageOnDeath())
+    monster.set_child(MonsterWeightedStepAction(100))
 
 
 def set_humanoid_components(composite):
@@ -91,7 +93,7 @@ def new_ratman(gamestate):
     ratman.set_child(DataPoint(DataTypes.ARMOR, 4))
     ratman.set_child(DataPoint(DataTypes.AWARENESS, 5))
 
-    ratman.set_child(MonsterThrowStoneAction(30))
+    ratman.set_child(MonsterThrowStoneAction())
 
     ratman.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 1))
     return ratman
@@ -205,7 +207,7 @@ def new_cyclops(game_state):
     cyclops.set_child(DataPoint(DataTypes.THROW_SPEED, gametime.double_turn))
     cyclops.set_child(DataPoint(DataTypes.MELEE_DAMAGE_MULTIPLIER, 0.5))
 
-    cyclops.set_child(MonsterThrowStoneAction(10, icon=icon.DUNGEON_WALLS_ROW))
+    cyclops.set_child(MonsterThrowRockAction(900))
     cyclops.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 5))
     return cyclops
 
@@ -241,7 +243,7 @@ def new_ghost(gamestate):
     ghost.set_child(DataPoint(DataTypes.AWARENESS, 8))
 
     ghost.set_child(KeepPlayerAtDistanceActor(4))
-    ghost.set_child(MonsterMagicRangeAction(1, 60))
+    ghost.set_child(SpiritMissile(150))
     ghost.set_child(AddGhostReviveToSeenEntities())
     ghost.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 2))
     return ghost
