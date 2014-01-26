@@ -1,3 +1,6 @@
+from entityeffect import AddSpoofChild
+import gametime
+from mover import ImmobileStepper
 import turn
 import direction
 import geometry as geo
@@ -119,3 +122,9 @@ def _get_walkable_neighbors_or_unseen(position, entity):
         except IndexError:
             pass
     return result_positions
+
+
+def entity_skip_turn(source_entity, target_entity):
+    immobile_stepper = ImmobileStepper()
+    add_spoof_effect = AddSpoofChild(source_entity, immobile_stepper, gametime.single_turn)
+    target_entity.effect_queue.add(add_spoof_effect)

@@ -1,6 +1,6 @@
 import random
 from animation import animate_flight
-from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity
+from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity, KnockBackAttacker
 from cloud import new_fire_cloud, new_dust_cloud
 from compositecommon import EntityShareTileEffect
 from compositecore import Composite, Leaf, Component
@@ -24,6 +24,7 @@ from stats import Flag, UnArmedHitTargetEntityEffectFactory, DataPoint, DataType
 from stats import GamePieceTypes
 from statusflags import StatusFlags
 from text import Description, EntityMessages
+from util import entity_skip_turn
 from vision import Vision, AwarenessChecker
 import colors
 from equipment import Equipment
@@ -156,6 +157,30 @@ def new_dust_demon(gamestate):
     return demon
 
 
+def new_armored_beetle(gamestate):
+    beetle = Composite()
+    set_insect_components(beetle)
+    set_monster_components(beetle, gamestate)
+
+    beetle.set_child(
+        Description("Armored Beetle", "A giant armored beetle, it looks like it wouldn't budge for anything."))
+    beetle.set_child(EntityMessages("The armored beetle notices you.", "The armored beetle is dead."))
+    beetle.set_child(GraphicChar(None, colors.CYAN_D, "B"))
+
+    beetle.set_child(Health(7))
+    beetle.set_child(DataPoint(DataTypes.STRENGTH, 4))
+    beetle.set_child(DataPoint(DataTypes.EVASION, 2))
+    beetle.set_child(DataPoint(DataTypes.HIT, 18))
+    beetle.set_child(DataPoint(DataTypes.ARMOR, 20))
+    beetle.set_child(DataPoint(DataTypes.AWARENESS, 3))
+
+    beetle.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 4))
+
+    beetle.set_child(KnockBackAttacker())
+
+    return beetle
+
+
 def set_insect_components(composite):
     composite.set_child(StatusFlags([StatusFlags.IS_ALIVE]))
     composite.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.ANIMAL))
@@ -257,7 +282,7 @@ def new_pixie(gamestate):
 
     pixie.set_child(EntityMessages("The pixie sees you.", "The pixie fades away."))
     pixie.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS,
-                                     StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
+                                 StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
     pixie.set_child(Description("Pixie", "A small humanoid with insect wings."))
     pixie.set_child(GraphicChar(None, colors.PINK, icon.PIXIE))
     pixie.set_child(Health(10))
@@ -271,7 +296,7 @@ def new_pixie(gamestate):
     pixie.set_child(KeepPlayerAtDistanceActor(4))
     pixie.set_child(MonsterHealTargetEntityEffect(50))
     pixie.set_child(MonsterTripTargetEffect(50))
-    pixie.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 3))
+    pixie.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 7))
     return pixie
 
 
@@ -405,7 +430,7 @@ class MakeSpiderWebs(Leaf):
         surrounding_solid_terrains = len([tile for tile in surrounding_tiles
                                           if tile.get_terrain().has("is_solid")])
         surrounding_dungeon_features = len([tile for tile in surrounding_tiles
-                                          if tile.get_dungeon_feature()])
+                                            if tile.get_dungeon_feature()])
         print surrounding_solid_terrains, surrounding_dungeon_features
         return surrounding_dungeon_features + surrounding_solid_terrains > 2
 
@@ -572,6 +597,7 @@ class StuckInSlimeStepperSpoof(Stepper):
             self.parent.attacker.hit(self._slime)
         if rng.stat_check(my_strength, slime_strength + 8):
             self._split_slime(geometry.sub_2d(self._slime.position.value, position))
+            entity_skip_turn(self.parent, self._slime)
             self._make_slime_skip_turn()
             return self.next.try_move_or_bump(position)
         return self.parent.movement_speed.value
@@ -585,7 +611,8 @@ class StuckInSlimeStepperSpoof(Stepper):
         if self._slime.health.hp.value < 3:
             return
         new_slime = self._slime.clone_function.value(self._slime.game_state.value)
-        if new_slime.mover.try_move_roll_over(geometry.add_2d(self._slime.position.value, split_direction), self._slime.dungeon_level.value):
+        if new_slime.mover.try_move_roll_over(geometry.add_2d(self._slime.position.value, split_direction),
+                                              self._slime.dungeon_level.value):
             health = self._slime.health.hp.value / 2
             self._slime.health.hp.value = health
             new_slime.health.hp.value = health

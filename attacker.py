@@ -1,8 +1,10 @@
 import random
 import entityeffect
+import geometry
 import rng
 from compositecore import Leaf
 from equipment import EquipmentSlots
+from util import entity_skip_turn
 
 
 class Attacker(Leaf):
@@ -53,6 +55,7 @@ class Attacker(Leaf):
         Causes the entity to hit the target entity.
         """
         equipment = self.parent.equipment
+        self._on_hit(target_entity)
         if equipment.slot_is_equiped(EquipmentSlots.MELEE_WEAPON):
             weapon = self.parent.equipment.get(EquipmentSlots.MELEE_WEAPON)
             weapon.damage_provider.damage_entity(self.parent, target_entity)
@@ -74,6 +77,30 @@ class Attacker(Leaf):
         return Attack(1 + damage_strength / 2, damage_strength / 4,
                       damage_types, self.parent.hit.value,
                       target_entity_effects_factories=target_entity_effects_factories)
+
+    def _on_hit(self, target_entity):
+        pass
+
+
+class KnockBackAttacker(Attacker):
+    """
+    Component for attacking and checking if an attacking is legal. Attacks will cause Knock Back.
+    """
+    def __init__(self):
+        super(Attacker, self).__init__()
+        self.component_type = "attacker"
+
+    def _on_hit(self, target_entity):
+        self._knock_away_entity(target_entity)
+
+    def _knock_away_entity(self, target_entity):
+        knock_direction = geometry.sub_2d(target_entity.position.value, self.parent.position.value)
+        knock_position = geometry.add_2d(target_entity.position.value, knock_direction)
+        old_target_position = target_entity.position.value
+        target_entity.mover.try_move(knock_position)
+        self.parent.mover.try_move(old_target_position)
+        #if rng.coin_flip():
+        #    entity_skip_turn(self.parent, target_entity)
 
 
 class Dodger(Leaf):
@@ -108,7 +135,7 @@ class ArmorChecker(Leaf):
         if (DamageTypes.BLUNT in damage_types or
                     DamageTypes.PIERCING in damage_types or
                     DamageTypes.CUTTING in damage_types):
-            armor =self.parent.armor.value
+            armor = self.parent.armor.value
             if damage <= armor:
                 damage_reduction_mid = armor / 4
             else:
