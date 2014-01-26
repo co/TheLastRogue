@@ -94,7 +94,7 @@ class Component(object):
 
         False otherwise.
         """
-        if(self._parent is None):
+        if self._parent is None:
             raise Exception("ERROR: Tries to find sibling {0} "
                             "of component {1} but it "
                             "has no parent!".format(str(component_type),

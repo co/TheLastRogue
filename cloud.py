@@ -8,6 +8,7 @@ from entityeffect import UndodgeableDamagAndBlockSameEffect, AddSpoofChild
 import gametime
 import geometry
 from graphic import CharPrinter, GraphicChar
+import icon
 import messenger
 from mover import Mover
 from position import Position, DungeonLevel
@@ -71,7 +72,7 @@ def new_explosion_cloud(density):
 def new_fire_cloud(density):
     fire = Composite()
     set_cloud_components(fire, density)
-    fire.graphic_char.icon = 'W'
+    fire.graphic_char.icon = icon.SPIDER + 1
     fire.graphic_char.color_fg = colors.RED
     fire.set_child(Description("Fire", "Don't get burnt."))
     fire.set_child(DisappearCloudActor())

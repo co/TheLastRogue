@@ -276,6 +276,16 @@ class ImmobileStepper(Stepper):
         return self.parent.movement_speed.value
 
 
+class RandomStepper(Stepper):
+    def __init__(self):
+        super(RandomStepper, self).__init__()
+        self.component_type = "stepper"
+
+    def try_move_or_bump(self, _):
+        new_position = geometry.add_2d(random.choice(direction.DIRECTIONS), self.parent.position.value)
+        return self.next.try_move_or_bump(new_position)
+
+
 class SlimeCanShareTileEntityMover(Mover):
     """
     Parent entities with this mover may enter tiles of other entities.

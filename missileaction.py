@@ -1,19 +1,28 @@
 import random
-import symbol
-from action import Action, SOURCE_ENTITY, GAME_STATE, DESTINATION
+from action import Action, SOURCE_ENTITY, GAME_STATE
 from animation import animate_flight
 from attacker import DamageTypes, UndodgeableAttack
-from entityeffect import Heal
+from entityeffect import Heal, AddSpoofChild
+import gametime
 import geometry
 from graphic import GraphicChar
 import libtcodpy as libtcod
 from monsteractor import MonsterWeightedAction
+from mover import RandomStepper
 import shoot
 import colors
 import icon
 
 
 class PlayerMissileAction(Action):
+    def __init__(self, missile_graphic=None):
+        super(PlayerMissileAction, self).__init__()
+        self._missile_graphic = missile_graphic
+
+    @property
+    def missile_graphic(self):
+        return self._missile_graphic
+
     def act(self, **kwargs):
         source_entity = kwargs[SOURCE_ENTITY]
         game_state = kwargs[GAME_STATE]
@@ -30,8 +39,7 @@ class PlayerMissileAction(Action):
         path_taken = hit_detector.get_path_taken(path, dungeon_level)
         if path_taken is None or len(path_taken) < 1:
             return False
-        animate_flight(game_state, path, self.parent.graphic_char.icon,
-                       self.parent.graphic_char.color_fg)
+        animate_flight(game_state, path, self.missile_graphic.icon, self.missile_graphic.color_fg)
         self.missile_hit_effect(dungeon_level, path_taken[-1], game_state, source_entity)
         self.add_energy_spent_to_entity(source_entity)
 
@@ -46,6 +54,10 @@ class PlayerThrowItemAction(PlayerMissileAction):
     """
     This action will prompt the player to throw the parent item.
     """
+
+    @property
+    def missile_graphic(self):
+        return self.parent.graphic_char
 
     def __init__(self):
         super(PlayerThrowItemAction, self).__init__()
@@ -76,12 +88,10 @@ class PlayerThrowItemAction(PlayerMissileAction):
 
 class PlayerThrowStoneAction(PlayerMissileAction):
     def __init__(self):
-        super(PlayerThrowStoneAction, self).__init__()
+        super(PlayerThrowStoneAction, self).__init__(GraphicChar(None, colors.GRAY, icon.STONE))
         self.component_type = "throw_stone_action"
         self.name = "Throw Stone"
         self.display_order = 95
-        self.icon = icon.STONE
-        self.color_fg = colors.GRAY
 
     def add_energy_spent_to_entity(self, entity):
         """
@@ -110,12 +120,10 @@ def max_throw_distance(strength):
 
 class PlayerSlingStoneAction(PlayerMissileAction):
     def __init__(self, sling_weapon):
-        super(PlayerSlingStoneAction, self).__init__()
+        super(PlayerSlingStoneAction, self).__init__(GraphicChar(None, colors.GRAY, icon.STONE))
         self.component_type = "sling_stone_action"
         self.name = "Throw Stone"
         self.display_order = 95
-        self.icon = icon.STONE
-        self.color_fg = colors.GRAY
         self.sling_weapon = sling_weapon
 
     def add_energy_spent_to_entity(self, entity):
@@ -148,9 +156,8 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         super(PlayerShootWeaponAction, self).__init__()
         self.name = "Shoot"
         self.display_order = 85
-        self.icon = icon.BIG_CENTER_DOT
         self.ranged_weapon = ranged_weapon
-        self.color_fg = colors.WHITE
+        self.missile_graphic = GraphicChar(None, colors.WHITE, icon.BIG_CENTER_DOT)
 
     def add_energy_spent_to_entity(self, entity):
         """
@@ -317,13 +324,21 @@ class MonsterMissileApplyEntityEffect(MonsterMissileAction):
         pass
 
 
-class MonsterHealEntityEffect(MonsterMissileApplyEntityEffect):
+class MonsterHealTargetEntityEffect(MonsterMissileApplyEntityEffect):
     def __init__(self,  weight=100):
         heart_graphic = GraphicChar(None, colors.RED, icon.HEART)
-        health_effect_factory = lambda: Heal(self.parent, random.randrange(2, 3))
-        super(MonsterHealEntityEffect, self).__init__(health_effect_factory, 2, 4, heart_graphic, weight)
+        health_effect_factory = lambda: Heal(self.parent, random.randrange(1, 3))
+        super(MonsterHealTargetEntityEffect, self).__init__(health_effect_factory, 2, 4, heart_graphic, weight)
         self.component_type = "monster_range_heal_action"
         self.target_chooser_function = get_suitable_healing_target
+
+
+class MonsterTripTargetEffect(MonsterMissileApplyEntityEffect):
+    def __init__(self,  weight=100):
+        missile_graphic = GraphicChar(None, colors.YELLOW, "+")
+        trip_effect_factory = lambda: AddSpoofChild(self.parent, RandomStepper(), gametime.single_turn)
+        super(MonsterTripTargetEffect, self).__init__(trip_effect_factory, 2, 4, missile_graphic, weight)
+        self.component_type = "monster_range_trip_action"
 
 
 def get_suitable_enemy_target(my_faction, seen_entities):
@@ -339,9 +354,6 @@ def get_suitable_enemy_target(source_entity):
 def get_suitable_healing_target(source_entity):
     seen_entities = source_entity.vision.get_seen_entities()
     my_faction = source_entity.faction.value
-    print [entity for entity in seen_entities
-            if entity.faction.value == my_faction and
-            entity.health.is_damaged()]
     return [entity for entity in seen_entities
             if entity.faction.value == my_faction and
             entity.health.is_damaged()]

@@ -14,7 +14,7 @@ from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
 import messenger
-from missileaction import MonsterThrowStoneAction, MonsterMagicRangeAction, MonsterThrowRockAction, SpiritMissile, MonsterHealEntityEffect
+from missileaction import MonsterThrowStoneAction, MonsterMagicRangeAction, MonsterThrowRockAction, SpiritMissile, MonsterHealTargetEntityEffect, MonsterTripTargetEffect
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor, MonsterWeightedStepAction
 from mover import Mover, Stepper, SlimeCanShareTileEntityMover, ImmobileStepper, CautiousStepper, TolerateDamage
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
@@ -118,7 +118,7 @@ def new_spider(gamestate):
 
     spider.set_child(Description("Spider", "A giant spider, its attacks are poisonous."))
     spider.set_child(EntityMessages("The spider looks at you.", "The spider stops moving."))
-    spider.set_child(GraphicChar(None, colors.CHAMPAGNE_D, "s"))
+    spider.set_child(GraphicChar(None, colors.CHAMPAGNE_D, icon.SPIDER))
 
     spider.set_child(Health(7))
     spider.set_child(DataPoint(DataTypes.STRENGTH, 1))
@@ -259,7 +259,7 @@ def new_pixie(gamestate):
     pixie.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS,
                                      StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
     pixie.set_child(Description("Pixie", "A small humanoid with insect wings."))
-    pixie.set_child(GraphicChar(None, colors.PINK, "y"))
+    pixie.set_child(GraphicChar(None, colors.PINK, icon.PIXIE))
     pixie.set_child(Health(10))
     pixie.set_child(DataPoint(DataTypes.STRENGTH, 2))
     pixie.set_child(DataPoint(DataTypes.EVASION, 22))
@@ -269,7 +269,8 @@ def new_pixie(gamestate):
     pixie.set_child(DataPoint(DataTypes.AWARENESS, 8))
 
     pixie.set_child(KeepPlayerAtDistanceActor(4))
-    pixie.set_child(MonsterHealEntityEffect())
+    pixie.set_child(MonsterHealTargetEntityEffect(50))
+    pixie.set_child(MonsterTripTargetEffect(50))
     pixie.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 3))
     return pixie
 

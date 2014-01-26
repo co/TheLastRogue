@@ -230,8 +230,8 @@ class TestGameState(GameStateBase):
         #rat = monster.new_ratman(self)
         #rat.mover.try_move((20, 8), self.dungeon_level)
 
-        #sal = monster.new_spider(self)
-        #spider.mover.try_move((25, 8), self.dungeon_level)
+        spider = monster.new_spider(self)
+        spider.mover.try_move((25, 10), self.dungeon_level)
 
         salamander = monster.new_salamander(self)
         salamander.mover.try_move((25, 12), self.dungeon_level)
