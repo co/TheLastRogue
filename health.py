@@ -32,6 +32,12 @@ class Health(Leaf):
         """
         return self.hp.value == 0
 
+    def is_damaged(self):
+        """
+        Returns True if the entity is considered dead.
+        """
+        return self.hp.value != self.hp.max_value
+
 
 class HealthModifier(Leaf):
     def __init__(self):

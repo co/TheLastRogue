@@ -32,7 +32,7 @@ class PlayerMissileAction(Action):
             return False
         animate_flight(game_state, path, self.parent.graphic_char.icon,
                        self.parent.graphic_char.color_fg)
-        self.missile_hit_effect(dungeon_level, path_taken, game_state, source_entity)
+        self.missile_hit_effect(dungeon_level, path_taken[-1], game_state, source_entity)
         self.add_energy_spent_to_entity(source_entity)
 
     def max_missile_distance(self, **kwargs):
@@ -192,6 +192,10 @@ class MonsterTargetAction(MonsterWeightedAction):
         self.weight = weight
         self.min_range = min_range
         self.max_range = max_range
+        self.target_chooser_function = get_suitable_enemy_target
+
+    def get_target_options(self):
+        return self.target_chooser_function(self.parent)
 
 
 class MonsterMissileAction(MonsterTargetAction):
@@ -200,8 +204,10 @@ class MonsterMissileAction(MonsterTargetAction):
         self.missile_graphic = missile_graphic
 
     def can_act(self, **kwargs):
-        destination = kwargs[DESTINATION]
-        return self.is_destination_within_range(destination) and not self.is_something_blocking(destination)
+        possible_targets = self.get_target_options()
+        return any([target for target in possible_targets
+                    if self.is_destination_within_range(target.position.value)
+                    and not self.is_something_blocking(target.position.value)])
 
     def is_destination_within_range(self, destination):
         return self.min_range <= geometry.chess_distance(self.parent.position.value, destination) <= self.max_range
@@ -314,6 +320,28 @@ class MonsterMissileApplyEntityEffect(MonsterMissileAction):
 class MonsterHealEntityEffect(MonsterMissileApplyEntityEffect):
     def __init__(self,  weight=100):
         heart_graphic = GraphicChar(None, colors.RED, icon.HEART)
-        health_effect_factory = lambda: Heal(self.parent, random.randrange(4, 10))
+        health_effect_factory = lambda: Heal(self.parent, random.randrange(2, 3))
         super(MonsterHealEntityEffect, self).__init__(health_effect_factory, 2, 4, heart_graphic, weight)
         self.component_type = "monster_range_heal_action"
+        self.target_chooser_function = get_suitable_healing_target
+
+
+def get_suitable_enemy_target(my_faction, seen_entities):
+    return [entity for entity in seen_entities if seen_entities.faction.value == my_faction]
+
+
+def get_suitable_enemy_target(source_entity):
+    seen_entities = source_entity.vision.get_seen_entities()
+    my_faction = source_entity.faction.value
+    return [entity for entity in seen_entities if entity.faction.value != my_faction]
+
+
+def get_suitable_healing_target(source_entity):
+    seen_entities = source_entity.vision.get_seen_entities()
+    my_faction = source_entity.faction.value
+    print [entity for entity in seen_entities
+            if entity.faction.value == my_faction and
+            entity.health.is_damaged()]
+    return [entity for entity in seen_entities
+            if entity.faction.value == my_faction and
+            entity.health.is_damaged()]
