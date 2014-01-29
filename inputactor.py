@@ -20,7 +20,6 @@ class InputActor(Actor):
         super(InputActor, self).__init__()
 
     def act(self):
-        self.parent.game_state.value.force_draw()
         self.newly_spent_energy = 0
 
         self.handle_mouse_input()

@@ -167,8 +167,8 @@ def new_armored_beetle(gamestate):
     beetle.set_child(EntityMessages("The armored beetle notices you.", "The armored beetle is dead."))
     beetle.set_child(GraphicChar(None, colors.CYAN_D, "B"))
 
-    beetle.set_child(Health(7))
-    beetle.set_child(DataPoint(DataTypes.STRENGTH, 4))
+    beetle.set_child(Health(20))
+    beetle.set_child(DataPoint(DataTypes.STRENGTH, 3))
     beetle.set_child(DataPoint(DataTypes.EVASION, 2))
     beetle.set_child(DataPoint(DataTypes.HIT, 18))
     beetle.set_child(DataPoint(DataTypes.ARMOR, 20))
@@ -431,7 +431,6 @@ class MakeSpiderWebs(Leaf):
                                           if tile.get_terrain().has("is_solid")])
         surrounding_dungeon_features = len([tile for tile in surrounding_tiles
                                             if tile.get_dungeon_feature()])
-        print surrounding_solid_terrains, surrounding_dungeon_features
         return surrounding_dungeon_features + surrounding_solid_terrains > 2
 
 

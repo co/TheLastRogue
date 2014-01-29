@@ -8,7 +8,20 @@ class Position(Leaf):
     def __init__(self):
         super(Position, self).__init__()
         self.component_type = "position"
-        self.value = (-1, -1)
+        self._value = (-1, -1)
+
+    @property
+    def value(self):
+        """
+        Gets the dungeon_level the entity is currently in.
+        """
+        return self._value
+
+    @value.setter
+    def value(self, new_value):
+        self._value = new_value
+        if self.has_parent() and not self.value is None:
+            self.parent.message(CompositeMessage.POSITION_CHANGED)
 
 
 class DungeonLevel(Leaf):

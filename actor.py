@@ -23,6 +23,8 @@ class Actor(Leaf):
             return
         self.energy += self.energy_recovery
         while self.energy > 0:
+            if self.parent.has("is_player"):
+                self._post_player_act()
             self.energy -= self.act()
         turn.current_turn += 1
 
@@ -32,6 +34,9 @@ class Actor(Leaf):
 
     def add_energy_spent(self, energy):
         self.newly_spent_energy += energy
+
+    def _post_player_act(self):
+        self.parent.game_state.value.force_draw()
 
 
 class DoNothingActor(Actor):

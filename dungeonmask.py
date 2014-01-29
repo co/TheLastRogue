@@ -131,6 +131,7 @@ class DungeonMask(Leaf):
         if (dungeon_level.terrain_changed_timestamp >
                 self.last_dungeon_map_update_timestamp):
             self.update_dungeon_map()
+            self.update_fov()
 
     def update_dungeon_map(self):
         """
@@ -144,7 +145,6 @@ class DungeonMask(Leaf):
                 libtcod.map_set_properties(self.dungeon_map, x, y, terrain.has("is_transparent"),
                                            self.parent. mover.can_pass_terrain(terrain))
         self.last_dungeon_map_update_timestamp = turn.current_turn
-        self.update_fov()
 
     def message(self, message):
         """
@@ -153,6 +153,8 @@ class DungeonMask(Leaf):
         if message == CompositeMessage.DUNGEON_LEVEL_CHANGED:
             self.init_dungeon_map_if_has_dungeon_level()
             self.update_dungeon_map()
+            self.update_fov()
+        if message == CompositeMessage.POSITION_CHANGED:
             self.update_fov()
 
 

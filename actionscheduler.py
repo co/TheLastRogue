@@ -24,6 +24,7 @@ class ActionScheduler(object):
         if len(self._actors) > 0:
             actor = self._actors[0].actor
             actor.parent.before_tick(gametime.normal_energy_gain)
+            actor = self._actors[0].actor  # Resets the actor in case the before tick removed an actor spoof.
             self.on_tick(actor)
             actor.tick()
             actor.parent.on_tick(gametime.normal_energy_gain)
