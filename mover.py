@@ -121,7 +121,7 @@ class Mover(Leaf):
         return len(tile.game_pieces[piece_type.value]) < max_instances_of_composite_on_tile(self.parent)
 
     def can_move_to_terrain(self, terrain_to_pass):
-        if terrain_to_pass is None:
+        if terrain_to_pass is None or terrain_to_pass.has("is_chasm"):
             return True
         elif terrain_to_pass.has("is_solid"):
             return False
