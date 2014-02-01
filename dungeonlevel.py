@@ -142,8 +142,7 @@ class DungeonLevel(object):
             print(line)
 
     def get_walkable_positions(self, entity, position):
-        return (self._walkable_destinations
-                .get_walkable_positions(entity, position))
+        return self._walkable_destinations.get_walkable_positions(entity, position)
 
     def print_statistics(self):
         monsters = {}

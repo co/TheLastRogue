@@ -278,11 +278,10 @@ def new_pixie(gamestate):
     pixie = Composite()
     set_monster_components(pixie, gamestate)
     set_humanoid_components(pixie)
-    pixie.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.FLYING]))
+    pixie.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.FLYING,
+                                     StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
 
     pixie.set_child(EntityMessages("The pixie sees you.", "The pixie fades away."))
-    pixie.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS,
-                                 StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
     pixie.set_child(Description("Pixie", "A small humanoid with insect wings."))
     pixie.set_child(GraphicChar(None, colors.PINK, icon.PIXIE))
     pixie.set_child(Health(10))

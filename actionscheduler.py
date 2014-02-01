@@ -7,7 +7,7 @@ class ActionScheduler(object):
         self._actors = deque()
 
     @property
-    def entities(self): # All monsters have health
+    def entities(self):  # All monsters have health
         return [actor for actor in self._actors if actor.has("health")]
 
     @property

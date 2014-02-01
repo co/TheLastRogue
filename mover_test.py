@@ -1,4 +1,5 @@
 import unittest
+from cloud import ExplosionDamageShareTileEffect
 
 from compositecore import Composite
 from mover import Mover
@@ -62,7 +63,8 @@ class TestComposition(unittest.TestCase):
         status_flags = StatusFlags([StatusFlags.CAN_OPEN_DOORS])
         entity.set_child(status_flags)
         door = terrain.Door()
-        door.mover.replace_move((2, 1), self.dungeon_level)
+        door_position = (2, 1)
+        door.mover.replace_move(door_position, self.dungeon_level)
         self.assertTrue(door.bump_action.can_bump(entity))
         door.bump_action.bump(entity)
         self.assertTrue(entity.mover.can_pass_terrain(door))
@@ -71,8 +73,24 @@ class TestComposition(unittest.TestCase):
         entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
         entity.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
         door = terrain.Door()
-        door.mover.replace_move((2, 1), self.dungeon_level)
-        self.assertFalse(entity.mover.try_move((2, 1)))
+        door_position = (2, 1)
+        door.mover.replace_move(door_position, self.dungeon_level)
+        self.assertFalse(entity.mover.try_move(door_position))
+
+    def test_flying_entity_can_move_to_chasm(self):
+        entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
+        entity.set_child(StatusFlags([StatusFlags.FLYING]))
+        chasm_position = (2, 1)
+        chasm = terrain.Chasm()
+        chasm.mover.replace_move(chasm_position, self.dungeon_level)
+        self.assertTrue(entity.mover.try_move(chasm_position))
+
+    def test_non_flying_entity_cant_move_to_chasm(self):
+        entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
+        chasm_position = (2, 1)
+        chasm = terrain.Chasm()
+        chasm.mover.replace_move(chasm_position, self.dungeon_level)
+        self.assertFalse(entity.mover.try_move(chasm_position))
 
     def test_can_move_to_door_if_it_is_opened(self):
         entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)

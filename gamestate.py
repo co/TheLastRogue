@@ -239,8 +239,8 @@ class TestGameState(GameStateBase):
         #slime = monster.new_slime(self)
         #slime.mover.try_move((25, 12), self.dungeon_level)
 
-        #ghost = monster.new_ghost(self)
-        #ghost.mover.try_move((21, 8), self.dungeon_level)
+        ghost = monster.new_ghost(self)
+        ghost.mover.try_move((21, 8), self.dungeon_level)
 
         pixie = monster.new_pixie(self)
         pixie.mover.try_move((23, 8), self.dungeon_level)

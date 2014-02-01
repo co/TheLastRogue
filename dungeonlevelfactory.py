@@ -45,14 +45,16 @@ def set_terrain_from_lines(dungeon_level, lines):
 
 
 def char_to_terrain(c):
-    if(c == '#'):
+    if c == '#':
         return terrain.Wall()
-    elif(c == '+'):
+    elif c == '+':
         return terrain.Door()
-    elif(c == '~'):
+    elif c == '~':
         return terrain.Water()
-    elif(c == 'g'):
+    elif c == 'g':
         return terrain.GlassWall()
+    elif c == '_':
+        return terrain.Chasm()
     else:
         return terrain.Floor()
 

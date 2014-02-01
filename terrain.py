@@ -1,5 +1,10 @@
+import random
+from attacker import DamageTypes
+from compositecommon import EntityShareTileEffect
 from compositecore import Leaf, Composite
+import entityeffect
 from graphic import GraphicChar, CharPrinter, GraphicCharTerrainCorners
+import messenger
 from mover import Mover
 from position import Position, DungeonLevel
 from stats import Flag, DataPoint, DataTypes, GamePieceTypes
@@ -94,6 +99,42 @@ class Chasm(Composite):
         self.set_child(CharPrinter())
         self.set_child(Flag("is_chasm"))
         self.set_child(Flag("is_transparent"))
+
+
+class PlayerFallDownChasmAction(EntityShareTileEffect):
+    def __init__(self):
+        super(PlayerFallDownChasmAction, self).__init__()
+        self.component_type = "player_fall_down_chasm_share_tile_effect"
+
+    def _effect(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        source_entity = kwargs["source_entity"]
+        if target_entity.has("is_player"):
+            current_depth = target_entity.dungeon_level.value.depth
+            dungeon = target_entity.dungeon_level.value.dungeon
+            next_dungeon_level = dungeon.get_dungeon_level(current_depth + 1)
+            target_position = self.get_random_walkable_position_in_dungeon(next_dungeon_level)
+            target_entity.mover.move_push_over(target_position, next_dungeon_level)
+            self.add_energy_spent_to_entity(target_entity)
+            if next_dungeon_level is None:
+                return
+            destination_position = next_dungeon_level.up_stairs[0].position.value
+            target_entity.mover.move_push_over(destination_position, next_dungeon_level)
+
+    def _fall_damage(self, target_entity):
+        min_damage = 2
+        max_damage = 5
+        damage = random.randrange(min_damage, max_damage + 1)
+        damage_effect = entityeffect.UndodgeableAttackEntityEffect(None, damage,
+                                                                   [DamageTypes.FALL], messenger.FALL_DOWN_MESSAGE)
+        target_entity.effect_queue.add(heal_effect)
+        messenger.msg.send_global_message(messenger.DOWN_STAIRS_HEAL_MESSAGE % {"health": heal})
+
+    def get_random_walkable_position_in_dungeon(self, dungeon_level):
+        position = dungeon_level.up_stairs[0].position.value
+        positions = dungeon_level.get_walkable_positions(self.parent, position)
+        destination = random.choice(positions)
+        self.parent.path.compute_path(destination)
 
 
 class Unknown(Composite):

@@ -54,7 +54,7 @@ class MonsterActor(Actor):
         Tries to make the entity step to a random direction.
         If the step succeeds True is return otherwise False.
         """
-        random_direction = random.sample(list(direction.DIRECTIONS), 1)[0]
+        random_direction = random.choice(list(direction.DIRECTIONS))
         return self.parent.stepper.try_step_in_direction(random_direction)
 
     def get_entity_sharing_my_position(self):
@@ -107,7 +107,7 @@ class MonsterActor(Actor):
 
     def set_path_to_random_walkable_point(self):
         positions = self.get_walkable_positions_from_my_position()
-        destination = random.sample(positions, 1)[0]
+        destination = random.choice(positions)
         self.parent.path.compute_path(destination)
 
     def get_walkable_positions_from_my_position(self):

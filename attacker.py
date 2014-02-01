@@ -180,6 +180,8 @@ class DamageTypes(object):
     POISON = 6
     FIRE = 7
 
+    FALL = 8
+
 
 class FireImmunity(Leaf):
     def __init__(self):
