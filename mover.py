@@ -25,7 +25,7 @@ class Mover(Leaf):
             return False
         new_tile = new_dungeon_level.get_tile(new_position)
         return (self._can_fit_on_tile(new_tile) and
-                self.can_pass_terrain(new_tile.get_terrain()))
+                self.can_move_to_terrain(new_tile.get_terrain()))
 
     def move_push_over(self, new_position, dungeon_level=None):
         """
@@ -64,8 +64,8 @@ class Mover(Leaf):
         """
         if self.try_move(new_position, new_dungeon_level):
             return True
+        #  Do not shuffle public constants!
         directions = list(direction.DIRECTIONS)
-        #TODO Dont shuffle public constants!
         random.shuffle(directions)
         for d in directions:
             destination = geometry.add_2d(d, new_position)
@@ -119,6 +119,14 @@ class Mover(Leaf):
         """
         piece_type = self.parent.game_piece_type
         return len(tile.game_pieces[piece_type.value]) < max_instances_of_composite_on_tile(self.parent)
+
+    def can_move_to_terrain(self, terrain_to_pass):
+        if terrain_to_pass is None:
+            return True
+        elif terrain_to_pass.has("is_solid"):
+            return False
+        else:
+            return self.can_pass_terrain(terrain_to_pass)
 
     def can_pass_terrain(self, terrain_to_pass):
         """
