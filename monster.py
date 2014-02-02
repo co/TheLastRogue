@@ -388,8 +388,7 @@ class MakeDustClouds(Leaf):
         my_position = self.parent.position.value
         dungeon_level = self.parent.dungeon_level.value
         dust = new_dust_cloud(24)
-        if dungeon_level and dust.mover.replace_move(my_position, dungeon_level):
-            return
+        dust.mover.replace_move(my_position, dungeon_level)
 
     def after_tick(self, time):
         self.time_to_next_attempt -= time

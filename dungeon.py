@@ -43,3 +43,12 @@ class Dungeon(object):
 
         dungeon_level.dungeon = self
         return dungeon_level
+
+
+class ReflexiveDungeon(object):
+    def __init__(self, dungeon_level):
+        self.dungeon_level = dungeon_level
+        self.dungeon_level.dungeon = self
+
+    def get_dungeon_level(self, depth):
+        return self.dungeon_level

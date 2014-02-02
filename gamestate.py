@@ -2,9 +2,9 @@ import os
 from os.path import isfile
 from os import listdir, getcwd
 import cPickle as pickle
-from cloud import new_steam_cloud, ExplosionDamageShareTileEffect
+from cloud import new_steam_cloud, new_dust_cloud
 import colors
-from dungeon import Dungeon
+from dungeon import Dungeon, ReflexiveDungeon
 from dungeonlevelfactory import dungeon_level_from_file
 import libtcodpy
 from mover import teleport_monsters
@@ -175,6 +175,7 @@ class TestGameState(GameStateBase):
         reset_globals(self.player)
         start_position = (20, 10)
         self.dungeon_level = dungeon_level_from_file("test.level")
+        self.dungeon = ReflexiveDungeon(self.dungeon_level)
         self.player.mover.try_move(start_position, self.dungeon_level)
         self.camera.center_on_entity(self.player)
 
@@ -233,14 +234,17 @@ class TestGameState(GameStateBase):
         #rat = monster.new_ratman(self)
         #rat.mover.try_move((20, 8), self.dungeon_level)
 
-        #spider = monster.new_spider(self)
-        #spider.mover.try_move((25, 10), self.dungeon_level)
+        salamander = monster.new_salamander(self)
+        salamander.mover.try_move((25, 10), self.dungeon_level)
 
         #slime = monster.new_slime(self)
         #slime.mover.try_move((25, 12), self.dungeon_level)
 
         ghost = monster.new_ghost(self)
         ghost.mover.try_move((21, 8), self.dungeon_level)
+
+        dust = new_dust_cloud(24)
+        dust.mover.try_move((23, 12), self.dungeon_level)
 
         pixie = monster.new_pixie(self)
         pixie.mover.try_move((23, 8), self.dungeon_level)

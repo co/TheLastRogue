@@ -185,8 +185,10 @@ class AttackEntityEffect(EntityEffect):
                                           self.target_entity.position.value)
 
     def send_hit_message(self, damage_caused):
-        m = self.hit_message % {"source_entity": self.source_entity.description.long_name,
-                                "target_entity": self.target_entity.description.long_name,
+        source_entity_name = self.source_entity.description.long_name if self.source_entity else None
+        target_entity_name = self.target_entity.description.long_name if self.target_entity else None
+        m = self.hit_message % {"source_entity": source_entity_name,
+                                "target_entity": target_entity_name,
                                 "damage": str(damage_caused)}
         messenger.msg.send_visual_message(m, self.target_entity.position.value)
 

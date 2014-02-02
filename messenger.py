@@ -14,7 +14,7 @@ PICK_UP_MESSAGE = "You pick up %(item)s"
 POISON_MESSAGE = "%(target_entity)s takes %(damage)s in poison damage."
 
 DOWN_STAIRS_HEAL_MESSAGE = "Your feel vitalized by your progress, you regain %(health)s health."
-FALL_DOWN_MESSAGE = "You take %(damage)s from the fall."
+FALL_DOWN_MESSAGE = "You take a damage of %(damage)s from the fall."
 DRINK_FOUNTAIN_MESSAGE = "You drink from the fountain, your max health increases by %(health)s."
 
 HURT_BY_EXPLOSION = "The explosion blasts %(target_entity)s for %(damage)s damage."

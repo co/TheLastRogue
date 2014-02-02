@@ -106,30 +106,33 @@ class FireDamageShareTileEffect(EntityShareTileEffect):
 class AddSpoofChildShareEntityEffect(EntityShareTileEffect):
     def __init__(self):
         super(AddSpoofChildShareEntityEffect, self).__init__()
-        self.spoof_child_creator = None
 
     def _effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         if not target_entity.has("effect_queue"):
             return
-        if not self.spoof_child_creator:
-            raise Exception("Spoof child not implemented")
-        target_entity.effect_queue.add(AddSpoofChild(self.parent, self.spoof_child_creator(), 1))
+        target_entity.effect_queue.add(AddSpoofChild(self.parent, self.spoof_child_factory(), 1))
+
+    def spoof_child_factory(self):
+        pass
 
 
 class CloudChangeAppearanceShareTileEffect(AddSpoofChildShareEntityEffect):
     def __init__(self):
         super(CloudChangeAppearanceShareTileEffect, self).__init__()
         self.component_type = "cloud_change_appearance_share_tile_effect"
-        self.spoof_child_creator = lambda: GraphicChar(self.parent.graphic_char.color_fg, colors.GRAY_D, None)
+
+    def spoof_child_factory(self):
+        return GraphicChar(self.parent.graphic_char.color_fg, colors.GRAY_D, None)
 
 
 class DustLowerHitOfEntityShareTileEffect(AddSpoofChildShareEntityEffect):
     def __init__(self):
         super(DustLowerHitOfEntityShareTileEffect, self).__init__()
         self.component_type = "dust_lower_hit_of_entity_share_tile_effect"
-        self.spoof_child_creator = lambda: DataPointBonusSpoof("hit", -10)
 
+    def spoof_child_factory(self):
+        return DataPointBonusSpoof("hit", -10)
 
 class ExplosionDamageShareTileEffect(EntityShareTileEffect):
     def __init__(self):

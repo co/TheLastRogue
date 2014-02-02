@@ -1,3 +1,4 @@
+from dungeonfeature import StairsDown, StairsUp
 import terrain
 import tile
 from dungeonlevel import DungeonLevel
@@ -40,23 +41,26 @@ def terrain_matrix_from_lines(lines):
 def set_terrain_from_lines(dungeon_level, lines):
         for x in range(dungeon_level.width):
             for y in range(dungeon_level.height):
-                current_terrain = char_to_terrain(lines[y][x])
-                current_terrain.mover.replace_move((x, y), dungeon_level)
+                features = char_to_terrain_and_features(lines[y][x])
+                for f in features:
+                    f.mover.replace_move((x, y), dungeon_level)
 
 
-def char_to_terrain(c):
+def char_to_terrain_and_features(c):
     if c == '#':
-        return terrain.Wall()
+        return [terrain.Wall()]
     elif c == '+':
-        return terrain.Door()
+        return [terrain.Door()]
     elif c == '~':
-        return terrain.Water()
+        return [terrain.Water()]
     elif c == 'g':
-        return terrain.GlassWall()
+        return [terrain.GlassWall()]
     elif c == '_':
-        return terrain.Chasm()
+        return [terrain.Chasm()]
+    elif c == '>':
+        return [terrain.Floor(), StairsUp()]
     else:
-        return terrain.Floor()
+        return [terrain.Floor()]
 
 
 def read_file(file_name):

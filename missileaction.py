@@ -199,7 +199,7 @@ class MonsterTargetAction(MonsterWeightedAction):
         self.weight = weight
         self.min_range = min_range
         self.max_range = max_range
-        self.target_chooser_function = get_suitable_enemy_target
+        self.target_chooser_function = GetSuitableEnemyTarget()
 
     def get_target_options(self):
         return self.target_chooser_function(self.parent)
@@ -312,13 +312,15 @@ def magic_hit_position(damage, dungeon_level, position, source_entity):
 
 
 class MonsterMissileApplyEntityEffect(MonsterMissileAction):
-    def __init__(self, entity_effect_factory, min_range, max_range, missile_graphic, weight=100):
+    def __init__(self, min_range, max_range, missile_graphic, weight=100):
         super(MonsterMissileApplyEntityEffect, self).__init__(min_range, max_range, missile_graphic, weight)
-        self.entity_effect_factory = entity_effect_factory
+
+    def effect_factory(self):
+        pass
 
     def missile_hit_effect(self, dungeon_level, position):
         target_entity = dungeon_level.get_tile_or_unknown(position).get_first_entity()
-        target_entity.effect_queue.add(self.entity_effect_factory())
+        target_entity.effect_queue.add(self.effect_factory())
 
     def hit_animation(self, dungeon_level, position):
         pass
@@ -327,33 +329,39 @@ class MonsterMissileApplyEntityEffect(MonsterMissileAction):
 class MonsterHealTargetEntityEffect(MonsterMissileApplyEntityEffect):
     def __init__(self,  weight=100):
         heart_graphic = GraphicChar(None, colors.RED, icon.HEART)
-        health_effect_factory = lambda: Heal(self.parent, random.randrange(1, 3))
-        super(MonsterHealTargetEntityEffect, self).__init__(health_effect_factory, 2, 4, heart_graphic, weight)
+        super(MonsterHealTargetEntityEffect, self).__init__(2, 4, heart_graphic, weight)
         self.component_type = "monster_range_heal_action"
-        self.target_chooser_function = get_suitable_healing_target
+        self.target_chooser_function = GetSuitableHealingTarget()
+
+    def effect_factory(self):
+        return Heal(self.parent, random.randrange(1, 3))
 
 
 class MonsterTripTargetEffect(MonsterMissileApplyEntityEffect):
     def __init__(self,  weight=100):
         missile_graphic = GraphicChar(None, colors.YELLOW, "+")
-        trip_effect_factory = lambda: AddSpoofChild(self.parent, RandomStepper(), gametime.single_turn)
-        super(MonsterTripTargetEffect, self).__init__(trip_effect_factory, 2, 4, missile_graphic, weight)
+        super(MonsterTripTargetEffect, self).__init__(2, 4, missile_graphic, weight)
         self.component_type = "monster_range_trip_action"
+
+    def effect_factory(self):
+        return AddSpoofChild(self.parent, RandomStepper(), gametime.single_turn)
 
 
 def get_suitable_enemy_target(my_faction, seen_entities):
     return [entity for entity in seen_entities if seen_entities.faction.value == my_faction]
 
 
-def get_suitable_enemy_target(source_entity):
-    seen_entities = source_entity.vision.get_seen_entities()
-    my_faction = source_entity.faction.value
-    return [entity for entity in seen_entities if entity.faction.value != my_faction]
+class GetSuitableEnemyTarget(object):
+    def __call__(self, source_entity):
+        seen_entities = source_entity.vision.get_seen_entities()
+        my_faction = source_entity.faction.value
+        return [entity for entity in seen_entities if entity.faction.value != my_faction]
 
 
-def get_suitable_healing_target(source_entity):
-    seen_entities = source_entity.vision.get_seen_entities()
-    my_faction = source_entity.faction.value
-    return [entity for entity in seen_entities
-            if entity.faction.value == my_faction and
-            entity.health.is_damaged()]
+class GetSuitableHealingTarget(object):
+    def __call__(self, source_entity):
+        seen_entities = source_entity.vision.get_seen_entities()
+        my_faction = source_entity.faction.value
+        return [entity for entity in seen_entities
+                if entity.faction.value == my_faction and
+                entity.health.is_damaged()]
