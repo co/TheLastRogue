@@ -1,6 +1,4 @@
 import unittest
-from cloud import ExplosionDamageShareTileEffect
-
 from compositecore import Composite
 from mover import Mover
 from position import Position, DungeonLevel
@@ -8,6 +6,18 @@ from stats import GamePieceTypes, DataTypes, DataPoint
 from statusflags import StatusFlags
 import dungeonlevelfactory
 import terrain
+from text import Description
+
+
+dummy_player = Composite()
+dummy_player.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
+dummy_player.set_child(Mover())
+dummy_player.set_child(Description("player_dummy", "Just a dummy used for instead of player for calculations."))
+
+dummy_flyer = Composite()
+dummy_flyer.set_child(StatusFlags([StatusFlags.FLYING]))
+dummy_flyer.set_child(Mover())
+dummy_flyer.set_child(Description("flyer_dummy", "Just a dummy used for instead a flyer for calculations."))
 
 
 class TestComposition(unittest.TestCase):
@@ -84,13 +94,6 @@ class TestComposition(unittest.TestCase):
         chasm = terrain.Chasm()
         chasm.mover.replace_move(chasm_position, self.dungeon_level)
         self.assertTrue(entity.mover.try_move(chasm_position))
-
-    def test_non_flying_entity_cant_move_to_chasm(self):
-        entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
-        chasm_position = (2, 1)
-        chasm = terrain.Chasm()
-        chasm.mover.replace_move(chasm_position, self.dungeon_level)
-        self.assertFalse(entity.mover.try_move(chasm_position))
 
     def test_can_move_to_door_if_it_is_opened(self):
         entity = self.set_up_new_entity_with_dungeon(self.dungeon_level)
@@ -171,3 +174,10 @@ class TestComposition(unittest.TestCase):
                              for entity in enteties_on_tile))
         self.assertTrue(any(entity is entity_second
                             for entity in enteties_on_tile))
+
+    # can pass terrain tests.
+    def test_not_flying_cant_pass_chasm(self):
+        self.assertFalse(dummy_player.mover.can_pass_terrain(terrain.Chasm()))
+
+    def test_flying_can_pass_chasm(self):
+        self.assertTrue(dummy_flyer.mover.can_pass_terrain(terrain.Chasm()))

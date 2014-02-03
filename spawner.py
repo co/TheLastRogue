@@ -1,20 +1,23 @@
 import random
 import logging
+from compositecore import Composite
+from mover import Mover
 from stats import GamePieceTypes
 
 import dungeontrash
 import item
 import monster
 import rng
+from statusflags import StatusFlags
+from text import Description
 
 
-def place_piece_on_random_tile(piece, dungeon_level):
-    positions = [(x, y) for x in range(dungeon_level.width)
-                 for y in range(dungeon_level.height)]
-    random.shuffle(positions)
-    for position in positions:
-        x, y = position
-        move_succeeded = piece.mover.try_move((x, y), dungeon_level)
+def place_piece_on_random_walkable_tile(piece, dungeon_level):
+    walker = piece
+    if not piece.has("status_flags"):
+        walker = dummy_player
+    for position in dungeon_level.get_random_walkable_positions_in_dungeon(walker):
+        move_succeeded = piece.mover.try_move(position, dungeon_level)
         if move_succeeded:
             return True
     return False
@@ -22,7 +25,7 @@ def place_piece_on_random_tile(piece, dungeon_level):
 
 def spawn_rat_man(dungeon_level, game_state):
     rat = monster.new_ratman(game_state)
-    spawn_succeeded = place_piece_on_random_tile(rat, dungeon_level)
+    spawn_succeeded = place_piece_on_random_walkable_tile(rat, dungeon_level)
     if not spawn_succeeded:
         logging.info("could not spawn rat-man")
         return False
@@ -54,7 +57,7 @@ def place_health_potions(dungeon_level):
     health_potions_to_spawn += 1
     for _ in range(health_potions_to_spawn):
         potion = item.new_health_potion()
-        place_piece_on_random_tile_not_on_item_or_feature(potion, dungeon_level)
+        place_piece_on_random_walkable_tile_not_on_item_or_feature(potion, dungeon_level)
     #print "HP pots spawned: ", health_potions_to_spawn
 
 
@@ -63,7 +66,7 @@ def place_equipment(dungeon_level):
 
     if (depth == 0 or depth == 1) and rng.coin_flip():
         early_weapon = random.choice([item.new_knife(), item.new_sling()])
-        place_piece_on_random_tile(early_weapon, dungeon_level)
+        place_piece_on_random_walkable_tile_not_on_item_or_feature(early_weapon, dungeon_level)
 
     for _ in range(random.randrange(depth + 1)):
         if rng.coin_flip():
@@ -72,7 +75,7 @@ def place_equipment(dungeon_level):
             else:  # Common equipment.
                 equipment = random.choice([item.new_leather_boots(), item.new_leather_cap(), item.new_leather_armor(),
                                            item.new_knife(), item.new_sling()])
-            place_piece_on_random_tile(equipment, dungeon_level)
+            place_piece_on_random_walkable_tile_not_on_item_or_feature(equipment, dungeon_level)
 
 
 def place_ammo(dungeon_level):
@@ -80,7 +83,7 @@ def place_ammo(dungeon_level):
     for _ in range(random.randrange(depth / 2 + 1)):
         if rng.coin_flip():
             ammo = item.new_ammunition()
-            place_piece_on_random_tile_not_on_item_or_feature(ammo, dungeon_level)
+            place_piece_on_random_walkable_tile_not_on_item_or_feature(ammo, dungeon_level)
 
 
 def place_bomb(dungeon_level):
@@ -88,7 +91,7 @@ def place_bomb(dungeon_level):
     for _ in range(random.randrange(depth / 2 + 2)):
         if rng.coin_flip():
             bomb = item.new_bomb()
-            place_piece_on_random_tile_not_on_item_or_feature(bomb, dungeon_level)
+            place_piece_on_random_walkable_tile_not_on_item_or_feature(bomb, dungeon_level)
 
 def place_jewellry(dungeon_level):
     depth = dungeon_level.depth
@@ -96,13 +99,13 @@ def place_jewellry(dungeon_level):
         if rng.coin_flip() and rng.coin_flip() and rng.coin_flip():
             ring = random.choice([item.new_ring_of_evasion(), item.new_ring_of_stealth(),
                                   item.new_ring_of_strength()])
-            place_piece_on_random_tile_not_on_item_or_feature(ring, dungeon_level)
+            place_piece_on_random_walkable_tile_not_on_item_or_feature(ring, dungeon_level)
 
 
 def place_devices(dungeon_level):
     if rng.coin_flip() and rng.coin_flip():
         device = random.choice([item.new_darkness_device(), item.new_heart_stop_device()])
-        place_piece_on_random_tile(device, dungeon_level)
+        place_piece_on_random_walkable_tile_not_on_item_or_feature(device, dungeon_level)
 
 
 def place_items_in_dungeon(dungeon_level):
@@ -113,17 +116,21 @@ def place_items_in_dungeon(dungeon_level):
     place_devices(dungeon_level)
 
 
-def place_piece_on_random_tile_not_on_item_or_feature(piece, dungeon_level):
-    positions = [(x, y) for x in range(dungeon_level.width)
-                 for y in range(dungeon_level.height)]
-    random.shuffle(positions)
-    for position in positions:
-        x, y = position
+def place_piece_on_random_walkable_tile_not_on_item_or_feature(piece, dungeon_level):
+    walker = piece
+    if not piece.has("status_flags"):
+        walker = dummy_player
+    for position in dungeon_level.get_random_walkable_positions_in_dungeon(walker):
         tile = dungeon_level.get_tile(position)
         if (tile.has_piece_of_type(GamePieceTypes.ITEM) or
                 tile.has_piece_of_type(GamePieceTypes.DUNGEON_FEATURE)):
             continue
-        move_succeeded = piece.mover.try_move((x, y), dungeon_level)
+        move_succeeded = piece.mover.try_move(position, dungeon_level)
         if move_succeeded:
             return True
     return False
+
+dummy_player = Composite()
+dummy_player.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
+dummy_player.set_child(Mover())
+dummy_player.set_child(Description("player_dummy", "Just a dummy used for instead of player for calculations."))

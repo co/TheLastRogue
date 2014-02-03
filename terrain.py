@@ -115,10 +115,9 @@ class PlayerFallDownChasmAction(EntityShareTileEffect):
             current_depth = target_entity.dungeon_level.value.depth
             dungeon = target_entity.dungeon_level.value.dungeon
             next_dungeon_level = dungeon.get_dungeon_level(current_depth + 1)
-            target_position = self.get_random_walkable_position_in_dungeon(target_entity, next_dungeon_level)
+            target_position = next_dungeon_level.get_random_walkable_position_in_dungeon(target_entity)
             target_entity.mover.move_push_over(target_position, next_dungeon_level)
             self._fall_damage(target_entity)
-            target_entity.game_state.value.signal_new_level()
 
     def _animate_fall(self, target_entity):
         color_fg = target_entity.graphic_char.color_fg
@@ -130,7 +129,6 @@ class PlayerFallDownChasmAction(EntityShareTileEffect):
                          GraphicChar(None, color_fg, icon.CENTER_DOT)]
         animation.animate_point(target_entity.game_state.value, target_entity.position.value, graphic_chars)
 
-
     def _fall_damage(self, target_entity):
         min_damage = 2
         max_damage = 5
@@ -138,12 +136,6 @@ class PlayerFallDownChasmAction(EntityShareTileEffect):
         damage_effect = entityeffect.UndodgeableAttackEntityEffect(None, damage,
                                                                    [DamageTypes.FALL], messenger.FALL_DOWN_MESSAGE)
         target_entity.effect_queue.add(damage_effect)
-
-    def get_random_walkable_position_in_dungeon(self, entity, dungeon_level):
-        position = dungeon_level.up_stairs[0].position.value
-        positions = dungeon_level.get_walkable_positions(entity, position)
-        print positions
-        return random.choice(positions)
 
 
 class Unknown(Composite):

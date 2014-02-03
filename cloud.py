@@ -134,6 +134,7 @@ class DustLowerHitOfEntityShareTileEffect(AddSpoofChildShareEntityEffect):
     def spoof_child_factory(self):
         return DataPointBonusSpoof("hit", -10)
 
+
 class ExplosionDamageShareTileEffect(EntityShareTileEffect):
     def __init__(self):
         super(ExplosionDamageShareTileEffect, self).__init__()

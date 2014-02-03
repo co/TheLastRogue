@@ -394,6 +394,7 @@ class MakeDustClouds(Leaf):
         self.time_to_next_attempt -= time
         if self.time_to_next_attempt > 0:
             return
+        print "its time!"
         self._spawn_dust_cloud()
         self.time_to_next_attempt = self.time_interval
 

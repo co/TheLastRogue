@@ -1,10 +1,8 @@
-import colors
-from console import console
+import random
 import direction
 import dungeonfeature
 import actionscheduler
 import libtcodpy
-import settings
 import turn
 import util
 import geometry as geo
@@ -142,7 +140,14 @@ class DungeonLevel(object):
             print(line)
 
     def get_walkable_positions(self, entity, position):
-        return self._walkable_destinations.get_walkable_positions(entity, position)
+        return self._walkable_destinations.get_walkable_positions(entity, position, self)
+
+    def get_random_walkable_position_in_dungeon(self, entity):
+        return random.choice(self.get_random_walkable_positions_in_dungeon(entity))
+
+    def get_random_walkable_positions_in_dungeon(self, entity):
+        position = self.up_stairs[0].position.value
+        return self.get_walkable_positions(entity, position)
 
     def print_statistics(self):
         monsters = {}

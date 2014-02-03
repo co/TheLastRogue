@@ -31,11 +31,11 @@ class Dungeon(object):
                                                         depth, self.game_state)
         print monsters
         for monster in monsters:
-            spawner.place_piece_on_random_tile(monster, dungeon_level)
+            spawner.place_piece_on_random_walkable_tile(monster, dungeon_level)
 
         if depth == (len(self._dungeon_levels) - 1):
             jericho = monster.new_jericho(self.game_state)
-            spawner.place_piece_on_random_tile(jericho, dungeon_level)
+            spawner.place_piece_on_random_walkable_tile(jericho, dungeon_level)
 
         spawner.place_items_in_dungeon(dungeon_level)
 
