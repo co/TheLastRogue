@@ -540,15 +540,24 @@ class EquipmentBox(RectangularUIElement):
         self._bg_rect = StyledRectangle(rect, style.MinimalStyle())
         self._equipment_slot_items = []
 
+        self._not_equipped_graphics = {}
+        for slot in EquipmentSlots.ALL:
+            self._not_equipped_graphics[slot] = SymbolUIElement(EquipmentBox.POSITIONS[slot],
+                                                                graphic.GraphicChar(None,
+                                                                                    colors.NOT_EQUIPPED_FG,
+                                                                                    slot.icon))
+        self._equipped_graphics = {}
+
     def update(self):
         self._equipment_slot_items = []
         for slot in EquipmentSlots.ALL:
             if self._equipment.slot_is_equiped(slot):
                 item = self._equipment.get(slot)
-                graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot], item.graphic_char)
+                if not item in self._equipped_graphics:
+                    self._equipped_graphics[item] = SymbolUIElement(EquipmentBox.POSITIONS[slot], item.graphic_char)
+                graphic_item = self._equipped_graphics[item]
             else:
-                graphic_item = SymbolUIElement(EquipmentBox.POSITIONS[slot],
-                                               graphic.GraphicChar(None, colors.NOT_EQUIPPED_FG, slot.icon))
+                graphic_item = self._not_equipped_graphics[slot]
             self._equipment_slot_items.append(graphic_item)
 
     def draw(self, offset=geo.zero2d()):
