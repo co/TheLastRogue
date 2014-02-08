@@ -198,7 +198,8 @@ class InputActor(Actor):
         if closest_enemy and not closest_enemy.position.value == self.parent.position.value:
             self.parent.path.compute_path(closest_enemy.position.value)
         else:
-            destination = util.get_closest_unseen_walkable_position(self.parent, self.parent.position.value)
+            destination = util.get_closest_unseen_walkable_position(self.parent, self.parent.position.value,
+                                                                    self.parent.dungeon_level.value)
             if destination:
                 self.parent.path.compute_path(destination)
 

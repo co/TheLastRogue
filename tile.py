@@ -35,6 +35,8 @@ class Tile(object):
 
     def _cycle_through_pieces(self, piece_list):
         """
+        Used to create a cycling animation of all the top pieces on the tile.
+
         If multiple pieces of the same type share tile.
         create a cycle through each one of them.
         """
@@ -106,17 +108,16 @@ class Tile(object):
 
     def copy(self):
         copy_tile = Tile()
-        for piece_type, piece_list in self.game_pieces.items():
-            for piece in piece_list:
-                new_piece = compositecore.Composite()
-                if piece.has("game_piece_type"):
-                    new_piece.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, piece.game_piece_type.value))
-                if piece.has("graphic_char"):
-                    new_piece.set_child(piece.graphic_char.copy())
-                if piece.has("description"):
-                    new_piece.set_child(piece.description.copy())
-                new_piece.set_child(CharPrinter())
-                copy_tile.add(new_piece)
+        piece = self.game_pieces[self._top_level][0]
+        new_piece = compositecore.Composite()
+        if piece.has("game_piece_type"):
+            new_piece.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, piece.game_piece_type.value))
+        if piece.has("graphic_char"):
+            new_piece.set_child(piece.graphic_char.copy())
+        if piece.has("description"):
+            new_piece.set_child(piece.description.copy())
+        new_piece.set_child(CharPrinter())
+        copy_tile.add(new_piece)
         return copy_tile
 
 
