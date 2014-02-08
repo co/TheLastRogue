@@ -43,6 +43,8 @@ class GameStateBase(state.State):
         self._init_caches_and_flags()
         messenger.msg.send_global_message("Welcome to The Last Rogue!")
 
+        self._gui_last_update_timestamp = -1
+
     def _init_caches_and_flags(self):
         """
         Sets up all variables for a new gamestate instance
@@ -126,6 +128,8 @@ class GameStateBase(state.State):
         self.prepare_draw_gui()
 
     def prepare_draw_gui(self):
+        if self._gui_last_update_timestamp < turn.current_turn:
+            self._update_gui()
         self._message_display.draw()
         self.gui_dock.draw()
 
@@ -138,7 +142,7 @@ class GameStateBase(state.State):
             self.signal_new_level()
         self._last_dungeon_level = dungeon_level
 
-        self._update_gui()
+        #self._update_gui()
         dungeon_level.tick()
 
         if self.player.health.is_dead():
@@ -156,6 +160,7 @@ class GameStateBase(state.State):
     def _update_gui(self):
         self.entity_stack_panel.update()
         self.command_list_bar.update()
+        self._gui_last_update_timestamp = turn.current_turn
 
     def _draw_bg(self):
         libtcodpy.console_blit(self._background_console, 0, 0, constants.GAME_STATE_WIDTH, constants.GAME_STATE_HEIGHT,
