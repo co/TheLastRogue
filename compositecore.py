@@ -123,6 +123,7 @@ class Composite(Component):
         super(Composite, self).__init__(*args, **kw)
         self._spoofed_children = {}
         self._children = {}
+        self._children_tag_table = {}
 
     def __getinitargs__(self):
         return ()
@@ -150,6 +151,7 @@ class Composite(Component):
         if self.has(child.component_type):
             self.remove_component_of_type(child.component_type)
         self._children[child.component_type] = child
+        self._add_child_to_tag_table(child)
         child.parent = self
 
     def add_spoof_child(self, child):
@@ -175,7 +177,19 @@ class Composite(Component):
         if not child.component_type in self._spoofed_children:
             self._spoofed_children[child.component_type] = []
         self._spoofed_children[child.component_type].append(child)
+        self._add_child_to_tag_table(child)
         child.parent = self
+
+    def _add_child_to_tag_table(self, child):
+        for tag in child.tags:
+            if not tag in self._children_tag_table:
+                self._children_tag_table[tag] = []
+            self._children_tag_table[tag].append(child)
+
+    def _remove_child_from_tag_table(self, child):
+        for tag in child.tags:
+            if tag in self._children_tag_table:
+                self._children_tag_table[tag].remove(child)
 
     def reset_spoofed_children(self):
         """
@@ -183,18 +197,23 @@ class Composite(Component):
         """
         for child_type in self._spoofed_children.values():
             for child in child_type:
-                child.parent = None
-        self._spoofed_children = {}
+                self.remove_component(child)
+        self._spoofed_children = {} #  Unecessary?
 
-    def remove_component(self, component):
+    def remove_component(self, child):
         """
-        Removes a child component to this component.
+        Removes a child component from this component.
         """
-        if(component.component_type in self._children and
-           component is self._children[component.component_type]):
-            del self._children[component.component_type]
-            component.parent = None
-        return component
+        if(child.component_type in self._children and
+           child is self._children[child.component_type]):
+            del self._children[child.component_type]
+            child.parent = None
+        if(child.component_type in self._spoofed_children and
+           child in self._spoofed_children[child.component_type]):
+            self._spoofed_children[child.component_type].remove(child)
+            child.parent = None
+        self._remove_child_from_tag_table(child)
+        return child
 
     def remove_component_of_type(self, component_type):
         """
@@ -301,9 +320,9 @@ class Composite(Component):
         """
         Gets the list of all children with the given tag.
         """
-        return [self.__getattr__(component_type)
-                for component_type in self._children.keys()
-                if tag in self.__getattr__(component_type).tags]
+        if not tag in self._children_tag_table:
+            return []
+        return self._children_tag_table[tag]
 
 
 class CompositeMessage(object):

@@ -34,14 +34,14 @@ class ActionScheduler(object):
     def on_tick(self, current_actor):
         self.sharing_tile_effects_tick(current_actor.parent)
 
-    def sharing_tile_effects_tick(self, current_piece):
-        if(current_piece.has("dungeon_level") and
-           current_piece.has("position")):
-            tile = (current_piece.dungeon_level.value.
-                    get_tile(current_piece.position.value))
+    def sharing_tile_effects_tick(self, actor):
+        if(actor.has("dungeon_level") and
+           actor.has("position")):
+            tile = (actor.dungeon_level.value.
+                    get_tile(actor.position.value))
             for piece in tile.get_all_pieces():
                 for share_effect in piece.get_children_with_tag("entity_share_tile_effect"):
-                    share_effect.share_tile_effect_tick(current_piece, gametime.normal_energy_gain)
+                    share_effect.share_tile_effect_tick(actor, gametime.normal_energy_gain)
 
     def tick(self):
         self._actors_tick()
