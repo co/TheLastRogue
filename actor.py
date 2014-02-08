@@ -22,11 +22,12 @@ class Actor(Leaf):
             self.energy - gametime.single_turn
             return
         self.energy += self.energy_recovery
+        if self.energy > 0:
+            turn.current_turn += 1
         while self.energy > 0:
             if self.parent.has("is_player"):
                 self._post_player_act()
             self.energy -= self.act()
-        turn.current_turn += 1
 
     def act(self):
         raise NotImplementedError("act method not implemented for parent:" +

@@ -590,6 +590,7 @@ class EntityStatusList(UIElement):
         self._entity_stack_panel = StackPanelVertical((0, 0), (0, 0), vertical_space=vertical_space)
         self.looking_entity = looking_entity
         self._width = width
+        self._entity_status_cache = {}
 
     def update(self):
         seen_entities = self.looking_entity.vision.get_seen_entities_closest_first()
@@ -599,8 +600,9 @@ class EntityStatusList(UIElement):
         self._entity_stack_panel.clear()
         rect = geo.Rect((0, 0), self.width, 3)
         for seen_entity in seen_entities:
-            entity_status = EntityStatus(seen_entity, rect)
-            self._entity_stack_panel.append(entity_status)
+            if not seen_entity in self._entity_status_cache:
+                self._entity_status_cache[seen_entity] = EntityStatus(seen_entity, rect)
+            self._entity_stack_panel.append(self._entity_status_cache[seen_entity])
 
     def draw(self, offset=geo.zero2d()):
         self._entity_stack_panel.draw(geo.add_2d(offset, self.margin))
