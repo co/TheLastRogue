@@ -172,7 +172,7 @@ class InputActor(Actor):
         self.newly_spent_energy += self.parent.stepper.try_step_in_direction(direction)
 
     def spawn_context_menu(self):
-        context_menu = menufactory.context_menu(self.parent, self.parent. game_state.value.menu_prompt_stack)
+        context_menu = menufactory.context_menu(self.parent, self.parent.game_state.value.menu_prompt_stack)
         self.parent.game_state.value.start_prompt(context_menu)
 
     def start_examine(self):

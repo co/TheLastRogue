@@ -873,6 +873,7 @@ class TextBoxWrap(UIElement):
         words = str(self.text).split()
         lines = []
         line = words[0]
+        self._text_stack_panel.clear()
         for word in words[1:]:
             if len(line) + len(" " + word) > self.row_max_width:
                 lines.append(line)

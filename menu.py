@@ -7,6 +7,9 @@ import colors
 import gui
 import inventory
 import menufactory
+import rectfactory
+import settings
+import style
 
 
 def clamp(n, minn, maxn):
@@ -352,3 +355,36 @@ class BackToGameFunction(object):
 
     def __call__(self):
         self._state_stack.pop_to_game_state()
+
+
+class AcceptRejectPrompt(gui.UIElement):
+    def __init__(self, state_stack, message, width=settings.MINIMUM_WIDTH / 2, max_height=settings.MINIMUM_HEIGHT / 2):
+        self.message = message
+        self._width = width
+        self.max_height = max_height
+        self._state_stack = state_stack
+
+        margin = style.interface_theme.margin
+        self.text = gui.TextBoxWrap(message, (-1, -1), colors.GRAY, self.width, max_height)
+        rect = rectfactory.center_of_screen_rect(self.width + margin[0] * 2, self.text.height + margin[0] * 2)
+        self.text.offset = geo.add_2d(rect.top_left, (2, 2))
+        self.text.row_max_width = self.width
+        self.bg_rectangle = gui.StyledRectangle(rect, style.interface_theme.rect_style)
+        self.result = False
+
+    @property
+    def width(self):
+        return self._width
+
+    def draw(self, offset=geo.zero2d()):
+        self.bg_rectangle.draw(offset)
+        self.text.draw(offset)
+
+    def update(self):
+        inputhandler.handler.update_keys()
+        key = inputhandler.handler.get_keypress()
+        if key == inputhandler.ENTER or key == inputhandler.SPACE:
+            self.result = True
+            self._state_stack.pop()
+        elif key:
+            self._state_stack.pop()

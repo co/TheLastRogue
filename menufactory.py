@@ -77,6 +77,12 @@ def get_save_quit_menu(player, state_stack):
     return get_menu_with_options(options, state_stack, 6, 5)
 
 
+def start_accept_reject_prompt(state_stack, game_state, message):
+    prompt = menu.AcceptRejectPrompt(state_stack, message)
+    game_state.start_prompt(state.UIState(prompt))
+    return prompt.result
+
+
 def get_menu_with_options(options, state_stack, x_border=4, y_border=5):
     temp_position = (-1, -1)
     main_menu = menu.StaticMenu(temp_position, options, state_stack, margin=style.menu_theme.margin, vertical_space=1)
