@@ -11,7 +11,7 @@ from inputactor import InputActor
 from inventory import Inventory
 from memorymap import MemoryMap
 from missileaction import PlayerThrowStoneAction
-from mover import Mover, Stepper
+from mover import Mover, Stepper, PlayerStepper
 from ondeath import LeaveCorpseOnDeath
 from position import Position, DungeonLevel
 from stats import GamePieceTypes, Flag, DataPoint, DataTypes, Factions, IntelligenceLevel
@@ -56,7 +56,7 @@ class Player(Composite):
         self.set_child(Position())
 
         self.set_child(Mover())
-        self.set_child(Stepper())
+        self.set_child(PlayerStepper())
 
         self.set_child(Attacker())
         self.set_child(Dodger())

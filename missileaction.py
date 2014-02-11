@@ -157,7 +157,11 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         self.name = "Shoot"
         self.display_order = 85
         self.ranged_weapon = ranged_weapon
-        self.missile_graphic = GraphicChar(None, colors.WHITE, icon.BIG_CENTER_DOT)
+        self._missile_graphic = GraphicChar(None, colors.WHITE, icon.BIG_CENTER_DOT)
+
+    @property
+    def missile_graphic(self):
+        return self._missile_graphic
 
     def add_energy_spent_to_entity(self, entity):
         """

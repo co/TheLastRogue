@@ -23,6 +23,9 @@ HURT_BY_FIRE = "The fire burns %(target_entity)s for %(damage)s damage."
 WONT_BREAK_OUT_OF_WEB_MESSAGE = "%(target_entity)s is stuck in the spider web."
 BREAKS_OUT_OF_WEB_MESSAGE = "%(target_entity)s breaks free."
 
+WANT_TO_JUMP_DOWN_CHASM = "Are you sure you want to drop down the chasm?"
+PRESS_ENTER_TO_ACCEPT = "Press ENTER to accept, another key to reject."
+
 
 class Messenger(object):
     def __init__(self):

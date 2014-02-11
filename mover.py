@@ -275,6 +275,36 @@ class CautiousStepper(Stepper):
         return 0
 
 
+class PlayerStepper(Stepper):
+    def __init__(self):
+        super(PlayerStepper, self).__init__()
+        self.component_type = "stepper"
+
+    def try_move_or_bump(self, position):
+        """
+        Tries to move the entity to a position.
+
+        If there is a door in the way try to open it.
+        If there is a unfriendly entity in the way hit it instead.
+        **If there is a danger on that tile don't step.**
+        If an action is taken return True otherwise return False.
+
+        Args:
+            position (int, int): The position the entity tries to move to.
+        Returns:
+            Energy spent
+        """
+        if self.try_bump_terrain(position):
+            return self.parent.movement_speed.value
+        if self.try_attack(position):
+            return self.parent.melee_speed.value
+        terrain = self.parent.dungeon_level.value.get_tile_or_unknown(position).get_terrain()
+        if ((len(terrain.get_children_with_tag("prompt_player")) < 1) or
+                terrain.get_children_with_tag("prompt_player")[0].prompt_player(target_entity=self.parent)):
+            if self.parent.mover.try_move(position):
+                return self.parent.movement_speed.value
+        return 0
+
 class ImmobileStepper(Stepper):
     def __init__(self):
         super(ImmobileStepper, self).__init__()

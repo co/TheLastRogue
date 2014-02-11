@@ -5,6 +5,7 @@ from compositecommon import EntityShareTileEffect
 from compositecore import Leaf, Composite
 import entityeffect
 from graphic import GraphicChar, CharPrinter, GraphicCharTerrainCorners
+from menufactory import start_accept_reject_prompt
 import messenger
 from mover import Mover
 from position import Position, DungeonLevel
@@ -100,7 +101,27 @@ class Chasm(Composite):
         self.set_child(CharPrinter())
         self.set_child(Flag("is_chasm"))
         self.set_child(Flag("is_transparent"))
+
         self.set_child(PlayerFallDownChasmAction())
+        self.set_child(PromptPlayerChasm())
+
+
+class PromptPlayer(Leaf):
+    def __init__(self, message):
+        super(PromptPlayer, self).__init__()
+        self.tags = ["prompt_player"]
+        self.text = message
+
+    def prompt_player(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        return start_accept_reject_prompt(target_entity.game_state.value.menu_prompt_stack,
+                                          target_entity.game_state.value, self.text)
+
+
+class PromptPlayerChasm(PromptPlayer):
+    def __init__(self):
+        super(PromptPlayerChasm, self).__init__(messenger.WANT_TO_JUMP_DOWN_CHASM)
+        self.component_type = "prompt_player_chasm"
 
 
 class PlayerFallDownChasmAction(EntityShareTileEffect):

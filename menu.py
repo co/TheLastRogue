@@ -7,6 +7,7 @@ import colors
 import gui
 import inventory
 import menufactory
+import messenger
 import rectfactory
 import settings
 import style
@@ -358,17 +359,23 @@ class BackToGameFunction(object):
 
 
 class AcceptRejectPrompt(gui.UIElement):
-    def __init__(self, state_stack, message, width=settings.MINIMUM_WIDTH / 2, max_height=settings.MINIMUM_HEIGHT / 2):
+    def __init__(self, state_stack, message, width=settings.MINIMUM_WIDTH * 0.8,
+                 max_height=settings.MINIMUM_HEIGHT * 0.8):
         self.message = message
         self._width = width
         self.max_height = max_height
         self._state_stack = state_stack
 
         margin = style.interface_theme.margin
-        self.text = gui.TextBoxWrap(message, (-1, -1), colors.GRAY, self.width, max_height)
-        rect = rectfactory.center_of_screen_rect(self.width + margin[0] * 2, self.text.height + margin[0] * 2)
-        self.text.offset = geo.add_2d(rect.top_left, (2, 2))
-        self.text.row_max_width = self.width
+        self.text_stack_panel = gui.StackPanelVertical((-1, -1), vertical_space=1)
+        self.text_stack_panel.append(gui.TextBoxWrap(message, (0, 0), colors.GRAY, self.width, max_height))
+        self.text_stack_panel.append(gui.TextBoxWrap(messenger.PRESS_ENTER_TO_ACCEPT, (0, 0),
+                                                     colors.LIGHT_ORANGE, self.width, max_height))
+        self.text_stack_panel.update()
+        rect = rectfactory.ratio_of_screen_rect(self.text_stack_panel.width + margin[0] * 2,
+                                                 self.text_stack_panel.height + margin[1] * 2,
+                                                 0.5, 0.3)
+        self.text_stack_panel.offset = geo.add_2d(rect.top_left, (2, 2))
         self.bg_rectangle = gui.StyledRectangle(rect, style.interface_theme.rect_style)
         self.result = False
 
@@ -378,7 +385,7 @@ class AcceptRejectPrompt(gui.UIElement):
 
     def draw(self, offset=geo.zero2d()):
         self.bg_rectangle.draw(offset)
-        self.text.draw(offset)
+        self.text_stack_panel.draw(offset)
 
     def update(self):
         inputhandler.handler.update_keys()

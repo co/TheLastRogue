@@ -316,6 +316,14 @@ class Composite(Component):
         """
         return component_type in self._children
 
+    def has_tag(self, tag):
+        """
+        Returns true if this component has the given tag.
+
+        False otherwise.
+        """
+        return tag in self.tags
+
     def get_children_with_tag(self, tag):
         """
         Gets the list of all children with the given tag.

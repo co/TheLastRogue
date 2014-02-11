@@ -327,6 +327,10 @@ class StackPanel(UIElement):
     def offset(self):
         return self._offset
 
+    @offset.setter
+    def offset(self, value):
+        self._offset = value
+
     @property
     def rectangle(self):
         return geo.Rect(self.offset, self.width, self.height)
@@ -890,6 +894,14 @@ class TextBoxWrap(UIElement):
         self.update()
         position = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
         self._text_stack_panel.draw(position)
+
+    @property
+    def height(self):
+        return self._text_stack_panel.height
+
+    @property
+    def width(self):
+        return self._text_stack_panel.width
 
 
 class VerticalTextBox(UIElement):
