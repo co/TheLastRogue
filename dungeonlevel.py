@@ -24,8 +24,6 @@ class DungeonLevel(object):
 
         self._walkable_destinations = util.WalkableDestinatinationsPath()
 
-        self.x = 0
-
     # TODO: Ugly Hack for improving save time. Improve this please.
     def __getstate__(self):
         if len(self.entities) == 0:

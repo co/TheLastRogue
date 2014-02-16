@@ -18,7 +18,7 @@ class Actor(Leaf):
         The actor will act if it isn't in an energy debt.
         It also receives some energy.
         """
-        if self.parent.health.is_dead():
+        if self._should_skip_me():
             self.energy - gametime.single_turn
             return
         self.energy += self.energy_recovery
@@ -32,6 +32,9 @@ class Actor(Leaf):
     def act(self):
         raise NotImplementedError("act method not implemented for parent:" +
                                   str(self.parent))
+
+    def _should_skip_me(self):
+        return self.parent.has("health") and self.parent.health.is_dead()
 
     def add_energy_spent(self, energy):
         self.newly_spent_energy += energy
@@ -51,4 +54,4 @@ class DoNothingActor(Actor):
         """
         Just returns energy spent, nothing is done.
         """
-        return self.parent.movement_speed.value
+        return gametime.single_turn

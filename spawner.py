@@ -46,7 +46,7 @@ def spawn_corpse_on_position(position, dungeon_level):
     return True
 
 
-def place_health_potions(dungeon_level):
+def place_health_potions(dungeon_level, game_state):
     health_potions_to_spawn = 0
 
     for _ in range(2):
@@ -56,16 +56,16 @@ def place_health_potions(dungeon_level):
         health_potions_to_spawn += 2
     health_potions_to_spawn += 1
     for _ in range(health_potions_to_spawn):
-        potion = item.new_health_potion()
+        potion = item.new_health_potion(game_state)
         place_piece_on_random_walkable_tile_not_on_item_or_feature(potion, dungeon_level)
     #print "HP pots spawned: ", health_potions_to_spawn
 
 
-def place_equipment(dungeon_level):
+def place_equipment(dungeon_level, game_state):
     depth = dungeon_level.depth
 
     if (depth == 0 or depth == 1) and rng.coin_flip():
-        early_weapon = random.choice([item.new_knife(), item.new_sling()])
+        early_weapon = random.choice([item.new_knife(game_state), item.new_sling(game_state)])
         place_piece_on_random_walkable_tile_not_on_item_or_feature(early_weapon, dungeon_level)
 
     for _ in range(random.randrange(depth + 1)):
@@ -73,47 +73,49 @@ def place_equipment(dungeon_level):
             if rng.coin_flip() and rng.coin_flip() and rng.coin_flip():  # Rare equipment.
                 equipment = random.choice([item.new_sword(), item.new_gun()])
             else:  # Common equipment.
-                equipment = random.choice([item.new_leather_boots(), item.new_leather_cap(), item.new_leather_armor(),
-                                           item.new_knife(), item.new_sling()])
+                equipment = random.choice([item.new_leather_boots(game_state), item.new_leather_cap(game_state),
+                                           item.new_leather_armor(game_state), item.new_knife(game_state),
+                                           item.new_sling(game_state)])
             place_piece_on_random_walkable_tile_not_on_item_or_feature(equipment, dungeon_level)
 
 
-def place_ammo(dungeon_level):
+def place_ammo(dungeon_level, game_state):
     depth = dungeon_level.depth
     for _ in range(random.randrange(depth / 2 + 1)):
         if rng.coin_flip():
-            ammo = item.new_ammunition()
+            ammo = item.new_ammunition(game_state)
             place_piece_on_random_walkable_tile_not_on_item_or_feature(ammo, dungeon_level)
 
 
-def place_bomb(dungeon_level):
+def place_bomb(dungeon_level, game_state):
     depth = dungeon_level.depth
     for _ in range(random.randrange(depth / 2 + 2)):
         if rng.coin_flip():
-            bomb = item.new_bomb()
+            bomb = item.new_bomb(game_state)
             place_piece_on_random_walkable_tile_not_on_item_or_feature(bomb, dungeon_level)
 
-def place_jewellry(dungeon_level):
+
+def place_jewellry(dungeon_level, game_state):
     depth = dungeon_level.depth
     for _ in range(random.randrange(depth + 1)):
         if rng.coin_flip() and rng.coin_flip() and rng.coin_flip():
-            ring = random.choice([item.new_ring_of_evasion(), item.new_ring_of_stealth(),
-                                  item.new_ring_of_strength()])
+            ring = random.choice([item.new_ring_of_evasion(game_state), item.new_ring_of_stealth(game_state),
+                                  item.new_ring_of_strength(game_state)])
             place_piece_on_random_walkable_tile_not_on_item_or_feature(ring, dungeon_level)
 
 
-def place_devices(dungeon_level):
+def place_devices(dungeon_level, game_state):
     if rng.coin_flip() and rng.coin_flip():
-        device = random.choice([item.new_darkness_device(), item.new_heart_stop_device()])
+        device = random.choice([item.new_darkness_device(game_state), item.new_heart_stop_device(game_state)])
         place_piece_on_random_walkable_tile_not_on_item_or_feature(device, dungeon_level)
 
 
-def place_items_in_dungeon(dungeon_level):
-    place_health_potions(dungeon_level)
-    place_ammo(dungeon_level)
-    place_jewellry(dungeon_level)
-    place_equipment(dungeon_level)
-    place_devices(dungeon_level)
+def place_items_in_dungeon(dungeon_level, game_state):
+    place_health_potions(dungeon_level, game_state)
+    place_ammo(dungeon_level, game_state)
+    place_jewellry(dungeon_level, game_state)
+    place_equipment(dungeon_level, game_state)
+    place_devices(dungeon_level, game_state)
 
 
 def place_piece_on_random_walkable_tile_not_on_item_or_feature(piece, dungeon_level):

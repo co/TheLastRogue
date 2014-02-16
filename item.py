@@ -1,6 +1,7 @@
 import random
 
 from action import Action
+from actor import DoNothingActor
 from cloud import new_steam_cloud, new_explosion_cloud
 from compositecore import Leaf, Composite
 from attacker import Attack, DamageTypes
@@ -44,11 +45,13 @@ class ItemType(Leaf):
         self.value = item_type
 
 
-def set_item_components(item):
+def set_item_components(item, game_state):
     item.set_child(Position())
+    item.set_child(DoNothingActor())
     item.set_child(DungeonLevel())
     item.set_child(Mover())
     item.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ITEM))
+    item.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
     item.set_child(CharPrinter())
     item.set_child(DropAction())
     item.set_child(PlayerThrowItemAction())
@@ -62,9 +65,9 @@ def set_ranged_weapon_components(item):
     item.set_child(ReEquipAction())
 
 
-def new_gun():
+def new_gun(game_state):
     gun = Composite()
-    set_item_components(gun)
+    set_item_components(gun, game_state)
     set_ranged_weapon_components(gun)
     gun.set_child(RangeWeaponType(RangeWeaponType.GUN))
     gun.set_child(Description("Gun",
@@ -81,9 +84,9 @@ def new_gun():
     return gun
 
 
-def new_sling():
+def new_sling(game_state):
     sling = Composite()
-    set_item_components(sling)
+    set_item_components(sling, game_state)
     set_ranged_weapon_components(sling)
     sling.set_child(RangeWeaponType(RangeWeaponType.SLING))
     sling.set_child(Description("Sling",
@@ -123,9 +126,9 @@ class Charge(Leaf):
         self.charges = charges
 
 
-def new_darkness_device():
+def new_darkness_device(game_state):
     device = Composite()
-    set_item_components(device)
+    set_item_components(device, game_state)
     set_device_components(device)
     device.set_child(Description("Device of Darkness",
                                  "This ancient device will dim the vision of all creatures on the floor."))
@@ -134,9 +137,9 @@ def new_darkness_device():
     return device
 
 
-def new_heart_stop_device():
+def new_heart_stop_device(game_state):
     device = Composite()
-    set_item_components(device)
+    set_item_components(device, game_state)
     set_device_components(device)
     device.set_child(Description("Dev. of Heart Stop",
                                  "This ancient device will cause a random creature on the floor to have a heart attack."))
@@ -241,12 +244,12 @@ class Stacker(Leaf):
         return self.size >= self.max_size
 
 
-def new_ammunition():
+def new_ammunition(game_state):
     """
     A composite component representing a gun ammunition item.
     """
     ammo = Composite()
-    set_item_components(ammo)
+    set_item_components(ammo, game_state)
     ammo.set_child(ItemType(ItemType.AMMO))
     ammo.set_child(Flag("is_ammo"))
     ammo.set_child(Stacker("ammo", 10, random.randrange(2, 6)))
@@ -278,12 +281,12 @@ def set_armor_components(item):
     return item
 
 
-def new_leather_armor():
+def new_leather_armor(game_state):
     """
     A composite component representing a Armor item.
     """
     armor = Composite()
-    set_item_components(armor)
+    set_item_components(armor, game_state)
     set_armor_components(armor)
     armor.set_child(Description("Leather Armor",
                                 "A worn leather armor. It's old, but should still protect you from some damage."))
@@ -294,12 +297,12 @@ def new_leather_armor():
     return armor
 
 
-def new_leather_boots():
+def new_leather_boots(game_state):
     """
     A composite component representing a Boots Armor item.
     """
     boots = Composite()
-    set_item_components(boots)
+    set_item_components(boots, game_state)
     set_armor_components(boots)
     boots.set_child(Description("Leather Boots",
                                 "A worn pair of boots, dry mud covers most of the leather."))
@@ -310,12 +313,12 @@ def new_leather_boots():
     return boots
 
 
-def new_leather_cap():
+def new_leather_cap(game_state):
     """
     A composite component representing a Armor item.
     """
     cap = Composite()
-    set_item_components(cap)
+    set_item_components(cap, game_state)
     set_armor_components(cap)
     cap.set_child(Description("Leather Cap",
                               "An old cap made out of leather, this should keep some harm away."))
@@ -332,12 +335,12 @@ def set_melee_weapon_component(item):
     item.set_child(ReEquipAction())
 
 
-def new_sword():
+def new_sword(game_state):
     """
     A composite component representing a Sword item.
     """
     sword = Composite()
-    set_item_components(sword)
+    set_item_components(sword, game_state)
     set_melee_weapon_component(sword)
     sword.set_child(Description("Iron Sword",
                                 "This old blade has seen some better days, it's as sharp as ever tough."))
@@ -348,12 +351,12 @@ def new_sword():
     return sword
 
 
-def new_knife():
+def new_knife(game_state):
     """
     A composite component representing a Knife item.
     """
     knife = Composite()
-    set_item_components(knife)
+    set_item_components(knife, game_state)
     set_melee_weapon_component(knife)
     knife.set_child(Description("Knife", "A trusty knife, small and precise but will only inflict small wounds."))
     knife.set_child(GraphicChar(None, colors.GRAY, icon.KNIFE))
@@ -370,9 +373,9 @@ def set_ring_components(item):
     item.set_child(DataPoint(DataTypes.WEIGHT, 2))
 
 
-def new_ring_of_invisibility():
+def new_ring_of_invisibility(game_state):
     ring = Composite()
-    set_item_components(ring)
+    set_item_components(ring, game_state)
     set_ring_components(ring)
     ring.set_child(GraphicChar(None, colors.CYAN, icon.RING))
     ring.set_child(SetInvisibilityFlagEquippedEffect())
@@ -382,9 +385,9 @@ def new_ring_of_invisibility():
     return ring
 
 
-def new_ring_of_evasion():
+def new_ring_of_evasion(game_state):
     ring = Composite()
-    set_item_components(ring)
+    set_item_components(ring, game_state)
     set_ring_components(ring)
     ring.set_child(GraphicChar(None, colors.GREEN, icon.RING))
     ring.set_child(StatBonusEquipEffect("evasion", 3))
@@ -394,9 +397,9 @@ def new_ring_of_evasion():
     return ring
 
 
-def new_ring_of_stealth():
+def new_ring_of_stealth(game_state):
     ring = Composite()
-    set_item_components(ring)
+    set_item_components(ring, game_state)
     set_ring_components(ring)
     ring.set_child(GraphicChar(None, colors.BLUE, icon.RING))
     ring.set_child(StatBonusEquipEffect("stealth", 3))
@@ -406,9 +409,9 @@ def new_ring_of_stealth():
     return ring
 
 
-def new_ring_of_strength():
+def new_ring_of_strength(game_state):
     ring = Composite()
-    set_item_components(ring)
+    set_item_components(ring, game_state)
     set_ring_components(ring)
     ring.set_child(GraphicChar(None, colors.ORANGE, icon.RING))
     ring.set_child(StatBonusEquipEffect("strength", 3))
@@ -453,9 +456,9 @@ def set_potion_components(item):
     #potion.set_child(Stacker("health_potion", 3))
 
 
-def new_health_potion():
+def new_health_potion(game_state):
     potion = Composite()
-    set_item_components(potion)
+    set_item_components(potion, game_state)
     set_potion_components(potion)
     potion.set_child(GraphicChar(None, colors.PINK, icon.POTION))
     potion.set_child(HealthPotionDrinkAction())
@@ -465,9 +468,9 @@ def new_health_potion():
     return potion
 
 
-def new_bomb():
+def new_bomb(game_state):
     bomb = Composite()
-    set_item_components(bomb)
+    set_item_components(bomb, game_state)
     bomb.set_child(ItemType(ItemType.BOMB))
     bomb.set_child(PlayerAutoPickUp())
     bomb.set_child(GraphicChar(None, colors.DARK_GRAY, icon.BOMB))

@@ -1,4 +1,6 @@
 from console import console
+from graphic import GraphicChar
+import icon
 import settings
 
 
@@ -50,3 +52,14 @@ def animate_point(game_state, position, graphic_chars):
         console.set_symbol((x, y), graphic_char.icon)
         for _ in range(settings.MISSILE_ANIMATION_DELAY):
             console.flush()
+
+
+def animate_fall(target_entity):
+    color_fg = target_entity.graphic_char.color_fg
+    target_entity.game_state.value.force_draw()
+    graphic_chars = [target_entity.graphic_char,
+                     GraphicChar(None, color_fg, icon.BIG_CENTER_DOT),
+                     GraphicChar(None, color_fg, "*"),
+                     GraphicChar(None, color_fg, "+"),
+                     GraphicChar(None, color_fg, icon.CENTER_DOT)]
+    animate_point(target_entity.game_state.value, target_entity.position.value, graphic_chars)

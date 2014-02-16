@@ -1,5 +1,5 @@
 import random
-import animation
+from animation import animate_fall
 from attacker import DamageTypes
 from compositecommon import EntityShareTileEffect
 from compositecore import Leaf, Composite
@@ -103,6 +103,7 @@ class Chasm(Composite):
         self.set_child(Flag("is_transparent"))
 
         self.set_child(PlayerFallDownChasmAction())
+        self.set_child(FallRemoveNonPlayer())
         self.set_child(PromptPlayerChasm())
 
 
@@ -124,6 +125,20 @@ class PromptPlayerChasm(PromptPlayer):
         self.component_type = "prompt_player_chasm"
 
 
+class FallRemoveNonPlayer(EntityShareTileEffect):
+    def __init__(self):
+        super(FallRemoveNonPlayer, self).__init__()
+        self.component_type = "non_player_fall_down_chasm_share_tile_effect"
+
+    def _effect(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        print "haha"
+        if not target_entity.has("is_player"):
+            animate_fall(target_entity)
+            target_entity.mover.try_remove_from_dungeon()
+            print "~_~"
+
+
 class PlayerFallDownChasmAction(EntityShareTileEffect):
     def __init__(self):
         super(PlayerFallDownChasmAction, self).__init__()
@@ -132,23 +147,13 @@ class PlayerFallDownChasmAction(EntityShareTileEffect):
     def _effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         if target_entity.has("is_player"):
-            self._animate_fall(target_entity)
+            animate_fall(target_entity)
             current_depth = target_entity.dungeon_level.value.depth
             dungeon = target_entity.dungeon_level.value.dungeon
             next_dungeon_level = dungeon.get_dungeon_level(current_depth + 1)
             target_position = next_dungeon_level.get_random_walkable_position_in_dungeon(target_entity)
             target_entity.mover.move_push_over(target_position, next_dungeon_level)
             self._fall_damage(target_entity)
-
-    def _animate_fall(self, target_entity):
-        color_fg = target_entity.graphic_char.color_fg
-        target_entity.game_state.value.force_draw()
-        graphic_chars = [target_entity.graphic_char,
-                         GraphicChar(None, color_fg, icon.BIG_CENTER_DOT),
-                         GraphicChar(None, color_fg, "*"),
-                         GraphicChar(None, color_fg, "+"),
-                         GraphicChar(None, color_fg, icon.CENTER_DOT)]
-        animation.animate_point(target_entity.game_state.value, target_entity.position.value, graphic_chars)
 
     def _fall_damage(self, target_entity):
         min_damage = 2

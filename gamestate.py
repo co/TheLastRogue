@@ -197,43 +197,43 @@ class TestGameState(GameStateBase):
         #amoeba.mover.try_move((26, 14), self.dungeon_level)
 
         for i in range(5):
-            bomb = item.new_bomb()
+            bomb = item.new_bomb(self)
             bomb.mover.try_move((18, 12 + i), self.dungeon_level)
 
-        potion = item.new_health_potion()
+        potion = item.new_health_potion(self)
         potion.mover.try_move((20, 12), self.dungeon_level)
 
-        ring1 = item.new_ring_of_evasion()
+        ring1 = item.new_ring_of_evasion(self)
         ring1.mover.try_move((24, 11), self.dungeon_level)
 
-        ring2 = item.new_ring_of_stealth()
+        ring2 = item.new_ring_of_stealth(self)
         ring2.mover.try_move((25, 11), self.dungeon_level)
 
-        ring3 = item.new_ring_of_strength()
+        ring3 = item.new_ring_of_strength(self)
         ring3.mover.try_move((26, 11), self.dungeon_level)
 
-        device1 = item.new_darkness_device()
+        device1 = item.new_darkness_device(self)
         device1.mover.try_move((24, 12), self.dungeon_level)
 
-        device2 = item.new_heart_stop_device()
+        device2 = item.new_heart_stop_device(self)
         device2.mover.try_move((25, 12), self.dungeon_level)
 
-        gun = item.new_gun()
+        gun = item.new_gun(self)
         gun.mover.try_move((20, 13), self.dungeon_level)
 
-        sling = item.new_sling()
+        sling = item.new_sling(self)
         sling.mover.try_move((20, 14), self.dungeon_level)
 
-        sword = item.new_sword()
+        sword = item.new_sword(self)
         sword.mover.try_move((19, 13), self.dungeon_level)
 
-        armor = item.new_leather_armor()
+        armor = item.new_leather_armor(self)
         armor.mover.try_move((21, 10), self.dungeon_level)
 
-        boots = item.new_leather_boots()
+        boots = item.new_leather_boots(self)
         boots.mover.try_move((22, 10), self.dungeon_level)
 
-        cap = item.new_leather_cap()
+        cap = item.new_leather_cap(self)
         cap.mover.try_move((23, 10), self.dungeon_level)
 
         #rat = monster.new_ratman(self)
@@ -267,11 +267,11 @@ class TestGameState(GameStateBase):
         #jericho.mover.try_move((56, 14), self.dungeon_level)
 
         for i in range(5):
-            ammo = item.new_ammunition()
+            ammo = item.new_ammunition(self)
             ammo.mover.try_move((21 + i, 13), self.dungeon_level)
 
         for i in range(23):
-            knife = item.new_knife()
+            knife = item.new_knife(self)
             knife.mover.try_move((10 + i, 23), self.dungeon_level)
 
 
