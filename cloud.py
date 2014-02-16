@@ -14,6 +14,7 @@ from mover import Mover
 from position import Position, DungeonLevel
 import rng
 from stats import DataTypes, DataPoint, GamePieceTypes, DataPointBonusSpoof
+from statusflags import StatusFlags
 from text import Description
 import turn
 
@@ -33,6 +34,7 @@ def set_cloud_components(cloud, density):
     cloud.set_child(Mover())
     cloud.set_child(GraphicChar(None, None, 178))
     cloud.set_child(DataPoint(DataTypes.DENSITY, density))
+    cloud.set_child(StatusFlags([StatusFlags.FLYING]))
 
 
 def new_steam_cloud(density):
@@ -88,7 +90,7 @@ class FireDamageShareTileEffect(EntityShareTileEffect):
         self.component_type = "fire_damage_share_tile_effect"
         self.damage_types = [DamageTypes.FIRE]
 
-    def _effect(self, **kwargs):
+    def effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
         damage_mid = 5
@@ -107,7 +109,7 @@ class AddSpoofChildShareEntityEffect(EntityShareTileEffect):
     def __init__(self):
         super(AddSpoofChildShareEntityEffect, self).__init__()
 
-    def _effect(self, **kwargs):
+    def effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         if not target_entity.has("effect_queue"):
             return
@@ -140,7 +142,7 @@ class ExplosionDamageShareTileEffect(EntityShareTileEffect):
         super(ExplosionDamageShareTileEffect, self).__init__()
         self.component_type = "explosion_damage_share_tile_effect"
 
-    def _effect(self, **kwargs):
+    def effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
         damage_mid = 20

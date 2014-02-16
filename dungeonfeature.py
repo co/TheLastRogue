@@ -82,7 +82,7 @@ class StuckInSpiderWebShareTileEffect(EntityShareTileEffect):
         super(StuckInSpiderWebShareTileEffect, self).__init__()
         self.component_type = "stuck_in_spider_web_share_tile_effect"
 
-    def _effect(self, **kwargs):
+    def effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
 

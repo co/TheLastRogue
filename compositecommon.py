@@ -11,8 +11,12 @@ class EntityShareTileEffect(Leaf):
         self.tags.add("entity_share_tile_effect")
 
     def share_tile_effect_tick(self, sharing_entity, time_spent):
-        if not sharing_entity is self.parent:
-            self._effect(source_entity=self.parent, target_entity=sharing_entity, time=time_spent)
+        if (not sharing_entity is self.parent and
+                self.can_effect(source_entity=self.parent, target_entity=sharing_entity, time=time_spent)):
+            self.effect(source_entity=self.parent, target_entity=sharing_entity, time=time_spent)
 
-    def _effect(self, **kwargs):
+    def effect(self, **kwargs):
         pass
+
+    def can_effect(self, **kwargs):
+        return True

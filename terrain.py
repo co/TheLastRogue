@@ -103,7 +103,7 @@ class Chasm(Composite):
         self.set_child(Flag("is_transparent"))
 
         self.set_child(PlayerFallDownChasmAction())
-        self.set_child(FallRemoveNonPlayer())
+        self.set_child(FallRemoveNonPlayerNonFlying())
         self.set_child(PromptPlayerChasm())
 
 
@@ -125,18 +125,22 @@ class PromptPlayerChasm(PromptPlayer):
         self.component_type = "prompt_player_chasm"
 
 
-class FallRemoveNonPlayer(EntityShareTileEffect):
+class FallRemoveNonPlayerNonFlying(EntityShareTileEffect):
     def __init__(self):
-        super(FallRemoveNonPlayer, self).__init__()
+        super(FallRemoveNonPlayerNonFlying, self).__init__()
         self.component_type = "non_player_fall_down_chasm_share_tile_effect"
 
-    def _effect(self, **kwargs):
+    def effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
-        print "haha"
-        if not target_entity.has("is_player"):
-            animate_fall(target_entity)
-            target_entity.mover.try_remove_from_dungeon()
-            print "~_~"
+        animate_fall(target_entity)
+        target_entity.mover.try_remove_from_dungeon()
+
+    def can_effect(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        if target_entity.has("status_flags"):
+            return not target_entity.has("is_player") and not target_entity.status_flags.has_status(StatusFlags.FLYING)
+        else:
+            return not target_entity.has("is_player")
 
 
 class PlayerFallDownChasmAction(EntityShareTileEffect):
@@ -144,16 +148,19 @@ class PlayerFallDownChasmAction(EntityShareTileEffect):
         super(PlayerFallDownChasmAction, self).__init__()
         self.component_type = "player_fall_down_chasm_share_tile_effect"
 
-    def _effect(self, **kwargs):
+    def effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
-        if target_entity.has("is_player"):
-            animate_fall(target_entity)
-            current_depth = target_entity.dungeon_level.value.depth
-            dungeon = target_entity.dungeon_level.value.dungeon
-            next_dungeon_level = dungeon.get_dungeon_level(current_depth + 1)
-            target_position = next_dungeon_level.get_random_walkable_position_in_dungeon(target_entity)
-            target_entity.mover.move_push_over(target_position, next_dungeon_level)
-            self._fall_damage(target_entity)
+        animate_fall(target_entity)
+        current_depth = target_entity.dungeon_level.value.depth
+        dungeon = target_entity.dungeon_level.value.dungeon
+        next_dungeon_level = dungeon.get_dungeon_level(current_depth + 1)
+        target_position = next_dungeon_level.get_random_walkable_position_in_dungeon(target_entity)
+        target_entity.mover.move_push_over(target_position, next_dungeon_level)
+        self._fall_damage(target_entity)
+
+    def can_effect(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        return target_entity.has("is_player") and not target_entity.status_flags.has_status(StatusFlags.FLYING)
 
     def _fall_damage(self, target_entity):
         min_damage = 2

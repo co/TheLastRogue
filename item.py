@@ -451,7 +451,7 @@ class SetInvisibilityFlagEquippedEffect(EquippedEffect):
 def set_potion_components(item):
     item.set_child(ItemType(ItemType.POTION))
     item.set_child(PlayerAutoPickUp())
-    item.set_child(ThrowerCreateSteam())
+    item.set_child(ThrowerBreakCreateSteam())
     item.set_child(DataPoint(DataTypes.WEIGHT, 4))
     #potion.set_child(Stacker("health_potion", 3))
 
@@ -473,7 +473,7 @@ def new_bomb(game_state):
     set_item_components(bomb, game_state)
     bomb.set_child(ItemType(ItemType.BOMB))
     bomb.set_child(PlayerAutoPickUp())
-    bomb.set_child(GraphicChar(None, colors.DARK_GRAY, icon.BOMB))
+    bomb.set_child(GraphicChar(None, colors.GRAY_D, icon.BOMB))
     bomb.set_child(DataPoint(DataTypes.WEIGHT, 4))
     bomb.set_child(Description("Bomb",
                                "A ball filled gunpowder, with a fuse attached."
@@ -758,6 +758,12 @@ class Thrower(Leaf):
         """
         pass
 
+    """
+    When the floor is a chasm it should not break the chasm will take care of the fall.
+    """
+    def _non_break(self, dungeon_level, position):
+        self.parent.mover.try_move(position, dungeon_level)
+
 
 class ThrowerNonBreak(Thrower):
     """
@@ -773,7 +779,7 @@ class ThrowerNonBreak(Thrower):
 
         position: The point at which the item hits the ground.
         """
-        self.parent.mover.try_move(position, dungeon_level)
+        self._non_break(dungeon_level, position)
         message = "The " + self.parent.description.name.lower() + \
                   " hits the ground with a thud."
         msg.send_visual_message(message, position)
@@ -788,20 +794,39 @@ class ThrowerBreak(Thrower):
         super(ThrowerBreak, self).__init__()
 
     def throw_effect(self, dungeon_level, position):
+        if is_hitting_ground(dungeon_level, position):
+            self._break_effect(dungeon_level, position)
+        else:
+            self._non_break(dungeon_level, position)
+
+    def _break_effect(self, dungeon_level, position):
         message = "The " + self.parent.description.name.lower() + \
                   " smashes to the ground and breaks into pieces."
         msg.send_visual_message(message, position)
 
+    def _non_break(self, dungeon_level, position):
+        """
+        When the floor is a chasm it should not break the chasm will take care of the fall.
+        """
+        self.parent.mover.try_move(position, dungeon_level)
+        message = "The " + self.parent.description.name.lower() + \
+                  " hits the ground with a thud."
+        msg.send_visual_message(message, position)
 
-class ThrowerCreateSteam(Thrower):
+
+def is_hitting_ground(dungeon_level, position):
+    return not dungeon_level.get_tile_or_unknown(position).get_terrain().has("is_chasm")
+
+
+class ThrowerBreakCreateSteam(ThrowerBreak):
     """
     Items with this component will create and create a puff of steam.
     """
 
     def __init__(self):
-        super(ThrowerCreateSteam, self).__init__()
+        super(ThrowerBreakCreateSteam, self).__init__()
 
-    def throw_effect(self, dungeon_level, position):
+    def _break_effect(self, dungeon_level, position):
         message = "The " + self.parent.description.name.lower() + \
                   " smashes to the ground and breaks into pieces."
         msg.send_visual_message(message, position)
@@ -809,7 +834,7 @@ class ThrowerCreateSteam(Thrower):
         steam.mover.try_move(position, dungeon_level)
 
 
-class ThrowerCreateExplosion(Thrower):
+class ThrowerCreateExplosion(ThrowerBreak):
     """
     Items with this component will create and create a puff of steam.
     """
@@ -817,7 +842,7 @@ class ThrowerCreateExplosion(Thrower):
     def __init__(self):
         super(ThrowerCreateExplosion, self).__init__()
 
-    def throw_effect(self, dungeon_level, position):
+    def _break_effect(self, dungeon_level, position):
         message = "The " + self.parent.description.name.lower() + " Explodes!."
         msg.send_visual_message(message, position)
         explosion = new_explosion_cloud(1)

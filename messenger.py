@@ -26,6 +26,8 @@ BREAKS_OUT_OF_WEB_MESSAGE = "%(target_entity)s breaks free."
 WANT_TO_JUMP_DOWN_CHASM = "Are you sure you want to drop down the chasm?"
 PRESS_ENTER_TO_ACCEPT = "Press ENTER to accept, another key to reject."
 
+POTION_SMASH_TO_GROUND = message = "The %(target_entity)s hits the ground with a thud."
+
 
 class Messenger(object):
     def __init__(self):

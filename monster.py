@@ -554,7 +554,7 @@ class DissolveEntitySlimeShareTileEffect(EntityShareTileEffect):
         super(DissolveEntitySlimeShareTileEffect, self).__init__()
         self.component_type = "dissolve_entity_slime_share_tile_effect"
 
-    def _effect(self, **kwargs):
+    def effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
         strength = source_entity.strength.value
@@ -621,7 +621,7 @@ class BlockVisionShareTileEffect(EntityShareTileEffect):
         super(BlockVisionShareTileEffect, self).__init__()
         self.component_type = "block_vision_share_tile_effect"
 
-    def _effect(self, **kwargs):
+    def effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
         source_entity = kwargs["source_entity"]
         if target_entity.has("effect_queue"):

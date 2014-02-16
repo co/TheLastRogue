@@ -37,7 +37,7 @@ class Dungeon(object):
             jericho = monster.new_jericho(self.game_state)
             spawner.place_piece_on_random_walkable_tile(jericho, dungeon_level)
 
-        spawner.place_items_in_dungeon(dungeon_level)
+        spawner.place_items_in_dungeon(dungeon_level, self.game_state)
 
         #dungeon_level.print_statistics()
 

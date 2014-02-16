@@ -56,6 +56,8 @@ def animate_point(game_state, position, graphic_chars):
 
 def animate_fall(target_entity):
     color_fg = target_entity.graphic_char.color_fg
+    print target_entity._children
+    print target_entity.description.name
     target_entity.game_state.value.force_draw()
     graphic_chars = [target_entity.graphic_char,
                      GraphicChar(None, color_fg, icon.BIG_CENTER_DOT),
