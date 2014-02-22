@@ -121,7 +121,7 @@ def new_spider(gamestate):
     spider.set_child(EntityMessages("The spider looks at you.", "The spider stops moving."))
     spider.set_child(GraphicChar(None, colors.CHAMPAGNE_D, icon.SPIDER))
 
-    spider.set_child(Health(7))
+    spider.set_child(Health(9))
     spider.set_child(DataPoint(DataTypes.STRENGTH, 1))
     spider.set_child(DataPoint(DataTypes.EVASION, 13))
     spider.set_child(DataPoint(DataTypes.HIT, 5))
@@ -130,7 +130,7 @@ def new_spider(gamestate):
 
     spider.set_child(MakeSpiderWebs())
     spider.set_child(Flag(Immunities.SPIDER_WEB))
-    spider.set_child(UnArmedHitTargetEntityEffectFactory(PoisonEntityEffectFactory(spider, 1, 3,
+    spider.set_child(UnArmedHitTargetEntityEffectFactory(PoisonEntityEffectFactory(spider, 1, 2,
                                                                                    random.randrange(9, 18))))
     spider.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 3))
     return spider
@@ -145,11 +145,11 @@ def new_dust_demon(gamestate):
     demon.set_child(EntityMessages("The dust demon notices you.", "The demon falls to the ground."))
     demon.set_child(GraphicChar(None, colors.GRAY, "i"))
 
-    demon.set_child(Health(12))
-    demon.set_child(DataPoint(DataTypes.STRENGTH, 5))
-    demon.set_child(DataPoint(DataTypes.EVASION, 12))
+    demon.set_child(Health(10))
+    demon.set_child(DataPoint(DataTypes.STRENGTH, 4))
+    demon.set_child(DataPoint(DataTypes.EVASION, 11))
     demon.set_child(DataPoint(DataTypes.HIT, 25))
-    demon.set_child(DataPoint(DataTypes.ARMOR, 8))
+    demon.set_child(DataPoint(DataTypes.ARMOR, 7))
     demon.set_child(DataPoint(DataTypes.AWARENESS, 4))
 
     demon.set_child(MakeDustClouds())
@@ -174,6 +174,7 @@ def new_armored_beetle(gamestate):
     beetle.set_child(DataPoint(DataTypes.ARMOR, 20))
     beetle.set_child(DataPoint(DataTypes.AWARENESS, 3))
 
+    beetle.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn + gametime.one_third_turn))
     beetle.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 4))
 
     beetle.set_child(KnockBackAttacker())
@@ -387,7 +388,7 @@ class MakeDustClouds(Leaf):
     def _spawn_dust_cloud(self):
         my_position = self.parent.position.value
         dungeon_level = self.parent.dungeon_level.value
-        dust = new_dust_cloud(24)
+        dust = new_dust_cloud(self.parent.game_state.value, 24)
         dust.mover.replace_move(my_position, dungeon_level)
 
     def after_tick(self, time):
@@ -449,7 +450,7 @@ class PutAdjacentTilesOnFire(Leaf):
         for d in direction.DIRECTIONS:
             point = geometry.add_2d(my_position, d)
             dungeon_level = self.parent.dungeon_level.value
-            fire = new_fire_cloud(random.randrange(6, 10))
+            fire = new_fire_cloud(self.parent.game_state.value, random.randrange(6, 10))
             if (random.random() < chance and len(dungeon_level.get_tile_or_unknown(point).get_entities()) == 0 and
                     fire.mover.can_move(point, dungeon_level)):
                 animate_flight(self.parent.game_state.value, [my_position, point],
