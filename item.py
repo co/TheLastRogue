@@ -830,7 +830,7 @@ class ThrowerBreakCreateSteam(ThrowerBreak):
         message = "The " + self.parent.description.name.lower() + \
                   " smashes to the ground and breaks into pieces."
         msg.send_visual_message(message, position)
-        steam = new_steam_cloud(32)
+        steam = new_steam_cloud(self.parent.game_state.value, 32)
         steam.mover.try_move(position, dungeon_level)
 
 
@@ -845,7 +845,8 @@ class ThrowerCreateExplosion(ThrowerBreak):
     def _break_effect(self, dungeon_level, position):
         message = "The " + self.parent.description.name.lower() + " Explodes!."
         msg.send_visual_message(message, position)
-        explosion = new_explosion_cloud(1)
+        game_state = self.parent.game_state.value
+        explosion = new_explosion_cloud(game_state, 1)
         explosion.graphic_char.color_fg = colors.YELLOW
         explosion.mover.replace_move(position, dungeon_level)
         for d in direction.DIRECTIONS:
@@ -854,7 +855,7 @@ class ThrowerCreateExplosion(ThrowerBreak):
             else:
                 color = colors.RED
             point = geometry.add_2d(d, position)
-            explosion = new_explosion_cloud(1)
+            explosion = new_explosion_cloud(game_state, 1)
             explosion.graphic_char.color_fg = color
             explosion.mover.replace_move(point, dungeon_level)
 

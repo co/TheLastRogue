@@ -26,8 +26,9 @@ class CloudTypes:
     DUST = "dust"
 
 
-def set_cloud_components(cloud, density):
+def set_cloud_components(game_state, cloud, density):
     cloud.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.CLOUD))
+    cloud.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
     cloud.set_child(CharPrinter())
     cloud.set_child(Position())
     cloud.set_child(DungeonLevel())
@@ -37,9 +38,9 @@ def set_cloud_components(cloud, density):
     cloud.set_child(StatusFlags([StatusFlags.FLYING]))
 
 
-def new_steam_cloud(density):
+def new_steam_cloud(game_state, density):
     steam = Composite()
-    set_cloud_components(steam, density)
+    set_cloud_components(game_state, steam, density)
     steam.graphic_char.color_fg = colors.WHITE
     steam.set_child(CloudActor())
     steam.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_steam_cloud))
@@ -47,9 +48,9 @@ def new_steam_cloud(density):
     return steam
 
 
-def new_dust_cloud(density):
+def new_dust_cloud(game_state, density):
     cloud = Composite()
-    set_cloud_components(cloud, density)
+    set_cloud_components(game_state, cloud, density)
     cloud.graphic_char.color_fg = colors.LIGHT_ORANGE
     cloud.set_child(CloudActor())
     cloud.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_dust_cloud))
@@ -59,9 +60,9 @@ def new_dust_cloud(density):
     return cloud
 
 
-def new_explosion_cloud(density):
+def new_explosion_cloud(game_state, density):
     explosion = Composite()
-    set_cloud_components(explosion, density)
+    set_cloud_components(game_state, explosion, density)
     explosion.graphic_char.color_fg = colors.YELLOW
     explosion.set_child(Description("Explosion", "Don't go near it."))
     explosion.set_child(DisappearCloudActor())
@@ -71,9 +72,14 @@ def new_explosion_cloud(density):
     return explosion
 
 
-def new_fire_cloud(density):
+def set_non_flying_cloud_components(cloud):
+    cloud.set_child(StatusFlags([]))
+
+
+def new_fire_cloud(game_state, density):
     fire = Composite()
-    set_cloud_components(fire, density)
+    set_cloud_components(game_state, fire, density)
+    set_non_flying_cloud_components(fire)
     fire.graphic_char.icon = icon.SPIDER + 1
     fire.graphic_char.color_fg = colors.RED
     fire.set_child(Description("Fire", "Don't get burnt."))
@@ -183,7 +189,7 @@ class CloudActor(Actor):
     def _float_to_position(self, position, density):
         original_cloud = self.parent.dungeon_level.value.get_tile_or_unknown(position).get_first_cloud()
         if original_cloud is None:
-            new_cloud = self.parent.clone_function.value(density)
+            new_cloud = self.parent.clone_function.value(self.parent.game_state.value, density)
             new_cloud.mover.try_move(position, self.parent.dungeon_level.value)
             self.parent.density.value -= density
         elif original_cloud.cloud_type.value == self.parent.cloud_type.value:
@@ -211,52 +217,3 @@ class CloudActor(Actor):
                 self._float_to_position(neighbour, density_per_tile)
             if self.parent.density.value < density_per_tile:
                 break
-
-#class Cloud(actor.Actor):
-#    def __init__(self, density):
-#        super(Cloud, self).__init__()
-#        self.energy = 0
-#        self.energy_recovery = gametime.normal_energy_gain
-#        self.piece_type = gamepiece.GamePieceType.CLOUD
-#        self.max_instances_in_single_tile = 1
-#        self.density = density
-#        self.gfx_char.symbol = 178
-#        self.gfx_char.color_fg = colors.WHITE
-#
-#    def act(self):
-#        return 0
-#
-#    def piece_copy(self, copy=None):
-#        if(copy is None):
-#            copy = self.__class__(self.density)
-#        return super(Cloud, self).piece_copy(copy)
-#
-#
-#class Steam(Cloud):
-#    def __init__(self, density):
-#        super(Steam, self).__init__(density)
-#
-#    def _float_to_position(self, position, density_of_gust):
-#        original_cloud =\
-#            self.dungeon_level.get_tile_or_unknown(position).get_first_cloud()
-#        if(original_cloud is None):
-#            new_cloud = Steam(density_of_gust)
-#            new_cloud.try_move(position, self.dungeon_level)
-#        else:
-#            original_cloud.density += density_of_gust
-#        self.density -= density_of_gust
-#
-#    def act(self):
-#        if(self.density < 2):
-#            self.try_remove_from_dungeon()
-#            return gametime.single_turn
-#
-#        density_per_gust = max(self.density / 5, 1)
-#        neighbours = [geo.add_2d(offset, self.position)
-#                      for offset in direction.AXIS_DIRECTIONS]
-#        for neighbour in neighbours:
-#            if not (rng.coin_flip() and rng.coin_flip()):
-#                self._float_to_position(neighbour, density_per_gust)
-#            if self.density < density_per_gust:
-#                break
-#        return gametime.single_turn

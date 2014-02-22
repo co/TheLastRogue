@@ -54,7 +54,7 @@ def animate_point(game_state, position, graphic_chars):
             console.flush()
 
 
-def animate_fall(target_entity):
+def animate_fall_sync(target_entity):
     color_fg = target_entity.graphic_char.color_fg
     print target_entity._children
     print target_entity.description.name
@@ -65,3 +65,14 @@ def animate_fall(target_entity):
                      GraphicChar(None, color_fg, "+"),
                      GraphicChar(None, color_fg, icon.CENTER_DOT)]
     animate_point(target_entity.game_state.value, target_entity.position.value, graphic_chars)
+
+
+def animate_fall(target_entity, animation_target_piece):
+    color_fg = target_entity.graphic_char.color_fg
+    target_entity.game_state.value.force_draw()
+    graphic_chars = [target_entity.graphic_char,
+                     GraphicChar(None, color_fg, icon.BIG_CENTER_DOT),
+                     GraphicChar(None, color_fg, "*"),
+                     GraphicChar(None, color_fg, "+"),
+                     GraphicChar(None, color_fg, icon.CENTER_DOT)]
+    animation_target_piece.char_printer.append_graphic_char_temporary_frames(graphic_chars)

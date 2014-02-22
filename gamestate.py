@@ -184,11 +184,11 @@ class TestGameState(GameStateBase):
         self.player.mover.try_move(start_position, self.dungeon_level)
         self.camera.center_on_entity(self.player)
 
-        cloud = new_steam_cloud(32)
+        cloud = new_steam_cloud(self, 32)
         cloud.mover.try_move((16, 10), self.dungeon_level)
 
-        demon = monster.new_dust_demon(self)
-        demon.mover.try_move((24, 16), self.dungeon_level)
+        #demon = monster.new_dust_demon(self)
+        #demon.mover.try_move((24, 16), self.dungeon_level)
 
         #beetle = monster.new_armored_beetle(self)
         #beetle.mover.try_move((25, 16), self.dungeon_level)
@@ -239,11 +239,14 @@ class TestGameState(GameStateBase):
         #rat = monster.new_ratman(self)
         #rat.mover.try_move((20, 8), self.dungeon_level)
 
-        #salamander = monster.new_salamander(self)
-        #salamander.mover.try_move((25, 10), self.dungeon_level)
+        salamander = monster.new_salamander(self)
+        salamander.mover.try_move((25, 10), self.dungeon_level)
 
         #slime = monster.new_slime(self)
         #slime.mover.try_move((25, 12), self.dungeon_level)
+
+        #spider = monster.new_spider(self)
+        #spider.mover.try_move((26, 12), self.dungeon_level)
 #
 #        ghost = monster.new_ghost(self)
 #        ghost.mover.try_move((21, 8), self.dungeon_level)

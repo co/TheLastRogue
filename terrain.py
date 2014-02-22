@@ -1,5 +1,5 @@
 import random
-from animation import animate_fall
+from animation import animate_fall, animate_fall_sync
 from attacker import DamageTypes
 from compositecommon import EntityShareTileEffect
 from compositecore import Leaf, Composite
@@ -132,7 +132,8 @@ class FallRemoveNonPlayerNonFlying(EntityShareTileEffect):
 
     def effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
-        animate_fall(target_entity)
+        terrain = target_entity.dungeon_level.value.get_tile_or_unknown(target_entity.position.value).get_terrain()
+        animate_fall(target_entity, terrain)
         target_entity.mover.try_remove_from_dungeon()
 
     def can_effect(self, **kwargs):
@@ -150,7 +151,7 @@ class PlayerFallDownChasmAction(EntityShareTileEffect):
 
     def effect(self, **kwargs):
         target_entity = kwargs["target_entity"]
-        animate_fall(target_entity)
+        animate_fall_sync(target_entity)
         current_depth = target_entity.dungeon_level.value.depth
         dungeon = target_entity.dungeon_level.value.dungeon
         next_dungeon_level = dungeon.get_dungeon_level(current_depth + 1)
