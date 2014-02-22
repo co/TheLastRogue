@@ -175,7 +175,7 @@ class BleedWhenDamaged(DamageTakenEffect):
         the_terrain = dungeon_level.get_tile_or_unknown(position).get_terrain()
         if isinstance(the_terrain, terrain.Wall):
             the_terrain.graphic_char.color_fg = colors.RED
-        else:
+        elif not the_terrain.has("is_chasm"):
             spawn_blood_on_position(position, dungeon_level)
 
     def effect(self, damage, source_entity):

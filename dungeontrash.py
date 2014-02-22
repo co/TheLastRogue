@@ -37,9 +37,7 @@ class PoolOfBlood(Composite):
         self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_TRASH))
         self.set_child(Position())
         self.set_child(DungeonLevel())
-        self.set_child(Description("A pool of blood.",
-                                   "A pool of blood."))
-        self.set_child(GraphicChar(None, colors.RED,
-                                   random.choice(icon.BLOOD_ICONS)))
+        self.set_child(Description("A pool of blood.", "A pool of blood."))
+        self.set_child(GraphicChar(None, colors.RED, random.choice(icon.BLOOD_ICONS)))
         self.set_child(CharPrinter())
         self.set_child(Mover())
