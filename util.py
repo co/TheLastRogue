@@ -126,3 +126,8 @@ def _get_walkable_neighbors_or_unseen(position, entity, dungeon_level):
 def entity_skip_turn(source_entity, target_entity):
     add_spoof_effect = AddSpoofChild(source_entity, DoNothingActor(), gametime.single_turn)
     target_entity.effect_queue.add(add_spoof_effect)
+
+
+def entity_skip_step(source_entity, target_entity):
+    add_spoof_effect = AddSpoofChild(source_entity, ImmobileStepper(), gametime.single_turn)
+    target_entity.effect_queue.add(add_spoof_effect)

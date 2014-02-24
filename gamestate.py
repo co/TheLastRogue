@@ -43,8 +43,6 @@ class GameStateBase(state.State):
         self._init_caches_and_flags()
         messenger.msg.send_global_message("Welcome to The Last Rogue!")
 
-        self._gui_last_update_timestamp = -1
-
     def _init_caches_and_flags(self):
         """
         Sets up all variables for a new gamestate instance
@@ -62,6 +60,8 @@ class GameStateBase(state.State):
                                                                          constants.GAME_STATE_HEIGHT)
         self.first_round = True
         self._init_bg()
+
+        self._gui_last_update_timestamp = -1
 
     def __getstate__(self):
         state = {

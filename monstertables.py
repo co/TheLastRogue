@@ -1,5 +1,5 @@
 import random
-from monster import new_ratman, new_ghost, new_slime, new_dark_slime, new_dust_demon, new_spider, new_salamander, new_cyclops, AddGhostReviveToSeenEntities
+from monster import new_ratman, new_ghost, new_slime, new_dark_slime, new_dust_demon, new_spider, new_salamander, new_cyclops, AddGhostReviveToSeenEntities, new_pixie, new_armored_beetle
 
 
 class DungeonTableItem(object):
@@ -17,6 +17,8 @@ dungeon_table =\
         [DungeonTableItem(new_ghost)] * 8 +
         [DungeonTableItem(new_slime)] * 3 +
         [DungeonTableItem(new_dark_slime)] * 2 +
+        [DungeonTableItem(new_pixie)] * 2 +
+        [DungeonTableItem(new_armored_beetle)] * 3 +
         [DungeonTableItem(new_dust_demon)] * 5 +
         [DungeonTableItem(new_spider)] * 15 +
         [DungeonTableItem(new_salamander)] * 3 +

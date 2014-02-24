@@ -14,7 +14,7 @@ from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
 import messenger
-from missileaction import MonsterThrowStoneAction, MonsterMagicRangeAction, MonsterThrowRockAction, SpiritMissile, MonsterHealTargetEntityEffect, MonsterTripTargetEffect
+from missileaction import MonsterThrowStoneAction, MonsterThrowRockAction, SpiritMissile, MonsterHealTargetEntityEffect, MonsterTripTargetEffect
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor, MonsterWeightedStepAction
 from mover import Mover, Stepper, SlimeCanShareTileEntityMover, ImmobileStepper, CautiousStepper, TolerateDamage
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
@@ -24,7 +24,7 @@ from stats import Flag, UnArmedHitTargetEntityEffectFactory, DataPoint, DataType
 from stats import GamePieceTypes
 from statusflags import StatusFlags
 from text import Description, EntityMessages
-from util import entity_skip_turn
+from util import entity_skip_turn, entity_skip_step
 from vision import Vision, AwarenessChecker
 import colors
 from equipment import Equipment
@@ -296,7 +296,7 @@ def new_pixie(gamestate):
     pixie.set_child(KeepPlayerAtDistanceActor(4))
     pixie.set_child(MonsterHealTargetEntityEffect(50))
     pixie.set_child(MonsterTripTargetEffect(50))
-    pixie.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 7))
+    pixie.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 6))
     return pixie
 
 
@@ -385,18 +385,18 @@ class MakeDustClouds(Leaf):
         self.time_interval = gametime.single_turn
         self.time_to_next_attempt = self.time_interval
 
-    def _spawn_dust_cloud(self):
-        my_position = self.parent.position.value
-        dungeon_level = self.parent.dungeon_level.value
-        dust = new_dust_cloud(self.parent.game_state.value, 24)
-        dust.mover.replace_move(my_position, dungeon_level)
-
-    def after_tick(self, time):
+    def on_tick(self, time):
         self.time_to_next_attempt -= time
         if self.time_to_next_attempt > 0:
             return
         self._spawn_dust_cloud()
         self.time_to_next_attempt = self.time_interval
+
+    def _spawn_dust_cloud(self):
+        my_position = self.parent.position.value
+        dungeon_level = self.parent.dungeon_level.value
+        dust = new_dust_cloud(self.parent.game_state.value, 24)
+        dust.mover.replace_move(my_position, dungeon_level)
 
 
 class MakeSpiderWebs(Leaf):
@@ -518,7 +518,7 @@ class ReviveAsGhostOnDeath(Leaf):
             ghost.mover.replace_move(self.parent.position.value, self.parent.dungeon_level.value)
             self._animate(ghost)
             self._send_revive_message()
-            _skip_turn(ghost)
+            entity_skip_step(ghost, ghost)
 
     def _animate(self, ghost):
         ghost.char_printer.append_default_graphic_frame()
@@ -529,12 +529,6 @@ class ReviveAsGhostOnDeath(Leaf):
             messenger.HAUNT_MESSAGE % {"source_entity": self.source_entity.description.name,
                                        "target_entity": self.parent.description.name},
             self.parent.position.value)
-
-
-def _skip_turn(entity):
-    immobile_stepper = ImmobileStepper()
-    add_spoof_effect = AddSpoofChild(entity, immobile_stepper, gametime.single_turn)
-    entity.effect_queue.add(add_spoof_effect)
 
 
 class SplitAtFullHealth(Component):
@@ -596,14 +590,9 @@ class StuckInSlimeStepperSpoof(Stepper):
         if rng.stat_check(my_strength, slime_strength + 8):
             self._split_slime(geometry.sub_2d(self._slime.position.value, position))
             entity_skip_turn(self.parent, self._slime)
-            self._make_slime_skip_turn()
+            entity_skip_step(self.parent, self._slime)
             return self.next.try_move_or_bump(position)
         return self.parent.movement_speed.value
-
-    def _make_slime_skip_turn(self):
-        immobile_stepper = ImmobileStepper()
-        add_spoof_effect = AddSpoofChild(self.parent, immobile_stepper, gametime.single_turn)
-        self._slime.effect_queue.add(add_spoof_effect)
 
     def _split_slime(self, split_direction):
         if self._slime.health.hp.value < 3:

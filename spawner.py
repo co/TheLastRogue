@@ -71,7 +71,7 @@ def place_equipment(dungeon_level, game_state):
     for _ in range(random.randrange(depth + 1)):
         if rng.coin_flip():
             if rng.coin_flip() and rng.coin_flip() and rng.coin_flip():  # Rare equipment.
-                equipment = random.choice([item.new_sword(), item.new_gun()])
+                equipment = random.choice([item.new_sword(game_state), item.new_gun(game_state)])
             else:  # Common equipment.
                 equipment = random.choice([item.new_leather_boots(game_state), item.new_leather_cap(game_state),
                                            item.new_leather_armor(game_state), item.new_knife(game_state),
