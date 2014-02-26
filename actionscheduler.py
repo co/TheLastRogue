@@ -20,19 +20,24 @@ class ActionScheduler(object):
     def release(self, actor):
         self._actors.remove(actor)
 
+    def prepare_tick(self, entity):
+        entity.reset_spoofed_children()
+        if entity.has("effect_queue"):
+            entity.effect_queue.update(gametime.normal_energy_gain)
+
     def _actors_tick(self):
         if len(self._actors) > 0:
-            actor = self._actors[0].actor
-            actor.parent.before_tick(gametime.normal_energy_gain)
-            actor = self._actors[0].actor  # Resets the actor in case the before tick removed an actor spoof.
-            self.on_tick(actor)
-            actor.tick()
-            actor.parent.on_tick(gametime.normal_energy_gain)
-            actor.parent.after_tick(gametime.normal_energy_gain)
+            entity = self._actors[0]
+            self.prepare_tick(entity)
+            entity.before_tick(gametime.normal_energy_gain)
+            self.on_tick(entity)
+            entity.actor.tick()
+            entity.on_tick(gametime.normal_energy_gain)
+            entity.after_tick(gametime.normal_energy_gain)
             self._actors.rotate()
 
-    def on_tick(self, current_actor):
-        self.sharing_tile_effects_tick(current_actor.parent)
+    def on_tick(self, entity):
+        self.sharing_tile_effects_tick(entity)
 
     def sharing_tile_effects_tick(self, actor):
         if(actor.has("dungeon_level") and

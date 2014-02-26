@@ -61,7 +61,7 @@ class EffectQueue(Leaf):
             if effect.status_flag == status_to_remove:
                 self._effect_queue[EffectTypes.STATUS_ADDER].remove(effect)
 
-    def before_tick(self, time):
+    def update(self, time):
         for effect_type_queue in EffectTypes.ALLTYPES:
             for effect in self._effect_queue[effect_type_queue]:
                 effect.update(time)

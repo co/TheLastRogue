@@ -145,11 +145,11 @@ def new_dust_demon(gamestate):
     demon.set_child(EntityMessages("The dust demon notices you.", "The demon falls to the ground."))
     demon.set_child(GraphicChar(None, colors.GRAY, "i"))
 
-    demon.set_child(Health(10))
-    demon.set_child(DataPoint(DataTypes.STRENGTH, 4))
-    demon.set_child(DataPoint(DataTypes.EVASION, 11))
+    demon.set_child(Health(12))
+    demon.set_child(DataPoint(DataTypes.STRENGTH, 5))
+    demon.set_child(DataPoint(DataTypes.EVASION, 12))
     demon.set_child(DataPoint(DataTypes.HIT, 25))
-    demon.set_child(DataPoint(DataTypes.ARMOR, 7))
+    demon.set_child(DataPoint(DataTypes.ARMOR, 8))
     demon.set_child(DataPoint(DataTypes.AWARENESS, 4))
 
     demon.set_child(MakeDustClouds())
@@ -167,12 +167,12 @@ def new_armored_beetle(gamestate):
     beetle.set_child(EntityMessages("The armored beetle notices you.", "The armored beetle is dead."))
     beetle.set_child(GraphicChar(None, colors.CYAN_D, "B"))
 
-    beetle.set_child(Health(20))
-    beetle.set_child(DataPoint(DataTypes.STRENGTH, 3))
+    beetle.set_child(Health(17))
+    beetle.set_child(DataPoint(DataTypes.STRENGTH, 2))
     beetle.set_child(DataPoint(DataTypes.EVASION, 2))
-    beetle.set_child(DataPoint(DataTypes.HIT, 18))
-    beetle.set_child(DataPoint(DataTypes.ARMOR, 20))
-    beetle.set_child(DataPoint(DataTypes.AWARENESS, 3))
+    beetle.set_child(DataPoint(DataTypes.HIT, 16))
+    beetle.set_child(DataPoint(DataTypes.ARMOR, 15))
+    beetle.set_child(DataPoint(DataTypes.AWARENESS, 2))
 
     beetle.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn + gametime.one_third_turn))
     beetle.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 4))
@@ -385,7 +385,7 @@ class MakeDustClouds(Leaf):
         self.time_interval = gametime.single_turn
         self.time_to_next_attempt = self.time_interval
 
-    def on_tick(self, time):
+    def before_tick(self, time):
         self.time_to_next_attempt -= time
         if self.time_to_next_attempt > 0:
             return

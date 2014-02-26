@@ -13,6 +13,7 @@ class Component(object):
         tags (Set of strings): Tags can be used as a second
         means of identifying a component.
     """
+
     def __init__(self, *args, **kw):
         self._parent = None
         self.component_type = None
@@ -45,7 +46,7 @@ class Component(object):
             return None
         if self.parent.get_original_child(self.component_type) is self:
             return None
-        siblings =\
+        siblings = \
             self.parent.get_spoofed_children_of_type(self.component_type)
         next_index = siblings.index(self) + 1
         if len(siblings) > next_index:
@@ -108,6 +109,7 @@ class Leaf(Component):
 
     Component classes of leaf type should inherit from this class.
     """
+
     def __init__(self, *args, **kw):
         super(Leaf, self).__init__(*args, **kw)
 
@@ -119,6 +121,7 @@ class Composite(Component):
     Component classes of composite type should inherit from this class.
     Composite objects may hold other Components.
     """
+
     def __init__(self, *args, **kw):
         super(Composite, self).__init__(*args, **kw)
         self._spoofed_children = {}
@@ -169,7 +172,7 @@ class Composite(Component):
                             "component: {1} to its children. "
                             "But component_type "
                             "was not set.".format(str(self), str(child)))
-        if not child._parent is None:
+        if not child._parent is None and child.parent != self:
             raise Exception("Component {0} tried to add_child "
                             "component: {1} to its children. "
                             "But it already "
@@ -198,18 +201,17 @@ class Composite(Component):
         for child_type in self._spoofed_children.values():
             for child in child_type:
                 self.remove_component(child)
-        self._spoofed_children = {} #  Unecessary?
+        self._spoofed_children = {}  # Unecessary?
 
     def remove_component(self, child):
         """
         Removes a child component from this component.
         """
-        if(child.component_type in self._children and
-           child is self._children[child.component_type]):
-            del self._children[child.component_type]
-            child.parent = None
-        if(child.component_type in self._spoofed_children and
-           child in self._spoofed_children[child.component_type]):
+        if (child.component_type in self._children and
+                    child is self._children[child.component_type]):
+            self.remove_component_of_type(child.component_type)
+        if (child.component_type in self._spoofed_children and
+                    child in self._spoofed_children[child.component_type]):
             self._spoofed_children[child.component_type].remove(child)
             child.parent = None
         self._remove_child_from_tag_table(child)
@@ -234,8 +236,6 @@ class Composite(Component):
         """
         Runs before_tick on all child components.
         """
-        self.reset_spoofed_children()
-
         visited_component_types = set()
         for component_type, component in self._spoofed_children.iteritems():
             visited_component_types.add(component_type)
@@ -285,8 +285,8 @@ class Composite(Component):
                                  "But it doesn't exist.".format(str(component_type),
                                                                 str(self)))
         try:
-            if(component_type in self._spoofed_children and
-               len(self._spoofed_children[component_type]) > 0):
+            if (component_type in self._spoofed_children and
+                        len(self._spoofed_children[component_type]) > 0):
                 return self._spoofed_children[component_type][0]
             return self._children[component_type]
         except KeyError:

@@ -28,12 +28,13 @@ class Vision(Leaf):
         return self._seen_entities_cache
 
     def _calculate_seen_entities(self):
-        seen_entities = []
-        for entity in self.parent.dungeon_level.value.entities:
-            if self.parent.dungeon_mask.can_see_point(entity.position.value):
-                seen_entities.append(entity)
-        self._seen_entities_cache = [entity for entity in seen_entities if not entity is self.parent]
-        self._seen_entities_cache_timestamp = turn.current_turn
+        if not self.parent.dungeon_level.value == None:
+            seen_entities = []
+            for entity in self.parent.dungeon_level.value.entities:
+                if self.parent.dungeon_mask.can_see_point(entity.position.value):
+                    seen_entities.append(entity)
+            self._seen_entities_cache = [entity for entity in seen_entities if not entity is self.parent]
+            self._seen_entities_cache_timestamp = turn.current_turn
 
     def get_seen_entities_closest_first(self):
         """
