@@ -195,11 +195,11 @@ class DarknessDeviceAction(ActivateDeviceAction):
         """
         ttl = gametime.single_turn * rng.random_variance(10, 5)
         entities = source_entity.dungeon_level.value.entities
+        msg.send_global_message(messenger.DARKNESS_MESSAGE)
         for entity in entities:
             sight_radius_spoof = DataPoint(DataTypes.SIGHT_RADIUS, 1)
             darkness_effect = entityeffect.AddSpoofChild(source_entity, sight_radius_spoof, time_to_live=ttl)
             entity.effect_queue.add(darkness_effect)
-            msg.send_global_message(messenger.DARKNESS_MESSAGE)
 
 
 class HeartStopDeviceAction(ActivateDeviceAction):
