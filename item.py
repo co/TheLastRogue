@@ -468,6 +468,18 @@ def new_health_potion(game_state):
     return potion
 
 
+def new_teleport_scroll(game_state):
+    potion = Composite()
+    set_item_components(potion, game_state)
+    set_potion_components(potion)
+    potion.set_child(GraphicChar(None, colors.CHAMPAGNE, icon.SCROLL))
+    potion.set_child(TeleportScrollReadAction())
+    potion.set_child(Description("Scroll of Teleport",
+                                 "A scroll with strange symbols on."
+                                 "When read you will appear in a different position."))
+    return potion
+
+
 def new_bomb(game_state):
     bomb = Composite()
     set_item_components(bomb, game_state)
@@ -567,16 +579,10 @@ class ReEquipAction(Action):
         target_entity.inventory.remove_item(self.parent)
 
 
-class DrinkAction(Action):
+class UsableOnceItemAction(Action):
     """
     Abstract class, drink actions should inherit from this class.
     """
-
-    def __init__(self):
-        super(DrinkAction, self).__init__()
-        self.name = "Drink"
-        self.tags.add("drink_action")
-        self.display_order = 90
 
     def act(self, **kwargs):
         """
@@ -584,7 +590,7 @@ class DrinkAction(Action):
         """
         target_entity = kwargs[action.TARGET_ENTITY]
         source_entity = kwargs[action.SOURCE_ENTITY]
-        self._drink(target_entity)
+        self._act(target_entity)
         self.remove_from_inventory(target_entity)
         _item_flash_animation(source_entity, self.parent)
         self.add_energy_spent_to_entity(source_entity)
@@ -595,12 +601,29 @@ class DrinkAction(Action):
         """
         target_entity.inventory.remove_one_item_from_stack(self.parent)
 
-    def _drink(self, target_entity):
-        """
-        The drink action subclasses should override
-        and define the drink action here.
-        """
-        pass
+
+class DrinkAction(UsableOnceItemAction):
+    """
+    Abstract class, drink actions should inherit from this class.
+    """
+
+    def __init__(self):
+        super(DrinkAction, self).__init__()
+        self.name = "Drink"
+        self.tags.add("drink_action")
+        self.display_order = 90
+
+
+class ReadAction(UsableOnceItemAction):
+    """
+    Abstract class, drink actions should inherit from this class.
+    """
+
+    def __init__(self):
+        super(ReadAction, self).__init__()
+        self.name = "Read"
+        self.tags.add("read_action")
+        self.display_order = 90
 
 
 class HealthPotionDrinkAction(DrinkAction):
@@ -614,13 +637,31 @@ class HealthPotionDrinkAction(DrinkAction):
         self.min_heal = 10
         self.max_heal = 15
 
-    def _drink(self, target_entity):
+    def _act(self, target_entity):
         """
         When an entity drinks a healing potion, it is healed.
         """
         heal = random.randrange(self.min_heal, self.max_heal + 1)
         heal_effect = entityeffect.Heal(target_entity, heal, heal_message=messenger.HEALTH_POTION_MESSAGE)
         target_entity.effect_queue.add(heal_effect)
+
+
+class TeleportScrollReadAction(ReadAction):
+    """
+    Defines the healing potion drink action.
+    """
+
+    def __init__(self):
+        super(TeleportScrollReadAction, self).__init__()
+        self.component_type = "teleport_scroll_read_action"
+
+    def _act(self, target_entity):
+        """
+        When an entity reads a scroll of teleportation it's teleported.
+        """
+        msg.send_global_message(messenger.PLAYER_TELEPORT_MESSAGE)
+        teleport_effect = entityeffect.Teleport(target_entity)
+        target_entity.effect_queue.add(teleport_effect)
 
 
 class PickUpItemAction(Action):
@@ -780,8 +821,7 @@ class ThrowerNonBreak(Thrower):
         position: The point at which the item hits the ground.
         """
         self._non_break(dungeon_level, position)
-        message = "The " + self.parent.description.name.lower() + \
-                  " hits the ground with a thud."
+        message = messenger.ITEM_HITS_THE_GROUND % {"target_entity": self.parent.description.name}
         msg.send_visual_message(message, position)
 
 
@@ -827,8 +867,7 @@ class ThrowerBreakCreateSteam(ThrowerBreak):
         super(ThrowerBreakCreateSteam, self).__init__()
 
     def _break_effect(self, dungeon_level, position):
-        message = "The " + self.parent.description.name.lower() + \
-                  " smashes to the ground and breaks into pieces."
+        message = messenger.POTION_SMASH_TO_GROUND % {"target_entity": self.parent.description.name}
         msg.send_visual_message(message, position)
         steam = new_steam_cloud(self.parent.game_state.value, 32)
         steam.mover.try_move(position, dungeon_level)
@@ -843,7 +882,7 @@ class ThrowerCreateExplosion(ThrowerBreak):
         super(ThrowerCreateExplosion, self).__init__()
 
     def _break_effect(self, dungeon_level, position):
-        message = "The " + self.parent.description.name.lower() + " Explodes!."
+        message = messenger.ENTITY_EXPLODES % {"target_entity": self.parent.description.name}
         msg.send_visual_message(message, position)
         game_state = self.parent.game_state.value
         explosion = new_explosion_cloud(game_state, 1)

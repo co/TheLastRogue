@@ -10,7 +10,7 @@ HAUNT_MESSAGE = "%(source_entity)s haunts the %(target_entity)s!"
 
 HEART_STOP_MESSAGE = "%(target_entity)s, clutches its heart."
 DARKNESS_MESSAGE = "An unnatural darkness fills the dungeon."
-PICK_UP_MESSAGE = "You pick up %(item)s"
+PICK_UP_MESSAGE = "You pick up %(item)s."
 POISON_MESSAGE = "%(target_entity)s takes %(damage)s in poison damage."
 
 DOWN_STAIRS_HEAL_MESSAGE = "Your feel vitalized by your progress, you regain %(health)s health."
@@ -26,7 +26,11 @@ BREAKS_OUT_OF_WEB_MESSAGE = "%(target_entity)s breaks free."
 WANT_TO_JUMP_DOWN_CHASM = "Are you sure you want to drop down the chasm?"
 PRESS_ENTER_TO_ACCEPT = "Press ENTER to accept, another key to reject."
 
-POTION_SMASH_TO_GROUND = message = "The %(target_entity)s hits the ground with a thud."
+PLAYER_TELEPORT_MESSAGE = "Your surroundings seem different."
+
+POTION_SMASH_TO_GROUND = "The %(target_entity)s smashes to the ground and breaks into pieces."
+ITEM_HITS_THE_GROUND = "The %(target_entity)s hits the ground with a thud."
+ENTITY_EXPLODES = "The %(target_entity)s explodes!"
 
 
 class Messenger(object):

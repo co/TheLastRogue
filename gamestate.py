@@ -190,8 +190,11 @@ class TestGameState(GameStateBase):
         #demon = monster.new_dust_demon(self)
         #demon.mover.try_move((24, 16), self.dungeon_level)
 
-        #beetle = monster.new_armored_beetle(self)
-        #beetle.mover.try_move((25, 16), self.dungeon_level)
+        beetle = monster.new_armored_beetle(self)
+        beetle.mover.try_move((25, 16), self.dungeon_level)
+
+        beetle = monster.new_armored_beetle(self)
+        beetle.mover.try_move((26, 16), self.dungeon_level)
 
         #amoeba = monster.new_giant_amoeba(self)
         #amoeba.mover.try_move((26, 14), self.dungeon_level)
@@ -218,6 +221,9 @@ class TestGameState(GameStateBase):
         device2 = item.new_heart_stop_device(self)
         device2.mover.try_move((25, 12), self.dungeon_level)
 
+        scroll = item.new_teleport_scroll(self)
+        scroll.mover.try_move((26, 12), self.dungeon_level)
+
         gun = item.new_gun(self)
         gun.mover.try_move((20, 13), self.dungeon_level)
 
@@ -239,8 +245,8 @@ class TestGameState(GameStateBase):
         #rat = monster.new_ratman(self)
         #rat.mover.try_move((20, 8), self.dungeon_level)
 
-        salamander = monster.new_salamander(self)
-        salamander.mover.try_move((25, 10), self.dungeon_level)
+        #salamander = monster.new_salamander(self)
+        #salamander.mover.try_move((25, 10), self.dungeon_level)
 
         #slime = monster.new_slime(self)
         #slime.mover.try_move((25, 12), self.dungeon_level)

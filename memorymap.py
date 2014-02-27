@@ -38,8 +38,6 @@ class MemoryMap(Leaf):
         """
         Writes the entity memory of a tile, to the memory map.
         """
-        if tile.get_first_entity() is self:
-            return  # No need to remember where you was, you are not there.
         self.set_memory_map_if_not_set(self.parent.dungeon_level.value)
         x, y = position
         self._memory_map[depth].tile_matrix[y][x] = tile.copy()
@@ -49,5 +47,4 @@ class MemoryMap(Leaf):
         Handles messages recieved.
         """
         if(message == CompositeMessage.DUNGEON_LEVEL_CHANGED):
-            self.set_memory_map_if_not_set(self.parent.
-                                           dungeon_level.value)
+            self.set_memory_map_if_not_set(self.parent. dungeon_level.value)
