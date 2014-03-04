@@ -30,12 +30,13 @@ class ItemType(Leaf):
     Enumerator class denoting different item types. Inventory is sorted on ItemType.
     """
     POTION = 0
-    BOMB = 1
-    MACHINE = 2
-    WEAPON = 3
-    ARMOR = 4
-    JEWELLRY = 5
-    AMMO = 6
+    SCROLL = 1
+    BOMB = 2
+    MACHINE = 3
+    WEAPON = 4
+    ARMOR = 5
+    JEWELLRY = 6
+    AMMO = 7
 
     ALL = [POTION, BOMB, MACHINE, WEAPON, ARMOR, JEWELLRY, AMMO]
 
@@ -468,16 +469,23 @@ def new_health_potion(game_state):
     return potion
 
 
+def set_scroll_components(item):
+    item.set_child(ItemType(ItemType.SCROLL))
+    item.set_child(PlayerAutoPickUp())
+    item.set_child(DataPoint(DataTypes.WEIGHT, 1))
+    item.set_child(GraphicChar(None, colors.CHAMPAGNE, icon.SCROLL))
+
+
 def new_teleport_scroll(game_state):
-    potion = Composite()
-    set_item_components(potion, game_state)
-    set_potion_components(potion)
-    potion.set_child(GraphicChar(None, colors.CHAMPAGNE, icon.SCROLL))
-    potion.set_child(TeleportScrollReadAction())
-    potion.set_child(Description("Scroll of Teleport",
+    scroll = Composite()
+    set_item_components(scroll, game_state)
+    set_scroll_components(scroll)
+    scroll.set_child(GraphicChar(None, colors.CHAMPAGNE, icon.SCROLL))
+    scroll.set_child(TeleportScrollReadAction())
+    scroll.set_child(Description("Scroll of Teleport",
                                  "A scroll with strange symbols on."
                                  "When read you will appear in a different position."))
-    return potion
+    return scroll
 
 
 def new_bomb(game_state):

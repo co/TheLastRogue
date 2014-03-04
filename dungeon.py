@@ -1,6 +1,6 @@
 import random
 import dungeongenerator
-from monstertables import from_table_pick_n_monsters_for_depth, dungeon_table
+from monstertables import from_table_pick_n_items_for_depth, dungeon_table, dungeon_equipment_table, dungeon_usable_item_table
 import spawner
 from tools import time_it
 
@@ -27,7 +27,7 @@ class Dungeon(object):
                                 (lambda: dungeongenerator.generate_dungeon_floor(size, depth)))
         minimum_monsters = int(4 + depth * 1.2)
         monsters_to_spawn = random.randrange(minimum_monsters, minimum_monsters + 3)
-        monsters = from_table_pick_n_monsters_for_depth(dungeon_table, monsters_to_spawn,
+        monsters = from_table_pick_n_items_for_depth(dungeon_table, monsters_to_spawn,
                                                         depth, self.game_state)
         print monsters
         for monster in monsters:
@@ -37,12 +37,25 @@ class Dungeon(object):
             jericho = monster.new_jericho(self.game_state)
             spawner.place_piece_on_random_walkable_tile(jericho, dungeon_level)
 
-        spawner.place_items_in_dungeon(dungeon_level, self.game_state)
+        place_items_in_dungeon(dungeon_level, self.game_state)
 
         #dungeon_level.print_statistics()
 
         dungeon_level.dungeon = self
         return dungeon_level
+
+
+def place_items_in_dungeon(dungeon_level, game_state):
+    spawner.place_health_potions(dungeon_level, game_state)
+    equipments = from_table_pick_n_items_for_depth(dungeon_equipment_table,
+                                                   random.randrange(int(2 + dungeon_level.depth * 0.3)),
+                                                   dungeon_level.depth, game_state)
+    usable_items = from_table_pick_n_items_for_depth(dungeon_usable_item_table,
+                                                     random.randrange(int(3 + dungeon_level.depth * 0.3)),
+                                                     dungeon_level.depth, game_state)
+    for loot_item in equipments + usable_items:
+        print "item: ", loot_item.description.name
+        spawner.place_piece_on_random_walkable_tile(loot_item, dungeon_level)
 
 
 class ReflexiveDungeon(object):
