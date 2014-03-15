@@ -256,9 +256,13 @@ class DamageOverTimeEffect(EntityEffect):
         self.time_until_next_damage = self.time_interval
 
     def send_damage_message(self, damage_caused):
-        m = self.damage_message % {"source_entity": self.source_entity.description.long_name,
-                                   "target_entity": self.target_entity.description.long_name,
-                                   "damage": str(damage_caused)}
+        message_arguments = {}
+        if self.source_entity and self.source_entity.has("description"):
+            message_arguments["source_entity"] = self.source_entity.description.long_name
+        if self.target_entity and self.target_entity.has("description"):
+            message_arguments["target_entity"] = self.target_entity.description.long_name
+        message_arguments["damage"] = str(damage_caused)
+        m = self.damage_message % message_arguments
         messenger.msg.send_visual_message(m, self.target_entity.position.value)
 
     def damage_target(self):

@@ -255,7 +255,7 @@ class HuntPlayerIfHurtMe(DamageTakenEffect):
         self.component_type = "hunt_player_if_hurt_me"
 
     def effect(self, _, source_entity):
-        if source_entity.has("is_player"):
+        if source_entity and source_entity.has("is_player"):
             self.parent.monster_actor_state.value = MonsterActorState.HUNTING
 
 

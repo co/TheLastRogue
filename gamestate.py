@@ -203,8 +203,11 @@ class TestGameState(GameStateBase):
             bomb = item.new_bomb(self)
             bomb.mover.try_move((18, 12 + i), self.dungeon_level)
 
-        potion = item.new_health_potion(self)
+        potion = item.new_poison_potion(self)
         potion.mover.try_move((20, 12), self.dungeon_level)
+
+        potion = item.new_health_potion(self)
+        potion.mover.try_move((20, 16), self.dungeon_level)
 
         ring1 = item.new_ring_of_evasion(self)
         ring1.mover.try_move((24, 11), self.dungeon_level)
@@ -251,8 +254,8 @@ class TestGameState(GameStateBase):
         #slime = monster.new_slime(self)
         #slime.mover.try_move((25, 12), self.dungeon_level)
 
-        #spider = monster.new_spider(self)
-        #spider.mover.try_move((26, 12), self.dungeon_level)
+        spider = monster.new_spider(self)
+        spider.mover.try_move((26, 12), self.dungeon_level)
 #
 #        ghost = monster.new_ghost(self)
 #        ghost.mover.try_move((21, 8), self.dungeon_level)

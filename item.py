@@ -2,7 +2,8 @@ import random
 
 from action import Action
 from actor import DoNothingActor
-from cloud import new_steam_cloud, new_explosion_cloud
+from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud
+from compositecommon import PoisonEntityEffectFactory
 from compositecore import Leaf, Composite
 from attacker import Attack, DamageTypes
 import direction
@@ -452,7 +453,6 @@ class SetInvisibilityFlagEquippedEffect(EquippedEffect):
 def set_potion_components(item):
     item.set_child(ItemType(ItemType.POTION))
     item.set_child(PlayerAutoPickUp())
-    item.set_child(ThrowerBreakCreateSteam())
     item.set_child(DataPoint(DataTypes.WEIGHT, 4))
     #potion.set_child(Stacker("health_potion", 3))
 
@@ -466,6 +466,20 @@ def new_health_potion(game_state):
     potion.set_child(Description("Health Potion",
                                  "An unusually thick liquid contained in a glass bottle."
                                  "Drinking from it will heal you."))
+    potion.set_child(ThrowerBreakCreateSteam())
+    return potion
+
+
+def new_poison_potion(game_state):
+    potion = Composite()
+    set_item_components(potion, game_state)
+    set_potion_components(potion)
+    potion.set_child(GraphicChar(None, colors.GREEN, icon.POTION))
+    potion.set_child(PoisonPotionDrinkAction())
+    potion.set_child(Description("Poison Potion",
+                                 "An unusually sluggish liquid contained in a glass bottle."
+                                 "Drinking from it would poison you."))
+    potion.set_child(ThrowerBreakCreatePoisonCloud())
     return potion
 
 
@@ -652,6 +666,25 @@ class HealthPotionDrinkAction(DrinkAction):
         heal = random.randrange(self.min_heal, self.max_heal + 1)
         heal_effect = entityeffect.Heal(target_entity, heal, heal_message=messenger.HEALTH_POTION_MESSAGE)
         target_entity.effect_queue.add(heal_effect)
+
+
+class PoisonPotionDrinkAction(DrinkAction):
+    """
+    Defines the healing potion drink action.
+    """
+    def __init__(self):
+        super(PoisonPotionDrinkAction, self).__init__()
+        self.component_type = "poison_potion_drink_action"
+        self.min_damage = 10
+        self.max_damage = 15
+
+    def _act(self, target_entity):
+        """
+        When an entity drinks a healing potion, it is healed.
+        """
+        damage = random.randrange(self.min_damage, self.max_damage + 1)
+        damage_effect_factory = PoisonEntityEffectFactory(target_entity, damage, 2, random.randrange(8, 12))
+        target_entity.effect_queue.add(damage_effect_factory())
 
 
 class TeleportScrollReadAction(ReadAction):
@@ -866,19 +899,34 @@ def is_hitting_ground(dungeon_level, position):
     return not dungeon_level.get_tile_or_unknown(position).get_terrain().has("is_chasm")
 
 
-class ThrowerBreakCreateSteam(ThrowerBreak):
+class ThrowerBreakCreateCloud(ThrowerBreak):
     """
-    Items with this component will create and create a puff of steam.
+    Should be sub-classed to items with this component will create and create a puff of cloud.
     """
 
     def __init__(self):
-        super(ThrowerBreakCreateSteam, self).__init__()
+        super(ThrowerBreakCreateCloud, self).__init__()
+        self.cloud_factory = None
 
     def _break_effect(self, dungeon_level, position):
         message = messenger.POTION_SMASH_TO_GROUND % {"target_entity": self.parent.description.name}
         msg.send_visual_message(message, position)
-        steam = new_steam_cloud(self.parent.game_state.value, 32)
+        steam = self.cloud_factory(self.parent.game_state.value, 32)
         steam.mover.try_move(position, dungeon_level)
+
+
+class ThrowerBreakCreateSteam(ThrowerBreakCreateCloud):
+
+    def __init__(self):
+        super(ThrowerBreakCreateSteam, self).__init__()
+        self.cloud_factory = new_steam_cloud
+
+
+class ThrowerBreakCreatePoisonCloud(ThrowerBreakCreateCloud):
+
+    def __init__(self):
+        super(ThrowerBreakCreatePoisonCloud, self).__init__()
+        self.cloud_factory = new_poison_cloud
 
 
 class ThrowerCreateExplosion(ThrowerBreak):

@@ -1,7 +1,8 @@
+import random
 from actor import Actor
 from attacker import DamageTypes
 import colors
-from compositecommon import EntityShareTileEffect
+from compositecommon import EntityShareTileEffect, PoisonEntityEffectFactory
 from compositecore import Composite
 import direction
 from entityeffect import UndodgeableDamagAndBlockSameEffect, AddSpoofChild
@@ -24,6 +25,7 @@ class CloudTypes:
     STEAM = "steam"
     FIRE = "fire"
     DUST = "dust"
+    POISON = "poison"
 
 
 def set_cloud_components(game_state, cloud, density):
@@ -39,13 +41,26 @@ def set_cloud_components(game_state, cloud, density):
 
 
 def new_steam_cloud(game_state, density):
-    steam = Composite()
-    set_cloud_components(game_state, steam, density)
-    steam.graphic_char.color_fg = colors.WHITE
-    steam.set_child(CloudActor())
-    steam.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_steam_cloud))
-    steam.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.STEAM))
-    return steam
+    cloud = Composite()
+    set_cloud_components(game_state, cloud, density)
+    cloud.graphic_char.color_fg = colors.WHITE
+    cloud.set_child(CloudActor())
+    cloud.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_steam_cloud))
+    cloud.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.STEAM))
+    cloud.set_child(CloudChangeAppearanceShareTileEffect())
+    return cloud
+
+
+def new_poison_cloud(game_state, density):
+    cloud = Composite()
+    set_cloud_components(game_state, cloud, density)
+    cloud.graphic_char.color_fg = colors.GREEN
+    cloud.set_child(CloudActor())
+    cloud.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_poison_cloud))
+    cloud.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.POISON))
+    cloud.set_child(PoisonCloudShareTileEffect())
+    cloud.set_child(CloudChangeAppearanceShareTileEffect())
+    return cloud
 
 
 def new_dust_cloud(game_state, density):
@@ -111,6 +126,20 @@ class FireDamageShareTileEffect(EntityShareTileEffect):
         target_entity.effect_queue.add(damage_effect)
 
 
+class AddEntityEffectShareTile(EntityShareTileEffect):
+    """
+    Abstract subclasses should define entity effect.
+    """
+    def __init__(self):
+        super(AddEntityEffectShareTile, self).__init__()
+
+    def effect(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        if not target_entity.has("effect_queue"):
+            return
+        target_entity.effect_queue.add(self.entity_effect)
+
+
 class AddSpoofChildShareEntityEffect(EntityShareTileEffect):
     def __init__(self):
         super(AddSpoofChildShareEntityEffect, self).__init__()
@@ -141,6 +170,17 @@ class DustLowerHitOfEntityShareTileEffect(AddSpoofChildShareEntityEffect):
 
     def spoof_child_factory(self):
         return DataPointBonusSpoof("hit", -10)
+
+
+class PoisonCloudShareTileEffect(AddEntityEffectShareTile):
+    def __init__(self):
+        super(PoisonCloudShareTileEffect, self).__init__()
+        self.component_type = "poison_share_tile_effect"
+        self.poison_effect_factory = PoisonEntityEffectFactory(None, random.randrange(8, 14), 2, random.randrange(10, 20))
+
+    @property
+    def entity_effect(self):
+        return self.poison_effect_factory()
 
 
 class ExplosionDamageShareTileEffect(EntityShareTileEffect):

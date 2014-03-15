@@ -2,13 +2,13 @@ import random
 from animation import animate_flight
 from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity, KnockBackAttacker
 from cloud import new_fire_cloud, new_dust_cloud
-from compositecommon import EntityShareTileEffect
+from compositecommon import EntityShareTileEffect, PoisonEntityEffectFactory
 from compositecore import Composite, Leaf, Component
 import constants
 import direction
 from dungeonfeature import SpiderWeb
 from dungeonmask import DungeonMask, Path
-from entityeffect import EffectQueue, AddSpoofChild, EffectStackID, UndodgeableDamagAndBlockSameEffect, DamageOverTimeEffect, HealthRegain
+from entityeffect import EffectQueue, AddSpoofChild, EffectStackID, UndodgeableDamagAndBlockSameEffect, HealthRegain
 import geometry
 from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
@@ -16,7 +16,7 @@ from inventory import Inventory
 import messenger
 from missileaction import MonsterThrowStoneAction, MonsterThrowRockAction, SpiritMissile, MonsterHealTargetEntityEffect, MonsterTripTargetEffect
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor, MonsterWeightedStepAction
-from mover import Mover, Stepper, SlimeCanShareTileEntityMover, ImmobileStepper, CautiousStepper, TolerateDamage
+from mover import Mover, Stepper, SlimeCanShareTileEntityMover, CautiousStepper, TolerateDamage
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
 from position import Position, DungeonLevel
 import rng
@@ -130,8 +130,8 @@ def new_spider(gamestate):
 
     spider.set_child(MakeSpiderWebs())
     spider.set_child(Flag(Immunities.SPIDER_WEB))
-    spider.set_child(UnArmedHitTargetEntityEffectFactory(PoisonEntityEffectFactory(spider, 1, 2,
-                                                                                   random.randrange(9, 18))))
+    spider.set_child(UnArmedHitTargetEntityEffectFactory(PoisonEntityEffectFactory(spider, random.randrange(4, 8), 2,
+                                                                                   20)))
     spider.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 3))
     return spider
 
@@ -468,19 +468,6 @@ class NaturalHealthRegain(Leaf):
         health_regain = HealthRegain(self.parent, 3, 4, float("inf"), no_stack_id="natural_health_regain")
         self.parent.effect_queue.add(health_regain)
         self.parent.remove_component(self)
-
-
-class PoisonEntityEffectFactory(object):
-    def __init__(self, source_entity, damage, turn_interval, turns_to_live):
-        self.source_entity = source_entity
-        self.damage = damage
-        self.turn_interval = turn_interval
-        self.turns_to_live = turns_to_live
-
-    def __call__(self):
-        return DamageOverTimeEffect(self.source_entity, self.damage, [DamageTypes.POISON],
-                                    self.turn_interval, self.turns_to_live,
-                                    messenger.POISON_MESSAGE, no_stack_id="poison")
 
 
 class AddGhostReviveToSeenEntities(Leaf):
