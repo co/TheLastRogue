@@ -1,5 +1,5 @@
 import random
-from item import new_leather_boots, new_leather_cap, new_leather_armor, new_knife, new_sling, new_sword, new_gun, new_ring_of_evasion, new_ring_of_strength, new_ring_of_stealth, new_ammunition, new_darkness_device, new_heart_stop_device, new_bomb, new_teleport_scroll
+from item import new_leather_boots, new_leather_cap, new_leather_armor, new_knife, new_sling, new_sword, new_gun, new_ring_of_evasion, new_ring_of_strength, new_ring_of_stealth, new_ammunition, new_darkness_device, new_heart_stop_device, new_bomb, new_teleport_scroll, new_poison_potion, new_flame_potion
 from monster import new_ratman, new_ghost, new_slime, new_dark_slime, new_dust_demon, new_spider, new_salamander, new_cyclops, AddGhostReviveToSeenEntities, new_pixie, new_armored_beetle
 
 
@@ -60,7 +60,9 @@ dungeon_usable_item_table = \
         [DungeonTableItem(new_darkness_device)] * 3 +
         [DungeonTableItem(new_heart_stop_device)] * 3 +
 
-        [DungeonTableItem(new_bomb)] * 6 +
+        [DungeonTableItem(new_bomb)] * 4 +
+        [DungeonTableItem(new_poison_potion)] * 6 +
+        [DungeonTableItem(new_flame_potion)] * 6 +
 
         [DungeonTableItem(new_teleport_scroll)] * 10
     )
