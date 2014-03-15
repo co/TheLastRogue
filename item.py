@@ -2,7 +2,7 @@ import random
 
 from action import Action
 from actor import DoNothingActor
-from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud
+from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud, new_fire_cloud
 from compositecommon import PoisonEntityEffectFactory
 from compositecore import Leaf, Composite
 from attacker import Attack, DamageTypes
@@ -463,7 +463,7 @@ def new_health_potion(game_state):
     set_potion_components(potion)
     potion.set_child(GraphicChar(None, colors.PINK, icon.POTION))
     potion.set_child(HealthPotionDrinkAction())
-    potion.set_child(Description("Health Potion",
+    potion.set_child(Description("Potion of Health",
                                  "An unusually thick liquid contained in a glass bottle."
                                  "Drinking from it will heal you."))
     potion.set_child(ThrowerBreakCreateSteam())
@@ -476,10 +476,23 @@ def new_poison_potion(game_state):
     set_potion_components(potion)
     potion.set_child(GraphicChar(None, colors.GREEN, icon.POTION))
     potion.set_child(PoisonPotionDrinkAction())
-    potion.set_child(Description("Poison Potion",
+    potion.set_child(Description("Potion of Poison",
                                  "An unusually sluggish liquid contained in a glass bottle."
                                  "Drinking from it would poison you."))
     potion.set_child(ThrowerBreakCreatePoisonCloud())
+    return potion
+
+
+def new_flame_potion(game_state):
+    potion = Composite()
+    set_item_components(potion, game_state)
+    set_potion_components(potion)
+    potion.set_child(GraphicChar(None, colors.RED, icon.POTION))
+    potion.set_child(FlamePotionDrinkAction())
+    potion.set_child(Description("Potion of Fire",
+                                 "An unusually muddy liquid contained in a glass bottle."
+                                 "Drinking from it would burn you badly."))
+    potion.set_child(ThrowerBreakCreateFire())
     return potion
 
 
@@ -668,9 +681,27 @@ class HealthPotionDrinkAction(DrinkAction):
         target_entity.effect_queue.add(heal_effect)
 
 
-class PoisonPotionDrinkAction(DrinkAction):
+class FlamePotionDrinkAction(DrinkAction):
     """
     Defines the healing potion drink action.
+    """
+    def __init__(self):
+        super(FlamePotionDrinkAction, self).__init__()
+        self.component_type = "flame_potion_drink_action"
+        self.min_fire_time = 3
+        self.max_fire_time = 8
+
+    def _act(self, target_entity):
+        """
+        When an entity drinks a flame potion, surrounding tiles and players tile catch fire.
+        """
+        put_tile_and_surrounding_tiles_on_fire(target_entity.dungeon_level.value, target_entity.position.value,
+                                               self.min_fire_time, self.max_fire_time, target_entity.game_state.value)
+
+
+class PoisonPotionDrinkAction(DrinkAction):
+    """
+    Defines the poison potion drink action.
     """
     def __init__(self):
         super(PoisonPotionDrinkAction, self).__init__()
@@ -680,12 +711,11 @@ class PoisonPotionDrinkAction(DrinkAction):
 
     def _act(self, target_entity):
         """
-        When an entity drinks a healing potion, it is healed.
+        When an entity drinks a poison potion, it is poisoned.
         """
         damage = random.randrange(self.min_damage, self.max_damage + 1)
         damage_effect_factory = PoisonEntityEffectFactory(target_entity, damage, 2, random.randrange(8, 12))
         target_entity.effect_queue.add(damage_effect_factory())
-
 
 class TeleportScrollReadAction(ReadAction):
     """
@@ -927,6 +957,26 @@ class ThrowerBreakCreatePoisonCloud(ThrowerBreakCreateCloud):
     def __init__(self):
         super(ThrowerBreakCreatePoisonCloud, self).__init__()
         self.cloud_factory = new_poison_cloud
+
+
+class ThrowerBreakCreateFire(ThrowerBreakCreateCloud):
+    def __init__(self):
+        super(ThrowerBreakCreateFire, self).__init__()
+        self.min_fire_time = 3
+        self.max_fire_time = 8
+
+    def _break_effect(self, dungeon_level, position):
+        put_tile_and_surrounding_tiles_on_fire(dungeon_level, position, self.min_fire_time, self.max_fire_time,
+                                               self.parent.game_state.value)
+
+
+def put_tile_and_surrounding_tiles_on_fire(dungeon_level, position, min_fire_time, max_fire_time, game_state):
+    fire = new_fire_cloud(game_state, random.randrange(min_fire_time, max_fire_time))
+    fire.mover.replace_move(position, dungeon_level)
+    for d in direction.DIRECTIONS:
+        point = geometry.add_2d(d, position)
+        fire = new_fire_cloud(game_state, random.randrange(min_fire_time, max_fire_time))
+        fire.mover.replace_move(point, dungeon_level)
 
 
 class ThrowerCreateExplosion(ThrowerBreak):

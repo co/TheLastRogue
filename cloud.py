@@ -84,6 +84,7 @@ def new_explosion_cloud(game_state, density):
     explosion.set_child(ExplosionDamageShareTileEffect())
     explosion.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_explosion_cloud))
     explosion.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.EXPLOSION))
+    explosion.set_child(CloudChangeAppearanceShareTileEffect())
     return explosion
 
 
@@ -102,6 +103,7 @@ def new_fire_cloud(game_state, density):
     fire.set_child(FireDamageShareTileEffect())
     fire.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_explosion_cloud))
     fire.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.FIRE))
+    fire.set_child(CloudChangeAppearanceShareTileEffect())
     return fire
 
 

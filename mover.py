@@ -251,6 +251,13 @@ class CautiousStepper(Stepper):
         super(CautiousStepper, self).__init__()
         self.component_type = "stepper"
 
+    def dares_to_step(self, position):
+        current_position_dangerous =\
+            is_tile_dangerous(self.parent.dungeon_level.value.get_tile_or_unknown(self.parent.position.value), self.parent)
+        if current_position_dangerous:
+            return True  # If the current tile is dangerous any tile is ok. Panic!
+        return not is_tile_dangerous(self.parent.dungeon_level.value.get_tile_or_unknown(position), self.parent)
+
     def try_move_or_bump(self, position):
         """
         Tries to move the entity to a position.
@@ -269,9 +276,9 @@ class CautiousStepper(Stepper):
             return self.parent.movement_speed.value
         if self.try_attack(position):
             return self.parent.melee_speed.value
-        if (not is_tile_dangerous(self.parent.dungeon_level.value.get_tile_or_unknown(position), self.parent)
-            and self.parent.mover.try_move(position)):
-            return self.parent.movement_speed.value
+        if self.dares_to_step(position):
+            move_successful = self.parent.mover.try_move(position)
+            return self.parent.movement_speed.value if move_successful else 0
         return 0
 
 
