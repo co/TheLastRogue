@@ -1,5 +1,5 @@
 import random
-from item import new_leather_boots, new_leather_cap, new_leather_armor, new_knife, new_sling, new_sword, new_gun, new_ring_of_evasion, new_ring_of_strength, new_ring_of_stealth, new_ammunition, new_darkness_device, new_heart_stop_device, new_bomb, new_teleport_scroll, new_poison_potion, new_flame_potion, new_map_scroll
+from item import new_leather_boots, new_leather_cap, new_leather_armor, new_knife, new_sling, new_sword, new_gun, new_ring_of_evasion, new_ring_of_strength, new_ring_of_stealth, new_ammunition, new_darkness_device, new_heart_stop_device, new_bomb, new_teleport_scroll, new_poison_potion, new_flame_potion, new_map_scroll, new_amulet_of_reflect_damage
 from monster import new_ratman, new_ghost, new_slime, new_dark_slime, new_dust_demon, new_spider, new_salamander, new_cyclops, AddGhostReviveToSeenEntities, new_pixie, new_armored_beetle
 
 
@@ -49,6 +49,12 @@ dungeon_equipment_table = \
         [DungeonTableItem(new_knife)] * 8 +
         [DungeonTableItem(new_sling)] * 8 +
 
+        [DungeonTableItem(new_ring_of_evasion)] * 3 +
+        [DungeonTableItem(new_ring_of_stealth)] * 3 +
+        [DungeonTableItem(new_ring_of_strength)] * 3 +
+
+        [DungeonTableItem(new_amulet_of_reflect_damage)] * 2 +
+
         [DungeonTableItem(new_sword)] * 2 +
         [DungeonTableItem(new_gun)] * 2
     )
@@ -64,6 +70,6 @@ dungeon_usable_item_table = \
         [DungeonTableItem(new_poison_potion)] * 6 +
         [DungeonTableItem(new_flame_potion)] * 6 +
 
-        [DungeonTableItem(new_teleport_scroll)] * 10 +
-        [DungeonTableItem(new_map_scroll)] * 90
+        [DungeonTableItem(new_teleport_scroll)] * 8 +
+        [DungeonTableItem(new_map_scroll)] * 8
     )

@@ -2,7 +2,7 @@ import os
 from os.path import isfile
 from os import listdir, getcwd
 import cPickle as pickle
-from cloud import new_steam_cloud, new_dust_cloud
+from cloud import new_steam_cloud
 import colors
 from dungeon import Dungeon, ReflexiveDungeon
 from dungeonlevelfactory import dungeon_level_from_file
@@ -212,8 +212,8 @@ class TestGameState(GameStateBase):
         potion = item.new_flame_potion(self)
         potion.mover.try_move((20, 14), self.dungeon_level)
 
-        ring1 = item.new_ring_of_evasion(self)
-        ring1.mover.try_move((24, 11), self.dungeon_level)
+        amulet = item.new_amulet_of_reflect_damage(self)
+        amulet.mover.try_move((24, 11), self.dungeon_level)
 
         ring2 = item.new_ring_of_stealth(self)
         ring2.mover.try_move((25, 11), self.dungeon_level)

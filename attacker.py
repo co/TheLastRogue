@@ -179,8 +179,9 @@ class DamageTypes(object):
     ACID = 5
     POISON = 6
     FIRE = 7
+    REFLECT = 8
 
-    FALL = 8
+    FALL = 9
 
 
 class FireImmunity(Leaf):

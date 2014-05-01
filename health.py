@@ -20,6 +20,7 @@ class Health(Leaf):
     Attributes:
         _health_counter (Counter): Holds the min, max and current health.
     """
+
     def __init__(self, max_hp):
         super(Health, self).__init__()
         self.component_type = "health"
@@ -56,7 +57,7 @@ class HealthModifier(Leaf):
         self._animate_hurt(damage_types)
         if self.parent.health.is_dead():
             self.parent.health.killer = entity
-        self._call_damage_taken_effect(damage, entity)
+        self._call_damage_taken_effect(damage, entity, damage_types)
         return damage
 
     def _animate_hurt(self, damage_types):
@@ -99,15 +100,17 @@ class HealthModifier(Leaf):
         heart_graphic_char = GraphicChar(None, colors.CYAN, icon.HEALTH_GAIN_ICON)
         self.parent.char_printer.append_graphic_char_temporary_frames([heart_graphic_char])
 
-    def _call_damage_taken_effect(self, damage, entity):
+    def _call_damage_taken_effect(self, damage, entity, damage_types):
         """
         Calls all on damage taken effects.
         @param damage: The amount of damage taken.
         @param entity: The entity that caused the damage.
         """
+
         effects = self.parent.get_children_with_tag("damage_taken_effect")
+        print "dte: ", damage, entity, effects
         for effect in effects:
-            effect.effect(damage, entity)
+            effect.effect(damage, entity, damage_types)
 
     def kill(self, entity=None):
         """
@@ -152,18 +155,36 @@ class DamageTakenEffect(Leaf):
     """
     Subclasses may define an effect that happens when parent takes damage.
     """
+
     def __init__(self):
         super(DamageTakenEffect, self).__init__()
         self.tags.add("damage_taken_effect")
 
-    def effect(self, damage, source_entity):
+    def effect(self, damage, source_entity, damage_types=[]):
         pass
+
+
+class ReflectDamageTakenEffect(DamageTakenEffect):
+    def __init__(self):
+        super(ReflectDamageTakenEffect, self).__init__()
+        self.component_type = "reflect_damage"
+        self.damage = 1
+
+    def effect(self, damage, source_entity, damage_types=[]):
+        if (damage >= 1 and
+                source_entity and
+                source_entity.has("health_modifier") and
+                not DamageTypes.REFLECT in damage_types and
+                source_entity != self.parent and
+                rng.coin_flip()):
+            source_entity.health_modifier.hurt(self.damage, self.parent, [DamageTypes.MAGIC, DamageTypes.REFLECT])
 
 
 class BleedWhenDamaged(DamageTakenEffect):
     """
     When parent takes damage, it will bleed pools of blood on the terrain.
     """
+
     def __init__(self):
         super(BleedWhenDamaged, self).__init__()
         self.component_type = "bleed_on_damaged"
@@ -178,18 +199,18 @@ class BleedWhenDamaged(DamageTakenEffect):
         elif not the_terrain.has("is_chasm"):
             spawn_blood_on_position(position, dungeon_level)
 
-    def effect(self, damage, source_entity):
+    def effect(self, damage, source_entity, damage_types=[]):
         dungeon_level = self.parent.dungeon_level.value
-        if damage/float(self.parent.health.hp.max_value) > 0.2:
+        if damage / float(self.parent.health.hp.max_value) > 0.2:
             self.put_blood_on_tile(dungeon_level, self.parent.position.value)
 
-        if damage/float(self.parent.health.hp.max_value) > 0.4:
+        if damage / float(self.parent.health.hp.max_value) > 0.4:
             point_behind = self._get_point_behind_unless_solid(source_entity.position.value, 1, dungeon_level)
             shape = shapegenerator.random_explosion_not_through_solid(point_behind, 2, dungeon_level)
             for point in shape:
                 self.put_blood_on_tile(dungeon_level, point)
 
-        if damage/float(self.parent.health.hp.max_value) > 0.8:
+        if damage / float(self.parent.health.hp.max_value) > 0.8:
             point_behind = self._get_point_behind_unless_solid(source_entity.position.value, 2, dungeon_level)
             shape = shapegenerator.random_explosion_not_through_solid(point_behind, min(damage / 2, 7), dungeon_level)
             for point in shape:

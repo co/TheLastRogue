@@ -10,6 +10,7 @@ import direction
 from dummyentities import dummy_flyer
 import geometry
 from graphic import GraphicChar, CharPrinter
+from health import ReflectDamageTakenEffect
 import messenger
 from missileaction import PlayerThrowItemAction
 from mover import Mover
@@ -377,6 +378,13 @@ def set_ring_components(item):
     item.set_child(DataPoint(DataTypes.WEIGHT, 2))
 
 
+def set_amulet_components(item):
+    item.set_child(EquipmentType(equipment.EquipmentTypes.AMULET))
+    item.set_child(ItemType(ItemType.JEWELLRY))
+    item.set_child(ReEquipAction())
+    item.set_child(DataPoint(DataTypes.WEIGHT, 3))
+
+
 def new_ring_of_invisibility(game_state):
     ring = Composite()
     set_item_components(ring, game_state)
@@ -425,6 +433,19 @@ def new_ring_of_strength(game_state):
     return ring
 
 
+def new_amulet_of_reflect_damage(game_state):
+    amulet = Composite()
+    set_item_components(amulet, game_state)
+    set_amulet_components(amulet)
+    amulet.set_child(GraphicChar(None, colors.CYAN, icon.AMULET))
+    amulet.set_child(AddSpoofChildEquipEffect(ReflectDamageTakenEffect))
+    amulet.set_child(Description("Amulet of Reflection",
+                                 "The amulet feels cold and heavy,"
+                                 "it is made of enchanted silver, "
+                                 "Its magic powers will damage those who hurt you."))
+    return amulet
+
+
 class StatBonusEquipEffect(EquippedEffect):
     def __init__(self, stat, bonus):
         super(StatBonusEquipEffect, self).__init__()
@@ -436,6 +457,18 @@ class StatBonusEquipEffect(EquippedEffect):
         Causes the entity that equips this have a bonus to one stat.
         """
         entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
+
+
+class AddSpoofChildEquipEffect(EquippedEffect):
+    def __init__(self, spoof_child_factory):
+        super(AddSpoofChildEquipEffect, self).__init__()
+        self.spoof_child_factory = spoof_child_factory
+
+    def effect(self, entity):
+        """
+        Causes the entity that equips this have a spoofed component child.
+        """
+        entity.effect_queue.add(entityeffect.AddSpoofChild(entity, self.spoof_child_factory(), 0))
 
 
 class SetInvisibilityFlagEquippedEffect(EquippedEffect):

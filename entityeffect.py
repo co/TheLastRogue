@@ -90,8 +90,8 @@ class EntityEffect(object):
         return new_turns_alive > turns_alive
 
     def tick(self, time_spent):
-        self.time_to_live = self.time_to_live - time_spent
         self.time_alive += time_spent
+        self.time_to_live = self.time_to_live - time_spent
         if self.time_to_live < 1:
             self._on_remove_effect()
             self.queue.remove(self)
