@@ -39,7 +39,7 @@ class PlayerMissileAction(Action):
         path_taken = hit_detector.get_path_taken(path, dungeon_level)
         if path_taken is None or len(path_taken) < 1:
             return False
-        animate_flight(game_state, path, self.missile_graphic.icon, self.missile_graphic.color_fg)
+        animate_flight(game_state, path_taken, self.missile_graphic.icon, self.missile_graphic.color_fg)
         self.missile_hit_effect(dungeon_level, path_taken[-1], game_state, source_entity)
         self.add_energy_spent_to_entity(source_entity)
 
@@ -242,7 +242,7 @@ class MonsterMissileAction(MonsterTargetAction):
         path_taken = hit_detector.get_path_taken(path, dungeon_level)
         if path_taken is None or len(path_taken) < 1:
             return False
-        animate_flight(self.parent.game_state.value, path, self.missile_graphic.icon, self.missile_graphic.color_fg)
+        animate_flight(self.parent.game_state.value, path_taken, self.missile_graphic.icon, self.missile_graphic.color_fg)
         self.missile_hit_effect(dungeon_level, path[-1])
         self.add_energy_spent_to_entity(self.parent)
 

@@ -26,11 +26,11 @@ class MissileAnimation(InstantAnimation):
             if not self.player.dungeon_mask.can_see_point(point):
                 continue
             self.game_state.prepare_draw()
-            self.print_missile_at_point(point)
+            self.draw_missile_at_point(point)
             for _ in range(settings.MISSILE_ANIMATION_DELAY):
                 console.flush()
 
-    def print_missile_at_point(self, point):
+    def draw_missile_at_point(self, point):
         x, y = self.camera.dungeon_to_screen_position(point)
         console.set_color_fg((x, y), self.color_fg)
         console.set_symbol((x, y), self.symbol)
