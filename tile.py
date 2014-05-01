@@ -18,7 +18,7 @@ class Tile(object):
         self._top_level = GamePieceTypes.TERRAIN
 
     def draw(self, console, screen_position, is_seen):
-        piece_list = self.game_pieces[self._top_level]
+        piece_list = self.get_top_pieces()
         if is_seen:
             self._draw_seen(console, screen_position, piece_list)
         else:
@@ -69,6 +69,9 @@ class Tile(object):
 
     def _draw_unseen(self, console, screen_position, piece_list):
         piece_list[0].char_printer.draw_unseen(screen_position, console)
+
+    def get_top_pieces(self):
+        return self.game_pieces[self._top_level]
 
     def get_first_item(self):
         return self.get_first_piece_of_type(GamePieceTypes.ITEM)

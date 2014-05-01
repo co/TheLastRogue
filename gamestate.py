@@ -230,6 +230,9 @@ class TestGameState(GameStateBase):
         scroll = item.new_teleport_scroll(self)
         scroll.mover.try_move((26, 12), self.dungeon_level)
 
+        scroll = item.new_map_scroll(self)
+        scroll.mover.try_move((21, 13), self.dungeon_level)
+
         gun = item.new_gun(self)
         gun.mover.try_move((20, 13), self.dungeon_level)
 

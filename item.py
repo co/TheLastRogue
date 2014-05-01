@@ -7,6 +7,7 @@ from compositecommon import PoisonEntityEffectFactory
 from compositecore import Leaf, Composite
 from attacker import Attack, DamageTypes
 import direction
+from dummyentities import dummy_flyer
 import geometry
 from graphic import GraphicChar, CharPrinter
 import messenger
@@ -14,6 +15,7 @@ from missileaction import PlayerThrowItemAction
 from mover import Mover
 from position import Position, DungeonLevel
 import rng
+from shapegenerator import extend_points
 from stats import DataPointBonusSpoof, DataPoint, Flag, DataTypes, GamePieceTypes
 from statusflags import StatusFlags
 from text import Description
@@ -515,6 +517,16 @@ def new_teleport_scroll(game_state):
     return scroll
 
 
+def new_map_scroll(game_state):
+    scroll = Composite()
+    set_item_components(scroll, game_state)
+    set_scroll_components(scroll)
+    scroll.set_child(GraphicChar(None, colors.CHAMPAGNE, icon.SCROLL))
+    scroll.set_child(MapScrollReadAction())
+    scroll.set_child(Description("Scroll of magic mapping.",
+                                 "A scroll which will make a map of your surroundings."))
+    return scroll
+
 def new_bomb(game_state):
     bomb = Composite()
     set_item_components(bomb, game_state)
@@ -717,6 +729,7 @@ class PoisonPotionDrinkAction(DrinkAction):
         damage_effect_factory = PoisonEntityEffectFactory(target_entity, damage, 2, random.randrange(8, 12))
         target_entity.effect_queue.add(damage_effect_factory())
 
+
 class TeleportScrollReadAction(ReadAction):
     """
     Defines the healing potion drink action.
@@ -733,6 +746,30 @@ class TeleportScrollReadAction(ReadAction):
         msg.send_global_message(messenger.PLAYER_TELEPORT_MESSAGE)
         teleport_effect = entityeffect.Teleport(target_entity)
         target_entity.effect_queue.add(teleport_effect)
+
+
+class MapScrollReadAction(ReadAction):
+    """
+    Defines the healing potion drink action.
+    """
+
+    def __init__(self):
+        super(MapScrollReadAction, self).__init__()
+        self.component_type = "map_scroll_read_action"
+
+    def _act(self, target_entity):
+        """
+        When an entity reads a scroll of mapping it gains knowledge of the surrounding terrain.
+        """
+        msg.send_global_message(messenger.PLAYER_MAP_MESSAGE)
+        dungeon_level = target_entity.dungeon_level.value
+        walkable_positions = dungeon_level.get_walkable_positions(dummy_flyer,
+                                                                  target_entity.position.value)
+        map_positions = extend_points(walkable_positions)
+        for p in map_positions:
+            tile = dungeon_level.get_tile_or_unknown(p)
+            target_entity.memory_map.gain_knowledge_of_terrain_of_tile(tile, p, dungeon_level.depth)
+        target_entity.game_state.value.dungeon_needs_redraw = True
 
 
 class PickUpItemAction(Action):

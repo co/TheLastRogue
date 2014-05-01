@@ -225,11 +225,10 @@ class Path(Leaf):
         for d in alternate_directions:
             new_position = geometry.add_2d(d, self.parent.position.value)
             terrain = self.parent.dungeon_level.value.get_tile_or_unknown(new_position).get_terrain()
-            energy_spent = 0
             if self.parent.mover.can_pass_terrain(terrain):
                 energy_spent = self.parent.stepper.try_move_or_bump(new_position)
-            if energy_spent > 0:
-                return energy_spent
+                if energy_spent > 0:
+                    return energy_spent
         return 0
 
     def compute_path(self, destination):

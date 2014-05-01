@@ -32,6 +32,8 @@ POTION_SMASH_TO_GROUND = "The %(target_entity)s smashes to the ground and breaks
 ITEM_HITS_THE_GROUND = "The %(target_entity)s hits the ground with a thud."
 ENTITY_EXPLODES = "The %(target_entity)s explodes!"
 
+PLAYER_MAP_MESSAGE = "You surroundings suddenly seem familiar."
+
 
 class Messenger(object):
     def __init__(self):

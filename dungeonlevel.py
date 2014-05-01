@@ -129,7 +129,11 @@ class DungeonLevel(object):
         for y, row in enumerate(self.tile_matrix):
             line = ""
             for x, tile in enumerate(row):
-                if tile.get_terrain().has("is_solid"):
+                if not tile.get_terrain():
+                    line += "X"
+                elif tile.get_terrain().has("is_unknown"):
+                    line += "?"
+                elif tile.get_terrain().has("is_solid"):
                     line += "#"
                 elif tile.get_terrain().has("is_chasm"):
                     line += "_"
@@ -210,8 +214,10 @@ class DungeonLevelScreen(object):
             entity.memory_map.update_memory_of_tile(the_tile, position, self.dungeon_level.depth)
             the_tile.draw(self.console, position, True)
         else:
-            the_tile = entity.memory_map.get_memory_of_map(self.dungeon_level).get_tile_or_unknown(position)
-            the_tile.draw(self.console, position, False)
+            memory_tile = entity.memory_map.get_memory_of_map(self.dungeon_level).get_tile_or_unknown(position)
+            memory_tile.draw(self.console, position, False)
+            real_tile = get_tile_or_unknown(position, tile_matrix)
+            real_tile.get_top_pieces()[0].char_printer.clear_animation()
 
     def blit(self, source_position):
         src_x, src_y = source_position

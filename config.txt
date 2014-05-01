@@ -3,8 +3,10 @@
 [Screen]
 #  Change resolution here, the deafult/minimum resolution is: 1024x768
 #  The real resolution will be the nearest even divisor of the tile width (default tileset: 16px)
-resolution_width=1024
-resolution_height=768
+#resolution_width=1024
+#resolution_height=768
+resolution_width=1920
+resolution_height=1080
 
 #The number of frames each animation frame will show up, will mostly effect blink animations in the game.
 animation_delay=3

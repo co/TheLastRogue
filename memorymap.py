@@ -1,6 +1,7 @@
 from compositecore import Leaf, CompositeMessage
 from dungeonlevelfactory import unknown_level_map
 import terrain
+from tile import Tile
 
 
 class MemoryMap(Leaf):
@@ -13,7 +14,7 @@ class MemoryMap(Leaf):
         self._memory_map = []
 
     def get_memory_of_map(self, dungeon_level):
-        self.set_memory_map_if_not_set(dungeon_level)
+        self._init_memory_map_if_not_set(dungeon_level)
         return self._memory_map[dungeon_level.depth]
 
     def has_seen_position(self, position):
@@ -21,7 +22,7 @@ class MemoryMap(Leaf):
         tile = memory.get_tile_or_unknown(position)
         return not isinstance(tile.get_terrain(), terrain.Unknown)
 
-    def set_memory_map_if_not_set(self, dungeon_level):
+    def _init_memory_map_if_not_set(self, dungeon_level):
         """
         Lazily initiates unknown dungeon to the depth needed.
         """
@@ -38,13 +39,38 @@ class MemoryMap(Leaf):
         """
         Writes the entity memory of a tile, to the memory map.
         """
-        self.set_memory_map_if_not_set(self.parent.dungeon_level.value)
+        self._init_memory_map_if_not_set(self.parent.dungeon_level.value)
         x, y = position
         self._memory_map[depth].tile_matrix[y][x] = tile.copy()
+
+    def gain_knowledge_of_terrain_of_tile(self, tile, position, depth):
+        """
+        Writes the entity memory of a tile, to the memory map.
+
+        If position is out of range, do nothing
+        """
+        x, y = position
+        self._init_memory_map_if_not_set(self.parent.dungeon_level.value)
+        try:
+            if (not self._memory_map[depth].tile_matrix[y][x].get_terrain() or
+                    self._memory_map[depth].tile_matrix[y][x].get_terrain().has("is_unknown")):
+                new_tile = Tile()
+                new_tile.add(tile.get_terrain())
+                self._memory_map[depth].tile_matrix[y][x] = new_tile
+        except IndexError:
+            pass
+
+    def number_of_seen_tiles(self, depth):
+        seen_tiles = []
+        for row in self._memory_map[depth].tile_matrix:
+            for t in row:
+                if t and not t.get_terrain():
+                    seen_tiles.append(t)
+        return len(seen_tiles)
 
     def message(self, message):
         """
         Handles messages recieved.
         """
         if(message == CompositeMessage.DUNGEON_LEVEL_CHANGED):
-            self.set_memory_map_if_not_set(self.parent. dungeon_level.value)
+            self._init_memory_map_if_not_set(self.parent. dungeon_level.value)

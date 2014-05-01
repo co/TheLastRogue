@@ -183,6 +183,7 @@ class Unknown(Composite):
         self.set_child(GraphicChar(colors.BLACK,
                                    colors.BLACK,
                                    ' '))
+        self.set_child(Flag("is_unknown"))
         self.set_child(Flag("is_solid"))
         self.set_child(Flag("is_transparent"))
 

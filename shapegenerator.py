@@ -22,6 +22,14 @@ def dfs_tunnler(start_position, min_length, max_length,
     return visited
 
 
+def extend_points(points):
+    result = set(points)
+    for point in points:
+        for d in direction.DIRECTIONS:
+            result.add(geo.add_2d(point, d))
+    return result
+
+
 def dfs_tunnler_with_random_stop(start_position, min_length, max_length,
                                  size, direction_list):
     position = start_position

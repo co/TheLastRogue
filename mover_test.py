@@ -1,5 +1,6 @@
 import unittest
 from compositecore import Composite
+from dummyentities import dummy_flyer, dummy_player
 from mover import Mover
 from position import Position, DungeonLevel
 from stats import GamePieceTypes, DataTypes, DataPoint
@@ -7,17 +8,6 @@ from statusflags import StatusFlags
 import dungeonlevelfactory
 import terrain
 from text import Description
-
-
-dummy_player = Composite()
-dummy_player.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
-dummy_player.set_child(Mover())
-dummy_player.set_child(Description("player_dummy", "Just a dummy used for instead of player for calculations."))
-
-dummy_flyer = Composite()
-dummy_flyer.set_child(StatusFlags([StatusFlags.FLYING]))
-dummy_flyer.set_child(Mover())
-dummy_flyer.set_child(Description("flyer_dummy", "Just a dummy used for instead a flyer for calculations."))
 
 
 class TestComposition(unittest.TestCase):

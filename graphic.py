@@ -86,6 +86,9 @@ class CharPrinter(Leaf):
             frame = self._temp_animation_frames.pop(0)
         return frame
 
+    def clear_animation(self):
+        self._temp_animation_frames = []
+
     def draw(self, position, the_console=0):
         """
         Draws the char on the given position on the console.
@@ -118,11 +121,11 @@ class CharPrinter(Leaf):
 
     def append_fg_color_blink_frames(self, frame_colors, animation_delay=settings.ANIMATION_DELAY):
         """
-            Appends frames to  the graphic char animation frame queue. With only fg_color changed.
+        Appends frames to  the graphic char animation frame queue. With only fg_color changed.
 
-            These chars will be drawn as an effect,
-            the regular chars won't be drawn until the animation frame queue is empty.
-            """
+        These chars will be drawn as an effect,
+        the regular chars won't be drawn until the animation frame queue is empty.
+        """
         color_bg = self.parent.graphic_char.color_bg
         symbol = self.parent.graphic_char.icon
         frames = [GraphicChar(color_bg, color, symbol) for color in frame_colors]
@@ -130,6 +133,14 @@ class CharPrinter(Leaf):
 
     def append_default_graphic_frame(self, frames=settings.ANIMATION_DELAY):
         self.append_graphic_char_temporary_frames([self.parent.graphic_char], frames)
+
+    def copy(self):
+        """
+        Makes a copy of this component.
+        """
+        copy = CharPrinter()
+        copy._temp_animation_frames = self._temp_animation_frames
+        return copy
 
 
 def _expand_frames(graphic_char_frames, animation_delay):
