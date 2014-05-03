@@ -180,8 +180,9 @@ class AttackEntityEffect(EntityEffect):
         self.target_entity_effects = target_entity_effects
 
     def send_miss_message(self):
-        messenger.msg.send_visual_message(self.miss_message % {"source_entity": self.source_entity.description.long_name,
-                                                   "target_entity": self.target_entity.description.long_name},
+        messenger.msg.send_visual_message(self.miss_message %
+                                          {"source_entity": self.source_entity.description.long_name,
+                                           "target_entity": self.target_entity.description.long_name},
                                           self.target_entity.position.value)
 
     def send_hit_message(self, damage_caused):

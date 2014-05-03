@@ -134,7 +134,7 @@ class Equipment(Leaf):
         if equipment.has("on_equip_effect"):
             equipment.on_equip_effect.effect(self.parent)
 
-    def before_tick(self, time_spent):
+    def first_tick(self, time_spent):
         self.execute_equip_effects()
 
     def execute_equip_effects(self):

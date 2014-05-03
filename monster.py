@@ -518,6 +518,40 @@ class ReviveAsGhostOnDeath(Leaf):
             self.parent.position.value)
 
 
+class AddEffectToOtherSeenEntities(Leaf):
+    """
+    Adds effects to seen entities other than self.
+    """
+
+    def __init__(self, effect_factory, ttl=1):
+        super(AddEffectToOtherSeenEntities, self).__init__()
+        self.component_type = "add_effect_to_other_seen_entities_" + str(effect_factory)
+        self.effect_factory = effect_factory
+        self.ttl = ttl
+
+    def before_tick(self, time):
+        seen_entities = self.parent.vision.get_seen_entities()
+        for entity in seen_entities:
+            if not entity is self.parent:
+                entity.effect_queue.add(AddSpoofChild(self.parent, self.effect_factory(), self.ttl))
+
+
+class HealAnEntityOnDeath(Leaf):
+    """
+    Will Heal an entity when parent has died.
+    """
+
+    def __init__(self, source_entity):
+        super(HealAnEntityOnDeath, self).__init__()
+        self.component_type = "heal_entity_on_death"
+        self.source_entity = source_entity
+        self.target_entity = source_entity
+
+    def on_tick(self, time):
+        if self.parent.health.is_dead():
+            self.target_entity.health_modifier.heal(1)
+
+
 class SplitAtFullHealth(Component):
     def __init__(self):
         super(SplitAtFullHealth, self).__init__()

@@ -20,15 +20,16 @@ class ActionScheduler(object):
     def release(self, actor):
         self._actors.remove(actor)
 
-    def prepare_tick(self, entity):
-        entity.reset_spoofed_children()
+    def effects_tick(self, entity):
         if entity.has("effect_queue"):
             entity.effect_queue.update(gametime.normal_energy_gain)
 
     def _actors_tick(self):
         if len(self._actors) > 0:
             entity = self._actors[0]
-            self.prepare_tick(entity)
+            entity.reset_spoofed_children()
+            entity.first_tick(gametime.normal_energy_gain)  # Equipped effects.
+            self.effects_tick(entity)
             entity.before_tick(gametime.normal_energy_gain)
             self.on_tick(entity)
             entity.actor.tick()

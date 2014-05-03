@@ -13,6 +13,7 @@ from graphic import GraphicChar, CharPrinter
 from health import ReflectDamageTakenEffect
 import messenger
 from missileaction import PlayerThrowItemAction
+from monster import HealAnEntityOnDeath, AddEffectToOtherSeenEntities
 from mover import Mover
 from position import Position, DungeonLevel
 import rng
@@ -274,7 +275,7 @@ class EquippedEffect(Leaf):
 
     def __init__(self):
         super(EquippedEffect, self).__init__()
-        self.component_type = "equipped_effect"
+        self.component_type = "equipped_effect"  #TODO: should be tag to allow multiple effects?
 
     def effect(self, entity):
         pass
@@ -446,6 +447,18 @@ def new_amulet_of_reflect_damage(game_state):
     return amulet
 
 
+def new_amulet_of_life_steal(game_state):
+    amulet = Composite()
+    set_item_components(amulet, game_state)
+    set_amulet_components(amulet)
+    amulet.set_child(GraphicChar(None, colors.RED, icon.AMULET))
+    amulet.set_child(LifeStealEffect())
+    amulet.set_child(Description("Amulet of the Nosferatu",
+                                 "The gem at the center pulsates when blood is near."
+                                 "Its magic powers will heal you see a creature die."))
+    return amulet
+
+
 class StatBonusEquipEffect(EquippedEffect):
     def __init__(self, stat, bonus):
         super(StatBonusEquipEffect, self).__init__()
@@ -469,6 +482,18 @@ class AddSpoofChildEquipEffect(EquippedEffect):
         Causes the entity that equips this have a spoofed component child.
         """
         entity.effect_queue.add(entityeffect.AddSpoofChild(entity, self.spoof_child_factory(), 0))
+
+
+class LifeStealEffect(EquippedEffect):
+    def __init__(self):
+        super(LifeStealEffect, self).__init__()
+
+    def effect(self, entity):
+        """
+        Causes seen entities to heal holder of this effect upon death.
+        """
+        e = AddEffectToOtherSeenEntities(lambda: HealAnEntityOnDeath(entity))
+        entity.effect_queue.add(entityeffect.AddSpoofChild(entity, e, 1))
 
 
 class SetInvisibilityFlagEquippedEffect(EquippedEffect):

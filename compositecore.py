@@ -65,6 +65,12 @@ class Component(object):
         """
         pass
 
+    def first_tick(self, time):
+        """
+        A method hook for updating the component tree before tick.
+        """
+        pass
+
     def before_tick(self, time):
         """
         A method hook for updating the component tree before tick.
@@ -231,6 +237,19 @@ class Composite(Component):
         Runs update on all child components.
         """
         map(lambda x: x.update(), self._children.values())
+
+    def first_tick(self, time):
+        """
+        Runs first_tick on all child components.
+        """
+        visited_component_types = set()
+        for component_type, component in self._spoofed_children.iteritems():
+            visited_component_types.add(component_type)
+            component[0].first_tick(time)
+        components_without_spoof = [component for key, component in self._children.iteritems()
+                                    if not key in visited_component_types]
+        for component in components_without_spoof:
+            component.first_tick(time)
 
     def before_tick(self, time):
         """

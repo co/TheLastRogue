@@ -100,7 +100,7 @@ class KnockBackAttacker(Attacker):
         old_target_position = target_entity.position.value
         target_entity.mover.try_move(knock_position)
         self.parent.mover.try_move(old_target_position)
-        if rng.coin_flip():
+        if rng.coin_flip() and rng.coin_flip():
             entity_skip_turn(self.parent, target_entity)
             target_entity.char_printer.append_fg_color_blink_frames([colors.CHAMPAGNE])
 
