@@ -1,3 +1,4 @@
+from Status import StatusBar
 import constants
 from equipment import Equipment
 from item import PickUpItemAction
@@ -65,6 +66,7 @@ class Player(Composite):
 
         self.set_child(Description("CO", "The Brave"))
         self.set_child(GraphicChar(None, colors.WHITE, icon.GUNSLINGER_THIN))
+        self.set_child(StatusBar())
         self.set_child(CharPrinter())
 
         self.set_child(HealthModifier())

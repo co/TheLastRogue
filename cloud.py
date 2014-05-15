@@ -1,4 +1,5 @@
 import random
+from Status import StatusIcon
 from actor import Actor
 from attacker import DamageTypes
 import colors
@@ -96,7 +97,7 @@ def new_fire_cloud(game_state, density):
     fire = Composite()
     set_cloud_components(game_state, fire, density)
     set_non_flying_cloud_components(fire)
-    fire.graphic_char.icon = icon.SPIDER + 1
+    fire.graphic_char.icon = icon.FIRE
     fire.graphic_char.color_fg = colors.RED
     fire.set_child(Description("Fire", "Don't get burnt."))
     fire.set_child(DisappearCloudActor())
@@ -121,10 +122,10 @@ class FireDamageShareTileEffect(EntityShareTileEffect):
         damage = rng.random_variance(damage_mid, damage_var)
         if not target_entity.has("effect_queue"):
             return
-
+        status_icon = StatusIcon("Fire", GraphicChar(None, colors.RED, icon.FIRE))
         damage_effect = UndodgeableDamagAndBlockSameEffect(source_entity, damage, self.damage_types,
                                                            messenger.HURT_BY_FIRE, "fire_damage",
-                                                           time_to_live=gametime.single_turn)
+                                                           time_to_live=gametime.single_turn, status_icon=status_icon)
         target_entity.effect_queue.add(damage_effect)
 
 

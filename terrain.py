@@ -198,7 +198,7 @@ class Wall (Composite):
         self.set_child(CharPrinter())
         self.set_child(GraphicCharTerrainCorners(colors.FLOOR_BG,
                                                  colors.WALL_FG,
-                                                 icon.DUNGEON_WALLS_ROW,
+                                                 icon.CAVE_WALLS_ROW2,
                                                  [Wall, Door, Chasm]))
         self.set_child(Flag("is_solid"))
 

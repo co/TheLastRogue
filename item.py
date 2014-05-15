@@ -1,4 +1,5 @@
 import random
+from Status import StatusIcon
 
 from action import Action
 from actor import DoNothingActor
@@ -439,7 +440,9 @@ def new_amulet_of_reflect_damage(game_state):
     set_item_components(amulet, game_state)
     set_amulet_components(amulet)
     amulet.set_child(GraphicChar(None, colors.CYAN, icon.AMULET))
-    amulet.set_child(AddSpoofChildEquipEffect(ReflectDamageTakenEffect))
+    amulet.set_child(AddSpoofChildEquipEffect(ReflectDamageTakenEffect,
+                                              StatusIcon("Reflect Damage",
+                                                         GraphicChar(None, colors.CYAN, icon.ARMOR))))
     amulet.set_child(Description("Amulet of Reflection",
                                  "The amulet feels cold and heavy,"
                                  "it is made of enchanted silver, "
@@ -473,15 +476,18 @@ class StatBonusEquipEffect(EquippedEffect):
 
 
 class AddSpoofChildEquipEffect(EquippedEffect):
-    def __init__(self, spoof_child_factory):
+    def __init__(self, spoof_child_factory, status_icon=None):
         super(AddSpoofChildEquipEffect, self).__init__()
         self.spoof_child_factory = spoof_child_factory
+        self.status_icon = status_icon
 
     def effect(self, entity):
         """
         Causes the entity that equips this have a spoofed component child.
         """
-        entity.effect_queue.add(entityeffect.AddSpoofChild(entity, self.spoof_child_factory(), 0))
+        entity.effect_queue.add(entityeffect.AddSpoofChild(entity, self.spoof_child_factory(), 1))
+        if self.status_icon:
+            entity.effect_queue.add(entityeffect.StatusIconEntityEffect(entity, self.status_icon, 1))
 
 
 class LifeStealEffect(EquippedEffect):
@@ -494,6 +500,8 @@ class LifeStealEffect(EquippedEffect):
         """
         e = AddEffectToOtherSeenEntities(lambda: HealAnEntityOnDeath(entity))
         entity.effect_queue.add(entityeffect.AddSpoofChild(entity, e, 1))
+        status_icon = StatusIcon("Life Steal", GraphicChar(None, colors.RED, "V"))
+        entity.effect_queue.add(entityeffect.StatusIconEntityEffect(entity, status_icon, 1))
 
 
 class SetInvisibilityFlagEquippedEffect(EquippedEffect):

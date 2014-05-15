@@ -31,7 +31,6 @@ def spawn_rat_man(dungeon_level, game_state):
         return False
     return True
 
-
 def spawn_corpse_of_entity(entity_killed):
     return spawn_corpse_on_position(entity_killed.position.value,
                                     entity_killed.dungeon_level.last_dungeon_level)

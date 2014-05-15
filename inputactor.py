@@ -2,6 +2,7 @@ from actor import Actor
 from entityeffect import Teleport, StatusAdder, StatusRemover
 from equipment import EquipmentSlots
 from item import RangeWeaponType
+import monster
 import settings
 import spawner
 import menu
@@ -85,8 +86,13 @@ class InputActor(Actor):
             self.toggle_invisibility()
 
         elif key == inputhandler.FIVE:
-            spawner.spawn_rat_man(self.parent.dungeon_level.value,
-                                  self.parent.game_state.value)
+            spawner.place_piece_on_random_walkable_tile(monster.new_ratman(self.parent.game_state.value),
+                                                        self.parent.dungeon_level.value)
+            self.newly_spent_energy += gametime.single_turn
+
+        elif key == inputhandler.SIX:
+            spawner.place_piece_on_random_walkable_tile(monster.new_ghost(self.parent.game_state.value),
+                                                        self.parent.dungeon_level.value)
             self.newly_spent_energy += gametime.single_turn
 
         elif key == inputhandler.NINE:

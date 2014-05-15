@@ -19,6 +19,15 @@ class Dungeon(object):
             self._dungeon_levels.append(self._generate_dungeon_level(len(self._dungeon_levels)))
         return self._dungeon_levels[depth]
 
+    def __getstate__(self):
+        print self._dungeon_levels
+        print "dungeon get"
+        return dict(self.__dict__)
+
+    def __setstate__(self, state):
+        print "*****dungeon ", state.__class__
+        self.__dict__.update(state)
+
     def _generate_dungeon_level(self, depth):
         self.game_state.draw_loading_screen("Generating Dungeon...")
         size = 600 + depth * 20

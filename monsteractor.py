@@ -164,6 +164,8 @@ class ChasePlayerActor(MonsterActor):
         return self.newly_spent_energy <= 0
 
     def act(self):
+        if not self.parent.dungeon_level.value:
+            return gametime.single_turn
         self.parent.dungeon_mask.update_fov()
         self.newly_spent_energy = 0
 

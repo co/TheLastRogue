@@ -26,12 +26,14 @@ class DungeonLevel(object):
 
     # TODO: Ugly Hack for improving save time. Improve this please.
     def __getstate__(self):
+        print "dungeon level get"
+        return dict(self.__dict__)
         if len(self.entities) == 0:
             return dict(self.__dict__)
         if any(entity.has("is_player") for entity in self.entities):
             return dict(self.__dict__)
         else:
-            return False
+            return dict()
 
     @property
     def entities(self):

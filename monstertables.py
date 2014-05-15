@@ -24,7 +24,7 @@ dungeon_table = \
         [DungeonTableItem(new_pixie)] * 2 +
         [DungeonTableItem(new_armored_beetle)] * 3 +
         [DungeonTableItem(new_dust_demon)] * 5 +
-        [DungeonTableItem(new_spider)] * 15 +
+        [DungeonTableItem(new_spider)] * 12 +
         [DungeonTableItem(new_salamander)] * 3 +
         [DungeonTableItem(new_cyclops)] * 3
     )

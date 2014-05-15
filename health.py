@@ -1,9 +1,12 @@
 import logging
+import symbol
+from Status import StatusIcon
 from attacker import DamageTypes
 from compositecore import Leaf
 import counter
 import colors
 import dungeontrash
+import entityeffect
 import geometry
 from graphic import GraphicChar
 import icon
@@ -108,7 +111,6 @@ class HealthModifier(Leaf):
         """
 
         effects = self.parent.get_children_with_tag("damage_taken_effect")
-        print "dte: ", damage, entity, effects
         for effect in effects:
             effect.effect(damage, entity, damage_types)
 
@@ -177,7 +179,11 @@ class ReflectDamageTakenEffect(DamageTakenEffect):
                 not DamageTypes.REFLECT in damage_types and
                 source_entity != self.parent and
                 rng.coin_flip()):
-            source_entity.health_modifier.hurt(self.damage, self.parent, [DamageTypes.MAGIC, DamageTypes.REFLECT])
+            damage_effect = entityeffect.UndodgeableAttackEntityEffect(self.parent, self.damage,
+                                                                       [DamageTypes.MAGIC, DamageTypes.REFLECT])
+            source_entity.effect_queue.add(damage_effect)
+        status_icon = StatusIcon("Damage Reflect", GraphicChar(None, colors.CYAN, icon.ARMOR_STAT))
+        source_entity.effect_queue.add(entityeffect.StatusIconEntityEffect(source_entity, status_icon, 1))
 
 
 class BleedWhenDamaged(DamageTakenEffect):

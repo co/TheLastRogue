@@ -11,6 +11,7 @@ class Mover(Leaf):
     """
     Component for moving and checking if a move is legal.
     """
+
     def __init__(self):
         super(Mover, self).__init__()
         self.component_type = "mover"
@@ -64,7 +65,7 @@ class Mover(Leaf):
         """
         if self.try_move(new_position, new_dungeon_level):
             return True
-        #  Do not shuffle public constants!
+            #  Do not shuffle public constants!
         directions = list(direction.DIRECTIONS)
         random.shuffle(directions)
         for d in directions:
@@ -138,8 +139,8 @@ class Mover(Leaf):
             status_flags = self.parent.status_flags
             if terrain_to_pass.has("is_chasm") and status_flags.has_status(StatusFlags.FLYING):
                 return True
-            if(status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
-               terrain_to_pass.has("is_door")):
+            if (status_flags.has_status(StatusFlags.CAN_OPEN_DOORS) and
+                    terrain_to_pass.has("is_door")):
                 return True
         if not terrain_to_pass.has("is_solid") and not terrain_to_pass.has("is_chasm"):
             return True
@@ -149,8 +150,8 @@ class Mover(Leaf):
         """
         Tries to remove parent from dungeon.
         """
-        if(not self.has_sibling("dungeon_level") or
-           self.parent.dungeon_level.value is None):
+        if (not self.has_sibling("dungeon_level") or
+                    self.parent.dungeon_level.value is None):
             return True
         if self._remove_from_old_tile():
             self.parent.dungeon_level.value = None
@@ -161,8 +162,8 @@ class Mover(Leaf):
         """
         Removes parent from previous tile.
         """
-        if(not self.has_sibling("dungeon_level") or
-           self.parent.dungeon_level.value is None):
+        if (not self.has_sibling("dungeon_level") or
+                    self.parent.dungeon_level.value is None):
             return True
         position = self.parent.position.value
         tile_i_might_be_on = (self.parent.dungeon_level.
@@ -176,6 +177,7 @@ class Stepper(Leaf):
 
     will also interact with what it bumps into.
     """
+
     def __init__(self):
         super(Stepper, self).__init__()
         self.component_type = "stepper"
@@ -239,6 +241,7 @@ class TolerateDamage(Leaf):
     """
     Signifies that that the entity won't minde taking damage of a type.
     """
+
     def __init__(self, damage_type):
         super(TolerateDamage, self).__init__()
         self.component_type = "tolerate_damage_" + str(damage_type)
@@ -311,6 +314,7 @@ class PlayerStepper(Stepper):
             if self.parent.mover.try_move(position):
                 return self.parent.movement_speed.value
         return 0
+
 
 class ImmobileStepper(Stepper):
     def __init__(self):

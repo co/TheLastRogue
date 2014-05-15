@@ -1,4 +1,5 @@
 import random
+from Status import StatusBar
 from animation import animate_flight
 from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity, KnockBackAttacker
 from cloud import new_fire_cloud, new_dust_cloud
@@ -47,6 +48,7 @@ def set_monster_components(monster, game_state):
     monster.set_child(Position())
     monster.set_child(CharPrinter())
     monster.set_child(DungeonLevel())
+    monster.set_child(StatusBar())
 
     monster.set_child(Mover())
     monster.set_child(CautiousStepper())
@@ -94,7 +96,7 @@ def new_ratman(gamestate):
     ratman.set_child(DataPoint(DataTypes.ARMOR, 4))
     ratman.set_child(DataPoint(DataTypes.AWARENESS, 5))
 
-    ratman.set_child(MonsterThrowStoneAction())
+    ratman.set_child(MonsterThrowStoneAction(20))
 
     ratman.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 1))
     return ratman
@@ -143,7 +145,7 @@ def new_dust_demon(gamestate):
 
     demon.set_child(Description("Dust Demon", "The demon constantly creates dust clouds."))
     demon.set_child(EntityMessages("The dust demon notices you.", "The demon falls to the ground."))
-    demon.set_child(GraphicChar(None, colors.GRAY, "i"))
+    demon.set_child(GraphicChar(None, colors.GRAY, icon.DEMON))
 
     demon.set_child(Health(12))
     demon.set_child(DataPoint(DataTypes.STRENGTH, 5))
@@ -165,7 +167,7 @@ def new_armored_beetle(gamestate):
     beetle.set_child(
         Description("Armored Beetle", "A giant armored beetle, it looks like it wouldn't budge for anything."))
     beetle.set_child(EntityMessages("The armored beetle notices you.", "The armored beetle is dead."))
-    beetle.set_child(GraphicChar(None, colors.CYAN_D, "B"))
+    beetle.set_child(GraphicChar(None, colors.PURPLE, icon.BEETLE))
 
     beetle.set_child(Health(17))
     beetle.set_child(DataPoint(DataTypes.STRENGTH, 2))

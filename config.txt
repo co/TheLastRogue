@@ -13,7 +13,7 @@ animation_delay=3
 missile_animation_delay=2
 
 #Max frames per second, a higher value may speed up the game.
-fps=20
+fps=30
 
 #Set to True for full screen, don't forget to set resolution.
 full_screen=False

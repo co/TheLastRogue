@@ -68,9 +68,12 @@ class GameStateBase(state.State):
             "player": self.player,
             "dungeon": self.dungeon
         }
+        print "get gs"
         return state
 
     def __setstate__(self, state):
+        print "*****gamestate ", state.__class__
+        print "set gs"
         self.player = state["player"]
         self.dungeon = state["dungeon"]
         self._init_caches_and_flags()
@@ -187,14 +190,11 @@ class TestGameState(GameStateBase):
         cloud = new_steam_cloud(self, 32)
         cloud.mover.try_move((16, 10), self.dungeon_level)
 
-        #demon = monster.new_dust_demon(self)
-        #demon.mover.try_move((24, 16), self.dungeon_level)
+        demon = monster.new_dust_demon(self)
+        demon.mover.try_move((24, 16), self.dungeon_level)
 
         beetle = monster.new_armored_beetle(self)
         beetle.mover.try_move((25, 16), self.dungeon_level)
-
-        beetle = monster.new_armored_beetle(self)
-        beetle.mover.try_move((26, 16), self.dungeon_level)
 
         #amoeba = monster.new_giant_amoeba(self)
         #amoeba.mover.try_move((26, 14), self.dungeon_level)
@@ -209,8 +209,8 @@ class TestGameState(GameStateBase):
         potion = item.new_health_potion(self)
         potion.mover.try_move((20, 16), self.dungeon_level)
 
-        potion = item.new_flame_potion(self)
-        potion.mover.try_move((20, 14), self.dungeon_level)
+        amulet = item.new_amulet_of_life_steal(self)
+        amulet.mover.try_move((20, 14), self.dungeon_level)
 
         amulet = item.new_amulet_of_reflect_damage(self)
         amulet.mover.try_move((24, 11), self.dungeon_level)
@@ -251,20 +251,20 @@ class TestGameState(GameStateBase):
         cap = item.new_leather_cap(self)
         cap.mover.try_move((23, 10), self.dungeon_level)
 
-        #rat = monster.new_ratman(self)
-        #rat.mover.try_move((20, 8), self.dungeon_level)
+        rat = monster.new_ratman(self)
+        rat.mover.try_move((20, 14), self.dungeon_level)
 
-        #salamander = monster.new_salamander(self)
-        #salamander.mover.try_move((25, 10), self.dungeon_level)
+        salamander = monster.new_salamander(self)
+        salamander.mover.try_move((25, 10), self.dungeon_level)
 
         #slime = monster.new_slime(self)
         #slime.mover.try_move((25, 12), self.dungeon_level)
 
-        spider = monster.new_spider(self)
-        spider.mover.try_move((26, 12), self.dungeon_level)
+#        spider = monster.new_spider(self)
+#        spider.mover.try_move((26, 12), self.dungeon_level)
 #
-#        ghost = monster.new_ghost(self)
-#        ghost.mover.try_move((21, 8), self.dungeon_level)
+        ghost = monster.new_ghost(self)
+        ghost.mover.try_move((21, 8), self.dungeon_level)
 #
 #        dust = new_dust_cloud(24)
 #        dust.mover.try_move((23, 12), self.dungeon_level)
@@ -281,8 +281,8 @@ class TestGameState(GameStateBase):
         #cyclops = monster.new_cyclops(self)
         #cyclops.mover.try_move((2, 2), self.dungeon_level)
 
-        #jericho = monster.new_jericho(self)
-        #jericho.mover.try_move((56, 14), self.dungeon_level)
+        jericho = monster.new_jericho(self)
+        jericho.mover.try_move((56, 14), self.dungeon_level)
 
         for i in range(5):
             ammo = item.new_ammunition(self)
@@ -341,6 +341,7 @@ def is_there_a_saved_game():
 
 def load_first_game():
     save_file = open(get_save_files()[0], 'rb')
+    print save_file
     game_state = time_it("load", (lambda: pickle.load(save_file)))
     save_file.close()
     return game_state

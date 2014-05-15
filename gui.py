@@ -13,6 +13,7 @@ import geometry as geo
 import rectfactory
 import style
 import settings
+import libtcodpy as libtcod
 
 
 class UIElement(object):
@@ -345,10 +346,11 @@ class StackPanelHorizontal(StackPanel):
     ALIGN_CENTER = 1
     ALIGN_BOTTOM = 2
 
-    def __init__(self, offset, margin=geo.zero2d(), horizontal_space=0, alignment=ALIGN_TOP):
+    def __init__(self, offset, margin=geo.zero2d(), horizontal_space=0, alignment=ALIGN_TOP, min_width=0):
         super(StackPanelHorizontal, self).__init__(offset, margin=margin)
         self.horizontal_space = horizontal_space
         self.alignment = alignment
+        self.min_width = min_width
 
     @property
     def height(self):
@@ -358,8 +360,8 @@ class StackPanelHorizontal(StackPanel):
 
     @property
     def width(self):
-        return (sum([element.total_width for element in self.elements])
-                + max(self.horizontal_space * (len(self.elements) - 1), 0))
+        return max((sum([element.total_width for element in self.elements])
+                + max(self.horizontal_space * (len(self.elements) - 1), 0)), self.min_width)
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
@@ -383,10 +385,11 @@ class StackPanelVertical(StackPanel):
     ALIGN_CENTER = 1
     ALIGN_RIGHT = 2
 
-    def __init__(self, offset, margin=geo.zero2d(), vertical_space=0, alignment=ALIGN_LEFT):
+    def __init__(self, offset, margin=geo.zero2d(), vertical_space=0, alignment=ALIGN_LEFT, min_height=0):
         super(StackPanelVertical, self).__init__(offset, margin=margin)
         self.vertical_space = vertical_space
         self.alignment = alignment
+        self.min_height = min_height
 
     @property
     def width(self):
@@ -396,8 +399,8 @@ class StackPanelVertical(StackPanel):
 
     @property
     def height(self):
-        return (sum([element.total_height for element in self.elements])
-                + max(self.vertical_space * (len(self.elements) - 1), 0))
+        return max((sum([element.total_height for element in self.elements])
+                + max(self.vertical_space * (len(self.elements) - 1), 0)), self.min_height)
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(geo.add_2d(offset, self.offset), self.margin)
@@ -486,19 +489,30 @@ class PlayerStatusBox(RectangularUIElement):
         self._status_stack_panel = StackPanelVertical(rect.top_left, (1, 2))
 
         element_width = self.width - style.interface_theme.margin[0] * 2 - 2
+
         player_hp = player.health.hp
         hp_bar = CounterBarWithNumbers(player_hp, element_width, colors.HP_BAR_FULL, colors.HP_BAR_EMPTY,
                                        colors.WHITE, colors.PINK, colors.HP_BAR_EMPTY, colors.CYAN, colors.BLACK)
         heart = SymbolUIElement((0, 0), graphic.GraphicChar(None, colors.RED, icon.HEALTH_STAT))
-
-        self._hp_stack_panel = StackPanelHorizontal((0, 0), (0, 1), 1)
+        self._hp_stack_panel = StackPanelHorizontal((0, 0), (0, 0), 1)
         self._hp_stack_panel.append(heart)
         self._hp_stack_panel.append(hp_bar)
 
         self._rectangle_bg = StyledRectangle(rect, style.interface_theme.rect_style,
-                            player.description.name, player.graphic_char.color_fg)
-
+                                             player.description.name, player.graphic_char.color_fg)
         self._status_stack_panel.append(self._hp_stack_panel)
+
+        self._status_icon_stack_panel_frame = StackPanelHorizontal((2, 0), (0, 0), 1)
+        self._status_icon_stack_panel_frame.append(SymbolUIElement((0, 0), graphic.GraphicChar(None,
+                                                                                               colors.INTERFACE_FG,
+                                                                                               libtcod.CHAR_SW)))
+        self._status_icon_stack_panel = StackPanelHorizontal((0, 0), (0, 0), 1, min_width=12)
+        self._status_icon_stack_panel_frame.append(self._status_icon_stack_panel)
+        self._status_icon_stack_panel_frame.append(SymbolUIElement((0, 0), graphic.GraphicChar(None,
+                                                                                               colors.INTERFACE_FG,
+                                                                                               libtcod.CHAR_SE)))
+        self._status_stack_panel.append(self._status_icon_stack_panel_frame)
+
         inner_margin = 3
         item_row_height = 6
         dock = UIDock(geo.Rect((0, 0), self.width - inner_margin * 2, item_row_height), margin=(2, 1))
@@ -520,12 +534,19 @@ class PlayerStatusBox(RectangularUIElement):
 
     def update(self):
         self._status_stack_panel.update()
+        self.update_status_icon_stack_panel()
         self.depth_text_box.text = ("Depth:" + str(self._player.dungeon_level.value.depth).rjust(2))
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(offset, self.margin)
         self._rectangle_bg.draw(position)
         self._status_stack_panel.draw(position)
+
+    def update_status_icon_stack_panel(self):
+        self._status_icon_stack_panel.clear()
+        for status_icon in self._player.status_bar.status_icons:
+            icon_element = SymbolUIElement((0, 0), status_icon.graphic_char)
+            self._status_icon_stack_panel.append(icon_element)
 
 
 class EquipmentBox(RectangularUIElement):
@@ -615,6 +636,7 @@ class EntityStatusList(UIElement):
         for seen_entity in seen_entities:
             if not seen_entity in self._entity_status_cache:
                 self._entity_status_cache[seen_entity] = EntityStatus(seen_entity, rect)
+            self._entity_status_cache[seen_entity].update()
             self._entity_stack_panel.append(self._entity_status_cache[seen_entity])
 
     def draw(self, offset=geo.zero2d()):
@@ -632,21 +654,34 @@ class EntityStatusList(UIElement):
 class EntityStatus(UIElement):
     def __init__(self, entity, rect, margin=geo.zero2d()):
         super(EntityStatus, self).__init__(margin)
+        self._entity = entity
         self._width = rect.width
         element_width = self.width - style.interface_theme.margin[0] * 2 - 2
         monster_health_bar = CounterBar(entity.health.hp, element_width, colors.HP_BAR_FULL, colors.HP_BAR_EMPTY)
 
         entity_symbol = SymbolUIElement((0, 0), entity.graphic_char)
 
-        self._hp_stack_panel = StackPanelHorizontal((0, 0), (1, 1), 1)
+        self._hp_stack_panel = StackPanelHorizontal((0, 1), (1, 0), 1)
         self._hp_stack_panel.append(entity_symbol)
         self._hp_stack_panel.append(monster_health_bar)
 
         self._rectangle_bg = StyledRectangle(rect, style.monster_list_card, entity.description.name,
                                              entity.get_original_child("graphic_char").color_fg)
 
-        self._status_stack_panel = StackPanelVertical(rect.top_left, margin)
+        self._status_stack_panel = StackPanelVertical(rect.top_left, margin, vertical_space=1)
         self._status_stack_panel.append(self._hp_stack_panel)
+
+        self._status_icon_stack_panel_frame = StackPanelHorizontal((3, 0), (0, 0), 1)
+        self._status_icon_stack_panel_frame.append(SymbolUIElement((0, 0), graphic.GraphicChar(None,
+                                                                                               colors.INTERFACE_FG,
+                                                                                               libtcod.CHAR_SW)))
+        self._status_icon_stack_panel = StackPanelHorizontal((0, 0), (0, 0), 1, min_width=12)
+        self._status_icon_stack_panel_frame.append(self._status_icon_stack_panel)
+        self._status_icon_stack_panel_frame.append(SymbolUIElement((0, 0), graphic.GraphicChar(None,
+                                                                                               colors.INTERFACE_FG,
+                                                                                               libtcod.CHAR_SE)))
+
+        self._status_stack_panel.append(self._status_icon_stack_panel_frame)
 
     @property
     def height(self):
@@ -660,6 +695,15 @@ class EntityStatus(UIElement):
         offset = geo.add_2d(offset, self.margin)
         self._rectangle_bg.draw(offset)
         self._status_stack_panel.draw(offset)
+
+    def update(self):
+        self.update_status_icon_stack_panel()
+
+    def update_status_icon_stack_panel(self):
+        self._status_icon_stack_panel.clear()
+        for status_icon in self._entity.status_bar.status_icons:
+            icon_element = SymbolUIElement((0, 0), status_icon.graphic_char)
+            self._status_icon_stack_panel.append(icon_element)
 
 
 class DescriptionCard(RectangularUIElement):

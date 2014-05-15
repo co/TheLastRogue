@@ -18,11 +18,12 @@ class EffectTypes(object):
     STATUS_ADDER = 3
     TELEPORT = 4
     HEAL = 5
-    DAMAGE = 6
-    EQUIPMENT = 7
+    UI = 6
+    DAMAGE = 7
+    EQUIPMENT = 8
 
     ALLTYPES = [STATUS_REMOVER, ADD_SPOOF_CHILD, BLOCKER, STATUS_ADDER,
-                TELEPORT, HEAL, DAMAGE, EQUIPMENT]
+                TELEPORT, HEAL, UI, DAMAGE, EQUIPMENT]
 
 
 class EffectStackID(object):
@@ -246,8 +247,21 @@ class HealthRegain(EntityEffect):
         self.tick(time_spent)
 
 
+class StatusIconEntityEffect(EntityEffect):
+    def __init__(self, source_entity, status_icon, time_to_live, no_stack_id=None):
+        super(StatusIconEntityEffect, self).__init__(source_entity=source_entity, effect_type=EffectTypes.UI,
+                                                     no_stack_id=no_stack_id, time_to_live=time_to_live)
+        self.status_icon = status_icon
+
+    def update(self, time_spent):
+        if self.status_icon and self.target_entity.has("status_bar"):
+            self.target_entity.status_bar.add(self.status_icon)
+        self.tick(time_spent)
+
+
 class DamageOverTimeEffect(EntityEffect):
-    def __init__(self, source_entity, damage, damage_types, turn_interval, turns_to_live, damage_message, no_stack_id=None):
+    def __init__(self, source_entity, damage, damage_types, turn_interval, turns_to_live,
+                 damage_message, status_icon=None, no_stack_id=None):
         super(DamageOverTimeEffect, self).__init__(source_entity=source_entity, effect_type=EffectTypes.DAMAGE,
                                                    no_stack_id=no_stack_id, time_to_live=turns_to_live * gametime.single_turn)
         self.damage = damage
@@ -255,6 +269,7 @@ class DamageOverTimeEffect(EntityEffect):
         self.time_interval = turn_interval * gametime.single_turn
         self.damage_message = damage_message
         self.time_until_next_damage = self.time_interval
+        self.status_icon = status_icon
 
     def send_damage_message(self, damage_caused):
         message_arguments = {}
@@ -273,6 +288,10 @@ class DamageOverTimeEffect(EntityEffect):
                                                                 damage_types=self.damage_types)
         return damage_caused
 
+    def update_status_icon(self):
+        if self.status_icon and self.target_entity.has("status_bar"):
+            self.target_entity.status_bar.add(self.status_icon)
+
     def update(self, time_spent):
         if (self.time_until_next_damage <= 0 and
                 not self.target_entity.resistance_checker.is_immune(self.damage_types)):
@@ -280,11 +299,13 @@ class DamageOverTimeEffect(EntityEffect):
             self.send_damage_message(damage_caused)
             self.time_until_next_damage = self.time_interval
         self.time_until_next_damage -= time_spent
+        self.update_status_icon()
         self.tick(time_spent)
 
 
 class UndodgeableDamagAndBlockSameEffect(EntityEffect):
-    def __init__(self, source_entity, damage, damage_types, damage_message, no_stack_id, time_to_live):
+    def __init__(self, source_entity, damage, damage_types,
+                 damage_message, no_stack_id, status_icon=None, time_to_live=1):
         super(UndodgeableDamagAndBlockSameEffect, self).__init__(source_entity=source_entity,
                                                                  effect_type=EffectTypes.DAMAGE,
                                                                  time_to_live=time_to_live,
@@ -292,6 +313,7 @@ class UndodgeableDamagAndBlockSameEffect(EntityEffect):
         self.damage = damage
         self.damage_types = damage_types
         self.damage_message = damage_message
+        self.status_icon = status_icon
 
     def send_damage_message(self, damage_caused):
         messenger.msg.send_visual_message(self.damage_message % {"source_entity": self.source_entity.description.long_name,
@@ -306,7 +328,12 @@ class UndodgeableDamagAndBlockSameEffect(EntityEffect):
             damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
             damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity)
             self.send_damage_message(damage_caused)
+        self.update_status_icon()
         self.tick(time_spent)
+
+    def update_status_icon(self):
+        if self.status_icon and self.target_entity.has("status_bar"):
+            self.target_entity.status_bar.add(self.status_icon)
 
 
 class Heal(EntityEffect):
@@ -395,7 +422,7 @@ class Unequip(EntityEffect):
     def update(self, time_spent):
         equipment = self.target_entity.equipment
         if equipment.can_unequip_to_inventory(self.equipment_slot):
-            underlip_succeeded =  equipment.unequip_to_inventory(self.equipment_slot)
+            underlip_succeeded = equipment.unequip_to_inventory(self.equipment_slot)
             if underlip_succeeded:
                 self.message()
         self.tick(time_spent)
