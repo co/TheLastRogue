@@ -1,6 +1,6 @@
 import logging
 import symbol
-from Status import StatusIcon
+from Status import StatusIcon, DAMAGE_REFLECT_STATUS_ICON
 from attacker import DamageTypes
 from compositecore import Leaf
 import counter
@@ -182,8 +182,7 @@ class ReflectDamageTakenEffect(DamageTakenEffect):
             damage_effect = entityeffect.UndodgeableAttackEntityEffect(self.parent, self.damage,
                                                                        [DamageTypes.MAGIC, DamageTypes.REFLECT])
             source_entity.effect_queue.add(damage_effect)
-        status_icon = StatusIcon("Damage Reflect", GraphicChar(None, colors.CYAN, icon.ARMOR_STAT))
-        source_entity.effect_queue.add(entityeffect.StatusIconEntityEffect(source_entity, status_icon, 1))
+        source_entity.effect_queue.add(entityeffect.StatusIconEntityEffect(source_entity, DAMAGE_REFLECT_STATUS_ICON, 1))
 
 
 class BleedWhenDamaged(DamageTakenEffect):

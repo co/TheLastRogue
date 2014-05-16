@@ -1,4 +1,7 @@
+import colors
 from compositecore import Leaf
+from graphic import GraphicChar
+import icon
 
 
 class StatusIcon(object):
@@ -21,3 +24,9 @@ class StatusBar(Leaf):
 
     def first_tick(self, time):
         self.clear()
+
+FIRE_STATUS_ICON = StatusIcon("Fire", GraphicChar(None, colors.RED, icon.FIRE))
+POISON_STATUS_ICON = StatusIcon("Poison", GraphicChar(None, colors.GREEN, icon.POTION))
+DAMAGE_REFLECT_STATUS_ICON = StatusIcon("Damage Reflect", GraphicChar(None, colors.CYAN, icon.ARMOR_STAT))
+LIFE_STEAL_STATUS_ICON = StatusIcon("Life Steal", GraphicChar(None, colors.RED, "V"))
+STUMBLE_STATUS_ICON = StatusIcon("Stumble", GraphicChar(None, colors.YELLOW, "+"))

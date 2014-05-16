@@ -1,5 +1,5 @@
 import random
-from Status import StatusIcon
+from Status import StatusIcon, DAMAGE_REFLECT_STATUS_ICON, LIFE_STEAL_STATUS_ICON
 
 from action import Action
 from actor import DoNothingActor
@@ -441,8 +441,7 @@ def new_amulet_of_reflect_damage(game_state):
     set_amulet_components(amulet)
     amulet.set_child(GraphicChar(None, colors.CYAN, icon.AMULET))
     amulet.set_child(AddSpoofChildEquipEffect(ReflectDamageTakenEffect,
-                                              StatusIcon("Reflect Damage",
-                                                         GraphicChar(None, colors.CYAN, icon.ARMOR))))
+                                              DAMAGE_REFLECT_STATUS_ICON))
     amulet.set_child(Description("Amulet of Reflection",
                                  "The amulet feels cold and heavy,"
                                  "it is made of enchanted silver, "
@@ -500,8 +499,8 @@ class LifeStealEffect(EquippedEffect):
         """
         e = AddEffectToOtherSeenEntities(lambda: HealAnEntityOnDeath(entity))
         entity.effect_queue.add(entityeffect.AddSpoofChild(entity, e, 1))
-        status_icon = StatusIcon("Life Steal", GraphicChar(None, colors.RED, "V"))
-        entity.effect_queue.add(entityeffect.StatusIconEntityEffect(entity, status_icon, 1))
+        entity.effect_queue.add(entityeffect.StatusIconEntityEffect(entity, LIFE_STEAL_STATUS_ICON,
+                                                                    1, "life_steal_effect"))
 
 
 class SetInvisibilityFlagEquippedEffect(EquippedEffect):
