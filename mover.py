@@ -335,7 +335,7 @@ class RandomStepper(Stepper):
 
     def try_move_or_bump(self, _):
         new_position = geometry.add_2d(random.choice(direction.DIRECTIONS), self.parent.position.value)
-        return self.next.try_move_or_bump(new_position)
+        return super(RandomStepper, self).try_move_or_bump(new_position)
 
 
 class SlimeCanShareTileEntityMover(Mover):

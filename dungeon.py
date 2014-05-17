@@ -20,12 +20,9 @@ class Dungeon(object):
         return self._dungeon_levels[depth]
 
     def __getstate__(self):
-        print self._dungeon_levels
-        print "dungeon get"
         return dict(self.__dict__)
 
     def __setstate__(self, state):
-        print "*****dungeon ", state.__class__
         self.__dict__.update(state)
 
     def _generate_dungeon_level(self, depth):
