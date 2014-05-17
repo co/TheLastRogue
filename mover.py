@@ -24,7 +24,10 @@ class Mover(Leaf):
             new_dungeon_level = self.parent.dungeon_level.value
         if not new_dungeon_level.get_tile_or_unknown(new_position):
             return False
-        new_tile = new_dungeon_level.get_tile(new_position)
+        try:
+            new_tile = new_dungeon_level.get_tile_or_unknown(new_position)
+        except IndexError:
+            return False
         return (self._can_fit_on_tile(new_tile) and
                 self.can_move_to_terrain(new_tile.get_terrain()))
 

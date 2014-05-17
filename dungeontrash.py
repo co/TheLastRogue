@@ -1,10 +1,12 @@
 import random
+from actor import DoNothingActor
 from compositecore import Composite
 from graphic import GraphicChar, CharPrinter
 import icon
 from mover import Mover
 from position import Position, DungeonLevel
 from stats import GamePieceTypes, DataTypes, DataPoint
+from terrain import FallRemoveNonPlayerNonFlying
 from text import Description
 import colors
 
@@ -14,7 +16,7 @@ class Corpse(Composite):
     A corpse. Totally useless but looks nice
     and gives the user feedback when a monster dies.
     """
-    def __init__(self):
+    def __init__(self, game_state):
         super(Corpse, self).__init__()
         self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_TRASH))
         self.set_child(Position())
@@ -23,8 +25,11 @@ class Corpse(Composite):
                                    "A rotting corpse."))
         self.set_child(GraphicChar(None, colors.WHITE,
                                    icon.CORPSE))
+        self.set_child(FallRemoveNonPlayerNonFlying())
         self.set_child(CharPrinter())
+        self.set_child(DoNothingActor())
         self.set_child(Mover())
+        self.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
 
 
 class PoolOfBlood(Composite):

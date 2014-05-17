@@ -33,11 +33,12 @@ def spawn_rat_man(dungeon_level, game_state):
 
 def spawn_corpse_of_entity(entity_killed):
     return spawn_corpse_on_position(entity_killed.position.value,
-                                    entity_killed.dungeon_level.last_dungeon_level)
+                                    entity_killed.dungeon_level.last_dungeon_level,
+                                    entity_killed.game_state.value)
 
 
-def spawn_corpse_on_position(position, dungeon_level):
-    corpse = dungeontrash.Corpse()
+def spawn_corpse_on_position(position, dungeon_level, game_state):
+    corpse = dungeontrash.Corpse(game_state)
     spawn_succeeded = corpse.mover.replace_move(position, dungeon_level)
     if not spawn_succeeded:
         logging.info("could not spawn corpse.")
