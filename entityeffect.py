@@ -293,13 +293,13 @@ class DamageOverTimeEffect(EntityEffect):
             self.target_entity.status_bar.add(self.status_icon)
 
     def update(self, time_spent):
-        if (self.time_until_next_damage <= 0 and
-                not self.target_entity.resistance_checker.is_immune(self.damage_types)):
-            damage_caused = self.damage_target()
-            self.send_damage_message(damage_caused)
-            self.time_until_next_damage = self.time_interval
+        if not self.target_entity.resistance_checker.is_immune(self.damage_types):
+            if self.time_until_next_damage <= 0:
+                damage_caused = self.damage_target()
+                self.send_damage_message(damage_caused)
+                self.time_until_next_damage = self.time_interval
+            self.update_status_icon()
         self.time_until_next_damage -= time_spent
-        self.update_status_icon()
         self.tick(time_spent)
 
 
@@ -322,13 +322,13 @@ class UndodgeableDamagAndBlockSameEffect(EntityEffect):
                                           self.target_entity.position.value)
 
     def update(self, time_spent):
-        if (self.time_alive == 0 and
-                not self.target_entity.resistance_checker.is_immune(self.damage_types)):
-            damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
-            damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
-            damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity)
-            self.send_damage_message(damage_caused)
-        self.update_status_icon()
+        if not self.target_entity.resistance_checker.is_immune(self.damage_types):
+            if self.time_alive == 0:
+                damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
+                damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
+                damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity)
+                self.send_damage_message(damage_caused)
+            self.update_status_icon()
         self.tick(time_spent)
 
     def update_status_icon(self):

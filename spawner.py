@@ -1,9 +1,7 @@
-import random
 import logging
 from compositecore import Composite
 from mover import Mover
 from stats import GamePieceTypes
-
 import dungeontrash
 import item
 import monster
@@ -30,6 +28,23 @@ def spawn_rat_man(dungeon_level, game_state):
         logging.info("could not spawn rat-man")
         return False
     return True
+
+
+def spawn_corpse_turn_into_entity(entity_killed, entity_factory):
+    return spawn_corpse_turn_into_entity_on_position(entity_killed.position.value,
+                                                     entity_killed.dungeon_level.last_dungeon_level,
+                                                     entity_killed.game_state.value,
+                                                     entity_factory)
+
+
+def spawn_corpse_turn_into_entity_on_position(position, dungeon_level, game_state, entity_factory):
+    corpse = dungeontrash.CorpseTurnIntoEntity(game_state, entity_factory)
+    spawn_succeeded = corpse.mover.replace_move(position, dungeon_level)
+    if not spawn_succeeded:
+        logging.info("could not spawn corpse.")
+        return False
+    return True
+
 
 def spawn_corpse_of_entity(entity_killed):
     return spawn_corpse_on_position(entity_killed.position.value,

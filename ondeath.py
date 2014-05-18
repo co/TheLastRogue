@@ -1,3 +1,4 @@
+import random
 from compositecore import Leaf
 import spawner
 from messenger import msg
@@ -41,3 +42,21 @@ class LeaveCorpseOnDeath(Leaf):
     def on_tick(self, time):
         if self.parent.health.is_dead():
             spawner.spawn_corpse_of_entity(self.parent)
+
+
+class LeaveCorpseTurnIntoEntityOnDeath(Leaf):
+    """
+    Will remove the parent from the dungeon when parent Entity dies.
+    """
+    def __init__(self, entity_factory, fail_chance):
+        super(LeaveCorpseTurnIntoEntityOnDeath, self).__init__()
+        self.component_type = "leave_corpse_on_death"
+        self.entity_factory = entity_factory
+        self.fail_chance = fail_chance
+
+    def on_tick(self, time):
+        if self.parent.health.is_dead():
+            if random.uniform(0, 1) < self.fail_chance:
+                spawner.spawn_corpse_turn_into_entity(self.parent, self.entity_factory)
+            else:
+                spawner.spawn_corpse_of_entity(self.parent)

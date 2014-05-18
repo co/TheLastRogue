@@ -1,7 +1,7 @@
 import random
 from Status import StatusBar
 from animation import animate_flight
-from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity, KnockBackAttacker
+from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity, KnockBackAttacker, PoisonImmunity
 from cloud import new_fire_cloud, new_dust_cloud
 from compositecommon import EntityShareTileEffect, PoisonEntityEffectFactory
 from compositecore import Composite, Leaf, Component
@@ -18,7 +18,7 @@ import messenger
 from missileaction import MonsterThrowStoneAction, MonsterThrowRockAction, SpiritMissile, MonsterHealTargetEntityEffect, MonsterTripTargetEffect
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor, MonsterWeightedStepAction
 from mover import Mover, Stepper, SlimeCanShareTileEntityMover, CautiousStepper, TolerateDamage
-from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath
+from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath, LeaveCorpseTurnIntoEntityOnDeath
 from position import Position, DungeonLevel
 import rng
 from stats import Flag, UnArmedHitTargetEntityEffectFactory, DataPoint, DataTypes, Factions, IntelligenceLevel, Immunities
@@ -80,6 +80,12 @@ def set_humanoid_components(composite):
     composite.set_child(LeaveCorpseOnDeath())
 
 
+def set_skeleton_components(composite):
+    composite.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
+    composite.set_child(PoisonImmunity())
+    composite.set_child(TolerateDamage(DamageTypes.POISON))
+
+
 def new_ratman(gamestate):
     ratman = Composite()
     set_monster_components(ratman, gamestate)
@@ -100,6 +106,28 @@ def new_ratman(gamestate):
 
     ratman.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 1))
     return ratman
+
+
+def new_skeleton(gamestate):
+    skeleton = Composite()
+    set_monster_components(skeleton, gamestate)
+    set_skeleton_components(skeleton)
+
+    skeleton.set_child(LeaveCorpseTurnIntoEntityOnDeath(new_skeleton, 0.5))
+
+    skeleton.set_child(Description("Skeleton", "An undead skeleton it looks hostile."))
+    skeleton.set_child(EntityMessages("The skeleton turns to you.", "The skeleton falls in a pile of bones."))
+    skeleton.set_child(GraphicChar(None, colors.WHITE, icon.SKELETON_WARRIOR))
+
+    skeleton.set_child(Health(10))
+    skeleton.set_child(DataPoint(DataTypes.STRENGTH, 6))
+    skeleton.set_child(DataPoint(DataTypes.EVASION, 18))
+    skeleton.set_child(DataPoint(DataTypes.HIT, 13))
+    skeleton.set_child(DataPoint(DataTypes.ARMOR, 12))
+    skeleton.set_child(DataPoint(DataTypes.AWARENESS, 4))
+
+    skeleton.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 4))
+    return skeleton
 
 
 def set_beast_components(composite):
@@ -252,6 +280,8 @@ def new_jericho(gamestate):
 
 def set_ghost_components(composite):
     composite.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.FLYING]))
+    composite.set_child(PoisonImmunity())
+    composite.set_child(TolerateDamage(DamageTypes.POISON))
 
 
 def new_ghost(gamestate):

@@ -190,8 +190,8 @@ class TestGameState(GameStateBase):
         cloud = new_steam_cloud(self, 32)
         cloud.mover.try_move((16, 10), self.dungeon_level)
 
-        demon = monster.new_dust_demon(self)
-        demon.mover.try_move((24, 16), self.dungeon_level)
+        #demon = monster.new_dust_demon(self)
+        #demon.mover.try_move((24, 16), self.dungeon_level)
 
         beetle = monster.new_armored_beetle(self)
         beetle.mover.try_move((25, 16), self.dungeon_level)
@@ -251,11 +251,11 @@ class TestGameState(GameStateBase):
         cap = item.new_leather_cap(self)
         cap.mover.try_move((23, 10), self.dungeon_level)
 
-        rat = monster.new_ratman(self)
-        rat.mover.try_move((20, 14), self.dungeon_level)
+        skeleton = monster.new_skeleton(self)
+        skeleton.mover.try_move((20, 14), self.dungeon_level)
 
-        salamander = monster.new_salamander(self)
-        salamander.mover.try_move((25, 10), self.dungeon_level)
+        #salamander = monster.new_salamander(self)
+        #salamander.mover.try_move((25, 10), self.dungeon_level)
 
         #slime = monster.new_slime(self)
         #slime.mover.try_move((25, 12), self.dungeon_level)
@@ -265,9 +265,6 @@ class TestGameState(GameStateBase):
 #
         ghost = monster.new_ghost(self)
         ghost.mover.try_move((21, 8), self.dungeon_level)
-#
-#        dust = new_dust_cloud(24)
-#        dust.mover.try_move((23, 12), self.dungeon_level)
 #
 #        pixie = monster.new_pixie(self)
 #        pixie.mover.try_move((23, 8), self.dungeon_level)

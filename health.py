@@ -1,19 +1,23 @@
 import logging
-import symbol
-from Status import StatusIcon, DAMAGE_REFLECT_STATUS_ICON
+import random
+from Status import DAMAGE_REFLECT_STATUS_ICON
 from attacker import DamageTypes
-from compositecore import Leaf
+from compositecore import Leaf, Composite
 import counter
 import colors
-import dungeontrash
+from dungeontrash import PoolOfBlood
 import entityeffect
 import geometry
-from graphic import GraphicChar
+from graphic import GraphicChar, CharPrinter
 import icon
+from mover import Mover
+from position import Position, DungeonLevel
 import rng
 import settings
 import shapegenerator
+from stats import DataPoint, GamePieceTypes, DataTypes
 import terrain
+from text import Description
 
 
 class Health(Leaf):
@@ -241,10 +245,9 @@ def position_is_solid(position, dungeon_level):
 
 
 def spawn_blood_on_position(position, dungeon_level):
-    corpse = dungeontrash.PoolOfBlood()
+    corpse = PoolOfBlood()
     spawn_succeded = corpse.mover.try_move(position, dungeon_level)
     if not spawn_succeded:
         logging.info("could not spawn pool of blood.")
         return False
     return True
-

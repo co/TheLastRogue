@@ -192,6 +192,14 @@ class FireImmunity(Leaf):
         self.immunity = DamageTypes.FIRE
 
 
+class PoisonImmunity(Leaf):
+    def __init__(self):
+        super(PoisonImmunity, self).__init__()
+        self.component_type = "poison_immunity"
+        self.tags.add("immunity")
+        self.immunity = DamageTypes.POISON
+
+
 class Attack(object):
     def __init__(self, damage, variance,
                  damage_types, hit, damage_multiplier=1, target_entity_effects_factories=[]):

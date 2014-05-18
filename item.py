@@ -1,5 +1,5 @@
 import random
-from Status import StatusIcon, DAMAGE_REFLECT_STATUS_ICON, LIFE_STEAL_STATUS_ICON
+from Status import DAMAGE_REFLECT_STATUS_ICON, LIFE_STEAL_STATUS_ICON
 
 from action import Action
 from actor import DoNothingActor
