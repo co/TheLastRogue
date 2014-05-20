@@ -17,6 +17,7 @@ from inventory import Inventory
 import messenger
 from missileaction import MonsterThrowStoneAction, MonsterThrowRockAction, SpiritMissile, MonsterHealTargetEntityEffect, MonsterTripTargetEffect
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor, MonsterWeightedStepAction
+from monsterspells import SummonEntityMonsterAction
 from mover import Mover, Stepper, SlimeCanShareTileEntityMover, CautiousStepper, TolerateDamage
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath, LeaveCorpseTurnIntoEntityOnDeath
 from position import Position, DungeonLevel
@@ -71,6 +72,7 @@ def set_monster_components(monster, game_state):
     monster.set_child(RemoveEntityOnDeath())
     monster.set_child(PrintDeathMessageOnDeath())
     monster.set_child(MonsterWeightedStepAction(100))
+    monster.set_child(StatusFlags([]))
 
 
 def set_humanoid_components(composite):
@@ -91,7 +93,7 @@ def new_ratman(gamestate):
     set_monster_components(ratman, gamestate)
     set_humanoid_components(ratman)
 
-    ratman.set_child(Description("Ratman", "A Rat/Man hybrid it looks hostile."))
+    ratman.set_child(Description("Ratman", "A Rat/Man hybrid, it looks hostile."))
     ratman.set_child(EntityMessages("The ratman looks at you.", "The ratman falls dead."))
     ratman.set_child(GraphicChar(None, colors.ORANGE, icon.RATMAN))
 
@@ -107,6 +109,50 @@ def new_ratman(gamestate):
     ratman.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 1))
     return ratman
 
+
+def new_ratman_mystic(gamestate):
+    ratman = Composite()
+    set_monster_components(ratman, gamestate)
+    set_humanoid_components(ratman)
+
+    ratman.set_child(Description("Ratman Mystic", "A Rat/Man hybrid, it looks hostile."))
+    ratman.set_child(EntityMessages("The ratman looks at you.", "The ratman falls dead."))
+    ratman.set_child(GraphicChar(None, colors.RED, icon.RATMAN))
+
+    ratman.set_child(Health(6))
+    ratman.set_child(DataPoint(DataTypes.STRENGTH, 2))
+    ratman.set_child(DataPoint(DataTypes.EVASION, 18))
+    ratman.set_child(DataPoint(DataTypes.HIT, 11))
+    ratman.set_child(DataPoint(DataTypes.ARMOR, 3))
+    ratman.set_child(DataPoint(DataTypes.AWARENESS, 6))
+
+    ratman.set_child(MonsterThrowStoneAction(20))
+    ratman.set_child(SpiritMissile(20))
+    ratman.set_child(SummonEntityMonsterAction(new_worm, 5, 20))
+
+    ratman.set_child(KeepPlayerAtDistanceActor(4))
+
+    ratman.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 3))
+    return ratman
+
+
+def new_worm(gamestate):
+    worm = Composite()
+    set_monster_components(worm, gamestate)
+
+    worm.set_child(Description("Worm", "It's a giant earth worm."))
+    worm.set_child(EntityMessages("The worm wiggles at you.", "The worm stops moving."))
+    worm.set_child(GraphicChar(None, colors.PINK, "w"))
+
+    worm.set_child(Health(4))
+    worm.set_child(DataPoint(DataTypes.STRENGTH, 4))
+    worm.set_child(DataPoint(DataTypes.EVASION, 12))
+    worm.set_child(DataPoint(DataTypes.HIT, 10))
+    worm.set_child(DataPoint(DataTypes.ARMOR, 2))
+    worm.set_child(DataPoint(DataTypes.AWARENESS, 3))
+    worm.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.one_and_half_turn))
+
+    return worm
 
 def new_skeleton(gamestate):
     skeleton = Composite()
@@ -312,9 +358,9 @@ def new_pixie(gamestate):
     set_monster_components(pixie, gamestate)
     set_humanoid_components(pixie)
     pixie.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.FLYING,
-                                     StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
+                                 StatusFlags.IS_ALIVE, StatusFlags.HAS_HEART]))
 
-    pixie.set_child(EntityMessages("The pixie sees you.", "The pixie fades away."))
+    pixie.set_child(EntityMessages("The pixie sees you.", "The pixie falls."))
     pixie.set_child(Description("Pixie", "A small humanoid with insect wings."))
     pixie.set_child(GraphicChar(None, colors.PINK, icon.PIXIE))
     pixie.set_child(Health(10))

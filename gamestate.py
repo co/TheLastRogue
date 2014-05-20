@@ -193,8 +193,8 @@ class TestGameState(GameStateBase):
         #demon = monster.new_dust_demon(self)
         #demon.mover.try_move((24, 16), self.dungeon_level)
 
-        beetle = monster.new_armored_beetle(self)
-        beetle.mover.try_move((25, 16), self.dungeon_level)
+        ratman_mystic = monster.new_ratman_mystic(self)
+        ratman_mystic.mover.try_move((25, 16), self.dungeon_level)
 
         #amoeba = monster.new_giant_amoeba(self)
         #amoeba.mover.try_move((26, 14), self.dungeon_level)

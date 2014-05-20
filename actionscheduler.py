@@ -32,6 +32,8 @@ class ActionScheduler(object):
             self.effects_tick(entity)
             entity.before_tick(gametime.normal_energy_gain)
             self.on_tick(entity)
+            if entity.dungeon_level.value is None or entity.position.value is None:
+                return
             entity.actor.tick()
             entity.on_tick(gametime.normal_energy_gain)
             entity.after_tick(gametime.normal_energy_gain)

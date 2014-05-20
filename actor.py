@@ -8,7 +8,7 @@ class Actor(Leaf):
         super(Actor, self).__init__()
         self.component_type = "actor"
         self.newly_spent_energy = 0
-        self.energy = 0
+        self.energy = -gametime.single_turn
         self.energy_recovery = gametime.normal_energy_gain
 
     def tick(self):
