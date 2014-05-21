@@ -21,6 +21,7 @@ import rng
 from shapegenerator import extend_points
 from stats import DataPointBonusSpoof, DataPoint, Flag, DataTypes, GamePieceTypes
 from statusflags import StatusFlags
+from terrain import GlassWall
 from text import Description
 import action
 import colors
@@ -155,6 +156,17 @@ def new_heart_stop_device(game_state):
     return device
 
 
+def new_glass_device(game_state):
+    device = Composite()
+    set_item_components(device, game_state)
+    set_device_components(device)
+    device.set_child(Description("Dev. of Glassmaking",
+                                 "This ancient device will turn all nearby stone into glass."))
+    device.set_child(GlassDeviceAction())
+    device.set_child(GraphicChar(None, colors.CYAN, icon.MACHINE))
+    return device
+
+
 class ActivateDeviceAction(Action):
     def __init__(self):
         super(ActivateDeviceAction, self).__init__()
@@ -196,10 +208,6 @@ class DarknessDeviceAction(ActivateDeviceAction):
         self.component_type = "darkness_device_activate_action"
 
     def _activate(self, source_entity):
-        """
-        The activate action subclasses should override
-        and define the activate action here.
-        """
         ttl = gametime.single_turn * rng.random_variance(10, 5)
         entities = source_entity.dungeon_level.value.entities
         msg.send_global_message(messenger.DARKNESS_MESSAGE)
@@ -207,6 +215,36 @@ class DarknessDeviceAction(ActivateDeviceAction):
             sight_radius_spoof = DataPoint(DataTypes.SIGHT_RADIUS, 1)
             darkness_effect = entityeffect.AddSpoofChild(source_entity, sight_radius_spoof, time_to_live=ttl)
             entity.effect_queue.add(darkness_effect)
+
+
+class GlassDeviceAction(ActivateDeviceAction):
+    """
+    Defines the device activate action.
+    """
+
+    def __init__(self):
+        super(GlassDeviceAction, self).__init__()
+        self.component_type = "glass_device_activate_action"
+
+    def _activate(self, source_entity):
+        sight_radius = source_entity.sight_radius.value
+        dungeon_level = source_entity.dungeon_level.value
+        top = source_entity.position.value[1] - sight_radius
+        left = source_entity.position.value[0] - sight_radius
+        turned_something_to_glass = False
+        for x in range(left, left + 2 * sight_radius + 1):
+            for y in range(top, top + 2 * sight_radius + 1):
+                try:
+                    terrain = dungeon_level.get_tile((x, y)).get_terrain()
+                    if terrain.has("is_wall"):
+                        glass_wall = GlassWall()
+                        glass_wall.mover.replace_move((x, y), dungeon_level)
+                        turned_something_to_glass = True
+                except IndexError:
+                    continue
+        if turned_something_to_glass:
+            dungeon_level.signal_terrain_changed()
+            msg.send_global_message(messenger.GLASS_TURNING_MESSAGE)
 
 
 class HeartStopDeviceAction(ActivateDeviceAction):

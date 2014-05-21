@@ -201,6 +201,7 @@ class Wall (Composite):
                                                  icon.CAVE_WALLS_ROW2,
                                                  [Wall, Door, Chasm]))
         self.set_child(Flag("is_solid"))
+        self.set_child(Flag("is_wall"))
 
 
 class Door(Composite):

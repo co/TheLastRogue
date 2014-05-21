@@ -48,9 +48,9 @@ class ReplaceWithEntityAfterTime(Leaf):
         self.time_out -= time
         if self.time_out <= 0:
             entity = self.entity_factory(self.parent.game_state)
-            positon = self.parent.position.value
+            position = self.parent.position.value
             dungeon_level = self.parent.dungeon_level.value
-            entity.mover.try_move(positon, dungeon_level)
+            entity.mover.try_move_roll_over(position, dungeon_level)
             self.parent.mover.try_remove_from_dungeon()
 
 

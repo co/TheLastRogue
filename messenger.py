@@ -33,6 +33,7 @@ ITEM_HITS_THE_GROUND = "The %(target_entity)s hits the ground with a thud."
 ENTITY_EXPLODES = "The %(target_entity)s explodes!"
 
 PLAYER_MAP_MESSAGE = "You surroundings suddenly seem familiar."
+GLASS_TURNING_MESSAGE = "You surroundings suddenly seem more transparent."
 
 
 class Messenger(object):
