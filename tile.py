@@ -1,3 +1,4 @@
+import colors
 from graphic import CharPrinter
 from stats import GamePieceTypes, DataPoint, DataTypes
 import compositecore
@@ -17,12 +18,17 @@ class Tile(object):
         }
         self._top_level = GamePieceTypes.TERRAIN
 
-    def draw(self, console, screen_position, is_seen):
+    def draw_unseen(self, console, screen_position):
         piece_list = self.get_top_pieces()
-        if is_seen:
-            self._draw_seen(console, screen_position, piece_list)
-        else:
-            self._draw_unseen(console, screen_position, piece_list)
+        self._draw_unseen(console, screen_position, piece_list)
+
+    def draw_unvisited(self, console, screen_position):
+        piece_list = self.get_top_pieces()
+        self._draw_unvisited(console, screen_position, piece_list)
+
+    def draw_seen(self, console, screen_position):
+        piece_list = self.get_top_pieces()
+        self._draw_seen(console, screen_position, piece_list)
 
     def _update_top_level(self):
         try:
@@ -70,6 +76,9 @@ class Tile(object):
     def _draw_unseen(self, console, screen_position, piece_list):
         piece_list[0].char_printer.draw_unseen(screen_position, console)
 
+    def _draw_unvisited(self, console, screen_position, piece_list):
+        piece_list[0].char_printer.draw_unvisited(screen_position, console)
+
     def get_top_pieces(self):
         return self.game_pieces[self._top_level]
 
@@ -111,17 +120,23 @@ class Tile(object):
 
     def copy(self):
         copy_tile = Tile()
-        piece = self.game_pieces[self._top_level][0]
-        new_piece = compositecore.Composite()
-        if piece.has("game_piece_type"):
-            new_piece.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, piece.game_piece_type.value))
-        if piece.has("graphic_char"):
-            new_piece.set_child(piece.graphic_char.copy())
-        if piece.has("description"):
-            new_piece.set_child(piece.description.copy())
-        new_piece.set_child(CharPrinter())
-        copy_tile.add(new_piece)
+        pieces = [self.game_pieces[self._top_level][0]]
+        if self.get_terrain():
+            pieces.append(self.get_terrain())
+        for piece in pieces:
+            copy_tile.add(self._copy_add_children_helper(piece))
         return copy_tile
+
+    def _copy_add_children_helper(self, old_piece):
+        new_piece = compositecore.Composite()
+        if old_piece.has("game_piece_type"):
+            new_piece.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, old_piece.game_piece_type.value))
+        if old_piece.has("graphic_char"):
+            new_piece.set_child(old_piece.graphic_char.copy())
+        if old_piece.has("description"):
+            new_piece.set_child(old_piece.description.copy())
+        new_piece.set_child(CharPrinter())
+        return new_piece
 
 
 unknown_tile = Tile()

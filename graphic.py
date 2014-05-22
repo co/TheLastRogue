@@ -109,6 +109,17 @@ class CharPrinter(Leaf):
                                               self.parent.graphic_char.icon,
                                               console=the_console)
 
+    def draw_unvisited(self, screen_position, the_console=0):
+        """
+        Draws the char as it looks like outside the field of view.
+        """
+        self._tick_animation()
+        console.console.set_colors_and_symbol(screen_position,
+                                              colors.DARK_PURPLE,
+                                              colors.UNSEEN_BG,
+                                              self.parent.graphic_char.icon,
+                                              console=the_console)
+
     def append_graphic_char_temporary_frames(self, graphic_char_frames, animation_delay=settings.ANIMATION_DELAY):
         """
         Appends frames to the graphic char animation frame queue.

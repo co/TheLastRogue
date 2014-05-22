@@ -167,6 +167,17 @@ def new_glass_device(game_state):
     return device
 
 
+def new_swap_device(game_state):
+    device = Composite()
+    set_item_components(device, game_state)
+    set_device_components(device)
+    device.set_child(Description("Device of Swaping",
+                                 "This ancient device will swap places with every creature in view."))
+    device.set_child(SwapDeviceAction())
+    device.set_child(GraphicChar(None, colors.YELLOW, icon.MACHINE))
+    return device
+
+
 class ActivateDeviceAction(Action):
     def __init__(self):
         super(ActivateDeviceAction, self).__init__()
@@ -218,13 +229,17 @@ class DarknessDeviceAction(ActivateDeviceAction):
 
 
 class GlassDeviceAction(ActivateDeviceAction):
-    """
-    Defines the device activate action.
-    """
-
     def __init__(self):
         super(GlassDeviceAction, self).__init__()
         self.component_type = "glass_device_activate_action"
+
+    def _turn_to_glass_if_wall(self, position, dungeon_level):
+        terrain = dungeon_level.get_tile(position).get_terrain()
+        if terrain.has("is_wall"):
+            glass_wall = GlassWall()
+            glass_wall.mover.replace_move(position, dungeon_level)
+            return True
+        return False
 
     def _activate(self, source_entity):
         sight_radius = source_entity.sight_radius.value
@@ -235,16 +250,34 @@ class GlassDeviceAction(ActivateDeviceAction):
         for x in range(left, left + 2 * sight_radius + 1):
             for y in range(top, top + 2 * sight_radius + 1):
                 try:
-                    terrain = dungeon_level.get_tile((x, y)).get_terrain()
-                    if terrain.has("is_wall"):
-                        glass_wall = GlassWall()
-                        glass_wall.mover.replace_move((x, y), dungeon_level)
-                        turned_something_to_glass = True
+                    turned_something_to_glass = self._turn_to_glass_if_wall((x, y), dungeon_level)
                 except IndexError:
                     continue
         if turned_something_to_glass:
             dungeon_level.signal_terrain_changed()
             msg.send_global_message(messenger.GLASS_TURNING_MESSAGE)
+
+
+class SwapDeviceAction(ActivateDeviceAction):
+    def __init__(self):
+        super(SwapDeviceAction, self).__init__()
+        self.component_type = "swap_device_activate_action"
+
+    def _activate(self, source_entity):
+        dungeon_level = source_entity.dungeon_level.value
+        entities_in_sight = source_entity.vision.get_seen_entities()
+        entities_in_sight.append(source_entity)
+
+        positions = [e.position.value for e in entities_in_sight]
+        random.shuffle(positions)
+
+        for entity in entities_in_sight:
+            entity.mover.try_remove_from_dungeon()
+
+        for entity in entities_in_sight:
+            print positions
+            entity.mover.try_move(positions.pop(), dungeon_level)
+        msg.send_global_message(messenger.GLASS_TURNING_MESSAGE)
 
 
 class HeartStopDeviceAction(ActivateDeviceAction):

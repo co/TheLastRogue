@@ -214,10 +214,14 @@ class DungeonLevelScreen(object):
         if entity.dungeon_mask.can_see_point(position):
             the_tile = get_tile_or_unknown(position, tile_matrix)
             entity.memory_map.update_memory_of_tile(the_tile, position, self.dungeon_level.depth)
-            the_tile.draw(self.console, position, True)
+            entity.memory_map.tile_seen(position)
+            the_tile.draw_seen(self.console, position)
         else:
             memory_tile = entity.memory_map.get_memory_of_map(self.dungeon_level).get_tile_or_unknown(position)
-            memory_tile.draw(self.console, position, False)
+            if entity.memory_map.has_seen_position(position):
+                memory_tile.draw_unseen(self.console, position)
+            else:
+                memory_tile.draw_unvisited(self.console, position)
             real_tile = get_tile_or_unknown(position, tile_matrix)
             real_tile.get_top_pieces()[0].char_printer.clear_animation()
 

@@ -221,7 +221,7 @@ class TestGameState(GameStateBase):
         ring3 = item.new_ring_of_strength(self)
         ring3.mover.try_move((26, 11), self.dungeon_level)
 
-        device1 = item.new_glass_device(self)
+        device1 = item.new_swap_device(self)
         device1.mover.try_move((24, 12), self.dungeon_level)
 
         device2 = item.new_heart_stop_device(self)

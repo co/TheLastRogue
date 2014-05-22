@@ -1,5 +1,6 @@
 from compositecore import Leaf, CompositeMessage
 from dungeonlevelfactory import unknown_level_map
+from stats import Flag
 import terrain
 from tile import Tile
 
@@ -20,7 +21,13 @@ class MemoryMap(Leaf):
     def has_seen_position(self, position):
         memory = self._memory_map[self.parent.dungeon_level.value.depth]
         tile = memory.get_tile_or_unknown(position)
-        return not isinstance(tile.get_terrain(), terrain.Unknown)
+        return tile.get_terrain() and tile.get_terrain().has("tile_seen")
+
+    def tile_seen(self, position):
+        memory = self._memory_map[self.parent.dungeon_level.value.depth]
+        tile = memory.get_tile_or_unknown(position)
+        if tile.get_terrain() and not tile.get_terrain().has("tile_seen"):
+            tile.get_terrain().set_child(Flag("tile_seen"))
 
     def _init_memory_map_if_not_set(self, dungeon_level):
         """
