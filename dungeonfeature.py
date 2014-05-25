@@ -6,11 +6,16 @@ import entityeffect
 import gametime
 import geometry
 from graphic import GraphicChar, CharPrinter
+import menu
+import menufactory
 import messenger
 from mover import Mover, teleport_monsters, Stepper
 from position import Position, DungeonLevel
 import rng
+import sacrifice
+import state
 from stats import DataPoint, DataTypes, GamePieceTypes, Immunities
+import terrain
 from text import Description
 import action
 import colors
@@ -133,7 +138,7 @@ class Fountain(Composite):
 class DrinkFromFountainAction(action.Action):
     def __init__(self):
         super(DrinkFromFountainAction, self).__init__()
-        self.component_type = "descend_stairs_action"
+        self.component_type = "drink_action"
         self.name = "Drink (Fountain)"
         self.display_order = 50
 
@@ -151,6 +156,43 @@ class DrinkFromFountainAction(action.Action):
         self.parent.remove_component(self)
 
 
+class BloodFountain(Composite):
+    """
+    Drinking from the fountain makes the player stronger.
+    """
+    def __init__(self):
+        super(BloodFountain, self).__init__()
+        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
+        self.set_child(Position())
+        self.set_child(DungeonLevel())
+        self.set_child(Description("Fountain Of Sacrifice",
+                                   ("The fountain is filled thick red liquid.",
+                                    "You have a feeling that it calls out for you.")))
+        self.set_child(GraphicChar(None, colors.RED,
+                                   icon.FOUNTAIN_FULL))
+        self.set_child(CharPrinter())
+        self.set_child(Mover())
+        self.set_child(IsDungeonFeature())
+        self.set_child(SacrificeFountainAction())
+
+
+class SacrificeFountainAction(DrinkFromFountainAction):
+    def __init__(self):
+        super(SacrificeFountainAction, self).__init__()
+        self.component_type = "sacrifice_fountain_action"
+        self.name = "Drink (Fountain)"
+        self.display_order = 50
+
+    def act(self, **kwargs):
+        target_entity = kwargs["target_entity"]
+        self.start_sacrifice_menu(target_entity)
+        self.add_energy_spent_to_entity(target_entity)
+
+    def start_sacrifice_menu(self, entity):
+        menu = menufactory.sacrifice_menu(entity, sacrifice.power_list, self._dry_up_fountain)
+        entity.game_state.value.start_prompt(state.UIState(menu))
+
+
 class IsDungeonFeature(Leaf):
     """
     Defines that the parent is a dungeon feature.
@@ -163,7 +205,7 @@ class IsDungeonFeature(Leaf):
 class DescendStairsAction(action.Action):
     def __init__(self):
         super(DescendStairsAction, self).__init__()
-        self.component_type = "descend_stairs_action"
+        self.component_type = "drink_action"
         self.name = "Descend (Stairs)"
         self.display_order = 50
 

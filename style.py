@@ -52,15 +52,13 @@ class RectangleStyle3D(RectangleStyle):
 
 
 class FinalFantasyClassicStyle(RectangleStyle):
-    def __init__(self):
-        white = colors.WHITE
-        blue = colors.BLUE_D
-        self.center = GraphicChar(blue, blue, ' ')
-        self.top = GraphicChar(blue, white, libtcod.CHAR_HLINE)
-        self.left = GraphicChar(blue, white, libtcod.CHAR_VLINE)
+    def __init__(self, color_fg=colors.WHITE, color_bg=colors.BLUE_D):
+        self.center = GraphicChar(color_bg, color_bg, ' ')
+        self.top = GraphicChar(color_bg, color_fg, libtcod.CHAR_HLINE)
+        self.left = GraphicChar(color_bg, color_fg, libtcod.CHAR_VLINE)
         self.bottom = self.top
         self.right = self.left
-        self.top_left = GraphicChar(blue, white, libtcod.CHAR_DIAMOND)
+        self.top_left = GraphicChar(color_bg, color_fg, libtcod.CHAR_DIAMOND)
         self.top_right = self.top_left
         self.bottom_left = self.top_left
         self.bottom_right = self.top_left
@@ -166,6 +164,10 @@ class MinimalStyle(RectangleStyle):
 
 ff_blue_theme = MenuStyle(FinalFantasyClassicStyle(),
                           colors.GRAY, (2, 2))
+
+ff_gold_theme = MenuStyle(FinalFantasyClassicStyle(colors.CHAMPAGNE, colors.DARK_BROWN),
+                          colors.GRAY, (2, 2))
+
 tlr_classic_3d_theme = MenuStyle(RectangleStyle3D(),
                                  colors.GRAY, (2, 2))
 rogue_classic_theme = MenuStyle(MinimalClassicStyle2(),
@@ -178,4 +180,5 @@ themes = {"ff_blue_theme": ff_blue_theme,
           "tlr_classic_3d_theme": tlr_classic_3d_theme}
 
 menu_theme = themes[settings.menu_theme]
+sacrifice_menu_theme = ff_gold_theme
 interface_theme = themes[settings.interface_theme]

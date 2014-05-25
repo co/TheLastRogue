@@ -258,9 +258,11 @@ def generate_dungeon_exploded_rooms(depth, rooms, room_area, rectangle_room_chan
     door_brush = DoorIfSuitableBrush()
     apply_brush_to_points(dungeon_level, normalized_possible_door_points, door_brush)
 
-    feature_positions = random.sample(normalized_open_points, 3)
+    feature_positions = random.sample(normalized_open_points, 4)
     place_up_down_stairs(dungeon_level, feature_positions[0], feature_positions[1])
     _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(), dungeon_level, feature_positions[2])
+    if rng.coin_flip():
+        _place_feature_replace_terrain_with_floor(dungeonfeature.BloodFountain(), dungeon_level, feature_positions[3])
 
     return dungeon_level
 

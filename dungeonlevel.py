@@ -192,7 +192,7 @@ class DungeonLevelScreen(object):
                 position = (x, y)
                 tile_position = geo.add_2d(position, camera.camera_offset)
                 the_tile = get_tile_or_unknown(tile_position, tile_matrix)
-                the_tile.draw(self.console, position, True)
+                the_tile.draw_seen(self.console, position)
 
     def draw_rectangle_seen_by_entity(self, rectangle, tile_matrix, entity):
         y_start = max(0, rectangle.top)

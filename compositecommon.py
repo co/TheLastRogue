@@ -1,10 +1,7 @@
-from Status import StatusIcon, POISON_STATUS_ICON
+from Status import POISON_STATUS_ICON
 from attacker import DamageTypes
-import colors
 from compositecore import Leaf
 from entityeffect import DamageOverTimeEffect
-from graphic import GraphicChar
-import icon
 import messenger
 
 

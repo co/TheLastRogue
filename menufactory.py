@@ -9,6 +9,7 @@ import graphic
 import gui
 import menu
 import rectfactory
+import sacrifice
 import settings
 import state
 import style
@@ -232,8 +233,8 @@ that can be taken on a given equipment_slot.
     return state.UIState(dock)
 
 
-def get_menu_background(rectangle):
-    background_rect = gui.StyledRectangle(rectangle, style.menu_theme.rect_style)
+def get_menu_background(rectangle, rect_style=style.menu_theme.rect_style):
+    background_rect = gui.StyledRectangle(rectangle, rect_style)
     return background_rect
 
 
@@ -258,6 +259,40 @@ def context_menu(player, state_stack):
     resulting_menu = menu.StaticMenu(context_menu_rect.top_left, context_options, state_stack,
                                      margin=style.menu_theme.margin)
     background_rect = get_menu_background(context_menu_rect)
+
+    ui_elements = [background_rect, resulting_menu]
+    ui_state = state.UIState(gui.UIElementList(ui_elements))
+    return ui_state
+
+
+def sacrifice_menu(player, powers, post_power_gain_function):
+    game_state = player.game_state.value
+    state_stack = game_state.menu_prompt_stack
+    context_options = []
+    stack_pop_function = menu.BackToGameFunction(state_stack)
+    width = 24
+
+    for power in powers:
+        power_caption = power.name + str(power.buy_cost).rjust(width - len(power.name))
+        pay_health_function = lambda: sacrifice.sacrifice_health(player, power.buy_cost)
+        add_power_function = lambda: player.set_child(power)
+        power_gain_function = lambda: power.on_power_gained()
+        power_option = menu.MenuOption(power_caption, [add_power_function,
+                                                       power_gain_function,
+                                                       pay_health_function,
+                                                       post_power_gain_function,
+                                                       stack_pop_function],
+                                       (lambda: player.health.hp.value > power.buy_cost))
+        context_options.append(power_option)
+
+    cancel_option = menu.MenuOption("Cancel", [stack_pop_function], (lambda: True))
+    context_options.append(cancel_option)
+
+    context_menu_rect = rectfactory.center_of_screen_rect(max(option.width for option in context_options) + 4,
+                                                          len(context_options) * 2 + 3)
+    resulting_menu = menu.StaticMenu(context_menu_rect.top_left, context_options, state_stack,
+                                     margin=style.menu_theme.margin)
+    background_rect = get_menu_background(context_menu_rect, style.sacrifice_menu_theme.rect_style)
 
     ui_elements = [background_rect, resulting_menu]
     ui_state = state.UIState(gui.UIElementList(ui_elements))

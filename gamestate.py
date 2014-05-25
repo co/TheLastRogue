@@ -5,6 +5,7 @@ import cPickle as pickle
 from cloud import new_steam_cloud
 import colors
 from dungeon import Dungeon, ReflexiveDungeon
+import dungeonfeature
 from dungeonlevelfactory import dungeon_level_from_file
 import libtcodpy
 from mover import teleport_monsters
@@ -242,8 +243,8 @@ class TestGameState(GameStateBase):
         sword = item.new_sword(self)
         sword.mover.try_move((19, 13), self.dungeon_level)
 
-        armor = item.new_leather_armor(self)
-        armor.mover.try_move((21, 10), self.dungeon_level)
+        blood_fountain = dungeonfeature.BloodFountain()
+        blood_fountain.mover.try_move((21, 10), self.dungeon_level)
 
         boots = item.new_leather_boots(self)
         boots.mover.try_move((22, 10), self.dungeon_level)

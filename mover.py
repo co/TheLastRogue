@@ -242,7 +242,7 @@ def is_tile_dangerous(tile, entity):
 
 class TolerateDamage(Leaf):
     """
-    Signifies that that the entity won't minde taking damage of a type.
+    Signifies that that the entity won't mind taking damage of a type.
     """
 
     def __init__(self, damage_type):
