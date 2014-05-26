@@ -19,6 +19,7 @@ import menufactory
 import messenger
 import monster
 import rectfactory
+import sacrifice
 import settings
 import state
 import statestack
@@ -63,6 +64,8 @@ class GameStateBase(state.State):
         self._init_bg()
 
         self._gui_last_update_timestamp = -1
+
+        self.power_list = sacrifice.new_power_list()
 
     def __getstate__(self):
         state = {

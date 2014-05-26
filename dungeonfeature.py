@@ -189,7 +189,7 @@ class SacrificeFountainAction(DrinkFromFountainAction):
         self.add_energy_spent_to_entity(target_entity)
 
     def start_sacrifice_menu(self, entity):
-        menu = menufactory.sacrifice_menu(entity, sacrifice.power_list, self._dry_up_fountain)
+        menu = menufactory.sacrifice_menu(entity, entity.game_state.value.power_list, self._dry_up_fountain)
         entity.game_state.value.start_prompt(state.UIState(menu))
 
 

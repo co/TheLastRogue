@@ -168,6 +168,9 @@ ff_blue_theme = MenuStyle(FinalFantasyClassicStyle(),
 ff_gold_theme = MenuStyle(FinalFantasyClassicStyle(colors.CHAMPAGNE, colors.DARK_BROWN),
                           colors.GRAY, (2, 2))
 
+ff_red_theme = MenuStyle(FinalFantasyClassicStyle(colors.CHAMPAGNE, colors.RED_D),
+                          colors.GRAY, (2, 2))
+
 tlr_classic_3d_theme = MenuStyle(RectangleStyle3D(),
                                  colors.GRAY, (2, 2))
 rogue_classic_theme = MenuStyle(MinimalClassicStyle2(),
@@ -180,5 +183,5 @@ themes = {"ff_blue_theme": ff_blue_theme,
           "tlr_classic_3d_theme": tlr_classic_3d_theme}
 
 menu_theme = themes[settings.menu_theme]
-sacrifice_menu_theme = ff_gold_theme
+sacrifice_menu_theme = ff_red_theme
 interface_theme = themes[settings.interface_theme]

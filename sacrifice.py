@@ -1,4 +1,5 @@
 from compositecore import Leaf
+from stats import DataPointBonusSpoof
 
 
 class Power(Leaf):
@@ -24,6 +25,22 @@ class NonPersistentPower(Power):
         self.parent.remove_component(self)
 
 
+class StrengthPower(Power):
+    def __init__(self):
+        super(StrengthPower, self).__init__()
+        self.component_type = "strength_power"
+        self.buy_cost = 7
+        self.icon = None
+        self.name = "Gain Strength"
+        self.description = None
+
+    def first_tick(self, time):
+        """
+        Causes the entity that equips this have a bonus to one stat.
+        """
+        self.parent.add_spoof_child(DataPointBonusSpoof("strength", 2))
+
+
 class FullHealPower(NonPersistentPower):
     def __init__(self):
         super(FullHealPower, self).__init__()
@@ -41,4 +58,5 @@ def sacrifice_health(entity, cost):
     entity.health_modifier.decreases_max_hp(cost)
 
 
-power_list = [FullHealPower()]
+def new_power_list():
+    return [FullHealPower(), StrengthPower()]
