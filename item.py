@@ -1045,7 +1045,7 @@ class AttackProvider(Leaf):
                           for effect in self.parent.get_children_with_tag("attack_effect")
                           if effect.roll_to_hit()]
         attack = Attack(damage_strength, self.variance,
-                        self.types, self.parent.hit.value, target_entity_effects_factories=attack_effects)
+                        self.types, self.parent.hit.value, target_entity_effects=attack_effects)
 
 
         return attack.damage_entity(source_entity, target_entity,

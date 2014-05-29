@@ -108,8 +108,8 @@ class HealthModifier(Leaf):
         Decreases max hp and heals the same amount.
         """
         hp = self.parent.health.hp
-        hp.decrease(amount)
         hp.max_value = hp.max_value - amount
+        hp.value = min(hp.value, hp.max_value)
 
     def _animate_max_hp_gain(self):
         heart_graphic_char = GraphicChar(None, colors.CYAN, icon.HEALTH_GAIN_ICON)

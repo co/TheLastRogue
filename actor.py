@@ -66,8 +66,8 @@ class StunnedActor(Actor):
     def __init__(self):
         super(StunnedActor, self).__init__()
 
-    def first_tick(self, time):
-        if self.target_entity.has("status_bar"):
+    def on_tick(self, time):
+        if self.parent.has("status_bar"):
             self.parent.status_bar.add(Status.STUNNED_STATUS_ICON)
 
     def act(self):

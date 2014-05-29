@@ -73,11 +73,11 @@ class Attacker(Leaf):
         if self.parent.has("melee_damage_multiplier"):
             damage_multiplier = self.parent.melee_damage_multiplier.value
         damage_strength = int(self.parent.strength.value * damage_multiplier)
-        target_entity_effects_factories = [effect_factory_data_point.value for effect_factory_data_point in
+        target_entity_effects = [effect_factory_data_point.value() for effect_factory_data_point in
                                            self.parent.get_children_with_tag("unarmed_hit_target_entity_effect_factory")]
         return Attack(1 + damage_strength / 2, damage_strength / 4,
                       damage_types, self.parent.hit.value,
-                      target_entity_effects_factories=target_entity_effects_factories)
+                      target_entity_effects=target_entity_effects)
 
     def _on_hit(self, target_entity):
         pass
@@ -203,20 +203,19 @@ class PoisonImmunity(Leaf):
 
 class Attack(object):
     def __init__(self, damage, variance,
-                 damage_types, hit, damage_multiplier=1, target_entity_effects_factories=[]):
+                 damage_types, hit, damage_multiplier=1, target_entity_effects=[]):
         self.damage = damage
         self.variance = variance
         self.damage_multiplier = damage_multiplier
         self.damage_types = damage_types
         self.hit = hit
-        self.target_entity_effects_factories = target_entity_effects_factories
+        self.target_entity_effects = target_entity_effects
 
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0, damage_multiplier=1):
         damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
-        target_entity_effects = [entity_effect for entity_effect in self.target_entity_effects_factories]
         damage_effect = entityeffect.AttackEntityEffect(source_entity, damage * self.damage_multiplier,
                                                         self.damage_types, self.hit + bonus_hit,
-                                                        target_entity_effects=target_entity_effects)
+                                                        target_entity_effects=self.target_entity_effects)
         target_entity.effect_queue.add(damage_effect)
 
 

@@ -12,7 +12,7 @@ class Power(Leaf):
         self.description = "??? ????? ? ??"
 
     def on_power_gained(self):
-        pass
+        self.parent.game_state.value.power_list.remove(self)
 
 
 class NonPersistentPower(Power):

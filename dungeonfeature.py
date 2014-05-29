@@ -168,8 +168,7 @@ class BloodFountain(Composite):
         self.set_child(Description("Fountain Of Sacrifice",
                                    ("The fountain is filled thick red liquid.",
                                     "You have a feeling that it calls out for you.")))
-        self.set_child(GraphicChar(None, colors.RED,
-                                   icon.FOUNTAIN_FULL))
+        self.set_child(GraphicChar(None, colors.RED, icon.FOUNTAIN_FULL))
         self.set_child(CharPrinter())
         self.set_child(Mover())
         self.set_child(IsDungeonFeature())

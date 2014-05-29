@@ -274,12 +274,9 @@ def sacrifice_menu(player, powers, post_power_gain_function):
 
     for power in powers:
         power_caption = power.name + str(power.buy_cost).rjust(width - len(power.name))
-        pay_health_function = lambda: sacrifice.sacrifice_health(player, power.buy_cost)
-        add_power_function = lambda: player.set_child(power)
-        power_gain_function = lambda: power.on_power_gained()
-        power_option = menu.MenuOption(power_caption, [add_power_function,
-                                                       power_gain_function,
-                                                       pay_health_function,
+        power_option = menu.MenuOption(power_caption, [lambda p=power: player.set_child(p),
+                                                       lambda p=power: p.on_power_gained(),
+                                                       lambda p=power: sacrifice.sacrifice_health(player, p.buy_cost),
                                                        post_power_gain_function,
                                                        stack_pop_function],
                                        (lambda: player.health.hp.value > power.buy_cost))
