@@ -59,7 +59,7 @@ class Attacker(Leaf):
         self._on_hit(target_entity)
         if equipment.slot_is_equiped(EquipmentSlots.MELEE_WEAPON):
             weapon = self.parent.equipment.get(EquipmentSlots.MELEE_WEAPON)
-            weapon.damage_provider.damage_entity(self.parent, target_entity)
+            weapon.attack_provider.attack_entity(self.parent, target_entity)
         else:
             self._unarmed_damage().damage_entity(self.parent, target_entity)
 
@@ -95,14 +95,15 @@ class KnockBackAttacker(Attacker):
         self._knock_away_entity(target_entity)
 
     def _knock_away_entity(self, target_entity):
-        knock_direction = geometry.sub_2d(target_entity.position.value, self.parent.position.value)
-        knock_position = geometry.add_2d(target_entity.position.value, knock_direction)
-        old_target_position = target_entity.position.value
-        target_entity.mover.try_move(knock_position)
-        self.parent.mover.try_move(old_target_position)
-        if rng.coin_flip() and rng.coin_flip():
-            entity_skip_turn(self.parent, target_entity)
-            target_entity.char_printer.append_fg_color_blink_frames([colors.CHAMPAGNE])
+        if rng.coin_flip():
+            knock_direction = geometry.sub_2d(target_entity.position.value, self.parent.position.value)
+            knock_position = geometry.add_2d(target_entity.position.value, knock_direction)
+            old_target_position = target_entity.position.value
+            target_entity.mover.try_move(knock_position)
+            self.parent.mover.try_move(old_target_position)
+            if rng.coin_flip():
+                entity_skip_turn(self.parent, target_entity)
+                target_entity.char_printer.append_fg_color_blink_frames([colors.CHAMPAGNE])
 
 
 class Dodger(Leaf):

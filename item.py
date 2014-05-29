@@ -30,6 +30,7 @@ import equipment
 import gametime
 from messenger import msg
 import icon
+from util import entity_skip_turn
 
 
 class ItemType(Leaf):
@@ -84,7 +85,7 @@ def new_gun(game_state):
                                The wooden handle is dry and gray, \
                                you see rust eating into the iron pipe."))
     gun.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
-    gun.set_child(DamageProvider(15, 10, [DamageTypes.PHYSICAL,
+    gun.set_child(AttackProvider(15, 10, [DamageTypes.PHYSICAL,
                                           DamageTypes.PIERCING]))
     gun.set_child(DataPoint(DataTypes.WEAPON_RANGE, 15))
     gun.set_child(DataPoint(DataTypes.HIT, 13))
@@ -101,7 +102,7 @@ def new_sling(game_state):
                                 "This weapon propels rocks more effectively than throwing them would."))
     sling.set_child(GraphicChar(None, colors.ORANGE, icon.SLING))
     sling.set_child(DataPoint(DataTypes.WEAPON_RANGE, 4))
-    sling.set_child(DamageProvider(1, 2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
+    sling.set_child(AttackProvider(1, 2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
     sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
     sling.set_child(DataPoint(DataTypes.HIT, 5))
     return sling
@@ -423,10 +424,27 @@ def new_sword(game_state):
     sword.set_child(Description("Iron Sword",
                                 "This old blade has seen some better days, it's as sharp as ever tough."))
     sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-    sword.set_child(DamageProvider(4, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+    sword.set_child(AttackProvider(4, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
     sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
-    sword.set_child(DataPoint(DataTypes.HIT, 16))
+    sword.set_child(DataPoint(DataTypes.HIT, 17))
     return sword
+
+
+def new_mace(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    mace = Composite()
+    set_item_components(mace, game_state)
+    set_melee_weapon_component(mace)
+    mace.set_child(Description("Iron Mace",
+                                "This old club has an lump of iron at one end."))
+    mace.set_child(GraphicChar(None, colors.GRAY, icon.MACE))
+    mace.set_child(AttackProvider(3, 1, [DamageTypes.PHYSICAL, DamageTypes.BLUNT]))
+    mace.set_child(DataPoint(DataTypes.WEIGHT, 8))
+    mace.set_child(DataPoint(DataTypes.HIT, 16))
+    mace.set_child(StunAttackEffect(1.0))
+    return mace
 
 
 def new_knife(game_state):
@@ -438,7 +456,7 @@ def new_knife(game_state):
     set_melee_weapon_component(knife)
     knife.set_child(Description("Knife", "A trusty knife, small and precise but will only inflict small wounds."))
     knife.set_child(GraphicChar(None, colors.GRAY, icon.KNIFE))
-    knife.set_child(DamageProvider(2, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+    knife.set_child(AttackProvider(2, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
     knife.set_child(DataPoint(DataTypes.WEIGHT, 5))
     knife.set_child(DataPoint(DataTypes.HIT, 21))
     return knife
@@ -974,24 +992,52 @@ class EquipmentType(Leaf):
         self.value = equipment_type
 
 
-class DamageProvider(Leaf):
+class AttackProvider(Leaf):
     """
-    The provides holds damage, actual damage will be calculated on use.
+    The modify be us, actual damage will be calculated on use.
     """
 
     def __init__(self, damage, variance, types):
-        super(DamageProvider, self).__init__()
-        self.component_type = "damage_provider"
+        super(AttackProvider, self).__init__()
+        self.component_type = "attack_provider"
         self.damage = damage
         self.variance = variance
         self.types = types
 
-    def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
+    def attack_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
         damage_strength = self.damage + source_entity.strength.value / 2
         damage = Attack(damage_strength, self.variance,
                         self.types, self.parent.hit.value)
+
+        for effect in self.parent.get_children_with_tag("attack_effect"):
+            effect.try_apply_effect(source_entity, target_entity)
+
         return damage.damage_entity(source_entity, target_entity,
                                     bonus_damage=bonus_damage, bonus_hit=bonus_hit)
+
+
+class AttackEffect(Leaf):
+    def __init__(self, effect_chance):
+        super(AttackEffect, self).__init__()
+        self.effect_chance = effect_chance
+        self.tags.add("attack_effect")
+
+    def try_apply_effect(self, source_entity, target_entity):
+        if random.random() < self.effect_chance:
+            self._apply_effect(source_entity, target_entity)
+
+    def _apply_effect(self, source_entity, target_entity):
+        pass
+
+
+class StunAttackEffect(AttackEffect):
+    def __init__(self, effect_chance):
+        super(StunAttackEffect, self).__init__(effect_chance)
+        self.effect_chance = effect_chance
+        self.component_type = "stun_attack_effect"
+
+    def _apply_effect(self, source_entity, target_entity):
+        entity_skip_turn(source_entity, target_entity)
 
 
 class OnUnequipEffect(Leaf):

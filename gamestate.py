@@ -243,8 +243,8 @@ class TestGameState(GameStateBase):
         sling = item.new_sling(self)
         sling.mover.try_move((20, 14), self.dungeon_level)
 
-        sword = item.new_sword(self)
-        sword.mover.try_move((19, 13), self.dungeon_level)
+        mace = item.new_mace(self)
+        mace.mover.try_move((19, 13), self.dungeon_level)
 
         blood_fountain = dungeonfeature.BloodFountain()
         blood_fountain.mover.try_move((21, 10), self.dungeon_level)

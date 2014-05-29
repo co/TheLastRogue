@@ -7,7 +7,6 @@ import icon
 from mover import Mover
 from position import Position, DungeonLevel
 from stats import GamePieceTypes, DataTypes, DataPoint
-from terrain import FallRemoveNonPlayerNonFlying
 from text import Description
 import colors
 
@@ -19,8 +18,7 @@ def set_corpse_components(corpse, game_state):
     corpse.set_child(Description("A rotting corpse.",
                                  "A rotting corpse."))
     corpse.set_child(GraphicChar(None, colors.WHITE,
-                               icon.CORPSE))
-    corpse.set_child(FallRemoveNonPlayerNonFlying())
+                                 icon.CORPSE))
     corpse.set_child(CharPrinter())
     corpse.set_child(DoNothingActor())
     corpse.set_child(Mover())

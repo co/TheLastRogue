@@ -167,7 +167,7 @@ class Teleport(EntityEffect):
 
 class AttackEntityEffect(EntityEffect):
     def __init__(self, source_entity, damage, damage_types, hit, hit_message=messenger.HIT_MESSAGE,
-                 miss_message=messenger.MISS_MESSAGE, no_stack_id=None, time_to_live=1,
+                 miss_message=messenger.MISS_MESSAGE, hit_trigger_effect=[], no_stack_id=None, time_to_live=1,
                  target_entity_effects=[]):
         super(AttackEntityEffect, self).__init__(source_entity=source_entity,
                                                  effect_type=EffectTypes.DAMAGE,
@@ -179,6 +179,7 @@ class AttackEntityEffect(EntityEffect):
         self.miss_message = miss_message
         self.hit_message = hit_message
         self.target_entity_effects = target_entity_effects
+        self.hit_trigger_effect = hit_trigger_effect
 
     def send_miss_message(self):
         messenger.msg.send_visual_message(self.miss_message %
