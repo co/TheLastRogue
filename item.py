@@ -2,7 +2,7 @@ import random
 from Status import DAMAGE_REFLECT_STATUS_ICON, LIFE_STEAL_STATUS_ICON
 
 from action import Action
-from actor import DoNothingActor
+from actor import DoNothingActor, StunnedActor
 from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud, new_fire_cloud
 from compositecommon import PoisonEntityEffectFactory
 from compositecore import Leaf, Composite
@@ -1006,13 +1006,15 @@ class AttackProvider(Leaf):
 
     def attack_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
         damage_strength = self.damage + source_entity.strength.value / 2
-        damage = Attack(damage_strength, self.variance,
-                        self.types, self.parent.hit.value)
 
-        for effect in self.parent.get_children_with_tag("attack_effect"):
-            effect.try_apply_effect(source_entity, target_entity)
+        attack_effects = [effect.get_effect(source_entity, target_entity)
+                          for effect in self.parent.get_children_with_tag("attack_effect")
+                          if effect.roll_to_hit()]
+        attack = Attack(damage_strength, self.variance,
+                        self.types, self.parent.hit.value, target_entity_effects_factories=attack_effects)
 
-        return damage.damage_entity(source_entity, target_entity,
+
+        return attack.damage_entity(source_entity, target_entity,
                                     bonus_damage=bonus_damage, bonus_hit=bonus_hit)
 
 
@@ -1022,11 +1024,10 @@ class AttackEffect(Leaf):
         self.effect_chance = effect_chance
         self.tags.add("attack_effect")
 
-    def try_apply_effect(self, source_entity, target_entity):
-        if random.random() < self.effect_chance:
-            self._apply_effect(source_entity, target_entity)
+    def roll_to_hit(self):
+        return random.random() < self.effect_chance
 
-    def _apply_effect(self, source_entity, target_entity):
+    def get_effect(self, source_entity, target_entity):
         pass
 
 
@@ -1036,8 +1037,8 @@ class StunAttackEffect(AttackEffect):
         self.effect_chance = effect_chance
         self.component_type = "stun_attack_effect"
 
-    def _apply_effect(self, source_entity, target_entity):
-        entity_skip_turn(source_entity, target_entity)
+    def get_effect(self, source_entity, target_entity):
+        return entityeffect.AddSpoofChild(source_entity, StunnedActor(), gametime.single_turn)
 
 
 class OnUnequipEffect(Leaf):

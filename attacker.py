@@ -213,7 +213,7 @@ class Attack(object):
 
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0, damage_multiplier=1):
         damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
-        target_entity_effects = [effect_factory() for effect_factory in self.target_entity_effects_factories]
+        target_entity_effects = [entity_effect for entity_effect in self.target_entity_effects_factories]
         damage_effect = entityeffect.AttackEntityEffect(source_entity, damage * self.damage_multiplier,
                                                         self.damage_types, self.hit + bonus_hit,
                                                         target_entity_effects=target_entity_effects)

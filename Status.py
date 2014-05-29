@@ -27,6 +27,7 @@ class StatusBar(Leaf):
 
 FIRE_STATUS_ICON = StatusIcon("Fire", GraphicChar(None, colors.RED, icon.FIRE))
 POISON_STATUS_ICON = StatusIcon("Poison", GraphicChar(None, colors.GREEN, icon.POTION))
+STUNNED_STATUS_ICON = StatusIcon("Stunned", GraphicChar(None, colors.CHAMPAGNE, "*"))
 DAMAGE_REFLECT_STATUS_ICON = StatusIcon("Damage Reflect", GraphicChar(None, colors.CYAN, icon.ARMOR_STAT))
 LIFE_STEAL_STATUS_ICON = StatusIcon("Life Steal", GraphicChar(None, colors.RED, "V"))
 STUMBLE_STATUS_ICON = StatusIcon("Stumble", GraphicChar(None, colors.YELLOW, "+"))

@@ -108,7 +108,6 @@ class CharPrinter(Leaf):
                                               colors.UNSEEN_BG,
                                               self.parent.graphic_char.icon,
                                               console=the_console)
-
     def draw_unvisited(self, screen_position, the_console=0):
         """
         Draws the char as it looks like outside the field of view.

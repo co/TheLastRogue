@@ -1,3 +1,5 @@
+import Status
+import colors
 from compositecore import Leaf
 import turn
 import gametime
@@ -54,4 +56,23 @@ class DoNothingActor(Actor):
         """
         Just returns energy spent, nothing is done.
         """
+        return gametime.single_turn
+
+
+class StunnedActor(Actor):
+    """
+    Entities with this actor will do nothing.
+    """
+    def __init__(self):
+        super(StunnedActor, self).__init__()
+
+    def first_tick(self, time):
+        if self.target_entity.has("status_bar"):
+            self.parent.status_bar.add(Status.STUNNED_STATUS_ICON)
+
+    def act(self):
+        """
+        Just returns energy spent, shows it's stunned.
+        """
+        self.parent.char_printer.append_fg_color_blink_frames([colors.CHAMPAGNE])
         return gametime.single_turn
