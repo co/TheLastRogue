@@ -392,6 +392,40 @@ def new_leather_boots(game_state):
     return boots
 
 
+def new_boots_of_running(game_state):
+    """
+    A composite component representing a Boots Armor item.
+    """
+    boots = Composite()
+    set_item_components(boots, game_state)
+    set_armor_components(boots)
+    boots.set_child(Description("Boots of Running",
+                                "A light pair of boots, they make your movement speed faster."))
+    boots.set_child(DataPoint(DataTypes.WEIGHT, 2))
+    boots.set_child(GraphicChar(None, colors.GREEN, icon.BOOTS))
+    boots.set_child(StatBonusEquipEffect("armor", 0))
+    boots.set_child(StatBonusEquipEffect(DataTypes.STEALTH, 3))
+    boots.set_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
+    return boots
+
+
+def new_boots_of_sneaking(game_state):
+    """
+    A composite component representing a Boots Armor item.
+    """
+    boots = Composite()
+    set_item_components(boots, game_state)
+    set_armor_components(boots)
+    boots.set_child(Description("Boots of sneaking",
+                                "A smooth pair of boots, they make you more stealthy."))
+    boots.set_child(DataPoint(DataTypes.WEIGHT, 2))
+    boots.set_child(GraphicChar(None, colors.BLUE, icon.BOOTS))
+    boots.set_child(StatBonusEquipEffect("armor", 0))
+    boots.set_child(StatBonusEquipEffect(DataTypes.MOVEMENT_SPEED, -gametime.half_turn))
+    boots.set_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
+    return boots
+
+
 def new_leather_cap(game_state):
     """
     A composite component representing a Armor item.
