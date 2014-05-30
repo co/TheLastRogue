@@ -16,7 +16,7 @@ def place_piece_on_random_walkable_tile(piece, dungeon_level):
         walker = dummy_player
     for position in dungeon_level.get_random_walkable_positions_in_dungeon(walker):
         tile = dungeon_level.get_tile(position)
-        if tile.get_dungeon_feature() and piece.mover.try_move(position, dungeon_level):
+        if not tile.get_dungeon_feature() and piece.mover.try_move(position, dungeon_level):
             return True
     return False
 

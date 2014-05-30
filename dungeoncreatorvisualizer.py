@@ -51,6 +51,12 @@ class DungeonCreatorVisualizer(state.State):
         dgen.drunkard_walk(dungeon_level, center_position, brush,
                            end_condition, move_list)
 
+    def fractal_room(self):
+        dungeon_level = self.dungeon_level
+        center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
+        brush = dgen.RandomTriShapedBrush(dgen.ReplaceTerrain(terrain.Floor))
+        dgen.fractal_room(dungeon_level, center_position, brush)
+
     def drunkard_walk2(self):
         dungeon_level = self.dungeon_level
         center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
@@ -86,7 +92,7 @@ class DungeonCreatorVisualizer(state.State):
             self.current_stack.pop()
 
         elif key == inputhandler.ONE:
-            self.drunkard_walk()
+            self.fractal_room()
 
         elif key == inputhandler.TWO:
             self.cellular_cave()

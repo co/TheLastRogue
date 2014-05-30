@@ -1,7 +1,6 @@
 from compositecore import Leaf, CompositeMessage
 from dungeonlevelfactory import unknown_level_map
 from stats import Flag
-import terrain
 from tile import Tile
 
 
@@ -79,5 +78,5 @@ class MemoryMap(Leaf):
         """
         Handles messages recieved.
         """
-        if(message == CompositeMessage.DUNGEON_LEVEL_CHANGED):
+        if message == CompositeMessage.DUNGEON_LEVEL_CHANGED:
             self._init_memory_map_if_not_set(self.parent. dungeon_level.value)

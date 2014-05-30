@@ -86,6 +86,14 @@ def drunkard_walk(dungeon_level, start_pos, tile_brush, end_condition_func,
             position = random.sample(unvisited_positions, 1)[0]
 
 
+def fractal_room(dungeon_level, start_pos, tile_brush):
+    room_points = shapegenerator.fractal_rectangle(start_pos, 15, 15)
+    room_shape = shapegenerator.Shape(room_points)
+    offset_points = room_shape.offset_points(start_pos)
+    for point in room_points:
+        tile_brush.apply_brush(dungeon_level, point)
+
+
 def random_explosion(dungeon_level, start_pos, tile_brush,
                      end_condition_func, move_list=None):
     if move_list is None:
@@ -195,7 +203,10 @@ def generate_dungeon_exploded_rooms(depth, rooms, room_area, rectangle_room_chan
     for position in room_positions:
         if random.random() > rectangle_room_chance:
             used_roms_positions.append(position)
-            room_points = shapegenerator.random_explosion(position, room_area, direction.AXIS_DIRECTIONS)
+            if rng.coin_flip():
+                room_points = shapegenerator.random_explosion(position, room_area, direction.AXIS_DIRECTIONS)
+            else:
+                room_points = shapegenerator.fractal_rectangle(position, 3, 3)
             open_points.update(room_points)
 
     for position in minor_room_positions:

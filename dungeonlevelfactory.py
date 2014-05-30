@@ -1,4 +1,4 @@
-from dungeonfeature import StairsDown, StairsUp
+from dungeonfeature import StairsUp
 import terrain
 import tile
 from dungeonlevel import DungeonLevel

@@ -1,4 +1,5 @@
 import random
+import libtcodpy as libtcod
 import math
 import rng
 import direction
@@ -19,6 +20,27 @@ def dfs_tunnler(start_position, min_length, max_length,
                 break
             position = geo.add_2d(position, direction_)
             visited.add(position)
+    return visited
+
+
+def fractal_rectangle(start_position, max_width, max_height, min_width=1, min_height=1):
+    visited = set()
+    frame = geo.Rect(start_position, max_width, max_height).border_points()
+
+    length = max_width / 4 if frame[0][0] == 0 or frame[0][0] == max_width else max_height / 4
+    for point in frame:
+        libtcod.line_init(start_position[0], start_position[1], point[0], point[1])
+        x, y = libtcod.line_step()
+        max_length = max_width / 2 if point[0] == 0 or point[0] == max_width else max_height / 2
+        min_length = min_width / 2 if point[1] == 0 or point[1] == min_width else min_height / 2
+        delta = random.sample([0, 0, 0, 0, 1, 1, -1, -1, -1], 1)[0]
+        length = min(max((delta + length), min_length), max_length)
+        i = length
+        while not x is None and i > 0:
+            visited.add((x, y))
+            x, y = libtcod.line_step()
+            i -= 1
+
     return visited
 
 
