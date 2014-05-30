@@ -185,7 +185,6 @@ class SacrificeFountainAction(DrinkFromFountainAction):
     def act(self, **kwargs):
         target_entity = kwargs["target_entity"]
         self.start_sacrifice_menu(target_entity)
-        self.add_energy_spent_to_entity(target_entity)
 
     def start_sacrifice_menu(self, entity):
         menu = menufactory.sacrifice_menu(entity, entity.game_state.value.power_list, self._dry_up_fountain)

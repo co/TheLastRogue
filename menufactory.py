@@ -277,6 +277,7 @@ def sacrifice_menu(player, powers, post_power_gain_function):
         power_option = menu.MenuOption(power_caption, [lambda p=power: player.set_child(p),
                                                        lambda p=power: p.on_power_gained(),
                                                        lambda p=power: sacrifice.sacrifice_health(player, p.buy_cost),
+                                                       lambda: player.actor.add_energy_spent(gametime.single_turn),
                                                        post_power_gain_function,
                                                        stack_pop_function],
                                        (lambda: player.health.hp.value > power.buy_cost))
