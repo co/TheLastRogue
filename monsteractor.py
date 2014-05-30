@@ -238,9 +238,7 @@ class KeepPlayerAtDistanceActor(MonsterActor):
         if current_distance_to_optimal == 0:
             return True
 
-        directions = direction.DIRECTIONS
-        random.shuffle(directions)
-        for d in directions:
+        for d in direction.get_shuffled_directions():
             possible_step = geo.add_2d(d, self.parent.position.value)
             if (self.distance_to_optimal_distance(possible_step, player.position.value)
                     < current_distance_to_optimal):

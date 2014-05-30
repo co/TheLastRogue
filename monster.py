@@ -117,7 +117,7 @@ def new_ratman_mystic(gamestate):
 
     ratman.set_child(Description("Ratman Mystic", "A Rat/Man hybrid, it looks hostile."))
     ratman.set_child(EntityMessages("The ratman looks at you.", "The ratman falls dead."))
-    ratman.set_child(GraphicChar(None, colors.RED, icon.RATMAN))
+    ratman.set_child(GraphicChar(None, colors.PURPLE, icon.RATMAN))
 
     ratman.set_child(Health(6))
     ratman.set_child(DataPoint(DataTypes.STRENGTH, 2))
@@ -126,9 +126,9 @@ def new_ratman_mystic(gamestate):
     ratman.set_child(DataPoint(DataTypes.ARMOR, 3))
     ratman.set_child(DataPoint(DataTypes.AWARENESS, 6))
 
-    ratman.set_child(MonsterThrowStoneAction(20))
-    ratman.set_child(SpiritMissile(20))
+    ratman.set_child(SpiritMissile(15))
     ratman.set_child(SummonEntityMonsterAction(new_worm, 5, 20))
+    ratman.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn + gametime.quarter_turn))
 
     ratman.set_child(KeepPlayerAtDistanceActor(4))
 

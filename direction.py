@@ -1,3 +1,4 @@
+from random import shuffle
 import geometry
 import rng
 
@@ -21,6 +22,16 @@ DIRECTIONS = [UP,
               DOWN_LEFT,
               LEFT,
               UP_LEFT]
+
+
+def get_shuffled_directions():
+    random_directions = [UP, UP_RIGHT,
+                         RIGHT, DOWN_RIGHT,
+                         DOWN, DOWN_LEFT,
+                         LEFT, UP_LEFT]
+    shuffle(random_directions)
+    return random_directions
+
 
 AXIS_DIRECTIONS = [UP,
                    DOWN,

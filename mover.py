@@ -227,6 +227,8 @@ def is_tile_dangerous(tile, entity):
     if entity.intelligence.value == IntelligenceLevel.PLANT:
         return False  # Low intelligence ch
     cloud = tile.get_first_cloud()
+    if tile.get_terrain().has("is_chasm"):
+        return True
     if not cloud:
         return False
     damage_effects = [effect for effect in cloud.get_children_with_tag("entity_share_tile_effect")
