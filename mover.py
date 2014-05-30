@@ -227,7 +227,7 @@ def is_tile_dangerous(tile, entity):
     if entity.intelligence.value == IntelligenceLevel.PLANT:
         return False  # Low intelligence ch
     cloud = tile.get_first_cloud()
-    if tile.get_terrain().has("is_chasm"):
+    if tile.get_terrain().has("is_chasm") and not entity.status_flags.has_status(StatusFlags.FLYING):
         return True
     if not cloud:
         return False
