@@ -258,9 +258,16 @@ def context_menu(player, state_stack):
                                                           len(context_options) * 2 + 3)
     resulting_menu = menu.StaticMenu(context_menu_rect.top_left, context_options, state_stack,
                                      margin=style.menu_theme.margin)
+
+    status_stack = gui.StackPanelVertical((0, 0))
+    status_stack.append(gui.PlayerStatusBox(rectfactory.player_status_rect(), player))
+    status_stack.append(gui.PlayerExtraStatusBox(rectfactory.player_status_rect(), player))
+    dock = gui.UIDock(rectfactory.full_screen_rect())
+    dock.bottom_left = status_stack
+
     background_rect = get_menu_background(context_menu_rect)
 
-    ui_elements = [background_rect, resulting_menu]
+    ui_elements = [background_rect, dock, resulting_menu]
     ui_state = state.UIState(gui.UIElementList(ui_elements))
     return ui_state
 

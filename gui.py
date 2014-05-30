@@ -11,6 +11,7 @@ from console import console
 import colors
 import geometry as geo
 import rectfactory
+from stats import DataTypes
 import style
 import settings
 import libtcodpy as libtcod
@@ -547,6 +548,52 @@ class PlayerStatusBox(RectangularUIElement):
         for status_icon in self._player.status_bar.status_icons:
             icon_element = SymbolUIElement((0, 0), status_icon.graphic_char)
             self._status_icon_stack_panel.append(icon_element)
+
+
+class PlayerExtraStatusBox(RectangularUIElement):
+    def __init__(self, rect, player, margin=geo.zero2d()):
+        super(PlayerExtraStatusBox, self).__init__(rect, margin)
+        self._player = player
+        self._status_stack_panel = StackPanelVertical(rect.top_left, (1, 2))
+
+        self._rectangle_bg = StyledRectangle(rect, style.interface_theme.rect_style,
+                                             "Status", player.graphic_char.color_fg)
+
+        self.strength_text_box = TextBox("", (2, 0), colors.ORANGE)
+        self.armor_text_box = TextBox("", (2, 0), colors.GRAY)
+        self.evasion_text_box = TextBox("", (2, 0), colors.GREEN)
+        self.stealth_text_box = TextBox("", (2, 0), colors.BLUE)
+        self.movement_speed_text_box = TextBox("", (2, 0), colors.CHAMPAGNE)
+
+        self._status_stack_panel.append(self.strength_text_box)
+        self._status_stack_panel.append(self.armor_text_box)
+        self._status_stack_panel.append(self.evasion_text_box)
+        self._status_stack_panel.append(self.stealth_text_box)
+        self._status_stack_panel.append(self.movement_speed_text_box)
+        rect.bottom = rect.top + self._status_stack_panel.height + 4
+
+    @property
+    def height(self):
+        return self.rect.height
+
+    @property
+    def width(self):
+        return self.rect.width
+
+    def update(self):
+        width = self.width - 6
+        self._status_stack_panel.update()
+        self.strength_text_box.text = ("Strength" + str(self._player.strength.value).rjust(width - len("Strength")))
+        self.armor_text_box.text = ("Armor" + str(self._player.armor.value).rjust(width - len("Armor")))
+        self.evasion_text_box.text = ("Evasion" + str(self._player.evasion.value).rjust(width - len("Evasion")))
+        self.stealth_text_box.text = ("Stealth" + str(self._player.stealth.value).rjust(width - len("Stealth")))
+        self.movement_speed_text_box.text = ("Move Speed" +
+                                             str(120 / self._player.movement_speed.value).rjust(width - len("Move Speed")))
+
+    def draw(self, offset=geo.zero2d()):
+        position = geo.add_2d(offset, self.margin)
+        self._rectangle_bg.draw(position)
+        self._status_stack_panel.draw(position)
 
 
 class EquipmentBox(RectangularUIElement):
