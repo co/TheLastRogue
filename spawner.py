@@ -38,6 +38,7 @@ def spawn_corpse_turn_into_entity(entity_killed, entity_factory):
 
 
 def spawn_corpse_turn_into_entity_on_position(position, dungeon_level, game_state, entity_factory):
+    print "lool", game_state
     corpse = dungeontrash.CorpseTurnIntoEntity(game_state, entity_factory)
     spawn_succeeded = corpse.mover.replace_move(position, dungeon_level)
     if not spawn_succeeded:

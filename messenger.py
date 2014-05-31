@@ -5,6 +5,7 @@ HEALTH_POTION_MESSAGE = "The health potion heals %(target_entity)s for %(health)
 DISSOLVE_MESSAGE = "%(source_entity)s dissolves %(target_entity)s for %(damage)s damage."
 HIT_MESSAGE = "%(source_entity)s hits %(target_entity)s for %(damage)s damage."
 MISS_MESSAGE = "%(source_entity)s misses %(target_entity)s."
+CRIT_MESSAGE = "%(source_entity)s critically hits %(target_entity)s for %(damage)s damage."
 
 HAUNT_MESSAGE = "%(source_entity)s haunts the %(target_entity)s!"
 

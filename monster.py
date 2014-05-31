@@ -36,6 +36,7 @@ import icon
 
 def set_monster_components(monster, game_state):
     monster.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ENTITY))
+    monster.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.15))
     monster.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn))
     monster.set_child(DataPoint(DataTypes.MELEE_SPEED, gametime.single_turn))
     monster.set_child(DataPoint(DataTypes.THROW_SPEED, gametime.single_turn))
@@ -145,7 +146,7 @@ def new_worm(gamestate):
     worm.set_child(GraphicChar(None, colors.PINK, "w"))
 
     worm.set_child(Health(4))
-    worm.set_child(DataPoint(DataTypes.STRENGTH, 4))
+    worm.set_child(DataPoint(DataTypes.STRENGTH, 3))
     worm.set_child(DataPoint(DataTypes.EVASION, 12))
     worm.set_child(DataPoint(DataTypes.HIT, 10))
     worm.set_child(DataPoint(DataTypes.ARMOR, 2))

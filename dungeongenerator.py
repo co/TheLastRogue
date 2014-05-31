@@ -90,7 +90,7 @@ def fractal_room(dungeon_level, start_pos, tile_brush):
     room_points = shapegenerator.fractal_rectangle(start_pos, 15, 15)
     room_shape = shapegenerator.Shape(room_points)
     offset_points = room_shape.offset_points(start_pos)
-    for point in room_points:
+    for point in offset_points:
         tile_brush.apply_brush(dungeon_level, point)
 
 

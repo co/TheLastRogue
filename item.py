@@ -459,6 +459,8 @@ def new_sword(game_state):
                                 "This old blade has seen some better days, it's as sharp as ever tough."))
     sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
     sword.set_child(AttackProvider(4, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+    sword.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.2))
+    sword.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2))
     sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
     sword.set_child(DataPoint(DataTypes.HIT, 17))
     return sword
@@ -475,6 +477,8 @@ def new_mace(game_state):
                                 "This old club has an lump of iron at one end."))
     mace.set_child(GraphicChar(None, colors.GRAY, icon.MACE))
     mace.set_child(AttackProvider(3, 1, [DamageTypes.PHYSICAL, DamageTypes.BLUNT]))
+    mace.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.1))
+    mace.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2))
     mace.set_child(DataPoint(DataTypes.WEIGHT, 8))
     mace.set_child(DataPoint(DataTypes.HIT, 16))
     mace.set_child(StunAttackEffect(1.0))
@@ -490,8 +494,10 @@ def new_knife(game_state):
     set_melee_weapon_component(knife)
     knife.set_child(Description("Knife", "A trusty knife, small and precise but will only inflict small wounds."))
     knife.set_child(GraphicChar(None, colors.GRAY, icon.KNIFE))
-    knife.set_child(AttackProvider(2, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+    knife.set_child(AttackProvider(1, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
     knife.set_child(DataPoint(DataTypes.WEIGHT, 5))
+    knife.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.3))
+    knife.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2.5))
     knife.set_child(DataPoint(DataTypes.HIT, 21))
     return knife
 
@@ -1044,8 +1050,15 @@ class AttackProvider(Leaf):
         attack_effects = [effect.get_effect(source_entity, target_entity)
                           for effect in self.parent.get_children_with_tag("attack_effect")
                           if effect.roll_to_hit()]
+        crit_chance = 0
+        if self.parent.has("crit_chance"):
+            crit_chance = self.parent.crit_chance.value
+        crit_multiplier = 2
+        if self.parent.has("crit_multiplier"):
+            crit_multiplier = self.parent.crit_multiplier.value
         attack = Attack(damage_strength, self.variance,
-                        self.types, self.parent.hit.value, target_entity_effects=attack_effects)
+                        self.types, self.parent.hit.value, crit_chance=crit_chance, crit_multiplier=crit_multiplier,
+                        target_entity_effects=attack_effects)
 
 
         return attack.damage_entity(source_entity, target_entity,

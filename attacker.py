@@ -5,8 +5,10 @@ import geometry
 import rng
 from compositecore import Leaf
 from equipment import EquipmentSlots
+from stats import DataTypes
 from util import entity_skip_turn
 
+CRIT_MULTIPLIER = 2
 
 class Attacker(Leaf):
     """
@@ -34,8 +36,7 @@ class Attacker(Leaf):
         Returns False if there is no entity
         there or the entity is of the same faction.
         """
-        entity = (self.parent.dungeon_level.value.
-                  get_tile(position).get_first_entity())
+        entity = (self.parent.dungeon_level.value.get_tile(position).get_first_entity())
         if(entity is None or
            entity.faction.value == self.parent.faction.value):
             return False
@@ -48,7 +49,7 @@ class Attacker(Leaf):
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
         thrown_damage = Attack(self.throw_rock_mean_damage, self.throw_rock_damage_variance,
-                               damage_types, self.parent.hit.value)
+                               damage_types, self.parent.hit.value, crit_chance=self.parent.crit_chance.value)
         thrown_damage.damage_entity(self.parent, target_entity)
 
     def hit(self, target_entity):
@@ -72,11 +73,14 @@ class Attacker(Leaf):
         damage_multiplier = 1
         if self.parent.has("melee_damage_multiplier"):
             damage_multiplier = self.parent.melee_damage_multiplier.value
+        if random.random() < self.parent.has(DataTypes.CRIT_CHANCE):
+            damage_multiplier *= CRIT_MULTIPLIER
+
         damage_strength = int(self.parent.strength.value * damage_multiplier)
         target_entity_effects = [effect_factory_data_point.value() for effect_factory_data_point in
                                            self.parent.get_children_with_tag("unarmed_hit_target_entity_effect_factory")]
         return Attack(1 + damage_strength / 2, damage_strength / 4,
-                      damage_types, self.parent.hit.value,
+                      damage_types, self.parent.hit.value, crit_chance=self.parent.crit_chance.value,
                       target_entity_effects=target_entity_effects)
 
     def _on_hit(self, target_entity):
@@ -203,18 +207,21 @@ class PoisonImmunity(Leaf):
 
 class Attack(object):
     def __init__(self, damage, variance,
-                 damage_types, hit, damage_multiplier=1, target_entity_effects=[]):
+                 damage_types, hit, crit_chance=0, crit_multiplier=2, damage_multiplier=1, target_entity_effects=[]):
         self.damage = damage
         self.variance = variance
         self.damage_multiplier = damage_multiplier
         self.damage_types = damage_types
         self.hit = hit
         self.target_entity_effects = target_entity_effects
+        self.crit_chance = crit_chance
+        self.crit_multiplier = crit_multiplier
 
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0, damage_multiplier=1):
         damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
         damage_effect = entityeffect.AttackEntityEffect(source_entity, damage * self.damage_multiplier,
-                                                        self.damage_types, self.hit + bonus_hit,
+                                                        self.damage_types, self.hit + bonus_hit, crit_chance=self.crit_chance,
+                                                        crit_multiplier=self.crit_multiplier,
                                                         target_entity_effects=self.target_entity_effects)
         target_entity.effect_queue.add(damage_effect)
 

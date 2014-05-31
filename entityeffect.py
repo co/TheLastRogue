@@ -1,5 +1,6 @@
 from audioop import add
 import random
+from animation import animate_point
 import colors
 
 from compositecore import Leaf
@@ -166,8 +167,8 @@ class Teleport(EntityEffect):
 
 
 class AttackEntityEffect(EntityEffect):
-    def __init__(self, source_entity, damage, damage_types, hit, hit_message=messenger.HIT_MESSAGE,
-                 miss_message=messenger.MISS_MESSAGE, hit_trigger_effect=[], no_stack_id=None, time_to_live=1,
+    def __init__(self, source_entity, damage, damage_types, hit, crit_chance=0, crit_multiplier=2, hit_message=messenger.HIT_MESSAGE,
+                 miss_message=messenger.MISS_MESSAGE, crit_message=messenger.CRIT_MESSAGE, hit_trigger_effect=[], no_stack_id=None, time_to_live=1,
                  target_entity_effects=[]):
         super(AttackEntityEffect, self).__init__(source_entity=source_entity,
                                                  effect_type=EffectTypes.DAMAGE,
@@ -180,6 +181,9 @@ class AttackEntityEffect(EntityEffect):
         self.hit_message = hit_message
         self.target_entity_effects = target_entity_effects
         self.hit_trigger_effect = hit_trigger_effect
+        self.crit_chance = crit_chance
+        self.crit_multiplier = crit_multiplier
+        self.crit_message = crit_message
 
     def send_miss_message(self):
         messenger.msg.send_visual_message(self.miss_message %
@@ -187,30 +191,41 @@ class AttackEntityEffect(EntityEffect):
                                            "target_entity": self.target_entity.description.long_name},
                                           self.target_entity.position.value)
 
-    def send_hit_message(self, damage_caused):
+    def send_hit_message(self, message_template, damage_caused):
         source_entity_name = self.source_entity.description.long_name if self.source_entity else None
         target_entity_name = self.target_entity.description.long_name if self.target_entity else None
-        m = self.hit_message % {"source_entity": source_entity_name,
+        m = message_template % {"source_entity": source_entity_name,
                                 "target_entity": target_entity_name,
-                                "damage": str(damage_caused)}
+                                "damage": str(int(damage_caused))}
         messenger.msg.send_visual_message(m, self.target_entity.position.value)
 
     def is_a_hit(self):
         return self.target_entity.dodger.is_a_hit(self.hit)
 
+    def is_a_crit(self):
+        return self.crit_chance > random.random()
+
     def hit_target(self):
-        self.add_effects_to_target()
-        damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
+        is_crit = self.is_a_crit()
+        damage = self.damage
+        if is_crit:
+            damage = self.damage * self.crit_multiplier
+            animate_point(self.target_entity.game_state.value, self.target_entity.position.value,
+                          [GraphicChar(None, colors.RED, "X")])
+        damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(damage, self.damage_types)
         damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
         damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity)
-        return damage_caused
+        self.add_effects_to_target()
+        if is_crit:
+            self.send_hit_message(self.crit_message, damage_caused)
+        else:
+            self.send_hit_message(self.hit_message, damage_caused)
 
     def update(self, time_spent):
         if self.target_entity.resistance_checker.is_immune(self.damage_types):
             pass
         elif self.is_a_hit():
-            damage_caused = self.hit_target()
-            self.send_hit_message(damage_caused)
+            self.hit_target()
         else:
             self.send_miss_message()
         self.tick(time_spent)

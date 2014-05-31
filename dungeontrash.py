@@ -45,7 +45,7 @@ class ReplaceWithEntityAfterTime(Leaf):
     def on_tick(self, time):
         self.time_out -= time
         if self.time_out <= 0:
-            entity = self.entity_factory(self.parent.game_state)
+            entity = self.entity_factory(self.parent.game_state.value)
             position = self.parent.position.value
             dungeon_level = self.parent.dungeon_level.value
             entity.mover.try_move_roll_over(position, dungeon_level)

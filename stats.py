@@ -40,6 +40,8 @@ class DataPointBonusSpoof(Leaf):
 
 
 class DataTypes:
+    CRIT_MULTIPLIER = "crit_multiplier"
+    CRIT_CHANCE = "crit_chance"
     STRENGTH = "strength"
     ARMOR = "armor"
     HIT = "hit"
