@@ -1,7 +1,9 @@
 import random
+import Status
 from action import Action
 import colors
 from compositecore import Leaf
+from entityeffect import RemoveChildEffect, AddSpoofChild
 import gametime
 import geometry as geo
 from graphic import GraphicChar
@@ -9,6 +11,7 @@ from health import DamageTakenEffect
 import direction
 from messenger import msg
 import rng
+from stats import DataPoint, DataTypes
 from statusflags import StatusFlags
 from actor import Actor
 
@@ -19,6 +22,7 @@ class MonsterActorState(Leaf):
     """
     WANDERING = 0
     HUNTING = 1
+    SLEEPING = 2
 
     def __init__(self, state=WANDERING):
         super(MonsterActorState, self).__init__()
@@ -37,6 +41,8 @@ class MonsterActorState(Leaf):
             (self.parent.char_printer.
              append_graphic_char_temporary_frames([found_gfx]))
             msg.send_visual_message(self.parent.entity_messages.notice, self.parent.position.value)
+            if self.parent.has("sleeping"):
+                self.parent.effect_queue.add(RemoveChildEffect(self.parent, "sleeping", time_to_live=1))
 
         self._value = new_value
 
@@ -127,17 +133,17 @@ class MonsterActor(Actor):
             return chosen_action.act(chosen_target.position.value)
         return chosen_action.act()
 
-    #def can_do_weighted_action(self):
-    #    """
-    #    Returns true if it's possible for the monster to do a ranged attack at the player.
-    #    """
-    #    player = self.get_player_if_seen()
-    #    if player is None or MonsterActorState.HUNTING != self.parent.monster_actor_state.value:
-    #        return False
-    #    for action in self.parent.get_children_with_tag("monster_target_action"):
-    #        if action.can_act(destination=player.position.value):
-    #            return True
-    #    return False
+        #def can_do_weighted_action(self):
+        #    """
+        #    Returns true if it's possible for the monster to do a ranged attack at the player.
+        #    """
+        #    player = self.get_player_if_seen()
+        #    if player is None or MonsterActorState.HUNTING != self.parent.monster_actor_state.value:
+        #        return False
+        #    for action in self.parent.get_children_with_tag("monster_target_action"):
+        #        if action.can_act(destination=player.position.value):
+        #            return True
+        #    return False
 
 
 class StepRandomDirectionActor(MonsterActor):
@@ -172,7 +178,8 @@ class ChasePlayerActor(MonsterActor):
         #  Perform Stealth Check
         if self.notice_player_check():
             self.parent.monster_actor_state.value = MonsterActorState.HUNTING
-        elif rng.coin_flip() and rng.coin_flip() and rng.coin_flip():
+        elif (self.parent.monster_actor_state.value == MonsterActorState.HUNTING and
+                  rng.coin_flip() and rng.coin_flip() and rng.coin_flip()):
             self.parent.monster_actor_state.value = MonsterActorState.WANDERING
 
         #  Set Path
@@ -200,6 +207,7 @@ class KeepPlayerAtDistanceActor(MonsterActor):
     """
     Standard Monster AI will chase the player.
     """
+
     def __init__(self, optimal_distance):
         super(KeepPlayerAtDistanceActor, self).__init__()
         self.optimal_distance = optimal_distance
@@ -273,3 +281,38 @@ class MonsterWeightedStepAction(MonsterWeightedAction):
 
     def act(self, **kwargs):
         self.parent.actor.newly_spent_energy += self.parent.path.try_step_path()
+
+
+class SleepingActor(MonsterActor):
+    """
+    Entities with this actor will do nothing.
+    """
+
+    def __init__(self):
+        super(SleepingActor, self).__init__()
+
+    def on_tick(self, time):
+        if self.parent.has("status_bar"):
+            self.parent.status_bar.add(Status.SLEEP_STATUS_ICON)
+        if self.parent.has("monster_actor_state"):
+            self.parent.monster_actor_state.value = MonsterActorState.SLEEPING
+        self.parent.effect_queue.add(AddSpoofChild(self.parent, DataPoint(DataTypes.AWARENESS, 1), time_to_live=1))
+
+    def act(self):
+        """
+        Just returns energy spent, shows it's stunned.
+        """
+        if self.notice_player_check():
+            self.parent.monster_actor_state.value = MonsterActorState.HUNTING
+        else:
+            self.parent.char_printer.append_graphic_char_temporary_frames([GraphicChar(None, colors.GRAY, "z")])
+        return gametime.single_turn
+
+
+class SleepingEntity(Leaf):
+    def __init__(self):
+        super(SleepingEntity, self).__init__()
+        self.component_type = "sleeping"
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(SleepingActor())

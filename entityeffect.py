@@ -15,15 +15,16 @@ from statusflags import StatusFlags
 class EffectTypes(object):
     STATUS_REMOVER = 0
     ADD_SPOOF_CHILD = 1
-    BLOCKER = 2
-    STATUS_ADDER = 3
-    TELEPORT = 4
-    HEAL = 5
-    UI = 6
-    DAMAGE = 7
-    EQUIPMENT = 8
+    REMOVE_CHILD = 2
+    BLOCKER = 3
+    STATUS_ADDER = 4
+    TELEPORT = 5
+    HEAL = 6
+    UI = 7
+    DAMAGE = 8
+    EQUIPMENT = 9
 
-    ALLTYPES = [STATUS_REMOVER, ADD_SPOOF_CHILD, BLOCKER, STATUS_ADDER,
+    ALLTYPES = [STATUS_REMOVER, ADD_SPOOF_CHILD, REMOVE_CHILD, BLOCKER, STATUS_ADDER,
                 TELEPORT, HEAL, UI, DAMAGE, EQUIPMENT]
 
 
@@ -200,10 +201,10 @@ class AttackEntityEffect(EntityEffect):
         messenger.msg.send_visual_message(m, self.target_entity.position.value)
 
     def is_a_hit(self):
-        return self.target_entity.dodger.is_a_hit(self.hit)
+        return self.target_entity.dodger.is_a_hit(self.hit) or self.target_entity.has("sleeping")
 
     def is_a_crit(self):
-        return self.crit_chance > random.random()
+        return self.crit_chance > random.random() or self.target_entity.has("sleeping")
 
     def hit_target(self):
         is_crit = self.is_a_crit()
@@ -382,6 +383,19 @@ class AddSpoofChild(EntityEffect):
 
     def update(self, time_spent):
         self.target_entity.add_spoof_child(self.spoof_child)
+        self.tick(time_spent)
+
+
+class RemoveChildEffect(EntityEffect):
+    def __init__(self, source_entity, component_type, time_to_live, no_stack_id=None):
+        super(RemoveChildEffect, self).__init__(source_entity=source_entity,
+                                                effect_type=EffectTypes.REMOVE_CHILD,
+                                                time_to_live=time_to_live,
+                                                no_stack_id=no_stack_id)
+        self.component_type = component_type
+
+    def update(self, time_spent):
+        self.target_entity.remove_component_of_type(self.component_type)
         self.tick(time_spent)
 
 

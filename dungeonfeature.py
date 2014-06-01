@@ -224,6 +224,5 @@ class DescendStairsAction(action.Action):
         min_heal = 5
         max_heal = 8
         heal = random.randrange(min_heal, max_heal + 1)
-        heal_effect = entityeffect.Heal(target_entity, heal)
+        heal_effect = entityeffect.Heal(target_entity, heal, heal_message=messenger.DOWN_STAIRS_HEAL_MESSAGE)
         target_entity.effect_queue.add(heal_effect)
-        messenger.msg.send_global_message(messenger.DOWN_STAIRS_HEAL_MESSAGE % {"health": heal})

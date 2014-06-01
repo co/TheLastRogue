@@ -20,6 +20,7 @@ def set_corpse_components(corpse, game_state):
     corpse.set_child(GraphicChar(None, colors.WHITE,
                                  icon.CORPSE))
     corpse.set_child(CharPrinter())
+    corpse.set_child(DataPoint(DataTypes.ENERGY, -gametime.single_turn))
     corpse.set_child(DoNothingActor())
     corpse.set_child(Mover())
     corpse.set_child(DataPoint(DataTypes.GAME_STATE, game_state))

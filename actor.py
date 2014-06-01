@@ -10,7 +10,6 @@ class Actor(Leaf):
         super(Actor, self).__init__()
         self.component_type = "actor"
         self.newly_spent_energy = 0
-        self.energy = -gametime.single_turn
         self.energy_recovery = gametime.normal_energy_gain
 
     def tick(self):
@@ -21,15 +20,15 @@ class Actor(Leaf):
         It also receives some energy.
         """
         if self._should_skip_me():
-            self.energy - gametime.single_turn
+            self.parent.energy.value - gametime.single_turn
             return
-        self.energy += self.energy_recovery
-        if self.energy > 0:
+        self.parent.energy.value += self.energy_recovery
+        if self.parent.energy.value > 0:
             turn.current_turn += 1
-        while self.energy > 0:
+        while self.parent.energy.value > 0:
             if self.parent.has("is_player"):
                 self._post_player_act()
-            self.energy -= self.act()
+            self.parent.energy.value -= self.act()
 
     def act(self):
         raise NotImplementedError("act method not implemented for parent:" +

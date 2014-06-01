@@ -1,4 +1,5 @@
 import logging
+import random
 from compositecore import Composite
 from mover import Mover
 from stats import GamePieceTypes
@@ -14,7 +15,9 @@ def place_piece_on_random_walkable_tile(piece, dungeon_level):
     walker = piece
     if not piece.has("status_flags"):
         walker = dummy_player
-    for position in dungeon_level.get_random_walkable_positions_in_dungeon(walker):
+    positions = dungeon_level.get_random_walkable_positions_in_dungeon(walker)
+    random.shuffle(positions)
+    for position in positions:
         tile = dungeon_level.get_tile(position)
         if not tile.get_dungeon_feature() and piece.mover.try_move(position, dungeon_level):
             return True
@@ -38,7 +41,6 @@ def spawn_corpse_turn_into_entity(entity_killed, entity_factory):
 
 
 def spawn_corpse_turn_into_entity_on_position(position, dungeon_level, game_state, entity_factory):
-    print "lool", game_state
     corpse = dungeontrash.CorpseTurnIntoEntity(game_state, entity_factory)
     spawn_succeeded = corpse.mover.replace_move(position, dungeon_level)
     if not spawn_succeeded:

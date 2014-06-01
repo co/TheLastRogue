@@ -1,23 +1,18 @@
 import logging
-import random
 from Status import DAMAGE_REFLECT_STATUS_ICON
 from attacker import DamageTypes
-from compositecore import Leaf, Composite
+from compositecore import Leaf
 import counter
 import colors
 from dungeontrash import PoolOfBlood
 import entityeffect
 import geometry
-from graphic import GraphicChar, CharPrinter
+from graphic import GraphicChar
 import icon
-from mover import Mover
-from position import Position, DungeonLevel
 import rng
 import settings
 import shapegenerator
-from stats import DataPoint, GamePieceTypes, DataTypes
 import terrain
-from text import Description
 
 
 class Health(Leaf):

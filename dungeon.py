@@ -1,7 +1,9 @@
 import random
 import dungeongenerator
+from monsteractor import SleepingEntity
 from monstertables import from_table_pick_n_items_for_depth, dungeon_table, dungeon_equipment_table, dungeon_usable_item_table
 import spawner
+from statusflags import StatusFlags
 from tools import time_it
 
 
@@ -37,6 +39,9 @@ class Dungeon(object):
                                                         depth, self.game_state)
         print monsters
         for monster in monsters:
+            sleep_chance = 0.25
+            if monster.status_flags.has_status(StatusFlags.IS_ALIVE) and sleep_chance > random.random():
+                monster.set_child(SleepingEntity())
             spawner.place_piece_on_random_walkable_tile(monster, dungeon_level)
 
         if depth == (len(self._dungeon_levels) - 1):

@@ -31,3 +31,4 @@ STUNNED_STATUS_ICON = StatusIcon("Stunned", GraphicChar(None, colors.CHAMPAGNE, 
 DAMAGE_REFLECT_STATUS_ICON = StatusIcon("Damage Reflect", GraphicChar(None, colors.CYAN, icon.ARMOR_STAT))
 LIFE_STEAL_STATUS_ICON = StatusIcon("Life Steal", GraphicChar(None, colors.RED, "V"))
 STUMBLE_STATUS_ICON = StatusIcon("Stumble", GraphicChar(None, colors.YELLOW, "+"))
+SLEEP_STATUS_ICON = StatusIcon("Sleeping", GraphicChar(None, colors.GRAY, "Z"))

@@ -55,6 +55,7 @@ class ItemType(Leaf):
 
 
 def set_item_components(item, game_state):
+    item.set_child(DataPoint(DataTypes.ENERGY, -gametime.single_turn))
     item.set_child(Position())
     item.set_child(DoNothingActor())
     item.set_child(DungeonLevel())

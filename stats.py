@@ -40,6 +40,7 @@ class DataPointBonusSpoof(Leaf):
 
 
 class DataTypes:
+    ENERGY = "energy"
     CRIT_MULTIPLIER = "crit_multiplier"
     CRIT_CHANCE = "crit_chance"
     STRENGTH = "strength"

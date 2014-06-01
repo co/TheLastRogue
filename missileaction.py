@@ -140,7 +140,7 @@ class PlayerSlingStoneAction(PlayerMissileAction):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
         if target_entity is None:
             return
-        self.sling_weapon.damage_provider.attack_entity(source_entity, target_entity,
+        self.sling_weapon.attack_provider.attack_entity(source_entity, target_entity,
                                                         bonus_damage=source_entity.attacker.throw_rock_mean_damage,
                                                         bonus_hit=source_entity.hit.value)
 
@@ -184,7 +184,7 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
         if target_entity is None:
             return
-        self.ranged_weapon.damage_provider.attack_entity(source_entity,
+        self.ranged_weapon.attack_provider.attack_entity(source_entity,
                                                          target_entity)
 
     def max_missile_distance(self, **kwargs):

@@ -217,13 +217,10 @@ class Path(Leaf):
 
     def try_step_left_or_right(self, next_point):
         step_direction = geometry.sub_2d(next_point, self.parent.position.value)
-        print "time to step left or right"
-        print direction.DIRECTIONS
         if step_direction not in direction.DIRECTIONS:
             return False
         alternate_directions = [direction.turn_slight_left(step_direction),
                                 direction.turn_slight_right(step_direction)]
-        print "**** time to step left or right", step_direction, alternate_directions
         random.shuffle(alternate_directions)
         for d in alternate_directions:
             new_position = geometry.add_2d(d, self.parent.position.value)

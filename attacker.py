@@ -8,7 +8,9 @@ from equipment import EquipmentSlots
 from stats import DataTypes
 from util import entity_skip_turn
 
+
 CRIT_MULTIPLIER = 2
+
 
 class Attacker(Leaf):
     """
@@ -73,15 +75,13 @@ class Attacker(Leaf):
         damage_multiplier = 1
         if self.parent.has("melee_damage_multiplier"):
             damage_multiplier = self.parent.melee_damage_multiplier.value
-        if random.random() < self.parent.has(DataTypes.CRIT_CHANCE):
-            damage_multiplier *= CRIT_MULTIPLIER
 
         damage_strength = int(self.parent.strength.value * damage_multiplier)
         target_entity_effects = [effect_factory_data_point.value() for effect_factory_data_point in
-                                           self.parent.get_children_with_tag("unarmed_hit_target_entity_effect_factory")]
+                                 self.parent.get_children_with_tag("unarmed_hit_target_entity_effect_factory")]
         return Attack(1 + damage_strength / 2, damage_strength / 4,
                       damage_types, self.parent.hit.value, crit_chance=self.parent.crit_chance.value,
-                      target_entity_effects=target_entity_effects)
+                      crit_multiplier=CRIT_MULTIPLIER, target_entity_effects=target_entity_effects)
 
     def _on_hit(self, target_entity):
         pass

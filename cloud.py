@@ -30,6 +30,7 @@ class CloudTypes:
 
 
 def set_cloud_components(game_state, cloud, density):
+    cloud.set_child(DataPoint(DataTypes.ENERGY, -gametime.single_turn))
     cloud.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.CLOUD))
     cloud.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
     cloud.set_child(CharPrinter())
@@ -209,12 +210,11 @@ class ExplosionDamageShareTileEffect(EntityShareTileEffect):
 class DisappearCloudActor(Actor):
     def __init__(self):
         super(DisappearCloudActor, self).__init__()
-        self.energy = -gametime.single_turn
 
     def tick(self):
-        self.energy += self.energy_recovery
-        while self.energy > 0:
-            self.energy -= self.act()
+        self.parent.energy.value += self.energy_recovery
+        while self.parent.energy.value > 0:
+            self.parent.energy.value -= self.act()
         turn.current_turn += 1
 
     def act(self):
@@ -227,7 +227,6 @@ class DisappearCloudActor(Actor):
 class CloudActor(Actor):
     def __init__(self):
         super(CloudActor, self).__init__()
-        self.energy = -gametime.normal_energy_gain
 
     def _float_to_position(self, position, density):
         original_cloud = self.parent.dungeon_level.value.get_tile_or_unknown(position).get_first_cloud()
@@ -240,9 +239,9 @@ class CloudActor(Actor):
             self.parent.density.value -= density
 
     def tick(self):
-        self.energy += self.energy_recovery
-        while self.energy > 0:
-            self.energy -= self.act()
+        self.parent.energy.value += self.energy_recovery
+        while self.parent.energy.value > 0:
+            self.parent.energy.value -= self.act()
         turn.current_turn += 1
 
     def act(self):

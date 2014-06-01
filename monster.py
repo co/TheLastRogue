@@ -35,6 +35,7 @@ import icon
 
 
 def set_monster_components(monster, game_state):
+    monster.set_child(DataPoint(DataTypes.ENERGY, -gametime.single_turn))
     monster.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ENTITY))
     monster.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.15))
     monster.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn))
