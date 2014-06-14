@@ -156,6 +156,7 @@ def new_worm(gamestate):
 
     return worm
 
+
 def new_skeleton(gamestate):
     skeleton = Composite()
     set_monster_components(skeleton, gamestate)

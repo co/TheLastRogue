@@ -1,6 +1,6 @@
 import random
-from item import new_leather_boots, new_leather_cap, new_leather_armor, new_knife, new_sling, new_sword, new_gun, new_ring_of_evasion, new_ring_of_strength, new_ring_of_stealth, new_ammunition, new_darkness_device, new_heart_stop_device, new_bomb, new_teleport_scroll, new_poison_potion, new_flame_potion, new_map_scroll, new_amulet_of_reflect_damage
-from monster import new_ratman, new_ghost, new_slime, new_dark_slime, new_dust_demon, new_spider, new_salamander, new_cyclops, AddGhostReviveToSeenEntities, new_pixie, new_armored_beetle
+from item import new_leather_boots, new_leather_cap, new_leather_armor, new_knife, new_sling, new_sword, new_gun, new_ring_of_evasion, new_ring_of_strength, new_ring_of_stealth, new_ammunition, new_darkness_device, new_heart_stop_device, new_bomb, new_teleport_scroll, new_poison_potion, new_flame_potion, new_map_scroll, new_amulet_of_reflect_damage, new_glass_device, new_swap_device, new_boots_of_running, new_boots_of_sneaking, new_mace, new_amulet_of_life_steal
+from monster import new_ratman, new_ghost, new_slime, new_dark_slime, new_dust_demon, new_spider, new_salamander, new_cyclops, AddGhostReviveToSeenEntities, new_pixie, new_armored_beetle, new_ratman_mystic
 
 
 class DungeonTableItem(object):
@@ -18,6 +18,7 @@ class DungeonTableItem(object):
 dungeon_table = \
     (
         [DungeonTableItem(new_ratman)] * 30 +
+        [DungeonTableItem(new_ratman_mystic)] * 3 +
         [DungeonTableItem(new_ghost)] * 8 +
         [DungeonTableItem(new_slime)] * 3 +
         [DungeonTableItem(new_dark_slime)] * 2 +
@@ -43,6 +44,8 @@ def from_table_pick_n_items_for_depth(table, n, depth, game_state):
 dungeon_equipment_table = \
     (
         [DungeonTableItem(new_leather_boots)] * 10 +
+        [DungeonTableItem(new_boots_of_running)] * 2 +
+        [DungeonTableItem(new_boots_of_sneaking)] * 2 +
         [DungeonTableItem(new_leather_cap)] * 10 +
         [DungeonTableItem(new_leather_armor)] * 10 +
 
@@ -54,8 +57,10 @@ dungeon_equipment_table = \
         [DungeonTableItem(new_ring_of_strength)] * 3 +
 
         [DungeonTableItem(new_amulet_of_reflect_damage)] * 2 +
+        [DungeonTableItem(new_amulet_of_life_steal)] * 2 +
 
         [DungeonTableItem(new_sword)] * 2 +
+        #[DungeonTableItem(new_mace)] * 1 +
         [DungeonTableItem(new_gun)] * 2
     )
 
@@ -63,8 +68,10 @@ dungeon_usable_item_table = \
     (
         [DungeonTableItem(new_ammunition)] * 10 +
 
-        [DungeonTableItem(new_darkness_device)] * 3 +
-        [DungeonTableItem(new_heart_stop_device)] * 3 +
+        [DungeonTableItem(new_darkness_device)] * 2 +
+        [DungeonTableItem(new_heart_stop_device)] * 2 +
+        [DungeonTableItem(new_glass_device)] * 2 +
+        [DungeonTableItem(new_swap_device)] * 2 +
 
         [DungeonTableItem(new_bomb)] * 4 +
         [DungeonTableItem(new_poison_potion)] * 6 +
