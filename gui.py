@@ -11,7 +11,6 @@ from console import console
 import colors
 import geometry as geo
 import rectfactory
-from stats import DataTypes
 import style
 import settings
 import libtcodpy as libtcod
@@ -53,6 +52,16 @@ class VerticalSpace(UIElement):
     @property
     def height(self):
         return self._height
+
+
+class HorizontalSpace(UIElement):
+    def __init__(self, width, margin=geo.zero2d()):
+        super(HorizontalSpace, self).__init__(margin)
+        self._width = width
+
+    @property
+    def width(self):
+        return self._width
 
 
 class HorizontalLine(UIElement):
@@ -491,17 +500,9 @@ class PlayerStatusBox(RectangularUIElement):
 
         element_width = self.width - style.interface_theme.margin[0] * 2 - 2
 
-        player_hp = player.health.hp
-        hp_bar = CounterBarWithNumbers(player_hp, element_width, colors.HP_BAR_FULL, colors.HP_BAR_EMPTY,
-                                       colors.WHITE, colors.PINK, colors.HP_BAR_EMPTY, colors.CYAN, colors.BLACK)
-        heart = SymbolUIElement((0, 0), graphic.GraphicChar(None, colors.RED, icon.HEALTH_STAT))
-        self._hp_stack_panel = StackPanelHorizontal((0, 0), (0, 0), 1)
-        self._hp_stack_panel.append(heart)
-        self._hp_stack_panel.append(hp_bar)
-
         self._rectangle_bg = StyledRectangle(rect, style.interface_theme.rect_style,
                                              player.description.name, player.graphic_char.color_fg)
-        self._status_stack_panel.append(self._hp_stack_panel)
+        self._status_stack_panel.append(new_player_hp_bar(element_width, player.health.hp))
 
         self._status_icon_stack_panel_frame = StackPanelHorizontal((2, 0), (0, 0), 1)
         self._status_icon_stack_panel_frame.append(SymbolUIElement((0, 0), graphic.GraphicChar(None,
@@ -550,6 +551,27 @@ class PlayerStatusBox(RectangularUIElement):
             self._status_icon_stack_panel.append(icon_element)
 
 
+def new_player_hp_bar(element_width, health_counter):
+    hp_bar = CounterBarWithNumbers(health_counter, element_width, colors.HP_BAR_FULL, colors.HP_BAR_EMPTY,
+                                   colors.WHITE, colors.PINK, colors.HP_BAR_EMPTY, colors.CYAN, colors.BLACK)
+    heart = SymbolUIElement((0, 0), graphic.GraphicChar(None, colors.HP_BAR_FULL, icon.HEALTH_STAT))
+    hp_stack_panel = StackPanelHorizontal((0, 0), (0, 0), 1)
+    hp_stack_panel.append(heart)
+    hp_stack_panel.append(hp_bar)
+    return hp_stack_panel
+
+
+def new_player_sanity_bar(element_width, health_counter):
+    hp_bar = CounterBarWithNumbers(health_counter, element_width, colors.SANITY_BAR_FULL, colors.SANITY_BAR_EMPTY,
+                                   colors.WHITE, colors.PINK, colors.HP_BAR_EMPTY, colors.CYAN, colors.BLACK)
+    heart = SymbolUIElement((0, 0), graphic.GraphicChar(None, colors.SANITY_BAR_FULL, icon.SANITY_STAT))
+    hp_stack_panel = StackPanelHorizontal((0, 0), (0, 0), 1)
+    hp_stack_panel.append(heart)
+    hp_stack_panel.append(hp_bar)
+    return hp_stack_panel
+
+
+#TODO Unused for now, delete?
 class PlayerExtraStatusBox(RectangularUIElement):
     def __init__(self, rect, player, margin=geo.zero2d()):
         super(PlayerExtraStatusBox, self).__init__(rect, margin)
@@ -583,12 +605,11 @@ class PlayerExtraStatusBox(RectangularUIElement):
     def update(self):
         width = self.width - 6
         self._status_stack_panel.update()
-        self.strength_text_box.text = ("Strength" + str(self._player.strength.value).rjust(width - len("Strength")))
-        self.armor_text_box.text = ("Armor" + str(self._player.armor.value).rjust(width - len("Armor")))
-        self.evasion_text_box.text = ("Evasion" + str(self._player.evasion.value).rjust(width - len("Evasion")))
-        self.stealth_text_box.text = ("Stealth" + str(self._player.stealth.value).rjust(width - len("Stealth")))
-        self.movement_speed_text_box.text = ("Move Speed" +
-                                             str(120 / self._player.movement_speed.value).rjust(width - len("Move Speed")))
+        self.strength_text_box.text = ("Str" + str(self._player.strength.value).rjust(width - 3))
+        self.armor_text_box.text = ("Def" + str(self._player.armor.value).rjust(width - 3))
+        self.evasion_text_box.text = ("Eva" + str(self._player.evasion.value).rjust(width - 3))
+        self.stealth_text_box.text = ("Sth" + str(self._player.stealth.value).rjust(width - 3))
+        self.movement_speed_text_box.text = ("Mov" + str(120.0 / self._player.movement_speed.value).rjust(width - 3))
 
     def draw(self, offset=geo.zero2d()):
         position = geo.add_2d(offset, self.margin)
@@ -942,16 +963,18 @@ class TextBox(UIElement):
 
     def draw(self, offset=geo.zero2d()):
         x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
-        if x > settings.SCREEN_WIDTH:
-            return
-        if x + len(self.text) > settings.SCREEN_WIDTH:
-            max_width = settings.SCREEN_WIDTH - x
-            show_text = self.text[:max_width - 3] + "..."
-        else:
-            show_text = self.text
+        for line in self.text.split("\n"):
+            if x > settings.SCREEN_WIDTH:
+                return
+            if x + len(line) > settings.SCREEN_WIDTH:
+                max_width = settings.SCREEN_WIDTH - x
+                show_text = line[:max_width - 3] + "..."
+            else:
+                show_text = line
 
-        console.set_default_color_fg(self.color_fg)
-        console.print_text((x, y), show_text)
+            console.set_default_color_fg(self.color_fg)
+            console.print_text((x, y), show_text)
+            y += 1
 
 
 class TextBoxWrap(UIElement):
@@ -1037,6 +1060,29 @@ class SymbolUIElement(UIElement):
         if self.graphic_char.color_bg:
             console.set_color_bg((x, y), self.graphic_char.color_bg)
         console.set_symbol((x, y), self.graphic_char.icon)
+
+
+class BigSymbolUIElement(UIElement):
+    def __init__(self, offset, graphic_char, margin=(0, 0)):
+        super(BigSymbolUIElement, self).__init__(margin)
+        self.offset = offset
+        self.graphic_char = graphic_char
+
+    @property
+    def height(self):
+        return 8
+
+    @property
+    def width(self):
+        return 8
+
+    def draw(self, offset=geo.zero2d()):
+        x, y = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
+        if self.graphic_char.color_fg:
+            console.set_default_color_fg(self.graphic_char.color_fg)
+        if self.graphic_char.color_bg:
+            console.set_default_color_fg(self.graphic_char.color_bg)
+        console.print_char_big(self.graphic_char.icon, (x, y))
 
 
 class TypeWriter(UIElement):

@@ -249,7 +249,7 @@ class TestGameState(GameStateBase):
         blood_fountain = dungeonfeature.BloodFountain()
         blood_fountain.mover.try_move((21, 10), self.dungeon_level)
 
-        boots = item.new_boots_of_sneaking(self)
+        boots = item.new_boots_of_running(self)
         boots.mover.try_move((22, 10), self.dungeon_level)
 
         cap = item.new_leather_cap(self)
@@ -264,15 +264,15 @@ class TestGameState(GameStateBase):
         #slime = monster.new_slime(self)
         #slime.mover.try_move((25, 12), self.dungeon_level)
 
-#        spider = monster.new_spider(self)
-#        spider.mover.try_move((26, 12), self.dungeon_level)
-#
+        #        spider = monster.new_spider(self)
+        #        spider.mover.try_move((26, 12), self.dungeon_level)
+        #
         ghost = monster.new_ghost(self)
         ghost.mover.try_move((21, 8), self.dungeon_level)
-#
-#        pixie = monster.new_pixie(self)
-#        pixie.mover.try_move((23, 8), self.dungeon_level)
-#
+        #
+        #        pixie = monster.new_pixie(self)
+        #        pixie.mover.try_move((23, 8), self.dungeon_level)
+        #
         #slime = monster.new_slime(self)
         #slime.mover.try_move((18, 16), self.dungeon_level)
 

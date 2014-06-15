@@ -2,10 +2,11 @@ import os
 import settings
 import libtcodpy as libtcod
 
+FONT_FILE_PATH = os.path.join('fonts', 'terminal16x16_gs_ro.png')
+
 
 def init_libtcod():
-    font = os.path.join('fonts', 'terminal16x16_gs_ro.png')
-    libtcod.console_set_custom_font(font,
+    libtcod.console_set_custom_font(FONT_FILE_PATH,
                                     libtcod.FONT_LAYOUT_ASCII_INROW |
                                     libtcod.FONT_TYPE_GREYSCALE,
                                     16, 32)

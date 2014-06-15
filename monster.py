@@ -463,7 +463,7 @@ class MakeDustClouds(Leaf):
     def __init__(self):
         super(MakeDustClouds, self).__init__()
         self.component_type = "make_dust_clouds"
-        self.time_interval = gametime.single_turn
+        self.time_interval = gametime.double_turn
         self.time_to_next_attempt = self.time_interval
 
     def before_tick(self, time):

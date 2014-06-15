@@ -30,7 +30,6 @@ import equipment
 import gametime
 from messenger import msg
 import icon
-from util import entity_skip_turn
 
 
 class ItemType(Leaf):
@@ -86,10 +85,10 @@ def new_gun(game_state):
                                The wooden handle is dry and gray, \
                                you see rust eating into the iron pipe."))
     gun.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
-    gun.set_child(AttackProvider(15, 10, [DamageTypes.PHYSICAL,
-                                          DamageTypes.PIERCING]))
+    gun.set_child(AttackProvider(10, [DamageTypes.PHYSICAL, 15, DamageTypes.PIERCING]))
     gun.set_child(DataPoint(DataTypes.WEAPON_RANGE, 15))
     gun.set_child(DataPoint(DataTypes.HIT, 13))
+    gun.set_child(DataPoint(DataTypes.DAMAGE, 15))
     gun.set_child(DataPoint(DataTypes.WEIGHT, 5))
     return gun
 
@@ -103,9 +102,10 @@ def new_sling(game_state):
                                 "This weapon propels rocks more effectively than throwing them would."))
     sling.set_child(GraphicChar(None, colors.ORANGE, icon.SLING))
     sling.set_child(DataPoint(DataTypes.WEAPON_RANGE, 4))
-    sling.set_child(AttackProvider(1, 2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
+    sling.set_child(AttackProvider(2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
     sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
     sling.set_child(DataPoint(DataTypes.HIT, 5))
+    sling.set_child(DataPoint(DataTypes.DAMAGE, 1))
     return sling
 
 
@@ -405,8 +405,8 @@ def new_boots_of_running(game_state):
     boots.set_child(DataPoint(DataTypes.WEIGHT, 2))
     boots.set_child(GraphicChar(None, colors.GREEN, icon.BOOTS))
     boots.set_child(StatBonusEquipEffect("armor", 0))
-    boots.set_child(StatBonusEquipEffect(DataTypes.STEALTH, 3))
     boots.set_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
+    boots.set_child(StatBonusEquipEffect(DataTypes.MOVEMENT_SPEED, -gametime.quarter_turn))
     return boots
 
 
@@ -422,7 +422,7 @@ def new_boots_of_sneaking(game_state):
     boots.set_child(DataPoint(DataTypes.WEIGHT, 2))
     boots.set_child(GraphicChar(None, colors.BLUE, icon.BOOTS))
     boots.set_child(StatBonusEquipEffect("armor", 0))
-    boots.set_child(StatBonusEquipEffect(DataTypes.MOVEMENT_SPEED, -gametime.half_turn))
+    boots.set_child(StatBonusEquipEffect(DataTypes.STEALTH, 3))
     boots.set_child(EquipmentType(equipment.EquipmentTypes.BOOTS))
     return boots
 
@@ -459,11 +459,11 @@ def new_sword(game_state):
     sword.set_child(Description("Iron Sword",
                                 "This old blade has seen some better days, it's as sharp as ever tough."))
     sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-    sword.set_child(AttackProvider(4, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+    sword.set_child(AttackProvider(1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
     sword.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.2))
     sword.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2))
     sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
-    sword.set_child(DataPoint(DataTypes.HIT, 17))
+    sword.set_child(DataPoint(DataTypes.DAMAGE, 4))
     return sword
 
 
@@ -477,11 +477,12 @@ def new_mace(game_state):
     mace.set_child(Description("Iron Mace",
                                 "This old club has an lump of iron at one end."))
     mace.set_child(GraphicChar(None, colors.GRAY, icon.MACE))
-    mace.set_child(AttackProvider(3, 1, [DamageTypes.PHYSICAL, DamageTypes.BLUNT]))
+    mace.set_child(AttackProvider(1, [DamageTypes.PHYSICAL, DamageTypes.BLUNT]))
     mace.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.1))
     mace.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2))
     mace.set_child(DataPoint(DataTypes.WEIGHT, 8))
     mace.set_child(DataPoint(DataTypes.HIT, 16))
+    mace.set_child(DataPoint(DataTypes.DAMAGE, 3))
     mace.set_child(StunAttackEffect(1.0))
     return mace
 
@@ -495,11 +496,12 @@ def new_knife(game_state):
     set_melee_weapon_component(knife)
     knife.set_child(Description("Knife", "A trusty knife, small and precise but will only inflict small wounds."))
     knife.set_child(GraphicChar(None, colors.GRAY, icon.KNIFE))
-    knife.set_child(AttackProvider(1, 1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+    knife.set_child(AttackProvider(1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
     knife.set_child(DataPoint(DataTypes.WEIGHT, 5))
     knife.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.3))
     knife.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2.5))
     knife.set_child(DataPoint(DataTypes.HIT, 21))
+    knife.set_child(DataPoint(DataTypes.DAMAGE, 1))
     return knife
 
 
@@ -1038,32 +1040,40 @@ class AttackProvider(Leaf):
     The modify be us, actual damage will be calculated on use.
     """
 
-    def __init__(self, damage, variance, types):
+    def __init__(self, variance, types):
         super(AttackProvider, self).__init__()
         self.component_type = "attack_provider"
-        self.damage = damage
         self.variance = variance
         self.types = types
 
-    def attack_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
-        damage_strength = self.damage + source_entity.strength.value / 2
+    def damage_strength(self, source_entity):
+        return self.parent.damage.value + source_entity.strength.value / 2
 
-        attack_effects = [effect.get_effect(source_entity, target_entity)
-                          for effect in self.parent.get_children_with_tag("attack_effect")
-                          if effect.roll_to_hit()]
+    def actual_hit(self, source_entity):
+        return self.parent.hit.value
+
+    def actual_crit_chance(self, source_entity):
         crit_chance = 0
         if self.parent.has("crit_chance"):
             crit_chance = self.parent.crit_chance.value
+        return crit_chance
+
+    def actual_crit_multiplier(self, source_entity):
         crit_multiplier = 2
         if self.parent.has("crit_multiplier"):
             crit_multiplier = self.parent.crit_multiplier.value
-        attack = Attack(damage_strength, self.variance,
-                        self.types, self.parent.hit.value, crit_chance=crit_chance, crit_multiplier=crit_multiplier,
+        return crit_multiplier
+
+    def attack_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
+        attack_effects = [effect.get_effect(source_entity, target_entity)
+                          for effect in self.parent.get_children_with_tag("attack_effect")
+                          if effect.roll_to_hit()]
+        attack = Attack(self.damage_strength(source_entity), self.variance,
+                        self.types, self.actual_hit(source_entity), crit_chance=self.actual_crit_chance(source_entity),
+                        crit_multiplier=self.actual_crit_multiplier(source_entity),
                         target_entity_effects=attack_effects)
 
-
-        return attack.damage_entity(source_entity, target_entity,
-                                    bonus_damage=bonus_damage, bonus_hit=bonus_hit)
+        return attack.damage_entity(source_entity, target_entity, bonus_damage=bonus_damage, bonus_hit=bonus_hit)
 
 
 class AttackEffect(Leaf):

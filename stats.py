@@ -39,13 +39,32 @@ class DataPointBonusSpoof(Leaf):
         self.next.value = new_value
 
 
+class Jobs:
+    ROGUE = "Rogue"
+    KNIGHT = "Knight"
+    GUNSLINGER = "Gunslinger"
+    WITCH = "Witch"
+    TINKER = "Tinker"
+
+
+class Races:
+    HUMAN = "Human"
+    RATMAN = "Ratman"
+    CYCLOPS = "Cyclops"
+    PIXIE = "Pixie"
+
+
 class DataTypes:
+    JOB = "job"
+    RACE = "race"
+
     ENERGY = "energy"
     CRIT_MULTIPLIER = "crit_multiplier"
     CRIT_CHANCE = "crit_chance"
     STRENGTH = "strength"
     ARMOR = "armor"
     HIT = "hit"
+    DAMAGE = "damage"
     STEALTH = "stealth"
     AWARENESS = "awareness"
     EVASION = "evasion"

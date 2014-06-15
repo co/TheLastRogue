@@ -15,7 +15,7 @@ from missileaction import PlayerThrowStoneAction
 from mover import Mover, Stepper, PlayerStepper
 from ondeath import LeaveCorpseOnDeath
 from position import Position, DungeonLevel
-from stats import GamePieceTypes, Flag, DataPoint, DataTypes, Factions, IntelligenceLevel
+from stats import GamePieceTypes, Flag, DataPoint, DataTypes, Factions, IntelligenceLevel, Races, Jobs
 
 from statusflags import StatusFlags
 from text import Description
@@ -32,6 +32,9 @@ class Player(Composite):
     def __init__(self, game_state):
         super(Player, self).__init__()
         self.set_child(Health(25))
+
+        self.set_child(DataPoint(DataTypes.RACE, Races.HUMAN))
+        self.set_child(DataPoint(DataTypes.JOB, Jobs.ROGUE))
 
         self.set_child(DataPoint(DataTypes.ENERGY, -gametime.single_turn))
         self.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.15))

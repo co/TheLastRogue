@@ -1,11 +1,14 @@
 import colors
 import frame
+from icon import ROW_LENGTH
+from init import FONT_FILE_PATH
 import settings
 import libtcodpy as libtcod
 
 
 class ConsoleVisual(object):
     def __init__(self, width, height):
+        self.font_image = None
         pass
 
     def get_color_fg(self, position):
@@ -60,6 +63,18 @@ class ConsoleVisual(object):
     def set_colors_and_symbol(self, position, color_fg, color_bg, icon, console=0):
         x, y = position
         libtcod.console_put_char_ex(console, x, y, icon, color_fg, color_bg)
+
+    def print_char_big(self, icon_position, destination, console=0):
+        source_pixel_x = (icon_position % ROW_LENGTH) * settings.TILE_WIDTH
+        source_pixel_y = (icon_position / ROW_LENGTH) * settings.TILE_WIDTH
+
+        dx, dy = destination
+        if not self.font_image:
+            self.font_image = libtcod.image_load(FONT_FILE_PATH)
+        libtcod.image_set_key_color(self.font_image, libtcod.Color(0, 0, 0))
+        libtcod.image_blit_2x(self.font_image, console, dx, dy,
+                              source_pixel_x, source_pixel_y,
+                              settings.TILE_WIDTH, settings.TILE_WIDTH)
 
     def flush(self):
         libtcod.console_flush()

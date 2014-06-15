@@ -1,15 +1,14 @@
-import random
 import colors
 import entityeffect
 import geometry
 import rng
 from compositecore import Leaf
 from equipment import EquipmentSlots
-from stats import DataTypes
 from util import entity_skip_turn
 
 
-CRIT_MULTIPLIER = 2
+DEFAULT_CRIT_MULTIPLIER = 2
+
 
 
 class Attacker(Leaf):
@@ -21,15 +20,50 @@ class Attacker(Leaf):
         self.component_type = "attacker"
 
     @property
-    def throw_rock_mean_damage(self):
+    def actual_thrown_rock_damage(self):
         damage_multiplier = 1
         if self.parent.has("throw_damage_multiplier"):
             damage_multiplier = self.parent.throw_damage_multiplier.value
         return int(2 * self.parent.strength.value * damage_multiplier / 3)
 
     @property
-    def throw_rock_damage_variance(self):
-        return int(self.throw_rock_mean_damage / 2)
+    def thrown_rock_damage_variance(self):
+        return int(self.actual_thrown_rock_damage / 2)
+
+    @property
+    def actual_thrown_hit(self):
+        return self.parent.hit.value
+
+    @property
+    def actual_thrown_crit_chance(self):
+        return self.parent.crit_chance.value
+
+    @property
+    def actual_thrown_crit_multiplier(self):
+        if self.parent.has("crit_multiplier"):
+            return self.parent.crit_multiplier.value
+        return DEFAULT_CRIT_MULTIPLIER
+
+
+    @property
+    def actual_unarmed_damage(self):
+        damage_multiplier = 1
+        if self.parent.has("melee_damage_multiplier"):
+            damage_multiplier = self.parent.melee_damage_multiplier.value
+        return 1 + int(self.parent.strength.value * damage_multiplier) / 2
+
+    @property
+    def actual_unarmed_hit(self):
+        return self.parent.hit.value
+
+    @property
+    def actual_unarmed_crit_chance(self):
+        return self.parent.crit_chance.value
+
+    @property
+    def actual_unarmed_crit_multiplier(self):
+        return self.actual_thrown_crit_multiplier
+
 
     def try_hit(self, position):
         """
@@ -50,8 +84,9 @@ class Attacker(Leaf):
         Makes entity to hit the target entity with the force of a thrown rock.
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
-        thrown_damage = Attack(self.throw_rock_mean_damage, self.throw_rock_damage_variance,
-                               damage_types, self.parent.hit.value, crit_chance=self.parent.crit_chance.value)
+        thrown_damage = Attack(self.actual_thrown_rock_damage, self.thrown_rock_damage_variance,
+                               damage_types, self.actual_thrown_hit, crit_chance=self.actual_thrown_crit_chance,
+                               crit_multiplier=self.actual_thrown_crit_multiplier)
         thrown_damage.damage_entity(self.parent, target_entity)
 
     def hit(self, target_entity):
@@ -72,16 +107,13 @@ class Attacker(Leaf):
         caused by an unarmed hit by the entity.
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
-        damage_multiplier = 1
-        if self.parent.has("melee_damage_multiplier"):
-            damage_multiplier = self.parent.melee_damage_multiplier.value
 
-        damage_strength = int(self.parent.strength.value * damage_multiplier)
         target_entity_effects = [effect_factory_data_point.value() for effect_factory_data_point in
                                  self.parent.get_children_with_tag("unarmed_hit_target_entity_effect_factory")]
-        return Attack(1 + damage_strength / 2, damage_strength / 4,
-                      damage_types, self.parent.hit.value, crit_chance=self.parent.crit_chance.value,
-                      crit_multiplier=CRIT_MULTIPLIER, target_entity_effects=target_entity_effects)
+        damage_strength = self.actual_unarmed_damage
+        return Attack(damage_strength, damage_strength / 4,
+                      damage_types, self.actual_unarmed_hit, crit_chance=self.actual_unarmed_crit_chance,
+                      crit_multiplier=self.actual_unarmed_crit_multiplier, target_entity_effects=target_entity_effects)
 
     def _on_hit(self, target_entity):
         pass

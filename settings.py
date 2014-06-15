@@ -41,7 +41,7 @@ defaults = {
 config = ConfigParser.SafeConfigParser(defaults)
 config.read('config.txt')
 
-tile_width = 16
+TILE_WIDTH = 16
 
 # For some reason the parser cries if a section is missing. So if a section is missing we add it.
 if not config.has_section("Screen"):
@@ -57,8 +57,8 @@ MINIMUM_RESOLUTION_HEIGHT = 768
 MINIMUM_WIDTH = MINIMUM_RESOLUTION_WIDTH / 16
 MINIMUM_HEIGHT = MINIMUM_RESOLUTION_HEIGHT / 16
 
-SCREEN_WIDTH = max(config.getint('Screen', 'resolution_width'), MINIMUM_RESOLUTION_WIDTH) / tile_width
-SCREEN_HEIGHT = max(config.getint('Screen', 'resolution_height'), MINIMUM_RESOLUTION_HEIGHT) / tile_width
+SCREEN_WIDTH = max(config.getint('Screen', 'resolution_width'), MINIMUM_RESOLUTION_WIDTH) / TILE_WIDTH
+SCREEN_HEIGHT = max(config.getint('Screen', 'resolution_height'), MINIMUM_RESOLUTION_HEIGHT) / TILE_WIDTH
 
 ANIMATION_DELAY = config.getint('Screen', 'animation_delay')
 MISSILE_ANIMATION_DELAY = config.getint('Screen', 'missile_animation_delay')

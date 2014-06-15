@@ -1,7 +1,9 @@
 import action
 import constants
 import colors
+from counter import Counter
 import dungeoncreatorvisualizer
+from equipment import EquipmentSlots
 import gamestate
 import gametime
 import geometry as geo
@@ -245,6 +247,10 @@ def context_menu(player, state_stack):
     if not current_dungeon_feature is None:
         context_options.extend(get_dungeon_feature_menu_options(player, stack_pop_function))
 
+    status_menu = player_status_menu(player)
+    open_status_option = menu.MenuOption("Player Status", [lambda: state_stack.push(status_menu)])
+    context_options.append(open_status_option)
+
     inventory_menu_opt = inventory_menu(player, state_stack)
     open_inventory_option = menu.MenuOption("Inventory", [lambda: state_stack.push(inventory_menu_opt)],
                                             (lambda: not player.inventory.is_empty()))
@@ -258,16 +264,123 @@ def context_menu(player, state_stack):
                                                           len(context_options) * 2 + 3)
     resulting_menu = menu.StaticMenu(context_menu_rect.top_left, context_options, state_stack,
                                      margin=style.menu_theme.margin)
-
-    status_stack = gui.StackPanelVertical((0, 0))
-    status_stack.append(gui.PlayerStatusBox(rectfactory.player_status_rect(), player))
-    status_stack.append(gui.PlayerExtraStatusBox(rectfactory.player_status_rect(), player))
-    dock = gui.UIDock(rectfactory.full_screen_rect())
-    dock.bottom_left = status_stack
-
     background_rect = get_menu_background(context_menu_rect)
 
-    ui_elements = [background_rect, dock, resulting_menu]
+    ui_elements = [background_rect, resulting_menu]
+    ui_state = state.UIState(gui.UIElementList(ui_elements))
+    return ui_state
+
+
+def new_player_status_stack(player, width):
+    text_margin = width - 3
+    text_box_margin = (0, 0)
+    strength_text_box = gui.TextBox("Str" + str(player.strength.value).rjust(text_margin), text_box_margin, colors.ORANGE)
+    armor_text_box = gui.TextBox("Def" + str(player.armor.value).rjust(text_margin), text_box_margin, colors.GRAY)
+    evasion_text_box = gui.TextBox("Eva" + str(player.evasion.value).rjust(text_margin), text_box_margin, colors.GREEN)
+    stealth_text_box = gui.TextBox("Sth" + str(player.stealth.value).rjust(text_margin), text_box_margin, colors.BLUE)
+    movement_speed_text_box = gui.TextBox("Mov" + str(int(120.0 / player.movement_speed.value * 10)).rjust(text_margin), text_box_margin, colors.CHAMPAGNE)
+
+    status_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_LEFT, vertical_space=0)
+    status_stack_panel.append(strength_text_box)
+    status_stack_panel.append(armor_text_box)
+    status_stack_panel.append(evasion_text_box)
+    status_stack_panel.append(stealth_text_box)
+    status_stack_panel.append(movement_speed_text_box)
+    return status_stack_panel
+
+
+def new_player_weapon_table(player, width):
+    equipment = player.equipment
+    if equipment.slot_is_equiped(EquipmentSlots.MELEE_WEAPON):
+        melee_weapon = equipment.get(EquipmentSlots.MELEE_WEAPON)
+        melee_graphic = melee_weapon.graphic_char
+        melee_damage = melee_weapon.attack_provider.damage_strength(player)
+        melee_hit = melee_weapon.attack_provider.actual_hit(player)
+        melee_crit_chance = int(melee_weapon.attack_provider.actual_crit_chance(player) * 100)
+    else:
+        melee_graphic = graphic.GraphicChar(None, colors.WHITE, icon.BIG_CENTER_DOT)
+        melee_damage = player.attacker.actual_unarmed_damage
+        melee_hit = player.attacker.actual_unarmed_hit
+        melee_crit_chance = int(player.attacker.actual_unarmed_crit_chance * 100)
+
+    if equipment.slot_is_equiped(EquipmentSlots.RANGED_WEAPON):
+        range_weapon = equipment.get(EquipmentSlots.RANGED_WEAPON)
+        range_graphic = range_weapon.graphic_char
+        range_damage = range_weapon.attack_provider.damage_strength(player)
+        range_hit = range_weapon.attack_provider.actual_hit(player)
+        range_crit_chance = int(range_weapon.attack_provider.actual_crit_chance(player) * 100)
+    else:
+        range_graphic = graphic.GraphicChar(None, colors.GRAY, icon.STONE)
+        range_damage = player.attacker.actual_thrown_rock_damage
+        range_hit = player.attacker.actual_thrown_hit
+        range_crit_chance = int(player.attacker.actual_thrown_crit_chance * 100)
+
+    value_width = 3
+    text_box_margin = (0, 0)
+    heading_stack_panel = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_TOP,
+                                                   horizontal_space=0)
+    heading_stack_panel.append(gui.HorizontalSpace(6))
+    heading_stack_panel.append(gui.SymbolUIElement((0, 0), melee_graphic))
+    heading_stack_panel.append(gui.HorizontalSpace(3))
+    heading_stack_panel.append(gui.SymbolUIElement((0, 0), range_graphic))
+    damage_text_box = gui.TextBox("Dmg " + str(melee_damage).rjust(value_width) +
+                                  " " + str(range_damage).rjust(value_width),
+                                  text_box_margin, colors.WHITE)
+    hit_text_box = gui.TextBox("Hit " + str(melee_hit).rjust(value_width) +
+                               " " + str(range_hit).rjust(value_width),
+                               text_box_margin, colors.YELLOW)
+    crit_chance_text_box = gui.TextBox("Cri " + str(melee_crit_chance).rjust(value_width) +
+                                       " " + str(range_crit_chance).rjust(value_width),
+                                       text_box_margin, colors.RED)
+
+    status_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_LEFT,
+                                                vertical_space=0)
+    status_stack_panel.append(heading_stack_panel)
+    status_stack_panel.append(gui.VerticalSpace(1))
+    status_stack_panel.append(damage_text_box)
+    status_stack_panel.append(hit_text_box)
+    status_stack_panel.append(crit_chance_text_box)
+    return status_stack_panel
+
+
+def player_status_menu(player):
+    player_status_stack_panel = gui.StackPanelVertical((2, 2), alignment=gui.StackPanelVertical.ALIGN_LEFT,
+                                                       vertical_space=1)
+    player_status_stack_panel_row_1 = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_TOP,
+                                                               horizontal_space=1)
+    player_status_stack_panel.append(player_status_stack_panel_row_1)
+    player_status_stack_panel_row_1.append(gui.BigSymbolUIElement((0, 0), player.graphic_char))
+    player_description_stack = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_LEFT,
+                                                      vertical_space=1)
+    player_status_stack_panel_row_1.append(player_description_stack)
+    player_description_stack.append(gui.TextBox(player.description.name, (2, 0), colors.WHITE))
+    player_description_stack.append(gui.TextBox(player.race.value + "\n" + player.job.value, (2, 0), colors.WHITE))
+
+    player_description_stack.append(gui.new_player_hp_bar(12, player.health.hp))
+    player_description_stack.append(gui.new_player_sanity_bar(12, Counter(10, 10)))
+
+    player_status_stack_panel_row_2 = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_TOP,
+                                                               horizontal_space=3)
+    player_status_stack_panel.append(player_status_stack_panel_row_2)
+    player_status_stack_panel_row_2.append(new_player_status_stack(player, 8))
+    player_status_stack_panel_row_2.append(new_player_weapon_table(player, 8))
+
+    game_state = player.game_state.value
+    state_stack = game_state.menu_prompt_stack
+    context_options = []
+    stack_pop_function = menu.BackToGameFunction(state_stack)
+
+    cancel_option = menu.MenuOption("Cancel", [stack_pop_function], (lambda: True))
+    context_options.append(cancel_option)
+
+    resulting_menu = menu.StaticMenu((0, 0), context_options, state_stack, margin=style.menu_theme.margin)
+    player_status_stack_panel.append(resulting_menu)
+    context_menu_rect = rectfactory.center_of_screen_rect(player_status_stack_panel.total_width + 4,
+                                                          player_status_stack_panel.total_height + 4)
+    player_status_stack_panel.margin = context_menu_rect.top_left
+    background_rect = get_menu_background(context_menu_rect, style.ff_blue_theme.rect_style)
+
+    ui_elements = [background_rect, player_status_stack_panel]
     ui_state = state.UIState(gui.UIElementList(ui_elements))
     return ui_state
 
