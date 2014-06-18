@@ -1,5 +1,5 @@
 import random
-from Status import StatusIcon, FIRE_STATUS_ICON
+from Status import StatusDescription, FIRE_STATUS_DESCRIPTION
 from actor import Actor
 from attacker import DamageTypes
 import colors
@@ -126,7 +126,7 @@ class FireDamageShareTileEffect(EntityShareTileEffect):
         damage_effect = UndodgeableDamagAndBlockSameEffect(source_entity, damage, self.damage_types,
                                                            messenger.HURT_BY_FIRE, "fire_damage",
                                                            time_to_live=gametime.single_turn,
-                                                           status_icon=FIRE_STATUS_ICON)
+                                                           status_icon=FIRE_STATUS_DESCRIPTION)
         target_entity.effect_queue.add(damage_effect)
 
 

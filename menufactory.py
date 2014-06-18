@@ -344,6 +344,8 @@ def new_player_weapon_table(player, width):
 
 
 def player_status_menu(player):
+
+    width = 27
     player_status_stack_panel = gui.StackPanelVertical((2, 2), alignment=gui.StackPanelVertical.ALIGN_LEFT,
                                                        vertical_space=1)
     player_status_stack_panel_row_1 = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_TOP,
@@ -370,19 +372,35 @@ def player_status_menu(player):
     context_options = []
     stack_pop_function = menu.BackToGameFunction(state_stack)
 
-    cancel_option = menu.MenuOption("Cancel", [stack_pop_function], (lambda: True))
+    cancel_option = menu.MenuOption("", [stack_pop_function], (lambda: True))
     context_options.append(cancel_option)
 
     resulting_menu = menu.StaticMenu((0, 0), context_options, state_stack, margin=style.menu_theme.margin)
-    player_status_stack_panel.append(resulting_menu)
-    context_menu_rect = rectfactory.center_of_screen_rect(player_status_stack_panel.total_width + 4,
-                                                          player_status_stack_panel.total_height + 4)
-    player_status_stack_panel.margin = context_menu_rect.top_left
-    background_rect = get_menu_background(context_menu_rect, style.ff_blue_theme.rect_style)
+    context_menu_rect = geo.Rect((0, 0), width, player_status_stack_panel.total_height + 4)
+    attribute_bg_rect = get_menu_background(context_menu_rect, style.ff_blue_theme.rect_style)
 
-    ui_elements = [background_rect, player_status_stack_panel]
-    ui_state = state.UIState(gui.UIElementList(ui_elements))
-    return ui_state
+    menu_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=0)
+    ui_elements = [attribute_bg_rect, player_status_stack_panel, resulting_menu]
+    menu_stack_panel.append(gui.UIElementList(ui_elements))
+    menu_stack_panel.append(get_status_list(player, width))
+
+    return state.UIState(gui.UIElementList([menu_stack_panel]))
+
+
+def get_status_list(player, width):
+    context_options = []
+    state_stack = player.game_state.value.menu_prompt_stack
+    for status in player.status_bar.statuses:
+        print status, status.graphic_char, status.graphic_char.color_fg
+        status_option = menu.MenuOptionWithSymbols(status.name, status.graphic_char, status.graphic_char,
+            [], (lambda: True))
+        context_options.append(status_option)
+    resulting_menu = menu.StaticMenu((0, 0), context_options, state_stack,
+                                     margin=style.menu_theme.margin)
+
+    status_bg_rect = get_menu_background(geo.Rect((0, 0), width, 16), style.ff_blue_theme.rect_style)
+    ui_elements = [status_bg_rect, resulting_menu]
+    return gui.UIElementList(ui_elements)
 
 
 def sacrifice_menu(player, powers, post_power_gain_function):

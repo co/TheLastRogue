@@ -67,7 +67,7 @@ class StunnedActor(Actor):
 
     def on_tick(self, time):
         if self.parent.has("status_bar"):
-            self.parent.status_bar.add(Status.STUNNED_STATUS_ICON)
+            self.parent.status_bar.add(Status.STUNNED_STATUS_DESCRIPTION)
 
     def act(self):
         """

@@ -101,7 +101,7 @@ class Menu(gui.UIElement):
             self.update_description()
 
     def can_activate(self):
-        return (not self.selected_index is None and
+        return (not self.selected_index is None and len(self.menu_items) > 0 and
                 self.menu_items[self.selected_index].can_activate())
 
     def activate(self):

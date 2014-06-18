@@ -1,5 +1,5 @@
 import random
-from Status import StatusBar
+from Status import StatusDescriptionBar
 from animation import animate_flight
 from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity, KnockBackAttacker, PoisonImmunity
 from cloud import new_fire_cloud, new_dust_cloud
@@ -51,7 +51,7 @@ def set_monster_components(monster, game_state):
     monster.set_child(Position())
     monster.set_child(CharPrinter())
     monster.set_child(DungeonLevel())
-    monster.set_child(StatusBar())
+    monster.set_child(StatusDescriptionBar())
 
     monster.set_child(Mover())
     monster.set_child(CautiousStepper())

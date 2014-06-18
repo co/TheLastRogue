@@ -293,7 +293,7 @@ class SleepingActor(MonsterActor):
 
     def on_tick(self, time):
         if self.parent.has("status_bar"):
-            self.parent.status_bar.add(Status.SLEEP_STATUS_ICON)
+            self.parent.status_bar.add(Status.SLEEP_STATUS_DESCRIPTION)
         if self.parent.has("monster_actor_state"):
             self.parent.monster_actor_state.value = MonsterActorState.SLEEPING
         self.parent.effect_queue.add(AddSpoofChild(self.parent, DataPoint(DataTypes.AWARENESS, 1), time_to_live=1))

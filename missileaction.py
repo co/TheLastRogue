@@ -1,5 +1,5 @@
 import random
-from Status import STUMBLE_STATUS_ICON
+from Status import STUMBLE_STATUS_DESCRIPTION
 from action import Action, SOURCE_ENTITY, GAME_STATE
 from animation import animate_flight
 from attacker import DamageTypes, UndodgeableAttack
@@ -350,7 +350,7 @@ class MonsterTripTargetEffect(MonsterMissileApplyEntityEffect):
         missile_graphic = GraphicChar(None, colors.YELLOW, "+")
         super(MonsterTripTargetEffect, self).__init__(2, 4, missile_graphic, weight)
         self.component_type = "monster_range_trip_action"
-        self.status_icon = STUMBLE_STATUS_ICON
+        self.status_icon = STUMBLE_STATUS_DESCRIPTION
 
     def effect_factory(self):
         return AddSpoofChild(self.parent, RandomStepper(), gametime.single_turn)

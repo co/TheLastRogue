@@ -1,4 +1,4 @@
-from Status import POISON_STATUS_ICON
+from Status import POISON_STATUS_DESCRIPTION
 from attacker import DamageTypes
 from compositecore import Leaf
 from entityeffect import DamageOverTimeEffect
@@ -37,4 +37,4 @@ class PoisonEntityEffectFactory(object):
         damage_per_turn = self.total_damage / (self.turns_to_live / self.turn_interval)
         return DamageOverTimeEffect(self.source_entity, damage_per_turn, [DamageTypes.POISON],
                                     self.turn_interval, self.turns_to_live,
-                                    messenger.POISON_MESSAGE, POISON_STATUS_ICON, no_stack_id="poison")
+                                    messenger.POISON_MESSAGE, POISON_STATUS_DESCRIPTION, no_stack_id="poison")

@@ -546,7 +546,7 @@ class PlayerStatusBox(RectangularUIElement):
 
     def update_status_icon_stack_panel(self):
         self._status_icon_stack_panel.clear()
-        for status_icon in self._player.status_bar.status_icons:
+        for status_icon in self._player.status_bar.statuses:
             icon_element = SymbolUIElement((0, 0), status_icon.graphic_char)
             self._status_icon_stack_panel.append(icon_element)
 
@@ -769,7 +769,7 @@ class EntityStatus(UIElement):
 
     def update_status_icon_stack_panel(self):
         self._status_icon_stack_panel.clear()
-        for status_icon in self._entity.status_bar.status_icons:
+        for status_icon in self._entity.status_bar.statuses:
             icon_element = SymbolUIElement((0, 0), status_icon.graphic_char)
             self._status_icon_stack_panel.append(icon_element)
 
