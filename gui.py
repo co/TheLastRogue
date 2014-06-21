@@ -213,10 +213,12 @@ class FilledRectangle(RectangularUIElement):
 
 class StyledRectangle(RectangularUIElement):
     def __init__(self, rect, rect_style, title=None,
-                 title_color_fg=colors.GRAY_D, margin=geo.zero2d()):
+                 title_color_fg=colors.GRAY_D, h_split=[], v_split=[], margin=geo.zero2d()):
         super(StyledRectangle, self).__init__(rect, margin)
         self.style = rect_style
         self.title = title
+        self.horizontal_split = [y + rect.top for y in h_split]
+        self.vertical_split = [x + rect.left for x in v_split]
         self.title_color_fg = title_color_fg
 
     def draw(self, offset=geo.zero2d()):
@@ -234,20 +236,35 @@ class StyledRectangle(RectangularUIElement):
                 return self.style.top_left
             elif y == self.rect.bottom - 1:
                 return self.style.bottom_left
+            elif y in self.horizontal_split:
+                return self.style.left_cross
             else:
                 return self.style.left
-        if x == self.rect.right - 1:
+        elif x == self.rect.right - 1:
             if y == self.rect.top:
                 return self.style.top_right
             elif y == self.rect.bottom - 1:
                 return self.style.bottom_right
+            elif y in self.horizontal_split:
+                return self.style.right_cross
             else:
                 return self.style.right
+        elif x in self.vertical_split:
+            if y == self.rect.top:
+                return self.style.top_cross
+            elif y == self.rect.bottom - 1:
+                return self.style.bottom_cross
+            elif y in self.horizontal_split:
+                return self.style.mid_cross
+            else:
+                return self.style.mid_vertical
         else:
             if y == self.rect.top:
                 return self.style.top
             elif y == self.rect.bottom - 1:
                 return self.style.bottom
+            elif y in self.horizontal_split:
+                return self.style.mid_horizontal
             else:
                 return self.style.center
 

@@ -235,8 +235,10 @@ that can be taken on a given equipment_slot.
     return state.UIState(dock)
 
 
-def get_menu_background(rectangle, rect_style=style.menu_theme.rect_style):
-    background_rect = gui.StyledRectangle(rectangle, rect_style)
+def get_menu_background(rectangle, rect_style=style.menu_theme.rect_style,
+        h_split=[], v_split=[]):
+    background_rect = gui.StyledRectangle(rectangle, rect_style,
+            h_split=h_split, v_split=v_split)
     return background_rect
 
 
@@ -376,15 +378,22 @@ def player_status_menu(player):
     context_options.append(cancel_option)
 
     resulting_menu = menu.StaticMenu((0, 0), context_options, state_stack, margin=style.menu_theme.margin)
-    context_menu_rect = geo.Rect((0, 0), width, player_status_stack_panel.total_height + 4)
-    attribute_bg_rect = get_menu_background(context_menu_rect, style.ff_blue_theme.rect_style)
 
     menu_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=0)
-    ui_elements = [attribute_bg_rect, player_status_stack_panel, resulting_menu]
+    ui_elements = [player_status_stack_panel, resulting_menu]
     menu_stack_panel.append(gui.UIElementList(ui_elements))
-    menu_stack_panel.append(get_status_list(player, width))
+    status_list = get_status_list(player, width)
+    menu_stack_panel.append(status_list)
 
-    return state.UIState(gui.UIElementList([menu_stack_panel]))
+    print player_status_stack_panel.total_height + 2
+    h_split = [player_status_stack_panel.total_height + 3]
+    v_split = [width]
+    bg_rect = geo.Rect((0, 0), width * 2,
+            h_split[0] + max(status_list.total_height, 15) + 4)
+    styled_bg_rect = get_menu_background(bg_rect,
+            style.ff_blue_theme.rect_style, h_split=h_split, v_split=v_split)
+
+    return state.UIState(gui.UIElementList([styled_bg_rect, menu_stack_panel]))
 
 
 def get_status_list(player, width):
@@ -397,10 +406,7 @@ def get_status_list(player, width):
         context_options.append(status_option)
     resulting_menu = menu.StaticMenu((0, 0), context_options, state_stack,
                                      margin=style.menu_theme.margin)
-
-    status_bg_rect = get_menu_background(geo.Rect((0, 0), width, 16), style.ff_blue_theme.rect_style)
-    ui_elements = [status_bg_rect, resulting_menu]
-    return gui.UIElementList(ui_elements)
+    return gui.UIElementList([resulting_menu])
 
 
 def sacrifice_menu(player, powers, post_power_gain_function):

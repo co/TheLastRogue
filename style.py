@@ -21,6 +21,14 @@ class RectangleStyle(object):
         self.bottom = None
         self.right = None
 
+        self.mid_vertical = self.left
+        self.mid_horizontal = self.top
+
+        self.top_cross = GraphicChar(bg, fg, " ")
+        self.left_cross = GraphicChar(bg, fg, " ")
+        self.bottom_cross = GraphicChar(bg, fg, " ")
+        self.right_cross = GraphicChar(bg, fg, " ")
+
         self.top_left = None
         self.top_right = None
         self.bottom_left = None
@@ -42,10 +50,20 @@ class RectangleStyle3D(RectangleStyle):
         self.left = self.top
         self.bottom = GraphicChar(dark, dark, ' ')
         self.right = self.bottom
+
+        self.mid_vertical = self.left
+        self.mid_horizontal = self.top
+        self.mid_cross = self.top
+
         self.top_left = GraphicChar(light, very_light, '\\')
         self.top_right = GraphicChar(light, dark, 243)
         self.bottom_left = GraphicChar(light, dark, 243)
         self.bottom_right = GraphicChar(dark, very_dark, '\\')
+
+        self.top_cross = GraphicChar(medium, medium, " ")
+        self.left_cross = GraphicChar(medium, medium, " ")
+        self.bottom_cross = GraphicChar(medium, medium, " ")
+        self.right_cross = GraphicChar(medium, medium, " ")
 
         self.title_separator_left = self.top
         self.title_separator_right = self.top
@@ -58,10 +76,22 @@ class FinalFantasyClassicStyle(RectangleStyle):
         self.left = GraphicChar(color_bg, color_fg, libtcod.CHAR_VLINE)
         self.bottom = self.top
         self.right = self.left
-        self.top_left = GraphicChar(color_bg, color_fg, libtcod.CHAR_DIAMOND)
-        self.top_right = self.top_left
-        self.bottom_left = self.top_left
-        self.bottom_right = self.top_left
+
+        cross = GraphicChar(color_bg, color_fg, libtcod.CHAR_DIAMOND)
+
+        self.mid_vertical = self.left
+        self.mid_horizontal = self.top
+        self.mid_cross = cross
+
+        self.top_cross = cross
+        self.left_cross = cross
+        self.bottom_cross = cross
+        self.right_cross = cross
+
+        self.top_left = cross
+        self.top_right = cross
+        self.bottom_left = cross
+        self.bottom_right = cross
 
         self.title_separator_left = self.top
         self.title_separator_right = self.top
@@ -76,6 +106,16 @@ class MinimalClassicStyle(RectangleStyle):
         self.left = GraphicChar(bg, fg, libtcod.CHAR_DVLINE)
         self.bottom = self.top
         self.right = self.left
+
+        self.mid_vertical = self.left
+        self.mid_horizontal = self.top
+        self.mid_cross = GraphicChar(bg, fg, libtcod.CHAR_DTEES)
+
+        self.top_cross = GraphicChar(bg, fg, libtcod.CHAR_DTEES)
+        self.left_cross = GraphicChar(bg, fg, libtcod.CHAR_DTEEE)
+        self.bottom_cross = GraphicChar(bg, fg, libtcod.CHAR_DTEEN)
+        self.right_cross = GraphicChar(bg, fg, libtcod.CHAR_DTEEW)
+
         self.top_left = GraphicChar(bg, fg, libtcod.CHAR_DNW)
         self.top_right = GraphicChar(bg, fg, libtcod.CHAR_DNE)
         self.bottom_left = GraphicChar(bg, fg, libtcod.CHAR_DSW)
@@ -83,7 +123,6 @@ class MinimalClassicStyle(RectangleStyle):
 
         self.title_separator_left = GraphicChar(bg, fg, 181)
         self.title_separator_right = GraphicChar(bg, fg, 198)
-
 
 class MinimalClassicStyle2(RectangleStyle):
     def __init__(self):
@@ -94,6 +133,15 @@ class MinimalClassicStyle2(RectangleStyle):
         self.left = GraphicChar(bg, fg, libtcod.CHAR_VLINE)
         self.bottom = self.top
         self.right = self.left
+
+        self.mid_vertical = self.left
+        self.mid_horizontal = self.top
+
+        self.top_cross = GraphicChar(bg, fg, libtcod.CHAR_DTEES)
+        self.left_cross = GraphicChar(bg, fg, libtcod.CHAR_TEEE)
+        self.bottom_cross = GraphicChar(bg, fg, libtcod.CHAR_DTEEN)
+        self.right_cross = GraphicChar(bg, fg, libtcod.CHAR_TEEW)
+
         self.top_left = GraphicChar(bg, fg, 213)
         self.top_right = GraphicChar(bg, fg, 184)
         self.bottom_left = GraphicChar(bg, fg, 212)
@@ -112,10 +160,19 @@ class MinimalTopCard(RectangleStyle):
         self.left = GraphicChar(bg, fg, libtcod.CHAR_VLINE)
         self.bottom = self.center
         self.right = self.left
+
+        self.mid_vertical = self.left
+        self.mid_horizontal = self.top
+
         self.top_left = GraphicChar(bg, fg, 213)
         self.top_right = GraphicChar(bg, fg, 184)
         self.bottom_left = self.left
         self.bottom_right = self.right
+
+        self.top_cross = GraphicChar(bg, fg, libtcod.CHAR_DTEES)
+        self.left_cross = GraphicChar(bg, fg, libtcod.CHAR_TEEE)
+        self.bottom_cross = GraphicChar(bg, fg, libtcod.CHAR_DTEEN)
+        self.right_cross = GraphicChar(bg, fg, libtcod.CHAR_TEEW)
 
         self.title_separator_left = GraphicChar(bg, fg, 181)
         self.title_separator_right = GraphicChar(bg, fg, 198)
@@ -130,10 +187,19 @@ class ChestStyle(RectangleStyle):
         self.left = GraphicChar(self.dark, self.light, libtcod.CHAR_SUBP_E)
         self.bottom = GraphicChar(self.dark, self.light, libtcod.CHAR_SUBP_N)
         self.right = GraphicChar(self.light, self.dark, libtcod.CHAR_SUBP_E)
+
+        self.mid_vertical = self.left
+        self.mid_horizontal = self.top
+
         self.top_left = GraphicChar(self.light, self.dark, libtcod.CHAR_NW)
         self.top_right = GraphicChar(self.light, self.dark, libtcod.CHAR_NE)
         self.bottom_left = GraphicChar(self.light, self.dark, libtcod.CHAR_SW)
         self.bottom_right = GraphicChar(self.light, self.dark, libtcod.CHAR_SE)
+
+        self.top_cross = GraphicChar(self.dark, self.light, " ")
+        self.left_cross = GraphicChar(self.dark, self.light, " ")
+        self.bottom_cross = GraphicChar(self.dark, self.light, " ")
+        self.right_cross = GraphicChar(self.dark, self.light, " ")
 
         self.title_separator_left = self.top
         self.title_separator_right = self.top
@@ -154,10 +220,19 @@ class MinimalStyle(RectangleStyle):
         self.left = GraphicChar(bg, fg, ' ')
         self.bottom = self.top
         self.right = self.left
+
+        self.mid_vertical = self.left
+        self.mid_horizontal = self.top
+
         self.top_left = GraphicChar(bg, fg, libtcod.CHAR_NW)
         self.top_right = GraphicChar(bg, fg, libtcod.CHAR_NE)
         self.bottom_left = GraphicChar(bg, fg, libtcod.CHAR_SW)
         self.bottom_right = GraphicChar(bg, fg, libtcod.CHAR_SE)
+
+        self.top_cross = GraphicChar(bg, fg, " ")
+        self.left_cross = GraphicChar(bg, fg, " ")
+        self.bottom_cross = GraphicChar(bg, fg, " ")
+        self.right_cross = GraphicChar(bg, fg, " ")
 
         self.title_separator_left = self.top
         self.title_separator_right = self.top
