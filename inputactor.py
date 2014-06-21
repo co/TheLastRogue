@@ -34,8 +34,6 @@ class InputActor(Actor):
         if self.newly_spent_energy < 1:
             self.handle_keyboard_input()
 
-        if self.has_sibling("dungeon_mask"):
-            self.parent.dungeon_mask.update_fov()
         return self.newly_spent_energy
 
     def handle_mouse_input(self):
