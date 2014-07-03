@@ -211,9 +211,9 @@ def equipment_menu(player, state_stack):
 
 def equipment_slot_menu(player, equipment_slot, state_stack):
     """
-Creates a menu which shows the possible actions
-that can be taken on a given equipment_slot.
-"""
+    Creates a menu which shows the possible actions
+    that can be taken on a given equipment_slot.
+    """
     menu_stack_panel = gui.StackPanelVertical((0, 0), margin=(0, 0))
     heading = gui.TextBox("Change " + equipment_slot.name, (2, 1), colors.INVENTORY_HEADING, (2, 2))
     menu_stack_panel.append(heading)
@@ -235,11 +235,8 @@ that can be taken on a given equipment_slot.
     return state.UIState(dock)
 
 
-def get_menu_background(rectangle, rect_style=style.menu_theme.rect_style,
-        h_split=[], v_split=[]):
-    background_rect = gui.StyledRectangle(rectangle, rect_style,
-            h_split=h_split, v_split=v_split)
-    return background_rect
+def get_menu_background(rectangle, rect_style=style.menu_theme.rect_style, h_split=[], v_split=[]):
+    return gui.StyledRectangle(rectangle, rect_style, h_split=h_split, v_split=v_split)
 
 
 def context_menu(player, state_stack):
@@ -346,7 +343,6 @@ def new_player_weapon_table(player, width):
 
 
 def player_status_menu(player):
-
     width = 27
     player_status_stack_panel = gui.StackPanelVertical((2, 2), alignment=gui.StackPanelVertical.ALIGN_LEFT,
                                                        vertical_space=1)
@@ -379,19 +375,15 @@ def player_status_menu(player):
 
     resulting_menu = menu.StaticMenu((0, 0), context_options, state_stack, margin=style.menu_theme.margin)
 
-    menu_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=0)
+    menu_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=3)
     ui_elements = [player_status_stack_panel, resulting_menu]
     menu_stack_panel.append(gui.UIElementList(ui_elements))
     status_list = get_status_list(player, width)
     menu_stack_panel.append(status_list)
 
-    print player_status_stack_panel.total_height + 2
-    h_split = [player_status_stack_panel.total_height + 3]
     v_split = [width]
-    bg_rect = geo.Rect((0, 0), width * 2,
-            h_split[0] + max(status_list.total_height, 15) + 4)
-    styled_bg_rect = get_menu_background(bg_rect,
-            style.ff_blue_theme.rect_style, h_split=h_split, v_split=v_split)
+    bg_rect = geo.Rect((0, 0), width * 2, max(menu_stack_panel.total_height, 15) + 4)
+    styled_bg_rect = get_menu_background(bg_rect, style.rogue_classic_theme.rect_style, v_split=v_split)
 
     return state.UIState(gui.UIElementList([styled_bg_rect, menu_stack_panel]))
 
@@ -464,8 +456,7 @@ def get_dungeon_feature_menu_options(player, stack_pop_function):
 
 def title_screen(state_stack):
     title_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
-    line = gui.HorizontalLine(icon.H_LINE, colors.GRAY,
-                              colors.WHITE, settings.SCREEN_WIDTH + 1)
+    line = gui.HorizontalLine(graphic.GraphicChar(colors.WHITE, colors.GRAY, icon.H_LINE), settings.SCREEN_WIDTH + 1)
     the_text = gui.TextBox("T H E", (0, 0), colors.BLACK, (0, 1))
     last_text = gui.TextBox("L A S T", (0, 0), colors.BLACK, (0, 1))
     rogue_text = gui.TextBox("R O G U E", (0, 0), colors.BLACK, (0, 1))
@@ -532,8 +523,7 @@ This is a ugly hack, remove if some event system is implemented for menus.
 
 def victory_screen(state_stack):
     victory_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
-    line = gui.HorizontalLine(icon.H_LINE, colors.YELLOW,
-                              None, settings.SCREEN_WIDTH + 1)
+    line = gui.HorizontalLine(graphic.GraphicChar(None, colors.YELLOW, icon.H_LINE), settings.SCREEN_WIDTH + 1)
     victory_text = gui.TextBox("A WINNER IS YOU", (0, 0), colors.WHITE)
     ironic_text = \
         gui.TextBox("Good job! No seriously, I bet it was real hard...",
@@ -565,8 +555,7 @@ def victory_screen(state_stack):
 
 def game_over_screen(state_stack):
     game_over_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
-    red_line = gui.HorizontalLine(icon.H_LINE, colors.RED,
-                                  colors.BLACK, settings.SCREEN_WIDTH + 1)
+    red_line = gui.HorizontalLine(graphic.GraphicChar(None, colors.RED, icon.H_LINE), settings.SCREEN_WIDTH + 1)
     game_over_text = gui.TextBox("YOU DIED", (0, 0), colors.RED)
     insult_text = gui.TextBox("Like a bitch.", (0, 0), colors.DARK_BROWN)
 

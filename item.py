@@ -629,8 +629,8 @@ class LifeStealEffect(EquippedEffect):
         """
         Causes seen entities to heal holder of this effect upon death.
         """
-        e = AddEffectToOtherSeenEntities(lambda: HealAnEntityOnDeath(entity))
-        entity.effect_queue.add(entityeffect.AddSpoofChild(entity, e, 1))
+        effect = AddEffectToOtherSeenEntities(lambda e=entity: HealAnEntityOnDeath(e))
+        entity.effect_queue.add(entityeffect.AddSpoofChild(entity, effect, 1))
         entity.effect_queue.add(entityeffect.StatusIconEntityEffect(entity, LIFE_STEAL_STATUS_DESCRIPTION,
                                                                     1, "life_steal_effect"))
 

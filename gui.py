@@ -6,6 +6,7 @@ import graphic
 import icon
 import inputhandler
 import inventory
+from libtcodpy import _CBsp
 from messenger import msg
 from console import console
 import colors
@@ -65,11 +66,11 @@ class HorizontalSpace(UIElement):
 
 
 class HorizontalLine(UIElement):
-    def __init__(self, icon, color_fg, color_bg, width, margin=geo.zero2d()):
+    def __init__(self, graphic_char, width, left_graphic_char=None, right_graphic_char=None, margin=geo.zero2d()):
         super(HorizontalLine, self).__init__(margin)
-        self.icon = icon
-        self.color_bg = color_bg
-        self.color_fg = color_fg
+        self.graphic_char = graphic_char
+        self.left_graphic_char = left_graphic_char
+        self.right_graphic_char = right_graphic_char
         self._width = width
 
     @property
@@ -80,18 +81,27 @@ class HorizontalLine(UIElement):
     def width(self):
         return self._width
 
+    def draw_point(self, graphic_char, x, y):
+        if self.graphic_char.icon:
+            console.set_symbol((x, y), graphic_char.icon)
+        if self.graphic_char.color_bg:
+            console.set_color_bg((x, y), graphic_char.color_bg)
+        if self.graphic_char.color_fg:
+            console.set_color_fg((x, y), graphic_char.color_fg)
+
     def draw(self, offset=geo.zero2d()):
         """
         Draws the line.
         """
         x, y = geo.add_2d(offset, self.margin)
         for i in range(self.width + 1):
-            if not self.icon is None:
-                console.set_symbol((x + i, y), self.icon)
-            if not self.color_bg is None:
-                console.set_color_bg((x + i, y), self.color_bg)
-            if not self.color_fg is None:
-                console.set_color_fg((x + i, y), self.color_fg)
+            if x + i == 0 and self.left_graphic_char:
+                graphic_char = self.left_graphic_char
+            elif x + i == self.width and self.right_graphic_char:
+                graphic_char = self.right_graphic_char
+            else:
+                graphic_char = self.graphic_char
+            self.draw_point(graphic_char, x + i, y)
 
 
 class VerticalLine(UIElement):
@@ -114,11 +124,11 @@ class VerticalLine(UIElement):
         """
         x, y = geo.add_2d(offset, self.margin)
         for i in range(self.height):
-            if not self.graphic_char.icon is None:
+            if self.graphic_char.icon:
                 console.set_symbol((x, y + i), self.graphic_char.icon)
-            if not self.graphic_char.color_bg is None:
+            if self.graphic_char.color_bg:
                 console.set_color_bg((x, y + i), self.graphic_char.color_bg)
-            if not self.graphic_char.color_fg is None:
+            if self.graphic_char.color_fg:
                 console.set_color_fg((x, y + i), self.graphic_char.color_fg)
 
 
@@ -220,6 +230,13 @@ class StyledRectangle(RectangularUIElement):
         self.horizontal_split = [y + rect.top for y in h_split]
         self.vertical_split = [x + rect.left for x in v_split]
         self.title_color_fg = title_color_fg
+        self.content = {}
+
+    def draw_content(self, px, py):
+        for x in [0] + self.horizontal_split:
+            for y in [0] + self.vertical_split:
+                if (x, y) in self.content:
+                    self.content[(x, y)].draw(geo.add_2d((x, y), (px, py)))
 
     def draw(self, offset=geo.zero2d()):
         px, py = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
@@ -229,6 +246,16 @@ class StyledRectangle(RectangularUIElement):
                 char_visual = self._get_char_visual(x - offset[0], y - offset[1])
                 StyledRectangle.draw_char(x, y, char_visual)
         self._draw_title(offset)
+        self.draw_content(px, py)
+
+    def update_content(self):
+        for x in [0] + self.horizontal_split:
+            for y in [0] + self.vertical_split:
+                if (x, y) in self.content:
+                    self.content[(x, y)].update()
+
+    def update(self):
+        self.update_content()
 
     def _get_char_visual(self, x, y):
         if x == self.rect.left:
@@ -274,7 +301,7 @@ class StyledRectangle(RectangularUIElement):
                                       char_visual.color_bg, char_visual.icon)
 
     def _draw_title(self, offset=geo.zero2d()):
-        if not self.title is None:
+        if self.title:
             if len(self.title) % 2 == 1:
                 self.title += " "
             y = offset[1] + self.rect.top
@@ -1209,7 +1236,8 @@ class InfoTextLine(UIElement):
         self._bg_stack_panel.clear()
         for text in self.texts:
             self._text_stack_panel.append(TextBox(text, (0, 0), self.color_fg))
-            self._bg_stack_panel.append(HorizontalLine(" ", self.color_fg, self.color_bg, self.width))
+            self._bg_stack_panel.append(HorizontalLine(graphic.GraphicChar(self.color_bg, self.color_fg, " "),
+                                                       self.width))
         self.dock.top = UIElementList([self._text_stack_panel])
 
     def draw(self):

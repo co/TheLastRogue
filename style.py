@@ -124,6 +124,7 @@ class MinimalClassicStyle(RectangleStyle):
         self.title_separator_left = GraphicChar(bg, fg, 181)
         self.title_separator_right = GraphicChar(bg, fg, 198)
 
+
 class MinimalClassicStyle2(RectangleStyle):
     def __init__(self):
         bg = colors.INTERFACE_BG
@@ -134,13 +135,15 @@ class MinimalClassicStyle2(RectangleStyle):
         self.bottom = self.top
         self.right = self.left
 
+
         self.mid_vertical = self.left
         self.mid_horizontal = self.top
+        self.mid_cross = GraphicChar(bg, fg, 216)
 
-        self.top_cross = GraphicChar(bg, fg, libtcod.CHAR_DTEES)
-        self.left_cross = GraphicChar(bg, fg, libtcod.CHAR_TEEE)
-        self.bottom_cross = GraphicChar(bg, fg, libtcod.CHAR_DTEEN)
-        self.right_cross = GraphicChar(bg, fg, libtcod.CHAR_TEEW)
+        self.top_cross = GraphicChar(bg, fg, 209)
+        self.left_cross = GraphicChar(bg, fg, 198)
+        self.bottom_cross = GraphicChar(bg, fg, 207)
+        self.right_cross = GraphicChar(bg, fg, 181)
 
         self.top_left = GraphicChar(bg, fg, 213)
         self.top_right = GraphicChar(bg, fg, 184)

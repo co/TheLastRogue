@@ -255,8 +255,8 @@ class TestGameState(GameStateBase):
         cap = item.new_leather_cap(self)
         cap.mover.try_move((23, 10), self.dungeon_level)
 
-        skeleton = monster.new_skeleton(self)
-        skeleton.mover.try_move((20, 14), self.dungeon_level)
+        pixie = monster.new_pixie(self)
+        pixie.mover.try_move((20, 14), self.dungeon_level)
 
         #salamander = monster.new_salamander(self)
         #salamander.mover.try_move((25, 10), self.dungeon_level)

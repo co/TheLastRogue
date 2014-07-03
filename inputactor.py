@@ -152,8 +152,6 @@ class InputActor(Actor):
             self.open_wear_wield_item_action_menu()
         elif key == inputhandler.DRINK:
             self.open_drink_item_action_menu()
-        elif key == inputhandler.PRINTSCREEN:
-            console.console.print_screen()
         if settings.DEV_MODE_FLAG:
             self.handle_dev_mode_commands(key)
 
