@@ -629,10 +629,19 @@ class LifeStealEffect(EquippedEffect):
         """
         Causes seen entities to heal holder of this effect upon death.
         """
-        effect = AddEffectToOtherSeenEntities(lambda e=entity: HealAnEntityOnDeath(e))
+        effect = AddEffectToOtherSeenEntities(HealAnEntityDeathFactory(entity))
         entity.effect_queue.add(entityeffect.AddSpoofChild(entity, effect, 1))
         entity.effect_queue.add(entityeffect.StatusIconEntityEffect(entity, LIFE_STEAL_STATUS_DESCRIPTION,
                                                                     1, "life_steal_effect"))
+
+
+class HealAnEntityDeathFactory(object):
+    def __init__(self, entity):
+        super(HealAnEntityDeathFactory, self).__init__()
+        self.entity = entity
+
+    def __call__(self):
+        return HealAnEntityOnDeath(self.entity)
 
 
 class SetInvisibilityFlagEquippedEffect(EquippedEffect):
@@ -723,6 +732,7 @@ def new_map_scroll(game_state):
     scroll.set_child(Description("Scroll of magic mapping.",
                                  "A scroll which will make a map of your surroundings."))
     return scroll
+
 
 def new_bomb(game_state):
     bomb = Composite()
