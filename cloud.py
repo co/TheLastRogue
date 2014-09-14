@@ -249,13 +249,16 @@ class CloudActor(Actor):
         return gametime.single_turn
 
     def spread(self):
-        if self.parent.density.value < 2:
+        minimal_cloud_size = 2
+        if self.parent.density.value < minimal_cloud_size:
             self.parent.mover.try_remove_from_dungeon()
             return gametime.single_turn
         density_per_tile = max(self.parent.density.value / 4, 1)
         neighbours = [geometry.add_2d(offset, self.parent.position.value) for offset in direction.AXIS_DIRECTIONS]
+        random.shuffle(neighbours)
         for neighbour in neighbours:
-            if not (rng.coin_flip() and rng.coin_flip()):
-                self._float_to_position(neighbour, density_per_tile)
+            self._float_to_position(neighbour, density_per_tile)
             if self.parent.density.value < density_per_tile:
+                break
+            if self.parent.density.value < minimal_cloud_size:
                 break
