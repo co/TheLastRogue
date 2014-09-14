@@ -73,7 +73,7 @@ class SpiderWeb(Composite):
         self.set_child(DungeonLevel())
         self.set_child(Description("Spider Web",
                                    "A spider made this web, touch it and you might get stuck"))
-        self.set_child(GraphicChar(None, colors.WHITE, "#"))
+        self.set_child(GraphicChar(None, colors.WHITE, icon.SPIDER+2))
 
         self.set_child(CharPrinter())
         self.set_child(Mover())

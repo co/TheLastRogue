@@ -144,7 +144,7 @@ def new_worm(gamestate):
 
     worm.set_child(Description("Worm", "It's a giant earth worm."))
     worm.set_child(EntityMessages("The worm wiggles at you.", "The worm stops moving."))
-    worm.set_child(GraphicChar(None, colors.PINK, "w"))
+    worm.set_child(GraphicChar(None, colors.PINK, icon.BLOOD7+4))
 
     worm.set_child(Health(4))
     worm.set_child(DataPoint(DataTypes.STRENGTH, 3))
@@ -476,7 +476,7 @@ class MakeDustClouds(Leaf):
     def _spawn_dust_cloud(self):
         my_position = self.parent.position.value
         dungeon_level = self.parent.dungeon_level.value
-        dust = new_dust_cloud(self.parent.game_state.value, 24)
+        dust = new_dust_cloud(self.parent.game_state.value, 12)
         dust.mover.replace_move(my_position, dungeon_level)
 
 
