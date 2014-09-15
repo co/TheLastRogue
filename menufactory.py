@@ -89,7 +89,8 @@ def start_accept_reject_prompt(state_stack, game_state, message):
 def get_menu_with_options(options, state_stack, x_border=4, y_border=5):
     temp_position = (-1, -1)
     main_menu = menu.StaticMenu(temp_position, options, state_stack, margin=style.menu_theme.margin, vertical_space=1)
-    main_menu_rect = rectfactory.ratio_of_screen_rect(main_menu.width + x_border, main_menu.height + y_border - 1, 0.5, 0.8)
+    main_menu_rect = rectfactory.ratio_of_screen_rect(main_menu.width + x_border, main_menu.height + y_border - 1, 0.5,
+                                                      0.8)
     main_menu.offset = main_menu_rect.top_left
 
     background_rect = get_menu_background(main_menu_rect)
@@ -273,11 +274,13 @@ def context_menu(player, state_stack):
 def new_player_status_stack(player, width):
     text_margin = width - 3
     text_box_margin = (0, 0)
-    strength_text_box = gui.TextBox("Str" + str(player.strength.value).rjust(text_margin), text_box_margin, colors.ORANGE)
+    strength_text_box = gui.TextBox("Str" + str(player.strength.value).rjust(text_margin), text_box_margin,
+                                    colors.ORANGE)
     armor_text_box = gui.TextBox("Def" + str(player.armor.value).rjust(text_margin), text_box_margin, colors.GRAY)
     evasion_text_box = gui.TextBox("Eva" + str(player.evasion.value).rjust(text_margin), text_box_margin, colors.GREEN)
     stealth_text_box = gui.TextBox("Sth" + str(player.stealth.value).rjust(text_margin), text_box_margin, colors.BLUE)
-    movement_speed_text_box = gui.TextBox("Mov" + str(int(120.0 / player.movement_speed.value * 10)).rjust(text_margin), text_box_margin, colors.CHAMPAGNE)
+    movement_speed_text_box = gui.TextBox("Mov" + str(int(120.0 / player.movement_speed.value * 10)).rjust(text_margin),
+                                          text_box_margin, colors.CHAMPAGNE)
 
     status_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_LEFT, vertical_space=0)
     status_stack_panel.append(strength_text_box)
@@ -343,8 +346,12 @@ def new_player_weapon_table(player, width):
 
 
 def player_status_menu(player):
-    width = 27
-    player_status_stack_panel = gui.StackPanelVertical((2, 2), alignment=gui.StackPanelVertical.ALIGN_LEFT,
+    split_width = 27
+    full_width = split_width * 2
+    status_position = ((settings.SCREEN_WIDTH - full_width) / 2, 10)
+    content_padding = (2, 2)
+    player_status_stack_panel = gui.StackPanelVertical(geo.add_2d(status_position, content_padding),
+                                                       alignment=gui.StackPanelVertical.ALIGN_LEFT,
                                                        vertical_space=1)
     player_status_stack_panel_row_1 = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_TOP,
                                                                horizontal_space=1)
@@ -373,22 +380,26 @@ def player_status_menu(player):
     cancel_option = menu.MenuOption("", [stack_pop_function], (lambda: True))
     context_options.append(cancel_option)
 
-    resulting_menu = menu.StaticMenu((0, 0), context_options, state_stack, margin=style.menu_theme.margin)
+    resulting_menu = menu.StaticMenu(status_position, context_options, state_stack, margin=style.menu_theme.margin)
 
     menu_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=3)
     ui_elements = [player_status_stack_panel, resulting_menu]
     menu_stack_panel.append(gui.UIElementList(ui_elements))
-    status_list = get_status_list(player, width)
-    menu_stack_panel.append(status_list)
+    status_list = get_status_list(player)
+    player_status_stack_panel.append(status_list)
 
-    v_split = [width]
-    bg_rect = geo.Rect((0, 0), width * 2, max(menu_stack_panel.total_height, 15) + 4)
+    v_split = [split_width]
+    bg_rect_height = (player_status_stack_panel_row_1.total_height +
+                      player_status_stack_panel_row_2.total_height +
+                      (status_list.total_height + 3 if status_list.total_height > 0 else 0) + 6)
+    bg_rect = geo.Rect(status_position, split_width * 2, bg_rect_height)
+
     styled_bg_rect = get_menu_background(bg_rect, style.rogue_classic_theme.rect_style, v_split=v_split)
 
     return state.UIState(gui.UIElementList([styled_bg_rect, menu_stack_panel]))
 
 
-def get_status_list(player, width):
+def get_status_list(player):
     context_options = []
     state_stack = player.game_state.value.menu_prompt_stack
     for status in player.status_bar.statuses:
