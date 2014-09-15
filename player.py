@@ -53,6 +53,7 @@ class Player(Composite):
         self.set_child(DataPoint(DataTypes.MELEE_SPEED, gametime.single_turn))
         self.set_child(DataPoint(DataTypes.THROW_SPEED, gametime.double_turn))
         self.set_child(DataPoint(DataTypes.SHOOT_SPEED, gametime.single_turn))
+        self.set_child(DataPoint(DataTypes.CAST_SPEED, gametime.single_turn))
         self.set_child(DataPoint(DataTypes.SIGHT_RADIUS, constants.COMMON_SIGHT_RADIUS))
         self.set_child(DataPoint(DataTypes.FACTION, Factions.PLAYER))
         self.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.NORMAL))

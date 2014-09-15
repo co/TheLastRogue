@@ -13,7 +13,7 @@ import geometry
 from graphic import GraphicChar, CharPrinter
 from health import ReflectDamageTakenEffect
 import messenger
-from missileaction import PlayerThrowItemAction
+from missileaction import PlayerThrowItemAction, PlayerCastMissileSpellAction
 from monster import HealAnEntityOnDeath, AddEffectToOtherSeenEntities
 from mover import Mover
 from position import Position, DungeonLevel
@@ -109,6 +109,45 @@ def new_sling(game_state):
     return sling
 
 
+def new_flame_orb(game_state):
+    orb = Composite()
+    set_item_components(orb, game_state)
+    set_ranged_weapon_components(orb)
+    orb.set_child(RangeWeaponType(RangeWeaponType.MAGIC))
+    orb.set_child(Description("Flame Orb",
+                                "An orb with a living flame inside, it allows the weilder to channel fire from it."))
+    orb.set_child(GraphicChar(None, colors.RED, icon.ORB))
+    orb.set_child(DataPoint(DataTypes.WEAPON_RANGE, 5))
+    orb.set_child(AttackProvider(2, [DamageTypes.FIRE, DamageTypes.MAGIC]))
+    orb.set_child(DataPoint(DataTypes.WEIGHT, 2))
+    orb.set_child(DataPoint(DataTypes.HIT, 5))
+    orb.set_child(DataPoint(DataTypes.DAMAGE, 2))
+    orb.set_child(MagicMissileEffect(GraphicChar(None, colors.RED, icon.BIG_CENTER_DOT)))
+    return orb
+
+
+class MagicEffect(Leaf):
+    def __init__(self):
+        super(MagicEffect, self).__init__()
+        self.component_type = "magic_effect"
+
+    def cast_magic(self):
+        pass
+
+
+class MagicMissileEffect(MagicEffect):
+    def __init__(self, missile_graphic):
+        super(MagicMissileEffect, self).__init__()
+        self.missile_graphic = missile_graphic
+
+    def cast_magic(self, **kwargs):
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        casting = PlayerCastMissileSpellAction(self.parent, self.missile_graphic)
+        game_state = self.parent.game_state.value
+        if casting.can_act(source_entity=source_entity, game_state=game_state):
+            casting.act(source_entity=source_entity, game_state=game_state)
+
+
 class RangeWeaponType(DataPoint):
     """
     Component that marks a weapon as a ranged weapon.
@@ -116,6 +155,7 @@ class RangeWeaponType(DataPoint):
 
     GUN = 0
     SLING = 1
+    MAGIC = 2
 
     def __init__(self, range_weapon_type):
         super(RangeWeaponType, self).__init__("range_weapon_type", range_weapon_type)

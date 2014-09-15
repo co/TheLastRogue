@@ -72,6 +72,7 @@ class DataTypes:
     MELEE_SPEED = "melee_speed"
     SHOOT_SPEED = "shoot_speed"
     THROW_SPEED = "throw_speed"
+    CAST_SPEED = "cast_speed"
 
     MELEE_DAMAGE_MULTIPLIER = "melee_damage_multiplier"
     THROW_DAMAGE_MULTIPLIER = "throw_damage_multiplier"

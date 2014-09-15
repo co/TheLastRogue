@@ -152,6 +152,38 @@ class PlayerSlingStoneAction(PlayerMissileAction):
         return max_throw_distance(source_entity.strength.value) + self.sling_weapon.weapon_range.value
 
 
+class PlayerCastMissileSpellAction(PlayerMissileAction):
+    def __init__(self, item, missile_graphic):
+        super(PlayerCastMissileSpellAction, self).__init__(missile_graphic)
+        self.component_type = "cast_spell_action"
+        self.name = "Cast Spell"
+        self.display_order = 95
+        self.item = item
+
+    def add_energy_spent_to_entity(self, entity):
+        """
+        Help method for spending energy for the act performing entity.
+        """
+        entity.actor.newly_spent_energy += entity.cast_speed.value
+
+    def missile_hit_effect(self, dungeon_level, position, game_state, source_entity):
+        self.hit_position(dungeon_level, position, source_entity)
+
+    def hit_position(self, dungeon_level, position, source_entity):
+        target_entity = dungeon_level.get_tile(position).get_first_entity()
+        if target_entity is None:
+            return
+        self.item.attack_provider.attack_entity(source_entity, target_entity,
+                                                        bonus_damage=source_entity.attacker.actual_thrown_rock_damage,
+                                                        bonus_hit=source_entity.hit.value)
+
+    def can_act(self, **kwargs):
+        return True
+
+    def max_missile_distance(self, **kwargs):
+        return self.item.weapon_range.value
+
+
 class PlayerShootWeaponAction(PlayerMissileAction):
     def __init__(self, ranged_weapon):
         super(PlayerShootWeaponAction, self).__init__()

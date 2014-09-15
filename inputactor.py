@@ -223,19 +223,13 @@ class InputActor(Actor):
         shooting = PlayerShootWeaponAction(weapon)
         game_state = self.parent.game_state.value
         if shooting.can_act(source_entity=self.parent, game_state=game_state):
-            shooting_succeded = shooting.act(source_entity=self.parent,
-                                             game_state=game_state)
-            if shooting_succeded:
-                self.newly_spent_energy += gametime.single_turn
+            shooting.act(source_entity=self.parent, game_state=game_state)
 
     def shoot_sling(self, weapon):
         shooting = PlayerSlingStoneAction(weapon)
         game_state = self.parent.game_state.value
         if shooting.can_act(source_entity=self.parent, game_state=game_state):
-            shooting_succeded = shooting.act(source_entity=self.parent,
-                                             game_state=game_state)
-            if shooting_succeded:
-                self.newly_spent_energy += gametime.single_turn
+            shooting.act(source_entity=self.parent, game_state=game_state)
 
     def throw_or_shoot(self):
         if not self.parent.equipment.slot_is_equiped(EquipmentSlots.RANGED_WEAPON):
@@ -246,6 +240,8 @@ class InputActor(Actor):
             self.shoot_gun(weapon)
         elif weapon.range_weapon_type.value == RangeWeaponType.SLING:
             self.shoot_sling(weapon)
+        elif weapon.range_weapon_type.value == RangeWeaponType.MAGIC:
+            weapon.magic_effect.cast_magic(source_entity=self.parent)
         else:
             raise Exception("Tried to shoot weapon without range_weapon_type")
 
