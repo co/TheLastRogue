@@ -10,7 +10,6 @@ from util import entity_skip_turn
 DEFAULT_CRIT_MULTIPLIER = 2
 
 
-
 class Attacker(Leaf):
     """
     Component for attacking and checking if an attacking is legal.
@@ -63,7 +62,6 @@ class Attacker(Leaf):
     @property
     def actual_unarmed_crit_multiplier(self):
         return self.actual_thrown_crit_multiplier
-
 
     def try_hit(self, position):
         """

@@ -189,7 +189,8 @@ class ReflectDamageTakenEffect(DamageTakenEffect):
             damage_effect = entityeffect.UndodgeableAttackEntityEffect(self.parent, self.damage,
                                                                        [DamageTypes.MAGIC, DamageTypes.REFLECT])
             source_entity.effect_queue.add(damage_effect)
-        source_entity.effect_queue.add(entityeffect.StatusIconEntityEffect(source_entity, DAMAGE_REFLECT_STATUS_DESCRIPTION, 1))
+        if source_entity:
+            source_entity.effect_queue.add(entityeffect.StatusIconEntityEffect(source_entity, DAMAGE_REFLECT_STATUS_DESCRIPTION, 1))
 
 
 class BleedWhenDamaged(DamageTakenEffect):

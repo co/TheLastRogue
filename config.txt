@@ -7,11 +7,11 @@ resolution_width=1600
 resolution_height=1024
 
 #The number of frames each animation frame will show up, will mostly effect blink animations in the game.
-animation_delay=3
-missile_animation_delay=2
+animation_delay=2
+missile_animation_delay=1
 
 #Max frames per second, a higher value may speed up the game.
-fps=30
+fps=40
 
 #Set to True for full screen, don't forget to set resolution.
 full_screen=False
