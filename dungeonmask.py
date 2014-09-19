@@ -1,4 +1,5 @@
 import random
+import time
 import colors
 from compositecore import Leaf, CompositeMessage
 from console import console
@@ -17,9 +18,10 @@ class DungeonMask(Leaf):
     def __init__(self):
         super(DungeonMask, self).__init__()
         self._dungeon_map = None
-        self.last_dungeon_map_update_timestamp = -1
+        self.dungeon_map_needs_total_update = True
         self.last_sight_radius = -1
         self.component_type = "dungeon_mask"
+        self._dirty_point_list = []
 
     @property
     def dungeon_map(self):
@@ -38,7 +40,7 @@ class DungeonMask(Leaf):
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.last_dungeon_map_update_timestamp = -1
+        self.dungeon_map_needs_total_update = True
         self.dungeon_map = None
 
     def init_dungeon_map_if_has_dungeon_level(self):
@@ -47,7 +49,7 @@ class DungeonMask(Leaf):
         """
         if self.has_sibling("dungeon_level") and not self.parent.dungeon_level.value is None:
             self._init_dungeon_map()
-            self.last_dungeon_map_update_timestamp = -1
+            self.dungeon_map_needs_total_update = True
 
     def _init_dungeon_map(self):
         """
@@ -55,6 +57,9 @@ class DungeonMask(Leaf):
         """
         self.dungeon_map = libtcod.map_new(self.parent.dungeon_level.value.width,
                                            self.parent.dungeon_level.value.height)
+
+    def signal_dirty_point(self, point):
+        self._dirty_point_list.append(point)
 
     def can_see_point(self, point):
         """
@@ -127,11 +132,21 @@ class DungeonMask(Leaf):
         """
         Updates the dungeon map it is older than the latest change.
         """
-        dungeon_level = self.parent.dungeon_level.value
-        if (dungeon_level.terrain_changed_timestamp >
-                self.last_dungeon_map_update_timestamp):
+        if self.dungeon_map_needs_total_update:
             self.update_dungeon_map()
             self.update_fov()
+        elif len(self._dirty_point_list) > 0:
+            for point in self._dirty_point_list:
+                x, y = point
+            self.update_dungeon_map_point(x, y)
+            self._dirty_point_list = []
+            self.update_fov()
+
+    def update_dungeon_map_point(self, x, y):
+        dungeon_level = self.parent.dungeon_level.value
+        terrain = dungeon_level.get_tile_or_unknown((x, y)).get_terrain()
+        libtcod.map_set_properties(self.dungeon_map, x, y, terrain.has("is_transparent"),
+                                   self.parent.mover.can_pass_terrain(terrain))
 
     def update_dungeon_map(self):
         """
@@ -140,11 +155,9 @@ class DungeonMask(Leaf):
         dungeon_level = self.parent.dungeon_level.value
         for y in range(dungeon_level.height):
             for x in range(dungeon_level.width):
-                terrain = \
-                    dungeon_level.get_tile_or_unknown((x, y)).get_terrain()
-                libtcod.map_set_properties(self.dungeon_map, x, y, terrain.has("is_transparent"),
-                                           self.parent. mover.can_pass_terrain(terrain))
-        self.last_dungeon_map_update_timestamp = turn.current_turn
+                self.update_dungeon_map_point(x, y)
+        self.dungeon_map_needs_total_update = False
+        self._dirty_point_list = []
 
     def message(self, message):
         """

@@ -293,10 +293,10 @@ class GlassDeviceAction(ActivateDeviceAction):
             for y in range(top, top + 2 * sight_radius + 1):
                 try:
                     turned_something_to_glass = self._turn_to_glass_if_wall((x, y), dungeon_level)
+                    dungeon_level.signal_terrain_changed((x, y))
                 except IndexError:
                     continue
         if turned_something_to_glass:
-            dungeon_level.signal_terrain_changed()
             msg.send_global_message(messenger.GLASS_TURNING_MESSAGE)
 
 

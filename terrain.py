@@ -233,7 +233,7 @@ class OpenDoorAction(Leaf):
             self.parent.remove_component_of_type("is_solid")
         self.parent.set_child(Flag("is_transparent"))
         self.parent.graphic_char.icon = icon.DOOR_OPEN
-        self.parent.dungeon_level.value.signal_terrain_changed()
+        self.parent.dungeon_level.value.signal_terrain_changed(self.parent.position.value)
 
 
 class OpenDoorBumpAction(BumpAction):

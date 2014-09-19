@@ -124,8 +124,11 @@ class DungeonLevel(object):
     def tick(self):
         self.actor_scheduler.tick()
 
-    def signal_terrain_changed(self):
+    def signal_terrain_changed(self, point):
         self.terrain_changed_timestamp = turn.current_turn
+        entities = [entity for entity in self.entities if entity.has("dungeon_mask")]
+        for entity in entities:
+            entity.dungeon_mask.signal_dirty_point(point)
 
     def print_dungeon(self):
         for y, row in enumerate(self.tile_matrix):
