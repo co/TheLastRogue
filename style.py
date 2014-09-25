@@ -70,14 +70,14 @@ class RectangleStyle3D(RectangleStyle):
 
 
 class FinalFantasyClassicStyle(RectangleStyle):
-    def __init__(self, color_fg=colors.WHITE, color_bg=colors.BLUE_D):
+    def __init__(self, color_fg=colors.WHITE, color_bg=colors.BLUE_D, cross_icon=libtcod.CHAR_DIAMOND):
         self.center = GraphicChar(color_bg, color_bg, ' ')
         self.top = GraphicChar(color_bg, color_fg, libtcod.CHAR_HLINE)
         self.left = GraphicChar(color_bg, color_fg, libtcod.CHAR_VLINE)
         self.bottom = self.top
         self.right = self.left
 
-        cross = GraphicChar(color_bg, color_fg, libtcod.CHAR_DIAMOND)
+        cross = GraphicChar(color_bg, color_fg, cross_icon)
 
         self.mid_vertical = self.left
         self.mid_horizontal = self.top
@@ -246,7 +246,7 @@ ff_blue_theme = MenuStyle(FinalFantasyClassicStyle(),
 ff_gold_theme = MenuStyle(FinalFantasyClassicStyle(colors.CHAMPAGNE, colors.DARK_BROWN),
                           colors.GRAY, (2, 2))
 
-ff_red_theme = MenuStyle(FinalFantasyClassicStyle(colors.CHAMPAGNE, colors.RED_D),
+ff_red_theme = MenuStyle(FinalFantasyClassicStyle(colors.CHAMPAGNE, colors.RED_D, icon.SKULL),
                           colors.GRAY, (2, 2))
 
 tlr_classic_3d_theme = MenuStyle(RectangleStyle3D(),

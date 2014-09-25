@@ -71,8 +71,8 @@ def get_save_quit_menu(player, state_stack):
                                                game_state.current_stack.pop,
                                                (lambda: player.actor.add_energy_spent(gametime.single_turn))]))
 
-    give_up_graphic_active = graphic.GraphicChar(None, colors.WHITE, icon.CORPSE)
-    give_up_graphic_inactive = graphic.GraphicChar(None, colors.GRAY, icon.CORPSE)
+    give_up_graphic_active = graphic.GraphicChar(None, colors.WHITE, icon.SKULL)
+    give_up_graphic_inactive = graphic.GraphicChar(None, colors.GRAY, icon.SKULL)
     options.append(menu.MenuOptionWithSymbols("Give Up", give_up_graphic_active, give_up_graphic_inactive,
                                               [player.health_modifier.kill, exit_menu_function,
                                                (lambda: player.actor.add_energy_spent(gametime.single_turn))]))
