@@ -627,9 +627,9 @@ def new_amulet_of_life_steal(game_state):
     set_amulet_components(amulet)
     amulet.set_child(GraphicChar(None, colors.RED, icon.AMULET))
     amulet.set_child(LifeStealEffect())
-    amulet.set_child(Description("Amulet of the Nosferatu",
+    amulet.set_child(Description("Amulet of Vampirism",
                                  "The gem at the center pulsates when blood is near."
-                                 "Its magic powers will heal you see a creature die."))
+                                 "Its magic powers will heal when you see a creature die."))
     return amulet
 
 
