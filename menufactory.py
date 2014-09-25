@@ -434,12 +434,23 @@ def sacrifice_menu(player, powers, post_power_gain_function):
     context_options.append(cancel_option)
 
     context_menu_rect = rectfactory.center_of_screen_rect(max(option.width for option in context_options) + 4,
-                                                          len(context_options) * 2 + 3)
-    resulting_menu = menu.StaticMenu(context_menu_rect.top_left, context_options, state_stack,
-                                     margin=style.menu_theme.margin)
+                                                          len(context_options) * 2 + 6)
+
+    menu_stack_panel = gui.StackPanelVertical(context_menu_rect.top_left, style.menu_theme.margin, vertical_space=0,
+                                              alignment=gui.StackPanelVertical.ALIGN_CENTER)
+
+    heading_stack_panel = gui.StackPanelHorizontal((0, 0), (0, 0), horizontal_space=2)
+    menu_stack_panel.append(heading_stack_panel)
+    power_caption = "Power" + str("Cost").rjust(width - len("Cost   "))
+    heading_stack_panel.append(gui.TextBox(power_caption, (1, 0), colors.GRAY))
+    heading_stack_panel.append(gui.SymbolUIElement((0, 0), graphic.GraphicChar(colors.DARK_BLUE, colors.HP_BAR_FULL, icon.HEALTH_STAT)))
+    menu_stack_panel.append(gui.VerticalSpace(2))
+
+    resulting_menu = menu.StaticMenu((0, 0), context_options, state_stack)
+    menu_stack_panel.append(resulting_menu)
     background_rect = get_menu_background(context_menu_rect, style.sacrifice_menu_theme.rect_style)
 
-    ui_elements = [background_rect, resulting_menu]
+    ui_elements = [background_rect, menu_stack_panel]
     ui_state = state.UIState(gui.UIElementList(ui_elements))
     return ui_state
 
