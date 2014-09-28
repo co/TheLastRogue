@@ -504,6 +504,7 @@ def new_sword(game_state):
     sword.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2))
     sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
     sword.set_child(DataPoint(DataTypes.DAMAGE, 4))
+    sword.set_child(DataPoint(DataTypes.HIT, 12))
     return sword
 
 
