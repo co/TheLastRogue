@@ -1,5 +1,5 @@
 from compositecore import Leaf, Composite
-from stats import DataPointBonusSpoof
+from stats import DataPointBonusSpoof, DataTypes
 from text import Description
 
 
@@ -23,18 +23,58 @@ class NonPersistentPower(Power):
         self.parent.remove_component(self)
 
 
-class StrengthPower(Power):
+class StatPower(Power):
+    """
+    Abstract class, should never be gained by player.
+    """
     def __init__(self):
-        super(StrengthPower, self).__init__()
-        self.component_type = "strength_power"
-        self.buy_cost = 7
-        self.set_child(Description("Gain Strength", "You gain +2 Strength."))
+        super(StatPower, self).__init__()
 
     def first_tick(self, time):
         """
         Causes the entity that equips this have a bonus to one stat.
         """
-        self.parent.add_spoof_child(DataPointBonusSpoof("strength", 2))
+        self.parent.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus_value))
+
+
+class StrengthPower(StatPower):
+    def __init__(self):
+        super(StrengthPower, self).__init__()
+        self.component_type = "strength_power"
+        self.buy_cost = 7
+        self.set_child(Description("Bear's Strength", "You gain +2 Strength."))
+        self.stat = DataTypes.STRENGTH
+        self.bonus_value = 2
+
+
+class StealthPower(StatPower):
+    def __init__(self):
+        super(StealthPower, self).__init__()
+        self.component_type = "stealth_power"
+        self.buy_cost = 6
+        self.set_child(Description("Light Feet", "You gain +3 Stealth."))
+        self.stat = DataTypes.STEALTH
+        self.bonus_value = 3
+
+
+class ArmorPower(StatPower):
+    def __init__(self):
+        super(ArmorPower, self).__init__()
+        self.component_type = "armor_power"
+        self.buy_cost = 9
+        self.set_child(Description("Survivor", "You gain +1 armor."))
+        self.stat = DataTypes.ARMOR
+        self.bonus_value = 1
+
+
+class CritPower(StatPower):
+    def __init__(self):
+        super(CritPower, self).__init__()
+        self.component_type = "crit_power"
+        self.buy_cost = 5
+        self.set_child(Description("Cruel", "You have an extra 5% chance of inflicting a critical strike."))
+        self.stat = DataTypes.CRIT_CHANCE
+        self.bonus_value = 0.05
 
 
 class FullHealPower(NonPersistentPower):
@@ -53,4 +93,4 @@ def sacrifice_health(entity, cost):
 
 
 def new_power_list():
-    return [FullHealPower(), StrengthPower()]
+    return [FullHealPower(), StrengthPower(), StealthPower(), ArmorPower(), CritPower()]
