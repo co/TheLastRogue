@@ -49,7 +49,17 @@ class BumpAction(Leaf):
         return True
 
 
+def set_terrain_components(terrain):
+    terrain.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.TERRAIN))
+    terrain.set_child(Mover())
+    terrain.set_child(Position())
+    terrain.set_child(DungeonLevel())
+    terrain.set_child(CharPrinter())
+
+
 class Floor(Composite):
+    FLOOR_FLAG = "is_floor"
+
     def __init__(self):
         super(Floor, self).__init__()
         self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.TERRAIN))
@@ -60,7 +70,7 @@ class Floor(Composite):
                                    colors.FLOOR_FG,
                                    icon.CENTER_DOT))
         self.set_child(CharPrinter())
-        self.set_child(Flag("is_transparent"))
+        self.set_child(Flag(Floor.FLOOR_FLAG))
 
 
 class Water(Composite):
@@ -74,7 +84,6 @@ class Water(Composite):
                                    colors.BLUE,
                                    icon.WATER))
         self.set_child(CharPrinter())
-        self.set_child(Flag("is_transparent"))
 
 
 class GlassWall(Composite):
@@ -87,7 +96,6 @@ class GlassWall(Composite):
         self.set_child(GraphicChar(colors.FLOOR_BG, colors.WHITE, icon.GLASS_WALL))
         self.set_child(CharPrinter())
         self.set_child(Flag("is_solid"))
-        self.set_child(Flag("is_transparent"))
 
 
 class Chasm(Composite):
@@ -100,7 +108,6 @@ class Chasm(Composite):
         self.set_child(GraphicChar(colors.BLACK, colors.DARKNESS, icon.CHASM2))
         self.set_child(CharPrinter())
         self.set_child(Flag("is_chasm"))
-        self.set_child(Flag("is_transparent"))
 
         self.set_child(PlayerFallDownChasmAction())
         self.set_child(FallRemoveNonPlayerNonFlying())
@@ -185,7 +192,6 @@ class Unknown(Composite):
                                    ' '))
         self.set_child(Flag("is_unknown"))
         self.set_child(Flag("is_solid"))
-        self.set_child(Flag("is_transparent"))
 
 
 class Wall (Composite):
@@ -201,6 +207,7 @@ class Wall (Composite):
                                                  icon.CAVE_WALLS_ROW2,
                                                  [Wall, Door, Chasm]))
         self.set_child(Flag("is_solid"))
+        self.set_child(Flag("is_opaque"))
         self.set_child(Flag("is_wall"))
 
 
@@ -216,6 +223,7 @@ class Door(Composite):
                                    colors.ORANGE_D,
                                    icon.DOOR))
         self.set_child(Flag("is_solid"))
+        self.set_child(Flag("is_opaque"))
 
         self.set_child(OpenDoorAction())
         self.set_child(OpenDoorBumpAction())
@@ -231,7 +239,8 @@ class OpenDoorAction(Leaf):
     def open_door(self):
         if self.parent.has("is_solid"):
             self.parent.remove_component_of_type("is_solid")
-        self.parent.set_child(Flag("is_transparent"))
+        if self.parent.has("is_opaque"):
+            self.parent.remove_component_of_type("is_opaque")
         self.parent.graphic_char.icon = icon.DOOR_OPEN
         self.parent.dungeon_level.value.signal_terrain_changed(self.parent.position.value)
 

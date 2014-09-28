@@ -1,4 +1,5 @@
 from dungeonfeature import StairsUp
+import dungeonfeature
 import terrain
 import tile
 from dungeonlevel import DungeonLevel
@@ -59,6 +60,8 @@ def char_to_terrain_and_features(c):
         return [terrain.Chasm()]
     elif c == '>':
         return [terrain.Floor(), StairsUp()]
+    elif c == 'p':
+        return [terrain.Floor(), dungeonfeature.new_plant()]
     else:
         return [terrain.Floor()]
 

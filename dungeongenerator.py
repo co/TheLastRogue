@@ -128,7 +128,7 @@ def dfs_tunnler(dungeon_level, start_position, min_length, max_length,
 
 
 def dig_out_rect(rect, dungeon_level):
-    dig_out_brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
+    dig_out_brush = SinglePointBrush(ReplaceComponent(terrain.Floor))
     for x in range(rect.left, rect.width):
         for y in range(rect.top, rect.height):
             dig_out_brush.apply_brush(dungeon_level, (x, y))
@@ -232,6 +232,18 @@ def generate_dungeon_exploded_rooms(depth, rooms, room_area, rectangle_room_chan
     # Redraw corridors to make sure no dead rooms appear.
     open_points.update(corridors_points)
 
+    plant_points = set()
+    if rng.coin_flip() or rng.coin_flip():
+        for room_position in room_positions:
+            if rng.coin_flip() and rng.coin_flip():
+                continue
+            room_x, room_y = room_position
+            variance = 7
+            chasm_start_point = (random.randrange(room_x - variance, room_x + variance),
+                                 random.randrange(room_y - variance, room_y + variance))
+            plant_points.update(shapegenerator.random_explosion(chasm_start_point,
+                                                                room_area * 0.2, direction.AXIS_DIRECTIONS))
+
     #  Chasm shape generation
     chasm_points = set()
     for room_position in room_positions:
@@ -247,24 +259,27 @@ def generate_dungeon_exploded_rooms(depth, rooms, room_area, rectangle_room_chan
     # Normalize Points to dungeon
     frame = (2, 2)  # Just to be safe we won't try to draw outside Dungeon.
     level_shape = shapegenerator.Shape(open_points)
+    plant_shape = shapegenerator.Shape(plant_points)
     chasm_shape = shapegenerator.Shape(chasm_points)
     possible_door_shape = shapegenerator.Shape(possible_door_points)
     dungeon_rect = shapegenerator.Shape(open_points | chasm_points).calc_rect()
     dungeon_rect_with_frame = dungeon_rect.expanded_by(frame)
     normalized_chasm_points = chasm_shape.offset_points(geo.sub_2d(frame, dungeon_rect.top_left))
+    normalized_plant_points = plant_shape.offset_points(geo.sub_2d(frame, dungeon_rect.top_left))
     normalized_possible_door_points = possible_door_shape.offset_points(geo.sub_2d(frame, dungeon_rect.top_left))
     normalized_open_points = level_shape.offset_points(geo.sub_2d(frame, dungeon_rect.top_left))
-
-
 
     # Apply shapes to dungeon
     dungeon_level = get_full_wall_dungeon(dungeon_rect_with_frame.width, dungeon_rect_with_frame.height, depth)
 
-    brush = SinglePointBrush(ReplaceTerrain(terrain.Chasm))
+    brush = SinglePointBrush(ReplaceComponent(terrain.Chasm))
     apply_brush_to_points(dungeon_level, normalized_chasm_points, brush)
 
-    brush = SinglePointBrush(ReplaceTerrain(terrain.Floor))
+    brush = SinglePointBrush(ReplaceComponent(terrain.Floor))
     apply_brush_to_points(dungeon_level, normalized_open_points, brush)
+
+    brush = SinglePointBrush(ReplaceComponent(dungeonfeature.new_plant))
+    apply_brush_to_terrains_with_flag(dungeon_level, normalized_plant_points, brush, terrain.Floor.FLOOR_FLAG)
 
     door_brush = DoorIfSuitableBrush()
     apply_brush_to_points(dungeon_level, normalized_possible_door_points, door_brush)
@@ -281,6 +296,15 @@ def generate_dungeon_exploded_rooms(depth, rooms, room_area, rectangle_room_chan
 def apply_brush_to_points(dungeon_level, points, brush):
     for point in points:
         brush.apply_brush(dungeon_level, point)
+
+
+def apply_brush_to_terrains_with_flag(dungeon_level, points, brush, flag):
+    for point in points:
+        terrain = dungeon_level.get_tile_or_unknown(point).get_terrain()
+        "what?"
+        if terrain.has(flag):
+            "yes!"
+            brush.apply_brush(dungeon_level, point)
 
 
 class TileBrush(object):
@@ -328,7 +352,7 @@ def suitable_for_door(dungeon_level, position):
 
 class DoorIfSuitableBrush(TileBrush):
     def __init__(self):
-        self.tile_modifier = ReplaceTerrain(terrain.Door)
+        self.tile_modifier = ReplaceComponent(terrain.Door)
 
     def apply_brush(self, dungeon_level, position):
         if suitable_for_door(dungeon_level, position):
@@ -384,13 +408,13 @@ class TileModifier(object):
         pass
 
 
-class ReplaceTerrain(TileModifier):
-    def __init__(self, terrain_class):
-        super(ReplaceTerrain, self).__init__()
-        self.terrain_class = terrain_class
+class ReplaceComponent(TileModifier):
+    def __init__(self, component_factory):
+        super(ReplaceComponent, self).__init__()
+        self.component_factory = component_factory
 
     def modify(self, dungeon_level, position):
-        terrain_to_modify = self.terrain_class()
+        terrain_to_modify = self.component_factory()
         terrain_to_modify.mover.replace_move(position, dungeon_level)
 
 

@@ -34,7 +34,7 @@ class DungeonCreatorVisualizer(state.State):
     def random_explosion(self):
         dungeon_level = self.dungeon_level
         center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
-        brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
+        brush = dgen.SinglePointBrush(dgen.ReplaceComponent(terrain.Floor))
         end_condition = dgen.CountDownCondition(dungeon_level.width *
                                                 dungeon_level.height * 0.1)
         move_list = list(direction.AXIS_DIRECTIONS)
@@ -44,7 +44,7 @@ class DungeonCreatorVisualizer(state.State):
     def drunkard_walk(self):
         dungeon_level = self.dungeon_level
         center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
-        brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
+        brush = dgen.SinglePointBrush(dgen.ReplaceComponent(terrain.Floor))
         end_condition = dgen.CountDownCondition(dungeon_level.width *
                                                 dungeon_level.height * 0.2)
         move_list = list(direction.DIRECTIONS)
@@ -54,14 +54,14 @@ class DungeonCreatorVisualizer(state.State):
     def fractal_room(self):
         dungeon_level = self.dungeon_level
         center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
-        brush = dgen.RandomTriShapedBrush(dgen.ReplaceTerrain(terrain.Floor))
+        brush = dgen.RandomTriShapedBrush(dgen.ReplaceComponent(terrain.Floor))
         dgen.fractal_room(dungeon_level, center_position, brush)
 
     def drunkard_walk2(self):
         dungeon_level = self.dungeon_level
         center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
         brush =\
-            dgen.RandomTriShapedBrush(dgen.ReplaceTerrain(terrain.Floor))
+            dgen.RandomTriShapedBrush(dgen.ReplaceComponent(terrain.Floor))
         end_condition = dgen.CountDownCondition(dungeon_level.width *
                                                 dungeon_level.height * 0.2)
         move_list = list(direction.DIAGONAL_DIRECTIONS)
@@ -71,7 +71,7 @@ class DungeonCreatorVisualizer(state.State):
     def tunnler(self):
         dungeon_level = self.dungeon_level
         center_position = (dungeon_level.width / 2, dungeon_level.height / 2)
-        brush = dgen.SinglePointBrush(dgen.ReplaceTerrain(terrain.Floor))
+        brush = dgen.SinglePointBrush(dgen.ReplaceComponent(terrain.Floor))
         end_condition = dgen.CountDownCondition(17)
         move_list = list(direction.AXIS_DIRECTIONS)
         dgen.dfs_tunnler(dungeon_level, center_position, 4, 12, brush,

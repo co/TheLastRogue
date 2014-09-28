@@ -145,7 +145,9 @@ class DungeonMask(Leaf):
     def update_dungeon_map_point(self, x, y):
         dungeon_level = self.parent.dungeon_level.value
         terrain = dungeon_level.get_tile_or_unknown((x, y)).get_terrain()
-        libtcod.map_set_properties(self.dungeon_map, x, y, terrain.has("is_transparent"),
+        dungeon_feature = dungeon_level.get_tile_or_unknown((x, y)).get_dungeon_feature()
+        is_opaque = terrain.has("is_opaque") or (dungeon_feature and dungeon_feature.has("is_opaque"))
+        libtcod.map_set_properties(self.dungeon_map, x, y, 0 if is_opaque else 1,
                                    self.parent.mover.can_pass_terrain(terrain))
 
     def update_dungeon_map(self):

@@ -1,21 +1,15 @@
 import random
 from compositecommon import EntityShareTileEffect
 from compositecore import Composite, Leaf
-import direction
 import entityeffect
-import gametime
-import geometry
 from graphic import GraphicChar, CharPrinter
-import menu
 import menufactory
 import messenger
 from mover import Mover, teleport_monsters, Stepper
 from position import Position, DungeonLevel
 import rng
-import sacrifice
 import state
-from stats import DataPoint, DataTypes, GamePieceTypes, Immunities
-import terrain
+from stats import DataPoint, DataTypes, GamePieceTypes, Immunities, Flag
 from text import Description
 import action
 import colors
@@ -34,8 +28,7 @@ class StairsDown(Composite):
         self.set_child(Description("Stairs Down",
                                    ("A dark pass way downward.",
                                     "what horrors awaits there?")))
-        self.set_child(GraphicChar(None, colors.WHITE,
-                                   icon.STAIRS_DOWN))
+        self.set_child(GraphicChar(None, colors.WHITE, icon.STAIRS_DOWN))
 
         self.set_child(CharPrinter())
         self.set_child(DescendStairsAction())
@@ -55,8 +48,7 @@ class StairsUp(Composite):
         self.set_child(Description("Stairs Up",
                                    ("A way back, when the ",
                                     "nightmare becomes too real.")))
-        self.set_child(GraphicChar(None, colors.WHITE,
-                                   icon.STAIRS_UP))
+        self.set_child(GraphicChar(None, colors.WHITE, icon.STAIRS_UP))
         self.set_child(CharPrinter())
         self.set_child(Mover())
         self.set_child(IsDungeonFeature())
@@ -74,7 +66,6 @@ class SpiderWeb(Composite):
         self.set_child(Description("Spider Web",
                                    "A spider made this web, touch it and you might get stuck"))
         self.set_child(GraphicChar(None, colors.WHITE, icon.SPIDER+2))
-
         self.set_child(CharPrinter())
         self.set_child(Mover())
         self.set_child(DataPoint(DataTypes.STRENGTH, 10))
@@ -127,8 +118,7 @@ class Fountain(Composite):
                                    ("A Fountain full of clean water",
                                     "surely you will become more",
                                     "healthy by drinking this.")))
-        self.set_child(GraphicChar(None, colors.CYAN,
-                                   icon.FOUNTAIN_FULL))
+        self.set_child(GraphicChar(None, colors.CYAN, icon.FOUNTAIN_FULL))
         self.set_child(CharPrinter())
         self.set_child(Mover())
         self.set_child(IsDungeonFeature())
@@ -226,3 +216,22 @@ class DescendStairsAction(action.Action):
         heal = random.randrange(min_heal, max_heal + 1)
         heal_effect = entityeffect.Heal(target_entity, heal, heal_message=messenger.DOWN_STAIRS_HEAL_MESSAGE)
         target_entity.effect_queue.add(heal_effect)
+
+
+def set_dungeon_feature_components(dungeon_feature):
+    dungeon_feature.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
+    dungeon_feature.set_child(Position())
+    dungeon_feature.set_child(DungeonLevel())
+    dungeon_feature.set_child(GraphicChar(None, colors.RED, icon.FOUNTAIN_FULL))
+    dungeon_feature.set_child(CharPrinter())
+    dungeon_feature.set_child(Mover())
+
+    dungeon_feature.set_child(IsDungeonFeature())
+
+
+def new_plant():
+    plant = Composite()
+    set_dungeon_feature_components(plant)
+    plant.set_child(GraphicChar(None, colors.GREEN_D, icon.PLANT))
+    plant.set_child(Flag("is_opaque"))
+    return plant
