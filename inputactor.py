@@ -259,7 +259,7 @@ class InputActor(Actor):
 
     def open_wear_wield_item_action_menu(self):
         reequip_tag = "reequip_action"
-        if menufactory.has_item_with_action_tag(self.parent, reequip_tag):
+        if menufactory._has_item_with_action_tag(self.parent, reequip_tag):
             equip_menu = menufactory.filtered_by_action_item_menu(self.parent,
                                                                   self.parent.game_state.value.menu_prompt_stack,
                                                                   reequip_tag, "Wear / Wield")
@@ -267,7 +267,7 @@ class InputActor(Actor):
 
     def open_drink_item_action_menu(self):
         drink_tag = "drink_action"
-        if menufactory.has_item_with_action_tag(self.parent, drink_tag):
+        if menufactory._has_item_with_action_tag(self.parent, drink_tag):
             equip_menu = menufactory.filtered_by_action_item_menu(self.parent,
                                                                   self.parent.game_state.value.menu_prompt_stack,
                                                                   drink_tag, "Drink")

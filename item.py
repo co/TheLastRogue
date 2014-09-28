@@ -12,6 +12,7 @@ from dummyentities import dummy_flyer
 import geometry
 from graphic import GraphicChar, CharPrinter
 from health import ReflectDamageTakenEffect
+import menufactory
 import messenger
 from missileaction import PlayerThrowItemAction, PlayerCastMissileSpellAction
 from monster import HealAnEntityOnDeath, AddEffectToOtherSeenEntities
@@ -39,13 +40,14 @@ class ItemType(Leaf):
     POTION = 0
     SCROLL = 1
     BOMB = 2
-    MACHINE = 3
+    DEVICE = 3
     WEAPON = 4
     ARMOR = 5
     JEWELLRY = 6
     AMMO = 7
+    ENERGY_SHPERE = 7
 
-    ALL = [POTION, BOMB, MACHINE, WEAPON, ARMOR, JEWELLRY, AMMO]
+    ALL = [POTION, BOMB, DEVICE, WEAPON, ARMOR, JEWELLRY, AMMO, ENERGY_SHPERE]
 
     def __init__(self, item_type):
         super(ItemType, self).__init__()
@@ -162,7 +164,7 @@ class RangeWeaponType(DataPoint):
 
 
 def set_device_components(item):
-    item.set_child(ItemType(ItemType.MACHINE))
+    item.set_child(ItemType(ItemType.DEVICE))
     item.set_child(PlayerAutoPickUp())
     item.set_child(Charge(random.randrange(2, 7)))
     item.set_child(DataPoint(DataTypes.WEIGHT, 5))
@@ -218,6 +220,47 @@ def new_swap_device(game_state):
     device.set_child(SwapDeviceAction())
     device.set_child(GraphicChar(None, colors.YELLOW, icon.MACHINE))
     return device
+
+
+def new_energy_sphere(game_state):
+    """
+    A composite component representing a gun ammunition item.
+    """
+    charge = Composite()
+    set_item_components(charge, game_state)
+    charge.set_child(ItemType(ItemType.ENERGY_SHPERE))
+    charge.set_child(Stacker("charge", 5, random.randrange(1, 3)))
+    charge.set_child(Description("Energy Sphere",
+                                 "These spheres are used to power ancient devices."))
+    charge.set_child(GraphicChar(None, colors.LIGHT_ORANGE, icon.BIG_CENTER_DOT))
+    charge.set_child(DataPoint(DataTypes.WEIGHT, 1))
+    charge.set_child(PlayerAutoPickUp())
+    charge.set_child(ChargeADeviceAction())
+    return charge
+
+
+class ChargeADeviceAction(Action):
+    def __init__(self):
+        super(ChargeADeviceAction, self).__init__()
+        self.component_type = "charge_device_action"
+        self.name = "Charge Device"
+        self.display_order = 30
+
+    def can_act(self, **kwargs):
+        return self.parent.game_state.value.player.inventory.has_item_of_type(ItemType.DEVICE)
+
+    def act(self, **kwargs):
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        callback = lambda item, source_entity=source_entity, **kwargs: self._charge_device(item, source_entity)
+        choose_device_menu = menufactory.item_type_menu_callback_menu(source_entity,
+                                                                      self.parent.game_state.value.menu_prompt_stack,
+                                                                      ItemType.DEVICE, "Device to Charge:", callback)
+        self.parent.game_state.value.start_prompt(choose_device_menu)
+        self.add_energy_spent_to_entity(source_entity)
+
+    def _charge_device(self, device, entity):
+        device.charge.charges += 1
+        entity.inventory.remove_one_item_from_stack(self.parent)
 
 
 class ActivateDeviceAction(Action):

@@ -252,8 +252,8 @@ class TestGameState(GameStateBase):
         blood_fountain = dungeonfeature.new_blood_fountain()
         blood_fountain.mover.try_move((21, 10), self.dungeon_level)
 
-        boots = item.new_boots_of_running(self)
-        boots.mover.try_move((22, 10), self.dungeon_level)
+        charge = item.new_energy_sphere(self)
+        charge.mover.try_move((22, 10), self.dungeon_level)
 
         cap = item.new_leather_cap(self)
         cap.mover.try_move((23, 10), self.dungeon_level)

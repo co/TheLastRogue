@@ -119,6 +119,12 @@ class Inventory(Leaf):
         """
         return item in self._items
 
+    def has_item_of_type(self, item_type):
+        """
+        Returns true if the item instance is in the inventory, false otherwise.
+        """
+        return any([item for item in self._items if item.item_type.value == item_type])
+
     def is_empty(self):
         """
         Returns true the inventory is empty, false otherwise.

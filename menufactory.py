@@ -98,73 +98,134 @@ def get_menu_with_options(options, state_stack, x_border=4, y_border=5):
     return ui_state
 
 
-def inventory_menu(player, state_stack):
+def get_item_menu_stack_panel_template(heading_text, heading_icon=None):
     menu_stack_panel = gui.StackPanelVertical((2, 2), vertical_space=1)
     heading_stack = gui.StackPanelHorizontal((0, 1), horizontal_space=1)
-    heading_stack.append(gui.SymbolUIElement((0, 0), graphic.GraphicChar(None, colors.INVENTORY_HEADING,
-                                                                         icon.INVENTORY_ICON)))
-    heading_stack.append(gui.TextBox("Inventory", (0, 0), colors.INVENTORY_HEADING))
+    if heading_icon:
+        heading_stack.append(gui.SymbolUIElement((0, 0), heading_icon))
+    heading_stack.append(gui.TextBox(heading_text, (0, 0), colors.INVENTORY_HEADING))
     menu_stack_panel.append(heading_stack)
+    return menu_stack_panel
 
-    description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.scroll_theme,
-                                           text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
-    inventory_menu = menu.InventoryMenu((0, 1), player, state_stack, description_card, (0, 0), vertical_space=0)
-    menu_stack_panel.append(inventory_menu)
 
+def _get_item_action_menu_option(item, player, state_stack):
+    menu_item_action = menu.OpenItemActionMenuAction(state_stack, item, player)
+    print "wat"
+    menu_item_can_activate_function = (lambda: (len(item.get_children_with_tag("user_action")) >= 1))
+    item_icon = item.graphic_char
+    menu_option = menu.MenuOptionWithSymbols(_get_item_option_text(item), item_icon, item_icon, [menu_item_action],
+                                             menu_item_can_activate_function, description=item.description)
+    return menu_option
+
+
+def _get_item_menu_composition(description_card, menu_stack_panel):
     inventory_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.MinimalChestStyle())
     inventory_gui = gui.UIElementList([inventory_menu_bg, menu_stack_panel])
-
     inventory_stack_panel = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_BOTTOM)
     inventory_stack_panel.append(description_card)
     inventory_stack_panel.append(inventory_gui)
-
     dock = gui.UIDock(rectfactory.full_screen_rect())
     dock.bottom_right = inventory_stack_panel
     return state.UIState(dock)
 
 
-def has_item_with_action_tag(player, item_action_tag):
+def inventory_menu(player, state_stack):
+    menu_stack_panel = get_item_menu_stack_panel_template("Inventory",
+                                                          graphic.GraphicChar(None, colors.INVENTORY_HEADING,
+                                                                              icon.INVENTORY_ICON))
+    description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.scroll_theme,
+                                           text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
+    menu_items = []
+    for item in player.inventory.get_items_sorted():
+        menu_option = _get_item_action_menu_option(item, player, state_stack)
+        menu_items.append(menu_option)
+
+    inventory_menu = menu.StaticMenu((0, 1), menu_items, state_stack, (0, 0), vertical_space=0,
+                                     description_card=description_card)
+    menu_stack_panel.append(inventory_menu)
+
+    return _get_item_menu_composition(description_card, menu_stack_panel)
+
+
+def _get_item_option_text(item):
+    if item.has("stacker") and item.stacker.size > 1:
+        return item.description.name + " (" + str(item.stacker.size) + ")"
+    if item.has("charge"):
+        return item.description.name + " [" + str(item.charge.charges) + "]"
+    return item.description.name
+
+
+def _has_item_with_action_tag(player, item_action_tag):
     for item in player.inventory.get_items_sorted():
         if len(item.get_children_with_tag(item_action_tag)) > 0:
             return True
     return False
 
 
+def _get_item_action_option(item, item_action, player, stack_pop_function):
+    item_graphic = item.graphic_char
+    item_action_list = [action.DelayedFunctionCall(item_action.act, source_entity=player,
+                                                   target_entity=player), stack_pop_function]
+    can_activate = (lambda: item_action.can_act(source_entity=player,
+                                                target_entity=player))
+    item_action_option = menu.MenuOptionWithSymbols(
+        _get_item_option_text(item), item_graphic, item_graphic,
+        item_action_list, can_activate=can_activate, description=item.description)
+    return item_action_option
+
+
 def filtered_by_action_item_menu(player, state_stack, item_action_tag, heading_text):
-    menu_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=0)
-    heading = gui.TextBox(heading_text, (2, 1), colors.INVENTORY_HEADING, margin=style.menu_theme.margin)
-    menu_stack_panel.append(heading)
-
+    menu_stack_panel = get_item_menu_stack_panel_template(heading_text,
+                                                          graphic.GraphicChar(None,
+                                                                              colors.INVENTORY_HEADING,
+                                                                              icon.INVENTORY_ICON))
+    description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.scroll_theme,
+                                           text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
     stack_pop_function = menu.BackToGameFunction(state_stack)
-    description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.scroll_theme, text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
-
     menu_items = []
     for item in player.inventory.get_items_sorted():
         if len(item.get_children_with_tag(item_action_tag)) > 0:
             item_action = item.get_children_with_tag(item_action_tag)[0]
-            menu_items.append(menu.MenuOptionWithSymbols(
-                menu.get_item_option_text(item), item.graphic_char, item.graphic_char,
-                [action.DelayedFunctionCall(item_action.act, source_entity=player,
-                                            target_entity=player), stack_pop_function],
-                can_activate=(lambda: item_action.can_act(source_entity=player,
-                                                          target_entity=player)),
-                description=item.description))
+            item_action_option = _get_item_action_option(item, item_action, player, stack_pop_function)
+            menu_items.append(item_action_option)
 
     _equip_menu = menu.StaticMenu(rectfactory.right_side_menu_rect().top_left, menu_items, state_stack,
                                   margin=style.menu_theme.margin, vertical_space=0, description_card=description_card)
-
     menu_stack_panel.append(_equip_menu)
+    return _get_item_menu_composition(description_card, menu_stack_panel)
 
-    menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(), style.MinimalChestStyle())
-    menu_gui = gui.UIElementList([menu_bg, menu_stack_panel])
 
-    inventory_stack_panel = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_BOTTOM)
-    inventory_stack_panel.append(description_card)
-    inventory_stack_panel.append(menu_gui)
+def _get_item_callback_option(item, callback, can_callback_activate, player, stack_pop_function):
+    item_graphic = item.graphic_char
+    item_action_list = [(lambda item=item: callback(item, source_entity=player,
+                                                    target_entity=player)), stack_pop_function]
+    can_activate = (lambda: can_callback_activate())
+    item_action_option = menu.MenuOptionWithSymbols(
+        _get_item_option_text(item), item_graphic, item_graphic,
+        item_action_list, can_activate=can_activate, description=item.description)
+    return item_action_option
 
-    dock = gui.UIDock(rectfactory.full_screen_rect())
-    dock.bottom_right = inventory_stack_panel
-    return state.UIState(dock)
+
+def item_type_menu_callback_menu(player, state_stack, item_type, heading_text, item_callback,
+                                 can_callback_activate=(lambda: True)):
+    menu_stack_panel = get_item_menu_stack_panel_template(heading_text,
+                                                          graphic.GraphicChar(None,
+                                                                              colors.INVENTORY_HEADING,
+                                                                              icon.INVENTORY_ICON))
+    description_card = gui.DescriptionCard(rectfactory.description_rectangle(), style.scroll_theme,
+                                           text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
+    stack_pop_function = menu.BackToGameFunction(state_stack)
+    menu_items = []
+    for item in player.inventory.get_items_sorted():
+        if item.item_type.value == item_type:
+            item_action_option = _get_item_callback_option(item, item_callback, can_callback_activate,
+                                                           player, stack_pop_function)
+            menu_items.append(item_action_option)
+
+    _equip_menu = menu.StaticMenu(rectfactory.right_side_menu_rect().top_left, menu_items, state_stack,
+                                  margin=style.menu_theme.margin, vertical_space=0, description_card=description_card)
+    menu_stack_panel.append(_equip_menu)
+    return _get_item_menu_composition(description_card, menu_stack_panel)
 
 
 def item_actions_menu(item, player, state_stack):

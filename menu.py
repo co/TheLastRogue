@@ -214,38 +214,6 @@ class StaticMenu(Menu):
         self._recreate_option_list()
 
 
-class InventoryMenu(Menu):
-    def __init__(self, offset, player, state_stack, description_card,
-                 margin=geo.zero2d(), vertical_space=1, may_escape=True):
-        super(InventoryMenu, self).__init__(offset, state_stack, margin=margin,
-                                            vertical_space=vertical_space, may_escape=may_escape,
-                                            description_card=description_card)
-        self._player = player
-        self.try_set_index_to_valid_value()
-
-    def _update_menu_items(self):
-        item_rect = geo.Rect(self.parent.offset,
-                             self.parent.width, self.parent.height)
-        self.menu_items = []
-        for item in self._player.inventory.get_items_sorted():
-            menu_item_action = OpenItemActionMenuAction(self._state_stack, item_rect, item, self._player)
-            menu_item_can_activate_function = (lambda: (len(item.get_children_with_tag("user_action")) >= 1))
-            item_icon = item.graphic_char
-            menu_option = MenuOptionWithSymbols(get_item_option_text(item), item_icon, item_icon, [menu_item_action],
-                                                menu_item_can_activate_function, description=item.description)
-            self.menu_items.append(menu_option)
-        if self.description_card.description is None:
-            self.update_description()
-
-
-def get_item_option_text(item):
-    if item.has("stacker") and item.stacker.size > 1:
-        return item.description.name + " (" + str(item.stacker.size) + ")"
-    if item.has("charge"):
-        return item.description.name + " [" + str(item.charge.charges) + "]"
-    return item.description.name
-
-
 class EquipmentMenu(Menu):
     def __init__(self, offset, player, state_stack, description_card,
                  margin=geo.zero2d(), may_escape=True):
@@ -306,8 +274,7 @@ class EquipSlotMenu(Menu):
 
 
 class OpenItemActionMenuAction(object):
-    def __init__(self, state_stack, rect, item, player):
-        self.rect = rect
+    def __init__(self, state_stack, item, player):
         self._item = item
         self._player = player
         self._state_stack = state_stack
