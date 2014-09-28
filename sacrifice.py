@@ -1,15 +1,13 @@
-from compositecore import Leaf
+from compositecore import Leaf, Composite
 from stats import DataPointBonusSpoof
+from text import Description
 
 
-class Power(Leaf):
+class Power(Composite):
     def __init__(self):
         super(Power, self).__init__()
         self.tags.add("power")
         self.buy_cost = 1
-        self.icon = "?"
-        self.name = "_?_?_?"
-        self.description = "??? ????? ? ??"
 
     def on_power_gained(self):
         self.parent.game_state.value.power_list.remove(self)
@@ -30,9 +28,7 @@ class StrengthPower(Power):
         super(StrengthPower, self).__init__()
         self.component_type = "strength_power"
         self.buy_cost = 7
-        self.icon = None
-        self.name = "Gain Strength"
-        self.description = None
+        self.set_child(Description("Gain Strength", "You gain +2 Strength."))
 
     def first_tick(self, time):
         """
@@ -46,9 +42,7 @@ class FullHealPower(NonPersistentPower):
         super(FullHealPower, self).__init__()
         self.component_type = "full_heal_power"
         self.buy_cost = 5
-        self.icon = None
-        self.name = "Full Heal"
-        self.description = None
+        self.set_child(Description("Full Heal", "You get fully healed at the cost of max health."))
 
     def on_power_gained(self):
         self.parent.health_modifier.heal(self.parent.health.hp.max_value)

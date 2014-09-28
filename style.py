@@ -208,6 +208,33 @@ class ChestStyle(RectangleStyle):
         self.title_separator_right = self.top
 
 
+class ScrollStyle(RectangleStyle):
+    def __init__(self):
+        self.light = colors.CHAMPAGNE
+        self.dark = colors.DARKNESS
+        self.center = GraphicChar(self.light, self.light, " ")
+        self.top = GraphicChar(self.light, self.dark, " ")
+        self.left = GraphicChar(self.dark, self.light, libtcod.CHAR_SUBP_E)
+        self.bottom = GraphicChar(self.dark, self.light, icon.SCROLL_S)
+        self.right = GraphicChar(self.light, self.dark, libtcod.CHAR_SUBP_E)
+
+        self.mid_vertical = self.left
+        self.mid_horizontal = self.top
+
+        self.top_left = GraphicChar(self.dark, self.light, icon.SCROLL_NW)
+        self.top_right = GraphicChar(self.dark, self.light, icon.SCROLL_NE)
+        self.bottom_left = GraphicChar(self.dark, self.light, icon.SCROLL_SW)
+        self.bottom_right = GraphicChar(self.dark, self.light, icon.SCROLL_SE)
+
+        self.top_cross = GraphicChar(self.dark, self.light, " ")
+        self.left_cross = GraphicChar(self.dark, self.light, " ")
+        self.bottom_cross = GraphicChar(self.dark, self.light, " ")
+        self.right_cross = GraphicChar(self.dark, self.light, " ")
+
+        self.title_separator_left = self.top
+        self.title_separator_right = self.top
+
+
 class MinimalChestStyle(ChestStyle):
     def __init__(self):
         super(MinimalChestStyle, self).__init__()
@@ -249,10 +276,10 @@ ff_gold_theme = MenuStyle(FinalFantasyClassicStyle(colors.CHAMPAGNE, colors.DARK
 ff_red_theme = MenuStyle(FinalFantasyClassicStyle(colors.CHAMPAGNE, colors.RED_D, icon.SKULL),
                           colors.GRAY, (2, 2))
 
-tlr_classic_3d_theme = MenuStyle(RectangleStyle3D(),
-                                 colors.GRAY, (2, 2))
-rogue_classic_theme = MenuStyle(MinimalClassicStyle2(),
-                                colors.GRAY, (2, 2))
+scroll_theme = MenuStyle(ScrollStyle(), colors.DARK_BROWN, (2, 2))
+
+tlr_classic_3d_theme = MenuStyle(RectangleStyle3D(), colors.GRAY, (2, 2))
+rogue_classic_theme = MenuStyle(MinimalClassicStyle2(), colors.GRAY, (2, 2))
 
 monster_list_card = MinimalTopCard()
 
@@ -263,3 +290,4 @@ themes = {"ff_blue_theme": ff_blue_theme,
 menu_theme = themes[settings.menu_theme]
 sacrifice_menu_theme = ff_red_theme
 interface_theme = themes[settings.interface_theme]
+description_theme = scroll_theme

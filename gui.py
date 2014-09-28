@@ -822,7 +822,7 @@ class DescriptionCard(RectangularUIElement):
     """
     GUI Element for displaying a description object as text in a styled rectangle.
     """
-    def __init__(self, rect, gui_style, heading_fg=colors.WHITE, margin=(0, 0), vertical_space=1):
+    def __init__(self, rect, gui_style, text_fg=colors.WHITE, heading_fg=colors.WHITE, margin=(0, 0), vertical_space=1):
         super(DescriptionCard, self).__init__(rect, margin=margin)
         self._bg_rect = StyledRectangle(self.rect, gui_style.rect_style)
         self.text_stack_panel = StackPanelVertical(gui_style.margin, vertical_space=vertical_space,
@@ -831,12 +831,13 @@ class DescriptionCard(RectangularUIElement):
         self.heading_fg = heading_fg
         self._inner_margin = gui_style.margin
         self._offset = (0, 0)
+        self.text_fg = text_fg
 
     def update(self):
         self.text_stack_panel.clear()
         if self.description:
             self.text_stack_panel.append(TextBox(self.description.name, (0, 0), self.heading_fg))
-            self.text_stack_panel.append(TextBoxWrap(self.description.description, (0, 0), colors.WHITE,
+            self.text_stack_panel.append(TextBoxWrap(self.description.description, (0, 0), self.text_fg,
                                                      self.width - self._inner_margin[0] - 1,
                                                      self.height - self._inner_margin[1]))
 
