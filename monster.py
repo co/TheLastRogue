@@ -7,7 +7,7 @@ from compositecommon import EntityShareTileEffect, PoisonEntityEffectFactory
 from compositecore import Composite, Leaf, Component
 import constants
 import direction
-from dungeonfeature import SpiderWeb
+from dungeonfeature import new_spider_web
 from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue, AddSpoofChild, EffectStackID, UndodgeableDamagAndBlockSameEffect, HealthRegain
 import geometry
@@ -500,7 +500,7 @@ class MakeSpiderWebs(Leaf):
             if (random.random() < chance and dungeon_level and
                         len(dungeon_level.get_tile_or_unknown(point).get_entities()) == 0 and
                     self.position_can_have_web(dungeon_level, point)):
-                web = SpiderWeb()
+                web = new_spider_web()
                 web.mover.try_move(point, dungeon_level)
         self.time_to_next_attempt = self.time_interval
 

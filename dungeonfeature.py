@@ -16,62 +16,57 @@ import colors
 import icon
 
 
-class StairsDown(Composite):
+def set_dungeon_feature_components(dungeon_feature):
+    dungeon_feature.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
+    dungeon_feature.set_child(Position())
+    dungeon_feature.set_child(DungeonLevel())
+    dungeon_feature.set_child(GraphicChar(None, colors.RED, icon.FOUNTAIN_FULL))
+    dungeon_feature.set_child(CharPrinter())
+    dungeon_feature.set_child(Mover())
+    dungeon_feature.set_child(IsDungeonFeature())
+
+
+def new_stairs_down():
     """
     Stairs Down allows the player to descend to the next level.
     """
-    def __init__(self):
-        super(StairsDown, self).__init__()
-        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Description("Stairs Down",
-                                   ("A dark pass way downward.",
-                                    "what horrors awaits there?")))
-        self.set_child(GraphicChar(None, colors.WHITE, icon.STAIRS_DOWN))
-
-        self.set_child(CharPrinter())
-        self.set_child(DescendStairsAction())
-        self.set_child(Mover())
-        self.set_child(IsDungeonFeature())
+    stairs = Composite()
+    set_dungeon_feature_components(stairs)
+    stairs.set_child(Description("Stairs Down",
+                                 ("A dark pass way downward.",
+                                  "what horrors awaits there?")))
+    stairs.set_child(GraphicChar(None, colors.WHITE, icon.STAIRS_DOWN))
+    stairs.set_child(DescendStairsAction())
+    stairs.set_child(Flag("is_stairs_down"))
+    return stairs
 
 
-class StairsUp(Composite):
+def new_stairs_up():
     """
     Stairs up allows the player to ascend to the next level.
     """
-    def __init__(self):
-        super(StairsUp, self).__init__()
-        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Description("Stairs Up",
-                                   ("A way back, when the ",
-                                    "nightmare becomes too real.")))
-        self.set_child(GraphicChar(None, colors.WHITE, icon.STAIRS_UP))
-        self.set_child(CharPrinter())
-        self.set_child(Mover())
-        self.set_child(IsDungeonFeature())
+    stairs = Composite()
+    set_dungeon_feature_components(stairs)
+    stairs.set_child(Description("Stairs Up",
+                                 ("A way back, when the ",
+                                  "nightmare becomes too real.")))
+    stairs.set_child(GraphicChar(None, colors.WHITE, icon.STAIRS_UP))
+    stairs.set_child(Flag("is_stairs_up"))
+    return stairs
 
 
-class SpiderWeb(Composite):
+def new_spider_web():
     """
     Spider web the player or other entities can get caught in.
     """
-    def __init__(self):
-        super(SpiderWeb, self).__init__()
-        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Description("Spider Web",
-                                   "A spider made this web, touch it and you might get stuck"))
-        self.set_child(GraphicChar(None, colors.WHITE, icon.SPIDER+2))
-        self.set_child(CharPrinter())
-        self.set_child(Mover())
-        self.set_child(DataPoint(DataTypes.STRENGTH, 10))
-        self.set_child(IsDungeonFeature())
-        self.set_child(StuckInSpiderWebShareTileEffect())
-
+    web = Composite()
+    set_dungeon_feature_components(web)
+    web.set_child(Description("Spider Web",
+                              "A spider made this web, touch it and you might get stuck"))
+    web.set_child(GraphicChar(None, colors.WHITE, icon.SPIDER+2))
+    web.set_child(DataPoint(DataTypes.STRENGTH, 10))
+    web.set_child(StuckInSpiderWebShareTileEffect())
+    return web
 
 class StuckInSpiderWebShareTileEffect(EntityShareTileEffect):
     def __init__(self):
@@ -105,24 +100,19 @@ class StuckInWebStepperSpoof(Stepper):
         return self.parent.movement_speed.value
 
 
-class Fountain(Composite):
+def new_fountain():
     """
     Drinking from the fountain makes the player stronger.
     """
-    def __init__(self):
-        super(Fountain, self).__init__()
-        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Description("Fountain",
+    fountain = Composite()
+    set_dungeon_feature_components(fountain)
+    fountain.set_child(Description("Fountain",
                                    ("A Fountain full of clean water",
                                     "surely you will become more",
                                     "healthy by drinking this.")))
-        self.set_child(GraphicChar(None, colors.CYAN, icon.FOUNTAIN_FULL))
-        self.set_child(CharPrinter())
-        self.set_child(Mover())
-        self.set_child(IsDungeonFeature())
-        self.set_child(DrinkFromFountainAction())
+    fountain.set_child(GraphicChar(None, colors.CYAN, icon.FOUNTAIN_FULL))
+    fountain.set_child(DrinkFromFountainAction())
+    return fountain
 
 
 class DrinkFromFountainAction(action.Action):
@@ -146,23 +136,18 @@ class DrinkFromFountainAction(action.Action):
         self.parent.remove_component(self)
 
 
-class BloodFountain(Composite):
+def new_blood_fountain():
     """
     Drinking from the fountain makes the player stronger.
     """
-    def __init__(self):
-        super(BloodFountain, self).__init__()
-        self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
-        self.set_child(Position())
-        self.set_child(DungeonLevel())
-        self.set_child(Description("Fountain Of Sacrifice",
+    fountain = Composite()
+    set_dungeon_feature_components(fountain)
+    fountain.set_child(Description("Fountain Of Sacrifice",
                                    ("The fountain is filled thick red liquid.",
                                     "You have a feeling that it calls out for you.")))
-        self.set_child(GraphicChar(None, colors.RED, icon.FOUNTAIN_FULL))
-        self.set_child(CharPrinter())
-        self.set_child(Mover())
-        self.set_child(IsDungeonFeature())
-        self.set_child(SacrificeFountainAction())
+    fountain.set_child(GraphicChar(None, colors.RED, icon.FOUNTAIN_FULL))
+    fountain.set_child(SacrificeFountainAction())
+    return fountain
 
 
 class SacrificeFountainAction(DrinkFromFountainAction):
@@ -216,17 +201,6 @@ class DescendStairsAction(action.Action):
         heal = random.randrange(min_heal, max_heal + 1)
         heal_effect = entityeffect.Heal(target_entity, heal, heal_message=messenger.DOWN_STAIRS_HEAL_MESSAGE)
         target_entity.effect_queue.add(heal_effect)
-
-
-def set_dungeon_feature_components(dungeon_feature):
-    dungeon_feature.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.DUNGEON_FEATURE))
-    dungeon_feature.set_child(Position())
-    dungeon_feature.set_child(DungeonLevel())
-    dungeon_feature.set_child(GraphicChar(None, colors.RED, icon.FOUNTAIN_FULL))
-    dungeon_feature.set_child(CharPrinter())
-    dungeon_feature.set_child(Mover())
-
-    dungeon_feature.set_child(IsDungeonFeature())
 
 
 def new_plant():

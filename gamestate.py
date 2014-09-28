@@ -194,11 +194,11 @@ class TestGameState(GameStateBase):
         cloud = new_steam_cloud(self, 32)
         cloud.mover.try_move((16, 10), self.dungeon_level)
 
-        #demon = monster.new_dust_demon(self)
-        #demon.mover.try_move((24, 16), self.dungeon_level)
+        demon = monster.new_dust_demon(self)
+        demon.mover.try_move((30, 16), self.dungeon_level)
 
-        ratman_mystic = monster.new_ratman_mystic(self)
-        ratman_mystic.mover.try_move((25, 16), self.dungeon_level)
+        #ratman_mystic = monster.new_ratman_mystic(self)
+        #ratman_mystic.mover.try_move((25, 16), self.dungeon_level)
 
         #amoeba = monster.new_giant_amoeba(self)
         #amoeba.mover.try_move((26, 14), self.dungeon_level)
@@ -212,6 +212,9 @@ class TestGameState(GameStateBase):
 
         potion = item.new_health_potion(self)
         potion.mover.try_move((20, 16), self.dungeon_level)
+
+        orb = item.new_flame_orb(self)
+        orb.mover.try_move((22, 15), self.dungeon_level)
 
         amulet = item.new_amulet_of_life_steal(self)
         amulet.mover.try_move((20, 14), self.dungeon_level)
@@ -246,7 +249,7 @@ class TestGameState(GameStateBase):
         mace = item.new_mace(self)
         mace.mover.try_move((19, 13), self.dungeon_level)
 
-        blood_fountain = dungeonfeature.BloodFountain()
+        blood_fountain = dungeonfeature.new_blood_fountain()
         blood_fountain.mover.try_move((21, 10), self.dungeon_level)
 
         boots = item.new_boots_of_running(self)
@@ -255,8 +258,8 @@ class TestGameState(GameStateBase):
         cap = item.new_leather_cap(self)
         cap.mover.try_move((23, 10), self.dungeon_level)
 
-        pixie = monster.new_pixie(self)
-        pixie.mover.try_move((20, 14), self.dungeon_level)
+        #pixie = monster.new_pixie(self)
+        #pixie.mover.try_move((20, 14), self.dungeon_level)
 
         #salamander = monster.new_salamander(self)
         #salamander.mover.try_move((25, 10), self.dungeon_level)
@@ -267,8 +270,8 @@ class TestGameState(GameStateBase):
         #        spider = monster.new_spider(self)
         #        spider.mover.try_move((26, 12), self.dungeon_level)
         #
-        ghost = monster.new_ghost(self)
-        ghost.mover.try_move((21, 8), self.dungeon_level)
+        #ghost = monster.new_ghost(self)
+        #ghost.mover.try_move((21, 8), self.dungeon_level)
         #
         #        pixie = monster.new_pixie(self)
         #        pixie.mover.try_move((23, 8), self.dungeon_level)
@@ -282,8 +285,8 @@ class TestGameState(GameStateBase):
         #cyclops = monster.new_cyclops(self)
         #cyclops.mover.try_move((2, 2), self.dungeon_level)
 
-        jericho = monster.new_jericho(self)
-        jericho.mover.try_move((56, 14), self.dungeon_level)
+        #jericho = monster.new_jericho(self)
+        #jericho.mover.try_move((56, 14), self.dungeon_level)
 
         for i in range(5):
             ammo = item.new_ammunition(self)

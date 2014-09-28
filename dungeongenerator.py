@@ -22,8 +22,8 @@ def place_up_down_stairs_at_center(dungeon_level):
 
 
 def place_up_down_stairs(dungeon_level, up_position, down_position):
-    _place_feature_replace_terrain_with_floor(dungeonfeature.StairsDown(), dungeon_level, down_position)
-    _place_feature_replace_terrain_with_floor(dungeonfeature.StairsUp(), dungeon_level, up_position)
+    _place_feature_replace_terrain_with_floor(dungeonfeature.new_stairs_down(), dungeon_level, down_position)
+    _place_feature_replace_terrain_with_floor(dungeonfeature.new_stairs_up(), dungeon_level, up_position)
 
 
 def _place_feature_replace_terrain_with_floor(feature, dungeon_level, position):
@@ -286,9 +286,9 @@ def generate_dungeon_exploded_rooms(depth, rooms, room_area, rectangle_room_chan
 
     feature_positions = random.sample(normalized_open_points, 4)
     place_up_down_stairs(dungeon_level, feature_positions[0], feature_positions[1])
-    _place_feature_replace_terrain_with_floor(dungeonfeature.Fountain(), dungeon_level, feature_positions[2])
+    _place_feature_replace_terrain_with_floor(dungeonfeature.new_fountain(), dungeon_level, feature_positions[2])
     if rng.coin_flip():
-        _place_feature_replace_terrain_with_floor(dungeonfeature.BloodFountain(), dungeon_level, feature_positions[3])
+        _place_feature_replace_terrain_with_floor(dungeonfeature.new_blood_fountain(), dungeon_level, feature_positions[3])
 
     return dungeon_level
 
