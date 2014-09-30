@@ -19,17 +19,17 @@ def clamp(n, minn, maxn):
 
 class Menu(gui.UIElement):
     def __init__(self, offset, state_stack,
-                 margin=geo.zero2d(), vertical_space=1, may_escape=True, vi_keys_accepted=True, description_card=None):
+                 margin=geo.zero2d(), vertical_space=1, may_escape=True, vi_keys_accepted=True, selected_payload_callback=None):
         super(Menu, self).__init__(margin)
         self.menu_items = []
         self._state_stack = state_stack
-        self._selected_index = 0
+        self._selected_index = None
         self.offset = offset
         self._wrap = True
         self.may_escape = may_escape
         self._item_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=vertical_space)
         self.vi_keys_accepted = vi_keys_accepted
-        self.description_card = description_card
+        self.selected_payload_callback = selected_payload_callback
 
     @property
     def rect(self):
@@ -50,6 +50,7 @@ class Menu(gui.UIElement):
     @selected_index.setter
     def selected_index(self, value):
         if not value is self._selected_index and not value is None:
+            print "wooot"
             self._selected_index = value
             self._signal_new_index()
 
@@ -57,7 +58,7 @@ class Menu(gui.UIElement):
         self._recreate_option_list()
         if not self.has_valid_option_selected():
             self.try_set_index_to_valid_value()
-        self._recreate_option_list()
+        #self._recreate_option_list()
 
         inputhandler.handler.update_keys()
         key = inputhandler.handler.get_keypress()
@@ -97,8 +98,6 @@ class Menu(gui.UIElement):
             else:
                 menu_item = item.inactive_ui_representation()
             self._item_stack_panel.append(menu_item)
-        if self.description_card and self.description_card.description is None:
-            self.update_description()
 
     def can_activate(self):
         return (not self.selected_index is None and len(self.menu_items) > 0 and
@@ -140,23 +139,23 @@ class Menu(gui.UIElement):
         real_offset = geo.int_2d(geo.add_2d(geo.add_2d(self.offset, offset), self.margin))
         self._item_stack_panel.draw(real_offset)
 
-    def update_description(self):
-        if self.description_card:
-            selected_option = self.menu_items[self.selected_index]
-            self.description_card.description = selected_option.description
+    def call_payload_callback(self):
+        if self.selected_payload_callback and self.has_valid_option_selected():
+            payload = self.menu_items[self.selected_index].payload
+            self.selected_payload_callback(payload)
 
     def _signal_new_index(self):
-        self.update_description()
+        self.call_payload_callback()
 
 
 class MenuOption(gui.UIElement):
-    def __init__(self, text, functions, can_activate=(lambda: True), description=None):
+    def __init__(self, text, functions, can_activate=(lambda: True), payload=None):
         self._functions = functions
         self.can_activate = can_activate
         self._selected = gui.TextBox(text, geo.zero2d(), colors.TEXT_SELECTED)
         self._unselected = gui.TextBox(text, geo.zero2d(), colors.TEXT_UNSELECTED)
         self._inactive = gui.TextBox(text, geo.zero2d(), colors.TEXT_INACTIVE)
-        self.description = description
+        self.payload = payload
 
     def activate(self):
         for function in self._functions:
@@ -185,8 +184,8 @@ class MenuOption(gui.UIElement):
 # this should not be solved by subclassing!
 class MenuOptionWithSymbols(MenuOption):
     def __init__(self, text, selected_graphic_char, unselected_graphic_char,
-                 functions, can_activate=(lambda: True), description=None):
-        super(MenuOptionWithSymbols, self).__init__(text, functions, can_activate, description=description)
+                 functions, can_activate=(lambda: True), payload=None):
+        super(MenuOptionWithSymbols, self).__init__(text, functions, can_activate, payload=payload)
         self.selected_graphic_char = selected_graphic_char
         self.unselected_graphic_char = unselected_graphic_char
 
@@ -205,20 +204,20 @@ class MenuOptionWithSymbols(MenuOption):
 
 class StaticMenu(Menu):
     def __init__(self, offset, menu_items, state_stack, margin=geo.zero2d(),
-                 vertical_space=1, may_escape=True, vi_keys_accepted=True, description_card=None):
+                 vertical_space=1, may_escape=True, vi_keys_accepted=True, selected_payload_callback=None):
         super(StaticMenu, self).__init__(offset, state_stack, margin=margin, vertical_space=vertical_space,
                                          may_escape=may_escape, vi_keys_accepted=vi_keys_accepted,
-                                         description_card=description_card)
+                                         selected_payload_callback=selected_payload_callback)
         self.menu_items = menu_items
-        self.try_set_index_to_valid_value()
         self._recreate_option_list()
+        self.try_set_index_to_valid_value()
 
 
 class EquipmentMenu(Menu):
-    def __init__(self, offset, player, state_stack, description_card,
+    def __init__(self, offset, player, state_stack, selected_payload_callback,
                  margin=geo.zero2d(), may_escape=True):
         super(EquipmentMenu, self).__init__(offset, state_stack, margin=margin,
-                                            may_escape=may_escape, description_card=description_card)
+                                            may_escape=may_escape, selected_payload_callback=selected_payload_callback)
         self.player = player
         self.try_set_index_to_valid_value()
 
@@ -231,20 +230,18 @@ class EquipmentMenu(Menu):
             if item_in_slot is None:
                 item_name = "-"
                 item_graphic = graphic.GraphicChar(None, colors.NOT_EQUIPPED_FG, slot.icon)
-                description = None
             else:
                 item_name = item_in_slot.description.name
                 item_graphic = item_in_slot.graphic_char
-                description = item_in_slot.description
             self.menu_items.append(MenuOptionWithSymbols(item_name, item_graphic, item_graphic, [option_func],
-                                                          description=description))
+                                                          payload=item_in_slot))
 
 
 class EquipSlotMenu(Menu):
-    def __init__(self, offset, player, equipment_slot, state_stack, description_card,
+    def __init__(self, offset, player, equipment_slot, state_stack, selected_payload_callback,
                  margin=geo.zero2d(), may_escape=True):
         super(EquipSlotMenu, self).__init__(offset, state_stack, margin=margin,
-                                            may_escape=may_escape, description_card=description_card)
+                                            may_escape=may_escape, selected_payload_callback=selected_payload_callback)
         self.player = player
         self.try_set_index_to_valid_value()
         self.equipment_slot = equipment_slot
@@ -258,7 +255,7 @@ class EquipSlotMenu(Menu):
             stack_pop_function = BackToGameFunction(self._state_stack)
             functions = [reequip_function, stack_pop_function]
             self.menu_items.append(MenuOptionWithSymbols(item.description.name, item.graphic_char,
-                                                          item.graphic_char, functions, description=item.description))
+                                                          item.graphic_char, functions, payload=item))
 
         unequip_function = equipactions.UnequipAction().delayed_call(source_entity=self.player, target_entity=self.player,
                                                                      equipment_slot=self.equipment_slot)
@@ -267,8 +264,8 @@ class EquipSlotMenu(Menu):
         none_item_graphic = graphic.GraphicChar(None, colors.NOT_EQUIPPED_FG, self.equipment_slot.icon)
         self.menu_items.append(MenuOptionWithSymbols("- None -", none_item_graphic,
                                                       none_item_graphic, unequip_functions))
-        if self.description_card.description is None:
-            self.update_description()
+        #if self.selected_payload_callback.description is None:
+            #self.call_payload_callback()
 
         self._item_stack_panel.vertical_space = 1 if len(items) * 2 + 2 <= inventory.ITEM_CAPACITY else 0
 

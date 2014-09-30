@@ -35,10 +35,8 @@ class EquipmentTypes(object):
 
 class EquipmentSlots(object):
     #  Weapons
-    MELEE_WEAPON = EquipmentSlot("Melee Weapon", EquipmentTypes.MELEE_WEAPON,
-                                 icon.SWORD)
-    RANGED_WEAPON = EquipmentSlot("Ranged Weapon",
-                                  EquipmentTypes.RANGED_WEAPON, icon.GUN)
+    MELEE_WEAPON = EquipmentSlot("Melee Weapon", EquipmentTypes.MELEE_WEAPON, icon.SWORD)
+    RANGED_WEAPON = EquipmentSlot("Ranged Weapon", EquipmentTypes.RANGED_WEAPON, icon.GUN)
 
     #  Armor
     HEADGEAR = EquipmentSlot("Headgear", EquipmentTypes.HEADGEAR, icon.HELM)
@@ -46,12 +44,9 @@ class EquipmentSlots(object):
     BOOTS = EquipmentSlot("Boots", EquipmentTypes.BOOTS, icon.BOOTS)
 
     #  Jewelry
-    RIGHT_RING = EquipmentSlot("Right Ring", EquipmentTypes.RING,
-                               icon.RING)
-    LEFT_RING = EquipmentSlot("Left Ring", EquipmentTypes.RING,
-                              icon.RING)
-    AMULET = EquipmentSlot("Amulet", EquipmentTypes.AMULET,
-                           icon.AMULET)
+    RIGHT_RING = EquipmentSlot("Right Ring", EquipmentTypes.RING, icon.RING)
+    LEFT_RING = EquipmentSlot("Left Ring", EquipmentTypes.RING, icon.RING)
+    AMULET = EquipmentSlot("Amulet", EquipmentTypes.AMULET, icon.AMULET)
 
     ALL = [MELEE_WEAPON, RANGED_WEAPON, HEADGEAR, ARMOR,
            BOOTS, RIGHT_RING, LEFT_RING, AMULET]

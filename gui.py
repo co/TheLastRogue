@@ -818,16 +818,57 @@ class EntityStatus(UIElement):
             self._status_icon_stack_panel.append(icon_element)
 
 
-class DescriptionCard(RectangularUIElement):
+class ItemDescriptionCard(RectangularUIElement):
     """
     GUI Element for displaying a description object as text in a styled rectangle.
     """
     def __init__(self, rect, gui_style, text_fg=colors.WHITE, heading_fg=colors.WHITE, margin=(0, 0), vertical_space=1):
-        super(DescriptionCard, self).__init__(rect, margin=margin)
+        super(ItemDescriptionCard, self).__init__(rect, margin=margin)
+
+        self._item_stat_card = ItemStatCard(style.rogue_classic_theme)
+
         self._bg_rect = StyledRectangle(self.rect, gui_style.rect_style)
         self.text_stack_panel = StackPanelVertical(gui_style.margin, vertical_space=vertical_space,
                                                    alignment=StackPanelVertical.ALIGN_LEFT)
-        self.description = None
+        self.stat_stack_panel = StackPanelVertical(gui_style.margin, vertical_space=vertical_space,
+                                                   alignment=StackPanelVertical.ALIGN_LEFT)
+        self._item = None
+        self.heading_fg = heading_fg
+        self._inner_margin = gui_style.margin
+        self._offset = (0, 0)
+        self.text_fg = text_fg
+
+    def set_item(self, item):
+        self._item = item
+        self._item_stat_card.item = item
+
+    def update(self):
+        self.text_stack_panel.clear()
+        if self._item and self._item.description:
+            self.text_stack_panel.append(TextBox(self._item.description.name, (0, 0), self.heading_fg))
+            self.text_stack_panel.append(TextBoxWrap(self._item.description.description, (0, 0), self.text_fg,
+                                                     self.width - self._inner_margin[0] - 1,
+                                                     self.height - self._inner_margin[1]))
+        self._item_stat_card.update()
+
+    def draw(self, offset=geo.zero2d()):
+        position = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
+        if self._item:
+            self._bg_rect.draw(position)
+            self.text_stack_panel.draw(position)
+        self._item_stat_card.draw(position)
+
+
+class ItemStatCard(RectangularUIElement):
+    def __init__(self, gui_style, text_fg=colors.WHITE, heading_fg=colors.WHITE, margin=(0, 0), vertical_space=1):
+        rect = geo.Rect((0, 0), constants.RIGHT_SIDE_BAR_WIDTH, 12)
+        super(ItemStatCard, self).__init__(rect, margin=margin)
+        self._bg_rect = StyledRectangle(self.rect, gui_style.rect_style)
+        self.text_stack_panel = StackPanelVertical(gui_style.margin, vertical_space=vertical_space,
+                                                   alignment=StackPanelVertical.ALIGN_LEFT)
+        self.stat_stack_panel = StackPanelVertical(gui_style.margin, vertical_space=vertical_space,
+                                                   alignment=StackPanelVertical.ALIGN_LEFT)
+        self.item = None
         self.heading_fg = heading_fg
         self._inner_margin = gui_style.margin
         self._offset = (0, 0)
@@ -835,14 +876,13 @@ class DescriptionCard(RectangularUIElement):
 
     def update(self):
         self.text_stack_panel.clear()
-        if self.description:
-            self.text_stack_panel.append(TextBox(self.description.name, (0, 0), self.heading_fg))
-            self.text_stack_panel.append(TextBoxWrap(self.description.description, (0, 0), self.text_fg,
-                                                     self.width - self._inner_margin[0] - 1,
-                                                     self.height - self._inner_margin[1]))
+        if self.item:
+            stats = self.item.get_children_with_tag("item_stat")
+            for stat in stats:
+                self.text_stack_panel.append(TextBox(stat.get_text(self.rect.width - 4), (0, 0), stat.color_fg))
 
     def draw(self, offset=geo.zero2d()):
-        if self.description:
+        if self.item:
             position = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
             self._bg_rect.draw(position)
             self.text_stack_panel.draw(position)

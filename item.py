@@ -70,6 +70,32 @@ def set_item_components(item, game_state):
     return item
 
 
+class ItemStat(DataPoint):
+
+    REGULAR_FORMAT = 0
+    PERCENT_FORMAT = 1
+    MULTIPLIER_FORMAT = 2
+
+    def __init__(self, component_type, value, color_fg, screen_name=None, formatting=REGULAR_FORMAT):
+        super(ItemStat, self).__init__(component_type, value)
+        self.tags.add("item_stat")
+        self.color_fg = color_fg
+        if screen_name:
+            self._screen_name = screen_name
+        else:
+            self._screen_name = component_type
+        self.format = formatting
+        if self.format == ItemStat.PERCENT_FORMAT:
+            self._value_text = str(self.value * 100) + "% "
+        elif self.format == ItemStat.MULTIPLIER_FORMAT:
+            self._value_text = "x" + str(self.value) + "  "
+        else:
+            self._value_text = str(self.value)
+
+    def get_text(self, width):
+        return str(self._screen_name + self._value_text.rjust(width - len(self._screen_name)))
+
+
 def set_ranged_weapon_components(item):
     item.set_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
     item.set_child(ItemType(ItemType.WEAPON))
@@ -562,11 +588,11 @@ def new_mace(game_state):
                                 "This old club has an lump of iron at one end."))
     mace.set_child(GraphicChar(None, colors.GRAY, icon.MACE))
     mace.set_child(AttackProvider(1, [DamageTypes.PHYSICAL, DamageTypes.BLUNT]))
-    mace.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.1))
-    mace.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2))
+    mace.set_child(ItemStat(DataTypes.CRIT_CHANCE, 0.1, colors.RED))
+    mace.set_child(ItemStat(DataTypes.CRIT_MULTIPLIER, 2, colors.RED))
     mace.set_child(DataPoint(DataTypes.WEIGHT, 8))
-    mace.set_child(DataPoint(DataTypes.HIT, 16))
-    mace.set_child(DataPoint(DataTypes.DAMAGE, 3))
+    mace.set_child(ItemStat(DataTypes.HIT, 16, colors.LIGHT_ORANGE))
+    mace.set_child(ItemStat(DataTypes.DAMAGE, 3, colors.WHITE))
     mace.set_child(StunAttackEffect(1.0))
     return mace
 
