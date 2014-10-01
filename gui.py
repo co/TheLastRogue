@@ -818,25 +818,40 @@ class EntityStatus(UIElement):
             self._status_icon_stack_panel.append(icon_element)
 
 
-class ItemDescriptionCard(RectangularUIElement):
+def new_item_description_card():
+    return ItemDescriptionCard(rectfactory.description_rectangle(), style.scroll_theme,
+                               text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
+
+
+class ItemDescriptionCard(UIElement):
     """
     GUI Element for displaying a description object as text in a styled rectangle.
     """
     def __init__(self, rect, gui_style, text_fg=colors.WHITE, heading_fg=colors.WHITE, margin=(0, 0), vertical_space=1):
-        super(ItemDescriptionCard, self).__init__(rect, margin=margin)
+        super(ItemDescriptionCard, self).__init__(margin=margin)
+        self._main_stack_panel = StackPanelVertical((0, 0), vertical_space=-1,
+                                                    alignment=StackPanelVertical.ALIGN_RIGHT)
+        self._item_stat_card = new_item_stat_card()
+        self._main_stack_panel.append(self._item_stat_card)
 
-        self._item_stat_card = ItemStatCard(style.rogue_classic_theme)
-
-        self._bg_rect = StyledRectangle(self.rect, gui_style.rect_style)
+        bg_rect = StyledRectangle(rect, gui_style.rect_style)
         self.text_stack_panel = StackPanelVertical(gui_style.margin, vertical_space=vertical_space,
                                                    alignment=StackPanelVertical.ALIGN_LEFT)
-        self.stat_stack_panel = StackPanelVertical(gui_style.margin, vertical_space=vertical_space,
-                                                   alignment=StackPanelVertical.ALIGN_LEFT)
+        description_card = UIElementList([bg_rect, self.text_stack_panel])
+        self._main_stack_panel.append(description_card)
         self._item = None
         self.heading_fg = heading_fg
         self._inner_margin = gui_style.margin
-        self._offset = (0, 0)
+        self.offset = (0, 0)
         self.text_fg = text_fg
+
+    @property
+    def height(self):
+        return self._main_stack_panel.height
+
+    @property
+    def width(self):
+        return self._main_stack_panel.width
 
     def set_item(self, item):
         self._item = item
@@ -854,20 +869,25 @@ class ItemDescriptionCard(RectangularUIElement):
     def draw(self, offset=geo.zero2d()):
         position = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
         if self._item:
-            self._bg_rect.draw(position)
-            self.text_stack_panel.draw(position)
-        self._item_stat_card.draw(position)
+            self._main_stack_panel.draw(position)
+
+
+def new_item_stat_card():
+    return ItemStatCard(rectfactory.description_rectangle(), style.rogue_classic_theme)
 
 
 class ItemStatCard(RectangularUIElement):
-    def __init__(self, gui_style, text_fg=colors.WHITE, heading_fg=colors.WHITE, margin=(0, 0), vertical_space=1):
-        rect = geo.Rect((0, 0), constants.RIGHT_SIDE_BAR_WIDTH, 12)
+    def __init__(self, rect, gui_style, text_fg=colors.WHITE, heading_fg=colors.WHITE, margin=(0, 0)):
         super(ItemStatCard, self).__init__(rect, margin=margin)
         self._bg_rect = StyledRectangle(self.rect, gui_style.rect_style)
-        self.text_stack_panel = StackPanelVertical(gui_style.margin, vertical_space=vertical_space,
-                                                   alignment=StackPanelVertical.ALIGN_LEFT)
-        self.stat_stack_panel = StackPanelVertical(gui_style.margin, vertical_space=vertical_space,
-                                                   alignment=StackPanelVertical.ALIGN_LEFT)
+        self.main_stack_panel = StackPanelHorizontal(gui_style.margin, horizontal_space=3,
+                                                     alignment=StackPanelHorizontal.ALIGN_TOP)
+        self.text_stack_panel_left = StackPanelVertical((0, 0), vertical_space=0,
+                                                        alignment=StackPanelVertical.ALIGN_LEFT)
+        self.main_stack_panel.append(self.text_stack_panel_left)
+        self.text_stack_panel_right = StackPanelVertical(gui_style.margin, vertical_space=0,
+                                                         alignment=StackPanelVertical.ALIGN_LEFT)
+        self.main_stack_panel.append(self.text_stack_panel_right)
         self.item = None
         self.heading_fg = heading_fg
         self._inner_margin = gui_style.margin
@@ -875,17 +895,23 @@ class ItemStatCard(RectangularUIElement):
         self.text_fg = text_fg
 
     def update(self):
-        self.text_stack_panel.clear()
+        self.text_stack_panel_left.clear()
+        self.text_stack_panel_right.clear()
         if self.item:
             stats = self.item.get_children_with_tag("item_stat")
-            for stat in stats:
-                self.text_stack_panel.append(TextBox(stat.get_text(self.rect.width - 4), (0, 0), stat.color_fg))
+            sorted_stats = sorted(stats, key=lambda s: s.order)
+            for stat in sorted_stats:
+                text = TextBox(stat.get_text(self.rect.width / 2 - 4), (0, 0), stat.color_fg)
+                if stat.is_common_stat:
+                    self.text_stack_panel_left.append(text)
+                else:
+                    self.text_stack_panel_right.append(text)
 
     def draw(self, offset=geo.zero2d()):
         if self.item:
             position = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
             self._bg_rect.draw(position)
-            self.text_stack_panel.draw(position)
+            self.main_stack_panel.draw(position)
 
 
 class MessageDisplay(RectangularUIElement):

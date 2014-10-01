@@ -76,24 +76,42 @@ class ItemStat(DataPoint):
     PERCENT_FORMAT = 1
     MULTIPLIER_FORMAT = 2
 
-    def __init__(self, component_type, value, color_fg, screen_name=None, formatting=REGULAR_FORMAT):
+    def __init__(self, component_type, value, color_fg, screen_name=None, formatting=REGULAR_FORMAT, order=50,
+                 is_common_stat=True):
         super(ItemStat, self).__init__(component_type, value)
         self.tags.add("item_stat")
         self.color_fg = color_fg
+        self.order = order
         if screen_name:
             self._screen_name = screen_name
         else:
             self._screen_name = component_type
         self.format = formatting
         if self.format == ItemStat.PERCENT_FORMAT:
-            self._value_text = str(self.value * 100) + "% "
+            self._value_text = "{:.0f}".format(self.value * 100) + "% "
         elif self.format == ItemStat.MULTIPLIER_FORMAT:
-            self._value_text = "x" + str(self.value) + "  "
+            self._value_text = "x {:.1f}".format(self.value)
         else:
-            self._value_text = str(self.value)
+            self._value_text = str(self.value) + "  "
+        self.is_common_stat = is_common_stat
 
     def get_text(self, width):
         return str(self._screen_name + self._value_text.rjust(width - len(self._screen_name)))
+
+def damage_item_stat(value):
+    return ItemStat(DataTypes.DAMAGE, value, colors.WHITE, "Damage", order=0)
+
+
+def accuracy_item_stat(value):
+    return ItemStat(DataTypes.HIT, value, colors.LIGHT_ORANGE, "Accuracy", order=10)
+
+
+def crit_chance_item_stat(value):
+    return ItemStat(DataTypes.CRIT_CHANCE, value, colors.RED, "Crit %", ItemStat.PERCENT_FORMAT, order=20)
+
+
+def crit_multiplier_item_stat(value):
+    return ItemStat(DataTypes.CRIT_MULTIPLIER, value, colors.RED, "Crit x", ItemStat.MULTIPLIER_FORMAT, order=30)
 
 
 def set_ranged_weapon_components(item):
@@ -585,15 +603,15 @@ def new_mace(game_state):
     set_item_components(mace, game_state)
     set_melee_weapon_component(mace)
     mace.set_child(Description("Iron Mace",
-                                "This old club has an lump of iron at one end."))
+                               "This old club has an lump of iron at one end."))
     mace.set_child(GraphicChar(None, colors.GRAY, icon.MACE))
     mace.set_child(AttackProvider(1, [DamageTypes.PHYSICAL, DamageTypes.BLUNT]))
-    mace.set_child(ItemStat(DataTypes.CRIT_CHANCE, 0.1, colors.RED))
-    mace.set_child(ItemStat(DataTypes.CRIT_MULTIPLIER, 2, colors.RED))
-    mace.set_child(DataPoint(DataTypes.WEIGHT, 8))
-    mace.set_child(ItemStat(DataTypes.HIT, 16, colors.LIGHT_ORANGE))
-    mace.set_child(ItemStat(DataTypes.DAMAGE, 3, colors.WHITE))
+    mace.set_child(crit_chance_item_stat(0.1))
+    mace.set_child(crit_multiplier_item_stat(2))
+    mace.set_child(accuracy_item_stat(16))
+    mace.set_child(damage_item_stat(3))
     mace.set_child(StunAttackEffect(1.0))
+    mace.set_child(DataPoint(DataTypes.WEIGHT, 8))
     return mace
 
 
@@ -1212,11 +1230,20 @@ class AttackEffect(Leaf):
 class StunAttackEffect(AttackEffect):
     def __init__(self, effect_chance):
         super(StunAttackEffect, self).__init__(effect_chance)
+        #self.tags.add("item_stat")
         self.effect_chance = effect_chance
         self.component_type = "stun_attack_effect"
+        #self.stun_item_stat = self._stun_item_stat()
 
     def get_effect(self, source_entity, target_entity):
         return entityeffect.AddSpoofChild(source_entity, StunnedActor(), gametime.single_turn)
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(self._stun_item_stat())
+
+    def _stun_item_stat(self):
+        return ItemStat("Stun", self.effect_chance, colors.CHAMPAGNE, "Stun",
+                        ItemStat.PERCENT_FORMAT, order=20, is_common_stat=False)
 
 
 class OnUnequipEffect(Leaf):

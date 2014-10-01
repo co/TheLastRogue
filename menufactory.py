@@ -132,8 +132,7 @@ def inventory_menu(player, state_stack):
     menu_stack_panel = get_item_menu_stack_panel_template("Inventory",
                                                           graphic.GraphicChar(None, colors.INVENTORY_HEADING,
                                                                               icon.INVENTORY_ICON))
-    item_description_card = gui.ItemDescriptionCard(rectfactory.description_rectangle(), style.scroll_theme,
-                                                        text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
+    item_description_card = gui.new_item_description_card()
     menu_items = []
     for item in player.inventory.get_items_sorted():
         menu_option = _get_item_action_menu_option(item, player, state_stack)
@@ -178,8 +177,7 @@ def filtered_by_action_item_menu(player, state_stack, item_action_tag, heading_t
                                                           graphic.GraphicChar(None,
                                                                               colors.INVENTORY_HEADING,
                                                                               icon.INVENTORY_ICON))
-    item_description_card = gui.ItemDescriptionCard(rectfactory.description_rectangle(), style.scroll_theme,
-                                           text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
+    item_description_card = gui.new_item_description_card()
     stack_pop_function = menu.BackToGameFunction(state_stack)
     menu_items = []
     for item in player.inventory.get_items_sorted():
@@ -211,8 +209,7 @@ def item_type_menu_callback_menu(player, state_stack, item_type, heading_text, i
                                                           graphic.GraphicChar(None,
                                                                               colors.INVENTORY_HEADING,
                                                                               icon.INVENTORY_ICON))
-    item_description_card = gui.ItemDescriptionCard(rectfactory.description_rectangle(), style.scroll_theme,
-                                           text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
+    item_description_card = gui.new_item_description_card()
     stack_pop_function = menu.BackToGameFunction(state_stack)
     menu_items = []
     for item in player.inventory.get_items_sorted():
@@ -255,7 +252,7 @@ def equipment_menu(player, state_stack):
     equipment_menu_bg = gui.StyledRectangle(rectfactory.right_side_menu_rect(),
                                             style.rogue_classic_theme.rect_style)
 
-    item_description_card = gui.ItemDescriptionCard(rectfactory.description_rectangle(), style.scroll_theme, text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
+    item_description_card = gui.new_item_description_card()
     resulting_menu = menu.EquipmentMenu((0, 0), player, state_stack, selected_payload_callback=(lambda item: item_description_card.set_item(item)), margin=(2, 1))
     menu_stack_panel.append(resulting_menu)
 
@@ -279,7 +276,7 @@ def equipment_slot_menu(player, equipment_slot, state_stack):
     heading = gui.TextBox("Change " + equipment_slot.name, (2, 1), colors.INVENTORY_HEADING, (2, 2))
     menu_stack_panel.append(heading)
 
-    item_description_card = gui.ItemDescriptionCard(rectfactory.description_rectangle(), style.scroll_theme, text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
+    item_description_card = gui.new_item_description_card()
     resulting_menu = menu.EquipSlotMenu((0, 0), player, equipment_slot, state_stack, (lambda item: item_description_card.set_item(item)), (2, 1))
     menu_stack_panel.append(resulting_menu)
 
@@ -506,7 +503,7 @@ def sacrifice_menu(player, powers, post_power_gain_function):
     heading_stack_panel.append(gui.SymbolUIElement((0, 0), graphic.GraphicChar(colors.DARK_BLUE, colors.HP_BAR_FULL, icon.HEALTH_STAT)))
     menu_stack_panel.append(gui.VerticalSpace(2))
 
-    item_description_card = gui.ItemDescriptionCard(rectfactory.description_rectangle(), style.scroll_theme, text_fg=colors.DARK_BROWN, heading_fg=colors.DARK_BROWN)
+    item_description_card = gui.new_item_description_card()
     resulting_menu = menu.StaticMenu((0, 0), context_options, state_stack, selected_payload_callback=(lambda item: item_description_card.set_item(item)))
     menu_stack_panel.append(resulting_menu)
     background_rect = get_menu_background(context_menu_rect, style.sacrifice_menu_theme.rect_style)
