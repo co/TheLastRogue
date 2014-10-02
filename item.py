@@ -630,6 +630,7 @@ def new_knife(game_state):
     knife.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2.5))
     knife.set_child(DataPoint(DataTypes.HIT, 21))
     knife.set_child(DataPoint(DataTypes.DAMAGE, 1))
+    knife.set_child(ExtraSwingAttackEffect(0.5))
     return knife
 
 
@@ -1203,9 +1204,7 @@ class AttackProvider(Leaf):
         return crit_multiplier
 
     def attack_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
-        attack_effects = [effect.get_effect(source_entity, target_entity)
-                          for effect in self.parent.get_children_with_tag("attack_effect")
-                          if effect.roll_to_hit()]
+        attack_effects = [effect for effect in self.parent.get_children_with_tag("attack_effect")]
         attack = Attack(self.damage_strength(source_entity), self.variance,
                         self.types, self.actual_hit(source_entity), crit_chance=self.actual_crit_chance(source_entity),
                         crit_multiplier=self.actual_crit_multiplier(source_entity),
@@ -1223,27 +1222,45 @@ class AttackEffect(Leaf):
     def roll_to_hit(self):
         return random.random() < self.effect_chance
 
-    def get_effect(self, source_entity, target_entity):
+    def execute_effect(self, source_entity, target_entity):
         pass
 
 
 class StunAttackEffect(AttackEffect):
     def __init__(self, effect_chance):
         super(StunAttackEffect, self).__init__(effect_chance)
-        #self.tags.add("item_stat")
         self.effect_chance = effect_chance
         self.component_type = "stun_attack_effect"
-        #self.stun_item_stat = self._stun_item_stat()
 
-    def get_effect(self, source_entity, target_entity):
-        return entityeffect.AddSpoofChild(source_entity, StunnedActor(), gametime.single_turn)
+    def execute_effect(self, source_entity, target_entity):
+        return target_entity.effect_queue.add(entityeffect.AddSpoofChild(source_entity, StunnedActor(),
+                                                                         gametime.single_turn))
 
     def first_tick(self, time):
-        self.parent.add_spoof_child(self._stun_item_stat())
+        self.parent.add_spoof_child(self._item_stat())
 
-    def _stun_item_stat(self):
+    def _item_stat(self):
         return ItemStat("Stun", self.effect_chance, colors.CHAMPAGNE, "Stun",
                         ItemStat.PERCENT_FORMAT, order=20, is_common_stat=False)
+
+
+class ExtraSwingAttackEffect(AttackEffect):
+    def __init__(self, effect_chance):
+        super(ExtraSwingAttackEffect, self).__init__(effect_chance)
+        self.effect_chance = effect_chance
+        self.component_type = "extra_swing_attack_effect"
+
+    def execute_effect(self, source_entity, target_entity):
+        source_entity.attacker.hit(target_entity)
+        return
+
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(self._item_stat())
+
+    def _item_stat(self):
+        return ItemStat("extra_swing", self.effect_chance, colors.LIGHT_BLUE, "Extra Swing",
+                        ItemStat.PERCENT_FORMAT, order=10, is_common_stat=False)
 
 
 class OnUnequipEffect(Leaf):

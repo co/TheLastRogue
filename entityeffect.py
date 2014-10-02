@@ -168,9 +168,10 @@ class Teleport(EntityEffect):
 
 
 class AttackEntityEffect(EntityEffect):
-    def __init__(self, source_entity, damage, damage_types, hit, crit_chance=0, crit_multiplier=2, hit_message=messenger.HIT_MESSAGE,
-                 miss_message=messenger.MISS_MESSAGE, crit_message=messenger.CRIT_MESSAGE, hit_trigger_effect=[], no_stack_id=None, time_to_live=1,
-                 target_entity_effects=[]):
+    def __init__(self, source_entity, damage, damage_types, hit, crit_chance=0, crit_multiplier=2,
+                 hit_message=messenger.HIT_MESSAGE, miss_message=messenger.MISS_MESSAGE,
+                 crit_message=messenger.CRIT_MESSAGE, hit_trigger_effect=[], no_stack_id=None, time_to_live=1,
+                 attack_effects=[]):
         super(AttackEntityEffect, self).__init__(source_entity=source_entity,
                                                  effect_type=EffectTypes.DAMAGE,
                                                  no_stack_id=no_stack_id,
@@ -180,7 +181,7 @@ class AttackEntityEffect(EntityEffect):
         self.damage_types = damage_types
         self.miss_message = miss_message
         self.hit_message = hit_message
-        self.target_entity_effects = target_entity_effects
+        self.attack_effects = attack_effects
         self.hit_trigger_effect = hit_trigger_effect
         self.crit_chance = crit_chance
         self.crit_multiplier = crit_multiplier
@@ -216,7 +217,7 @@ class AttackEntityEffect(EntityEffect):
         damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(damage, self.damage_types)
         damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
         damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity)
-        self.add_effects_to_target()
+        self.execute_effects()
         if is_crit:
             self.send_hit_message(self.crit_message, damage_caused)
         else:
@@ -231,9 +232,10 @@ class AttackEntityEffect(EntityEffect):
             self.send_miss_message()
         self.tick(time_spent)
 
-    def add_effects_to_target(self):
-        for effect in self.target_entity_effects:
-            self.target_entity.effect_queue.add(effect)
+    def execute_effects(self):
+        for effect in self.attack_effects:
+            if effect.roll_to_hit():
+                effect.execute_effect(self.source_entity, self.target_entity)
 
 
 class UndodgeableAttackEntityEffect(AttackEntityEffect):

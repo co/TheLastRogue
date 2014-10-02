@@ -252,7 +252,7 @@ class Attack(object):
         damage_effect = entityeffect.AttackEntityEffect(source_entity, damage * self.damage_multiplier,
                                                         self.damage_types, self.hit + bonus_hit, crit_chance=self.crit_chance,
                                                         crit_multiplier=self.crit_multiplier,
-                                                        target_entity_effects=self.target_entity_effects)
+                                                        attack_effects=self.target_entity_effects)
         target_entity.effect_queue.add(damage_effect)
 
 
