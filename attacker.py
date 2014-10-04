@@ -211,12 +211,13 @@ class DamageTypes(object):
     BLUNT = 2
     PIERCING = 3
     CUTTING = 4
-    ACID = 5
-    POISON = 6
-    FIRE = 7
-    REFLECT = 8
+    BLEED = 5
+    ACID = 6
+    POISON = 7
+    FIRE = 8
+    REFLECT = 9
 
-    FALL = 9
+    FALL = 10
 
 
 class FireImmunity(Leaf):

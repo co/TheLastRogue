@@ -33,3 +33,4 @@ DAMAGE_REFLECT_STATUS_DESCRIPTION = StatusDescription("Damage Reflect", GraphicC
 LIFE_STEAL_STATUS_DESCRIPTION = StatusDescription("Life Steal", GraphicChar(None, colors.RED, "V"), "When an enemy dies within sight you will heal one point of health.")
 STUMBLE_STATUS_DESCRIPTION = StatusDescription("Stumble Curse", GraphicChar(None, colors.YELLOW, "+"), "Your next step will be in a random direction.")
 SLEEP_STATUS_DESCRIPTION = StatusDescription("Sleeping", GraphicChar(None, colors.GRAY, "Z"), "You will be unable to do anything until you take damage.")
+BLEED_STATUS_DESCRIPTION = StatusDescription("Bleed", GraphicChar(None, colors.RED, "B"), "You will take damage each turn you do not rest.")

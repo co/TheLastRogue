@@ -214,7 +214,8 @@ class BleedWhenDamaged(DamageTakenEffect):
 
     def effect(self, damage, source_entity, damage_types=[]):
         dungeon_level = self.parent.dungeon_level.value
-        if damage / float(self.parent.health.hp.max_value) > 0.2:
+        is_bleed_damage = DamageTypes.BLEED in damage_types
+        if damage / float(self.parent.health.hp.max_value) > 0.2 or is_bleed_damage:
             self.put_blood_on_tile(dungeon_level, self.parent.position.value)
 
         if damage / float(self.parent.health.hp.max_value) > 0.4:

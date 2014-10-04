@@ -45,9 +45,11 @@ class EffectQueue(Leaf):
         return [effect for effect_group in self._effect_queue for effect in effect_group]
 
     def add(self, effect):
-        if effect.no_stack_id:
-            if not any(effect.no_stack_id == e.no_stack_id for e in self.effects):
+        if effect.meld_id:
+            if not any(effect.meld_id == e.meld_id for e in self.effects):
                 self._add(effect)
+            else:
+                [e for e in self.effects][0].meld(effect)
         else:
             self._add(effect)
 
@@ -71,16 +73,19 @@ class EffectQueue(Leaf):
 
 
 class EntityEffect(object):
-    def __init__(self, source_entity, time_to_live, effect_type, no_stack_id=None):
+    def __init__(self, source_entity, time_to_live, effect_type, meld_id=None):
         self.source_entity = source_entity
         self.time_to_live = time_to_live
         self.effect_type = effect_type
         self.is_blocked = False
-        self.no_stack_id = no_stack_id
+        self.meld_id = meld_id
         self.queue = None
         self.time_alive = 0
 
     def update(self, time_spent):
+        pass
+
+    def meld(self, other_effect):
         pass
 
     @property
@@ -170,11 +175,11 @@ class Teleport(EntityEffect):
 class AttackEntityEffect(EntityEffect):
     def __init__(self, source_entity, damage, damage_types, hit, crit_chance=0, crit_multiplier=2,
                  hit_message=messenger.HIT_MESSAGE, miss_message=messenger.MISS_MESSAGE,
-                 crit_message=messenger.CRIT_MESSAGE, hit_trigger_effect=[], no_stack_id=None, time_to_live=1,
+                 crit_message=messenger.CRIT_MESSAGE, hit_trigger_effect=[], meld_id=None, time_to_live=1,
                  attack_effects=[]):
         super(AttackEntityEffect, self).__init__(source_entity=source_entity,
                                                  effect_type=EffectTypes.DAMAGE,
-                                                 no_stack_id=no_stack_id,
+                                                 meld_id=meld_id,
                                                  time_to_live=time_to_live)
         self.hit = hit
         self.damage = damage
@@ -240,10 +245,10 @@ class AttackEntityEffect(EntityEffect):
 
 class UndodgeableAttackEntityEffect(AttackEntityEffect):
     def __init__(self, source_entity, damage, damage_types, hit_message=messenger.HIT_MESSAGE,
-                 no_stack_id=None, time_to_live=1):
+                 meld_id=None, time_to_live=1):
         super(UndodgeableAttackEntityEffect, self).__init__(source_entity, damage, damage_types, -1,
                                                             hit_message=hit_message,
-                                                            no_stack_id=no_stack_id,
+                                                            meld_id=meld_id,
                                                             time_to_live=time_to_live)
 
     def is_a_hit(self):
@@ -251,9 +256,9 @@ class UndodgeableAttackEntityEffect(AttackEntityEffect):
 
 
 class HealthRegain(EntityEffect):
-    def __init__(self, source_entity, health, turn_interval, time_to_live, no_stack_id=None):
+    def __init__(self, source_entity, health, turn_interval, time_to_live, meld_id=None):
         super(HealthRegain, self).__init__(source_entity=source_entity, effect_type=EffectTypes.HEAL,
-                                           no_stack_id=no_stack_id, time_to_live=time_to_live)
+                                           meld_id=meld_id, time_to_live=time_to_live)
         self.health = health
         self.time_interval = turn_interval * gametime.single_turn
         self.time_until_next_heal = self.time_interval
@@ -267,9 +272,9 @@ class HealthRegain(EntityEffect):
 
 
 class StatusIconEntityEffect(EntityEffect):
-    def __init__(self, source_entity, status_icon, time_to_live, no_stack_id=None):
+    def __init__(self, source_entity, status_icon, time_to_live, meld_id=None):
         super(StatusIconEntityEffect, self).__init__(source_entity=source_entity, effect_type=EffectTypes.UI,
-                                                     no_stack_id=no_stack_id, time_to_live=time_to_live)
+                                                     meld_id=meld_id, time_to_live=time_to_live)
         self.status_icon = status_icon
 
     def update(self, time_spent):
@@ -280,9 +285,9 @@ class StatusIconEntityEffect(EntityEffect):
 
 class DamageOverTimeEffect(EntityEffect):
     def __init__(self, source_entity, damage, damage_types, turn_interval, turns_to_live,
-                 damage_message, status_icon=None, no_stack_id=None):
+                 damage_message, status_icon=None, meld_id=None):
         super(DamageOverTimeEffect, self).__init__(source_entity=source_entity, effect_type=EffectTypes.DAMAGE,
-                                                   no_stack_id=no_stack_id, time_to_live=turns_to_live * gametime.single_turn)
+                                                   meld_id=meld_id, time_to_live=turns_to_live * gametime.single_turn)
         self.damage = damage
         self.damage_types = damage_types
         self.time_interval = turn_interval * gametime.single_turn
@@ -322,13 +327,28 @@ class DamageOverTimeEffect(EntityEffect):
         self.tick(time_spent)
 
 
+class BleedEffect(DamageOverTimeEffect):
+
+    MAX_DAMAGE_PER_TURN = 3
+
+    def __init__(self, source_entity, damage, damage_types, turn_interval, turns_to_live,
+                 damage_message, status_icon):
+        super(BleedEffect, self).__init__(source_entity, damage, damage_types, turn_interval, turns_to_live,
+                                          damage_message, status_icon=status_icon, meld_id="bleed_effect")
+
+    def meld(self, other_effect):
+        self.time_to_live = max(other_effect.time_to_live, self.time_to_live)
+        self.damage = min(self.damage + 1, BleedEffect.MAX_DAMAGE_PER_TURN)
+        self.status_icon.graphic_char.icon = str(self.damage)
+
+
 class UndodgeableDamagAndBlockSameEffect(EntityEffect):
     def __init__(self, source_entity, damage, damage_types,
-                 damage_message, no_stack_id, status_icon=None, time_to_live=1):
+                 damage_message, meld_id, status_icon=None, time_to_live=1):
         super(UndodgeableDamagAndBlockSameEffect, self).__init__(source_entity=source_entity,
                                                                  effect_type=EffectTypes.DAMAGE,
                                                                  time_to_live=time_to_live,
-                                                                 no_stack_id=no_stack_id)
+                                                                 meld_id=meld_id)
         self.damage = damage
         self.damage_types = damage_types
         self.damage_message = damage_message
@@ -376,11 +396,11 @@ class Heal(EntityEffect):
 
 
 class AddSpoofChild(EntityEffect):
-    def __init__(self, source_entity, spoof_child, time_to_live, no_stack_id=None):
+    def __init__(self, source_entity, spoof_child, time_to_live, meld_id=None):
         super(AddSpoofChild, self).__init__(source_entity=source_entity,
                                             effect_type=EffectTypes.ADD_SPOOF_CHILD,
                                             time_to_live=time_to_live,
-                                            no_stack_id=no_stack_id)
+                                            meld_id=meld_id)
         self.spoof_child = spoof_child
 
     def update(self, time_spent):
@@ -389,11 +409,11 @@ class AddSpoofChild(EntityEffect):
 
 
 class RemoveChildEffect(EntityEffect):
-    def __init__(self, source_entity, component_type, time_to_live, no_stack_id=None):
+    def __init__(self, source_entity, component_type, time_to_live, meld_id=None):
         super(RemoveChildEffect, self).__init__(source_entity=source_entity,
                                                 effect_type=EffectTypes.REMOVE_CHILD,
                                                 time_to_live=time_to_live,
-                                                no_stack_id=no_stack_id)
+                                                meld_id=meld_id)
         self.component_type = component_type
 
     def update(self, time_spent):

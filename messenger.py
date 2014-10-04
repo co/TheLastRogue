@@ -13,6 +13,7 @@ HEART_STOP_MESSAGE = "%(target_entity)s, clutches its heart."
 DARKNESS_MESSAGE = "An unnatural darkness fills the dungeon."
 PICK_UP_MESSAGE = "You pick up %(item)s."
 POISON_MESSAGE = "%(target_entity)s takes %(damage)s in poison damage."
+BLEED_MESSAGE = "%(target_entity)s is bleeding out %(damage)s damage."
 
 DOWN_STAIRS_HEAL_MESSAGE = "Your feel vitalized by your progress, you regain %(health)s health."
 FALL_DOWN_MESSAGE = "You take a damage of %(damage)s from the fall."

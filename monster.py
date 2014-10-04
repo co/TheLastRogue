@@ -331,6 +331,7 @@ def set_ghost_components(composite):
     composite.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.FLYING]))
     composite.set_child(PoisonImmunity())
     composite.set_child(TolerateDamage(DamageTypes.POISON))
+    composite.set_child(TolerateDamage(DamageTypes.BLEED))
 
 
 def new_ghost(gamestate):
@@ -546,7 +547,7 @@ class NaturalHealthRegain(Leaf):
         self.component_type = "natural_health_regain"
 
     def before_tick(self, time):
-        health_regain = HealthRegain(self.parent, 3, 4, float("inf"), no_stack_id="natural_health_regain")
+        health_regain = HealthRegain(self.parent, 3, 4, float("inf"), meld_id="natural_health_regain")
         self.parent.effect_queue.add(health_regain)
         self.parent.remove_component(self)
 

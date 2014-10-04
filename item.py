@@ -1,5 +1,5 @@
 import random
-from Status import DAMAGE_REFLECT_STATUS_DESCRIPTION, LIFE_STEAL_STATUS_DESCRIPTION
+from Status import DAMAGE_REFLECT_STATUS_DESCRIPTION, LIFE_STEAL_STATUS_DESCRIPTION, BLEED_STATUS_DESCRIPTION
 
 from action import Action
 from actor import DoNothingActor, StunnedActor
@@ -630,7 +630,8 @@ def new_knife(game_state):
     knife.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2.5))
     knife.set_child(DataPoint(DataTypes.HIT, 21))
     knife.set_child(DataPoint(DataTypes.DAMAGE, 1))
-    knife.set_child(ExtraSwingAttackEffect(0.5))
+    knife.set_child(ExtraSwingAttackEffect(0.3))
+    knife.set_child(BleedAttackEffect(1))
     return knife
 
 
@@ -1254,13 +1255,35 @@ class ExtraSwingAttackEffect(AttackEffect):
         source_entity.attacker.hit(target_entity)
         return
 
-
     def first_tick(self, time):
         self.parent.add_spoof_child(self._item_stat())
 
     def _item_stat(self):
         return ItemStat("extra_swing", self.effect_chance, colors.LIGHT_BLUE, "Extra Swing",
                         ItemStat.PERCENT_FORMAT, order=10, is_common_stat=False)
+
+
+class BleedAttackEffect(AttackEffect):
+    def __init__(self, effect_chance):
+        super(BleedAttackEffect, self).__init__(effect_chance)
+        self.effect_chance = effect_chance
+        self.component_type = "bleed_attack_effect"
+
+    def execute_effect(self, source_entity, target_entity):
+        turns = random.randrange(2, 6)
+        damage_per_turn = 1
+        damage_interval = 1
+        bleed_effect = entityeffect.BleedEffect(source_entity, damage_per_turn, [DamageTypes.BLEED],
+                                                         damage_interval, turns,
+                                                         messenger.BLEED_MESSAGE, BLEED_STATUS_DESCRIPTION)
+        target_entity.effect_queue.add(bleed_effect)
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(self._item_stat())
+
+    def _item_stat(self):
+        return ItemStat("bleed_weapon_effect", self.effect_chance, colors.RED_D, "Bleed",
+                        ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
 
 
 class OnUnequipEffect(Leaf):
