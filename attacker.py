@@ -66,6 +66,16 @@ class Attacker(Leaf):
     def actual_unarmed_crit_multiplier(self):
         return self.actual_thrown_crit_multiplier
 
+    def try_hit_melee(self, position):
+        """
+        Tries to hit an entity at a position.
+
+        will fail if it is not next to parent entity.
+        """
+        if geometry.chess_distance(self.parent.position.value, position) <= 1:
+            return self.try_hit(position)
+        return False
+
     def try_hit(self, position):
         """
         Tries to hit an entity at a position.
@@ -299,10 +309,62 @@ class CounterAttackOnDamageTakenEffect(OnAttackedEffect):
     def __init__(self):
         super(CounterAttackOnDamageTakenEffect, self).__init__()
         self.component_type = "counter_attack_on_damage_taken"
-        self.damage = 1
 
     def effect(self, source_entity, damage_types=[]):
-        distance = geometry.chess_distance(source_entity.position.value, self.parent.position.value)
-        if (distance <= 1 and self.parent.has(DataTypes.COUNTER_ATTACK_CHANCE) and
-                    random.random() < self.parent.counter_attack_chance.value):
-            self.parent.attacker.hit(source_entity)
+        target_entity = self.parent
+        melee_hit_entity_help_function(DataTypes.COUNTER_ATTACK_CHANCE, target_entity, source_entity)
+
+
+class EnemySteppingNextToMeEffect(Leaf):
+    """
+    Subclasses may define an effect that happens when an entity steps next to parent entity.
+    """
+
+    TAG = "enemy_stepping_next_to_me_effect"
+
+    def __init__(self):
+        super(EnemySteppingNextToMeEffect, self).__init__()
+        self.tags.add(EnemySteppingNextToMeEffect.TAG)
+
+    def effect(self, source_entity, damage_types=[]):
+        pass
+
+
+class StepNextToEnemyEffect(Leaf):
+    """
+    Subclasses may define an effect that happens when parent takes damage.
+    """
+
+    TAG = "step_next_to_enemy_effect"
+
+    def __init__(self):
+        super(StepNextToEnemyEffect, self).__init__()
+        self.tags.add(StepNextToEnemyEffect.TAG)
+
+    def effect(self, source_entity, damage_types=[]):
+        pass
+
+
+class AttackEnemyIStepNextToEffect(StepNextToEnemyEffect):
+    def __init__(self):
+        super(AttackEnemyIStepNextToEffect, self).__init__()
+        self.component_type = "attack_enemy_i_step_next_to_effect"
+
+    def effect(self, target_entity):
+        melee_hit_entity_help_function(DataTypes.OFFENCIVE_ATTACK_CHANCE, self.parent, target_entity)
+
+
+class AttackEnemySteppingNextToMeEffect(EnemySteppingNextToMeEffect):
+    def __init__(self):
+        super(AttackEnemySteppingNextToMeEffect, self).__init__()
+        self.component_type = "attack_enemy_stepping_next_to_me_effect"
+
+    def effect(self, target_entity):
+        melee_hit_entity_help_function(DataTypes.DEFENCIVE_ATTACK_CHANCE, self.parent, target_entity)
+
+
+def melee_hit_entity_help_function(attack_chance, source_entity, target_entity):
+    distance = geometry.chess_distance(source_entity.position.value, source_entity.position.value)
+    if (distance <= 1 and source_entity.has(attack_chance) and
+                random.random() < source_entity.get_child(attack_chance).value):
+        source_entity.attacker.try_hit_melee(target_entity.position.value)

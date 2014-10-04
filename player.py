@@ -2,7 +2,7 @@ from Status import StatusDescriptionBar
 import constants
 from equipment import Equipment
 from item import PickUpItemAction
-from attacker import Attacker, Dodger, ArmorChecker, ResistanceChecker, CounterAttackOnDamageTakenEffect
+from attacker import Attacker, Dodger, ArmorChecker, ResistanceChecker, CounterAttackOnDamageTakenEffect, AttackEnemyIStepNextToEffect, AttackEnemySteppingNextToMeEffect
 from compositecore import Composite
 from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue
@@ -43,7 +43,10 @@ class Player(Composite):
         self.set_child(DataPoint(DataTypes.HIT, 16))
         self.set_child(DataPoint(DataTypes.ARMOR, 4))
         self.set_child(DataPoint(DataTypes.STEALTH, 6))
+
         self.set_child(DataPoint(DataTypes.COUNTER_ATTACK_CHANCE, 0.0))
+        self.set_child(DataPoint(DataTypes.DEFENCIVE_ATTACK_CHANCE, 0.0))
+        self.set_child(DataPoint(DataTypes.OFFENCIVE_ATTACK_CHANCE, 0.0))
 
         self.set_child(Flag("is_player"))
         self.set_child(Flag("is_named"))
@@ -79,7 +82,10 @@ class Player(Composite):
 
         self.set_child(HealthModifier())
         self.set_child(BleedWhenDamaged())
+
         self.set_child(CounterAttackOnDamageTakenEffect())
+        self.set_child(AttackEnemyIStepNextToEffect())
+        self.set_child(AttackEnemySteppingNextToMeEffect())
 
         self.set_child(PlayerThrowStoneAction())
 

@@ -137,6 +137,9 @@ class Composite(Component):
     def __getinitargs__(self):
         return ()
 
+    def get_child(self, component_type):
+        return self.__getattr__(component_type)
+
     def set_child(self, child):
         """
         Adds a child component to this component.

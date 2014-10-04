@@ -68,7 +68,10 @@ class DataTypes:
     STEALTH = "stealth"
     AWARENESS = "awareness"
     EVASION = "evasion"
+
     COUNTER_ATTACK_CHANCE = "counter_attack_chance"
+    OFFENCIVE_ATTACK_CHANCE = "offencive_attack_chance"
+    DEFENCIVE_ATTACK_CHANCE = "defencive_attack_chance"
 
     MELEE_SPEED = "melee_speed"
     SHOOT_SPEED = "shoot_speed"

@@ -6,7 +6,7 @@ from actor import DoNothingActor, StunnedActor
 from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud, new_fire_cloud
 from compositecommon import PoisonEntityEffectFactory
 from compositecore import Leaf, Composite
-from attacker import Attack, DamageTypes
+from attacker import Attack, DamageTypes, AttackEnemyIStepNextToEffect
 import direction
 from dummyentities import dummy_flyer
 import geometry
@@ -630,8 +630,7 @@ def new_knife(game_state):
     knife.set_child(DataPoint(DataTypes.HIT, 21))
     knife.set_child(DataPoint(DataTypes.DAMAGE, 1))
     knife.set_child(ExtraSwingAttackEffect(0.3))
-    knife.set_child(KnockBackAttackEffect(1))
-    knife.set_child(CounterAttackEffect(1))
+    knife.set_child(DefenciveAttackEffect(1))
     return knife
 
 
@@ -1258,8 +1257,7 @@ class ExtraSwingAttackEffect(AttackEffect):
         self.component_type = "extra_swing_attack_effect"
 
     def execute_effect(self, source_entity, target_entity):
-        source_entity.attacker.hit(target_entity)
-        return
+        source_entity.attacker.try_hit_melee(target_entity.position.value)
 
     def first_tick(self, time):
         self.parent.add_spoof_child(self._item_stat())
@@ -1285,6 +1283,39 @@ class CounterAttackEffect(StatBonusEquipEffect):
         return ItemStat("counter_attack_weapon_effect", self.effect_chance, colors.PURPLE, "Counter",
                         ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
 
+
+class OffenciveAttackEffect(StatBonusEquipEffect):
+    def __init__(self, effect_chance):
+        super(OffenciveAttackEffect, self).__init__(DataTypes.OFFENCIVE_ATTACK_CHANCE, effect_chance)
+        self.effect_chance = effect_chance
+        self.component_type = "offencive_attack"
+
+    def effect(self, entity):
+        entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(self._item_stat())
+
+    def _item_stat(self):
+        return ItemStat("offencive_attack_weapon_effect", self.effect_chance, colors.LIGHT_GREEN, "Offencive Strike",
+                        ItemStat.PERCENT_FORMAT, order=40, is_common_stat=False)
+
+
+class DefenciveAttackEffect(StatBonusEquipEffect):
+    def __init__(self, effect_chance):
+        super(DefenciveAttackEffect, self).__init__(DataTypes.DEFENCIVE_ATTACK_CHANCE, effect_chance)
+        self.effect_chance = effect_chance
+        self.component_type = "defencive_attack"
+
+    def effect(self, entity):
+        entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(self._item_stat())
+
+    def _item_stat(self):
+        return ItemStat("defencive_attack_weapon_effect", self.effect_chance, colors.LIGHT_GREEN, "Defencive Strike",
+                        ItemStat.PERCENT_FORMAT, order=40, is_common_stat=False)
 
 class BleedAttackEffect(AttackEffect):
     def __init__(self, effect_chance):

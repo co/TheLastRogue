@@ -185,6 +185,28 @@ class Stepper(Leaf):
         super(Stepper, self).__init__()
         self.component_type = "stepper"
 
+    def _try_move_to_destination(self, position):
+        """
+        This method should wrap the move component for the stepper.
+        No other method should call mover.
+        """
+        if self.parent.mover.try_move(position):
+            self._on_successful_step()
+            return True
+        return False
+
+    def _on_successful_step(self):
+        position = self.parent.position.value
+        surrounding_points = [geometry.add_2d(d, position) for d in direction.DIRECTIONS]
+        for p in surrounding_points:
+            entities = self.parent.dungeon_level.value.get_tile_or_unknown(p).get_entities()
+            if len(entities) > 0:
+                entity = entities[0]
+                for e in entity.get_children_with_tag("enemy_stepping_next_to_me_effect"):
+                    e.effect(self.parent)
+                for e in self.parent.get_children_with_tag("step_next_to_enemy_effect"):
+                    e.effect(entity)
+
     def try_step_in_direction(self, direction):
         return self.try_move_or_bump(geometry.add_2d(self.parent.position.value, direction))
 
@@ -199,7 +221,7 @@ class Stepper(Leaf):
 
     def try_attack(self, position):
         return (self.parent.has("attacker") and
-                self.parent.attacker.try_hit(position))
+                self.parent.attacker.try_hit_melee(position))
 
     def try_move_or_bump(self, position):
         """
@@ -218,7 +240,7 @@ class Stepper(Leaf):
             return self.parent.movement_speed.value
         if self.try_attack(position):
             return self.parent.melee_speed.value
-        if self.parent.mover.try_move(position):
+        if self._try_move_to_destination(position):
             return self.parent.movement_speed.value
         return 0
 
@@ -285,7 +307,7 @@ class CautiousStepper(Stepper):
         if self.try_attack(position):
             return self.parent.melee_speed.value
         if self.dares_to_step(position):
-            move_successful = self.parent.mover.try_move(position)
+            move_successful = self._try_move_to_destination(position)
             return self.parent.movement_speed.value if move_successful else 0
         return 0
 
@@ -316,7 +338,7 @@ class PlayerStepper(Stepper):
         terrain = self.parent.dungeon_level.value.get_tile_or_unknown(position).get_terrain()
         if ((len(terrain.get_children_with_tag("prompt_player")) < 1) or
                 terrain.get_children_with_tag("prompt_player")[0].prompt_player(target_entity=self.parent)):
-            if self.parent.mover.try_move(position):
+            if self._try_move_to_destination(position):
                 return self.parent.movement_speed.value
         return 0
 
