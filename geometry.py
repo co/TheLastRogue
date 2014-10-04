@@ -13,6 +13,28 @@ def int_2d(point):
     return int(point[0]), int(point[1])
 
 
+def other_side_of_point_direction(point1, point2):
+    far_behind_point = sub_2d(point2, point1)
+    direction = element_wise_round(normalize(far_behind_point))
+    return direction
+
+
+def other_side_of_point(point1, point2):
+    """
+    returns the point right behind point2 as seen by point1.
+    1 = point1
+    2 = point2
+    r = result
+    ..1..
+    .....
+    .....
+    ...2.
+    ...r.
+    """
+    direction = other_side_of_point_direction(point1, point2)
+    return add_2d(point2, direction)
+
+
 def distance_sqrd(point1, point2):
     """
     Returns the distance between two points squared.

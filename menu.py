@@ -50,7 +50,6 @@ class Menu(gui.UIElement):
     @selected_index.setter
     def selected_index(self, value):
         if not value is self._selected_index and not value is None:
-            print "wooot"
             self._selected_index = value
             self._signal_new_index()
 

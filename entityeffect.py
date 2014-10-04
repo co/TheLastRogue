@@ -231,7 +231,8 @@ class AttackEntityEffect(EntityEffect):
     def update(self, time_spent):
         if self.target_entity.resistance_checker.is_immune(self.damage_types):
             pass
-        elif self.is_a_hit():
+        self.on_attacked_effects()
+        if self.is_a_hit():
             self.hit_target()
         else:
             self.send_miss_message()
@@ -241,6 +242,10 @@ class AttackEntityEffect(EntityEffect):
         for effect in self.attack_effects:
             if effect.roll_to_hit():
                 effect.execute_effect(self.source_entity, self.target_entity)
+
+    def on_attacked_effects(self):
+        for effect in self.target_entity.get_children_with_tag("on_attacked_effect"):
+            effect.effect(self.source_entity, self.damage_types)
 
 
 class UndodgeableAttackEntityEffect(AttackEntityEffect):

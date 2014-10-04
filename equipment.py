@@ -82,8 +82,8 @@ class Equipment(Leaf):
 
     def unequip(self, equipment_slot):
         equipment = self._equipment[equipment_slot]
-        if equipment.has("unequip_effect"):
-            equipment.unequip_effect.effect()
+        for e in equipment.get_children_with_tag("unequip_effect"):
+            e.effect()
         self._equipment[equipment_slot] = None
         return equipment
 
@@ -126,8 +126,8 @@ class Equipment(Leaf):
 
     def _equip_into_slot(self, equipment, slot):
         self._equipment[slot] = equipment
-        if equipment.has("on_equip_effect"):
-            equipment.on_equip_effect.effect(self.parent)
+        for e in equipment.get_children_with_tag("on_equip_effect"):
+            e.effect(self.parent)
 
     def first_tick(self, time_spent):
         self.execute_equip_effects()
@@ -136,8 +136,8 @@ class Equipment(Leaf):
         for equipment_slot in EquipmentSlots.ALL:
             if self.slot_is_equiped(equipment_slot):
                 equipment = self._equipment[equipment_slot]
-                if equipment.has("equipped_effect"):
-                    equipment.equipped_effect.effect(self.parent)
+                for e in equipment.get_children_with_tag("equipped_effect"):
+                    e.effect(self.parent)
 
     def print_equipment(self):
         print("###############################")

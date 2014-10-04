@@ -234,11 +234,10 @@ class BleedWhenDamaged(DamageTakenEffect):
         """
         Gets point right behind me seen from my enemy.
         """
-        far_behind_point = geometry.sub_2d(self.parent.position.value, enemy_position)
-        right_behind_point_delta = geometry.element_wise_round(geometry.normalize(far_behind_point))
+        right_behind_direction = geometry.other_side_of_point_direction(enemy_position, self.parent.position.value)
         last_result = self.parent.position.value
         for _ in range(distance):
-            result = geometry.add_2d(right_behind_point_delta, last_result)
+            result = geometry.add_2d(right_behind_direction, last_result)
             if position_is_solid(result, dungeon_level):
                 return last_result
             last_result = result

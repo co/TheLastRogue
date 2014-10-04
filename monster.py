@@ -1,5 +1,6 @@
 import random
 from Status import StatusDescriptionBar
+from actor import DoNothingActor
 from animation import animate_flight
 from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity, KnockBackAttacker, PoisonImmunity
 from cloud import new_fire_cloud, new_dust_cloud
@@ -88,6 +89,25 @@ def set_skeleton_components(composite):
     composite.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
     composite.set_child(PoisonImmunity())
     composite.set_child(TolerateDamage(DamageTypes.POISON))
+
+
+def new_training_dummy(gamestate):
+    monster = Composite()
+    set_monster_components(monster, gamestate)
+
+    monster.set_child(Description("Training Dummy", "A Man hybrid, it looks hostile."))
+    monster.set_child(EntityMessages("The monster looks at you.", "The monster falls dead."))
+    monster.set_child(GraphicChar(None, colors.CHAMPAGNE, icon.STATUE))
+
+    monster.set_child(Health(80))
+    monster.set_child(DataPoint(DataTypes.STRENGTH, 3))
+    monster.set_child(DataPoint(DataTypes.EVASION, 16))
+    monster.set_child(DataPoint(DataTypes.HIT, 13))
+    monster.set_child(DataPoint(DataTypes.ARMOR, 4))
+    monster.set_child(DataPoint(DataTypes.AWARENESS, 5))
+    monster.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 99999))
+    monster.set_child(DoNothingActor())
+    return monster
 
 
 def new_ratman(gamestate):

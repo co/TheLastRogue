@@ -404,7 +404,6 @@ class SwapDeviceAction(ActivateDeviceAction):
             entity.mover.try_remove_from_dungeon()
 
         for entity in entities_in_sight:
-            print positions
             entity.mover.try_move(positions.pop(), dungeon_level)
         msg.send_global_message(messenger.GLASS_TURNING_MESSAGE)
 
@@ -476,7 +475,7 @@ class EquippedEffect(Leaf):
 
     def __init__(self):
         super(EquippedEffect, self).__init__()
-        self.component_type = "equipped_effect"  #TODO: should be tag to allow multiple effects?
+        self.tags.add("equipped_effect")
 
     def effect(self, entity):
         pass
@@ -631,7 +630,8 @@ def new_knife(game_state):
     knife.set_child(DataPoint(DataTypes.HIT, 21))
     knife.set_child(DataPoint(DataTypes.DAMAGE, 1))
     knife.set_child(ExtraSwingAttackEffect(0.3))
-    knife.set_child(BleedAttackEffect(1))
+    knife.set_child(KnockBackAttackEffect(1))
+    knife.set_child(CounterAttackEffect(1))
     return knife
 
 
@@ -726,6 +726,7 @@ def new_amulet_of_life_steal(game_state):
 class StatBonusEquipEffect(EquippedEffect):
     def __init__(self, stat, bonus):
         super(StatBonusEquipEffect, self).__init__()
+        self.component_type = "equip_stat_bonus_effect_" + stat
         self.stat = stat
         self.bonus = bonus
 
@@ -736,9 +737,12 @@ class StatBonusEquipEffect(EquippedEffect):
         entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
 
 
-class AddSpoofChildEquipEffect(EquippedEffect):
+class AddSpoofChildEquipEffect(Leaf):
     def __init__(self, spoof_child_factory, status_icon=None):
         super(AddSpoofChildEquipEffect, self).__init__()
+        self.component_type = "equipment_add_spoof_component_" + spoof_child_factory().component_type
+        self.tags.add("equipped_effect")
+
         self.spoof_child_factory = spoof_child_factory
         self.status_icon = status_icon
 
@@ -754,6 +758,7 @@ class AddSpoofChildEquipEffect(EquippedEffect):
 class LifeStealEffect(EquippedEffect):
     def __init__(self):
         super(LifeStealEffect, self).__init__()
+        self.component_type = "equipment_life_steal_effect"
 
     def effect(self, entity):
         """
@@ -777,6 +782,7 @@ class HealAnEntityDeathFactory(object):
 class SetInvisibilityFlagEquippedEffect(EquippedEffect):
     def __init__(self):
         super(SetInvisibilityFlagEquippedEffect, self).__init__()
+        self.component_type = "equipment_invisibility_effect"
 
     def effect(self, entity):
         """
@@ -1263,6 +1269,23 @@ class ExtraSwingAttackEffect(AttackEffect):
                         ItemStat.PERCENT_FORMAT, order=10, is_common_stat=False)
 
 
+class CounterAttackEffect(StatBonusEquipEffect):
+    def __init__(self, effect_chance):
+        super(CounterAttackEffect, self).__init__(DataTypes.COUNTER_ATTACK_CHANCE, effect_chance)
+        self.effect_chance = effect_chance
+        self.component_type = "counter_attack"
+
+    def effect(self, entity):
+        entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(self._item_stat())
+
+    def _item_stat(self):
+        return ItemStat("counter_attack_weapon_effect", self.effect_chance, colors.PURPLE, "Counter",
+                        ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
+
+
 class BleedAttackEffect(AttackEffect):
     def __init__(self, effect_chance):
         super(BleedAttackEffect, self).__init__(effect_chance)
@@ -1274,8 +1297,8 @@ class BleedAttackEffect(AttackEffect):
         damage_per_turn = 1
         damage_interval = 1
         bleed_effect = entityeffect.BleedEffect(source_entity, damage_per_turn, [DamageTypes.BLEED],
-                                                         damage_interval, turns,
-                                                         messenger.BLEED_MESSAGE, BLEED_STATUS_DESCRIPTION)
+                                                damage_interval, turns,
+                                                messenger.BLEED_MESSAGE, BLEED_STATUS_DESCRIPTION)
         target_entity.effect_queue.add(bleed_effect)
 
     def first_tick(self, time):
@@ -1284,6 +1307,25 @@ class BleedAttackEffect(AttackEffect):
     def _item_stat(self):
         return ItemStat("bleed_weapon_effect", self.effect_chance, colors.RED_D, "Bleed",
                         ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
+
+
+class KnockBackAttackEffect(AttackEffect):
+    def __init__(self, effect_chance):
+        super(KnockBackAttackEffect, self).__init__(effect_chance)
+        self.effect_chance = effect_chance
+        self.component_type = "knock_back_attack_effect"
+
+    def execute_effect(self, source_entity, target_entity):
+        knock_position = geometry.other_side_of_point(self.parent.position.value,
+                                                      target_entity.position.value)
+        target_entity.mover.try_move(knock_position)
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(self._item_stat())
+
+    def _item_stat(self):
+        return ItemStat("knock_back_weapon_effect", self.effect_chance, colors.CHAMPAGNE, "Knock Back",
+                        ItemStat.PERCENT_FORMAT, order=25, is_common_stat=False)
 
 
 class OnUnequipEffect(Leaf):

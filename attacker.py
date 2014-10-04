@@ -1,10 +1,12 @@
+import random
 import colors
 import entityeffect
 import geometry
 import rng
 from compositecore import Leaf
 from equipment import EquipmentSlots
-from util import entity_skip_turn
+from stats import DataTypes
+from util import entity_skip_turn, entity_stunned_turn
 
 
 DEFAULT_CRIT_MULTIPLIER = 2
@@ -14,6 +16,7 @@ class Attacker(Leaf):
     """
     Component for attacking and checking if an attacking is legal.
     """
+
     def __init__(self):
         super(Attacker, self).__init__()
         self.component_type = "attacker"
@@ -71,8 +74,8 @@ class Attacker(Leaf):
         there or the entity is of the same faction.
         """
         entity = (self.parent.dungeon_level.value.get_tile(position).get_first_entity())
-        if(entity is None or
-           entity.faction.value == self.parent.faction.value):
+        if (entity is None or
+                    entity.faction.value == self.parent.faction.value):
             return False
         self.hit(entity)
         return True
@@ -121,6 +124,7 @@ class KnockBackAttacker(Attacker):
     """
     Component for attacking and checking if an attacking is legal. Attacks will cause Knock Back.
     """
+
     def __init__(self):
         super(Attacker, self).__init__()
         self.component_type = "attacker"
@@ -130,20 +134,20 @@ class KnockBackAttacker(Attacker):
 
     def _knock_away_entity(self, target_entity):
         if rng.coin_flip():
-            knock_direction = geometry.sub_2d(target_entity.position.value, self.parent.position.value)
-            knock_position = geometry.add_2d(target_entity.position.value, knock_direction)
+            knock_position = geometry.other_side_of_point(self.parent.position.value,
+                                                          target_entity.position.value)
             old_target_position = target_entity.position.value
             target_entity.mover.try_move(knock_position)
             self.parent.mover.try_move(old_target_position)
             if rng.coin_flip():
-                entity_skip_turn(self.parent, target_entity)
-                target_entity.char_printer.append_fg_color_blink_frames([colors.CHAMPAGNE])
+                entity_stunned_turn(self.parent, target_entity)
 
 
 class Dodger(Leaf):
     """
     Component for calculating dodge.
     """
+
     def __init__(self):
         super(Dodger, self).__init__()
         self.component_type = "dodger"
@@ -161,6 +165,7 @@ class ArmorChecker(Leaf):
     """
     Component for calculating dodge.
     """
+
     def __init__(self):
         super(ArmorChecker, self).__init__()
         self.component_type = "armor_checker"
@@ -185,6 +190,7 @@ class ResistanceChecker(Leaf):
     """
     Component for calculating dodge.
     """
+
     def __init__(self):
         super(ResistanceChecker, self).__init__()
         self.component_type = "resistance_checker"
@@ -251,7 +257,8 @@ class Attack(object):
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0, damage_multiplier=1):
         damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
         damage_effect = entityeffect.AttackEntityEffect(source_entity, damage * self.damage_multiplier,
-                                                        self.damage_types, self.hit + bonus_hit, crit_chance=self.crit_chance,
+                                                        self.damage_types, self.hit + bonus_hit,
+                                                        crit_chance=self.crit_chance,
                                                         crit_multiplier=self.crit_multiplier,
                                                         attack_effects=self.target_entity_effects)
         target_entity.effect_queue.add(damage_effect)
@@ -273,3 +280,29 @@ class UndodgeableAttack(object):
 
 def calculate_damage(damage, damage_variance, bonus_damage, damage_multiplier):
     return rng.random_variance_no_negative((damage + bonus_damage) * damage_multiplier, damage_variance)
+
+
+class OnAttackedEffect(Leaf):
+    """
+    Subclasses may define an effect that happens when parent takes damage.
+    """
+
+    def __init__(self):
+        super(OnAttackedEffect, self).__init__()
+        self.tags.add("on_attacked_effect")
+
+    def effect(self, source_entity, damage_types=[]):
+        pass
+
+
+class CounterAttackOnDamageTakenEffect(OnAttackedEffect):
+    def __init__(self):
+        super(CounterAttackOnDamageTakenEffect, self).__init__()
+        self.component_type = "counter_attack_on_damage_taken"
+        self.damage = 1
+
+    def effect(self, source_entity, damage_types=[]):
+        distance = geometry.chess_distance(source_entity.position.value, self.parent.position.value)
+        if (distance <= 1 and self.parent.has(DataTypes.COUNTER_ATTACK_CHANCE) and
+                    random.random() < self.parent.counter_attack_chance.value):
+            self.parent.attacker.hit(source_entity)
