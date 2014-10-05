@@ -1,4 +1,5 @@
 import random
+import Status
 from compositecore import Leaf
 import direction
 import geometry
@@ -360,6 +361,10 @@ class RandomStepper(Stepper):
     def try_move_or_bump(self, _):
         new_position = geometry.add_2d(random.choice(direction.DIRECTIONS), self.parent.position.value)
         return super(RandomStepper, self).try_move_or_bump(new_position)
+
+    def before_tick(self, time):
+        if self.parent.has("status_bar"):
+            self.parent.status_bar.add(Status.STUMBLE_STATUS_DESCRIPTION)
 
 
 class SlimeCanShareTileEntityMover(Mover):

@@ -351,7 +351,6 @@ def magic_hit_position(damage, dungeon_level, position, source_entity):
 class MonsterMissileApplyEntityEffect(MonsterMissileAction):
     def __init__(self, min_range, max_range, missile_graphic, weight=100):
         super(MonsterMissileApplyEntityEffect, self).__init__(min_range, max_range, missile_graphic, weight)
-        self.status_icon = None
 
     def effect_factory(self):
         pass
@@ -359,8 +358,6 @@ class MonsterMissileApplyEntityEffect(MonsterMissileAction):
     def missile_hit_effect(self, dungeon_level, position):
         target_entity = dungeon_level.get_tile_or_unknown(position).get_first_entity()
         target_entity.effect_queue.add(self.effect_factory())
-        if self.status_icon:
-            target_entity.effect_queue.add(StatusIconEntityEffect(self.parent, self.status_icon, gametime.single_turn))
 
     def hit_animation(self, dungeon_level, position):
         pass
@@ -382,7 +379,6 @@ class MonsterTripTargetEffect(MonsterMissileApplyEntityEffect):
         missile_graphic = GraphicChar(None, colors.YELLOW, "+")
         super(MonsterTripTargetEffect, self).__init__(2, 4, missile_graphic, weight)
         self.component_type = "monster_range_trip_action"
-        self.status_icon = STUMBLE_STATUS_DESCRIPTION
 
     def effect_factory(self):
         return AddSpoofChild(self.parent, RandomStepper(), gametime.single_turn)

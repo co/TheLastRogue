@@ -16,7 +16,7 @@ import menufactory
 import messenger
 from missileaction import PlayerThrowItemAction, PlayerCastMissileSpellAction
 from monster import HealAnEntityOnDeath, AddEffectToOtherSeenEntities
-from mover import Mover
+from mover import Mover, RandomStepper
 from position import Position, DungeonLevel
 import rng
 from shapegenerator import extend_points
@@ -630,7 +630,7 @@ def new_knife(game_state):
     knife.set_child(DataPoint(DataTypes.HIT, 21))
     knife.set_child(DataPoint(DataTypes.DAMAGE, 1))
     knife.set_child(ExtraSwingAttackEffect(0.3))
-    knife.set_child(DefenciveAttackEffect(1))
+    knife.set_child(TripAttackEffect(1))
     return knife
 
 
@@ -1247,6 +1247,24 @@ class StunAttackEffect(AttackEffect):
 
     def _item_stat(self):
         return ItemStat("Stun", self.effect_chance, colors.CHAMPAGNE, "Stun",
+                        ItemStat.PERCENT_FORMAT, order=20, is_common_stat=False)
+
+
+class TripAttackEffect(AttackEffect):
+    def __init__(self, effect_chance):
+        super(TripAttackEffect, self).__init__(effect_chance)
+        self.effect_chance = effect_chance
+        self.component_type = "trip_attack_effect"
+
+    def execute_effect(self, source_entity, target_entity):
+        return target_entity.effect_queue.add(entityeffect.AddSpoofChild(source_entity, RandomStepper(),
+                                                                         gametime.single_turn))
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(self._item_stat())
+
+    def _item_stat(self):
+        return ItemStat("trip", self.effect_chance, colors.YELLOW, "Trip",
                         ItemStat.PERCENT_FORMAT, order=20, is_common_stat=False)
 
 
