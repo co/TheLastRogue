@@ -20,7 +20,7 @@ from mover import Mover, RandomStepper
 from position import Position, DungeonLevel
 import rng
 from shapegenerator import extend_points
-from stats import DataPointBonusSpoof, DataPoint, Flag, DataTypes, GamePieceTypes, Tags
+from stats import DataPointBonusSpoof, DataPoint, Flag, DataTypes, GamePieceTypes, Tags, Damage
 from statusflags import StatusFlags
 from terrain import GlassWall
 from text import Description
@@ -76,6 +76,7 @@ class ItemStat(DataPoint):
     REGULAR_FORMAT = 0
     PERCENT_FORMAT = 1
     MULTIPLIER_FORMAT = 2
+    RANGE_FORMAT = 3
 
     def __init__(self, component_type, value, color_fg, screen_name=None, formatting=REGULAR_FORMAT, order=50,
                  is_common_stat=True):
@@ -88,19 +89,34 @@ class ItemStat(DataPoint):
         else:
             self._screen_name = component_type
         self.format = formatting
-        if self.format == ItemStat.PERCENT_FORMAT:
-            self._value_text = "{:.0f}".format(self.value * 100) + "% "
-        elif self.format == ItemStat.MULTIPLIER_FORMAT:
-            self._value_text = "x {:.1f}".format(self.value)
-        else:
-            self._value_text = str(self.value) + "  "
         self.is_common_stat = is_common_stat
 
-    def get_text(self, width):
-        return str(self._screen_name + self._value_text.rjust(width - len(self._screen_name)))
+    def _get_value_text(self):
+        if self.format == ItemStat.PERCENT_FORMAT:
+            return "{:.0f}".format(self.value * 100) + "% "
+        elif self.format == ItemStat.MULTIPLIER_FORMAT:
+            return "x {:.1f}".format(self.value)
+        else:
+            return str(self.value) + "  "
 
-def damage_item_stat(value):
-    return ItemStat(DataTypes.DAMAGE, value, colors.WHITE, "Damage", order=0)
+    def get_text(self, width):
+        return str(self._screen_name + self._get_value_text().rjust(width - len(self._screen_name)))
+
+
+class RangeItemStat(ItemStat):
+    def __init__(self, component_type, min_value, max_value, color_fg, screen_name=None,
+                 order=50, is_common_stat=True):
+        super(RangeItemStat, self).__init__(component_type, min_value, color_fg, screen_name=screen_name,
+                                       formatting=ItemStat.REGULAR_FORMAT, order=order, is_common_stat=is_common_stat)
+        self.min = min_value
+        self.max = max_value
+
+    def _get_value_text(self):
+        return str(self.min) + "-" + str(self.max) + "  "
+
+
+def damage_item_stat(min_value, max_value):
+    return RangeItemStat(DataTypes.DAMAGE, min_value, max_value, colors.WHITE, "Damage", order=0)
 
 
 def accuracy_item_stat(value):
@@ -132,10 +148,10 @@ def new_gun(game_state):
                                The wooden handle is dry and gray, \
                                you see rust eating into the iron pipe."))
     gun.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
-    gun.set_child(AttackProvider(10))
+    gun.set_child(AttackProvider())
     gun.set_child(DataPoint(DataTypes.WEAPON_RANGE, 15))
     gun.set_child(DataPoint(DataTypes.HIT, 13))
-    gun.set_child(DataPoint(DataTypes.DAMAGE, 15))
+    gun.set_child(damage_item_stat(5, 25))
     gun.set_child(DataPoint(DataTypes.WEIGHT, 5))
     return gun
 
@@ -149,10 +165,10 @@ def new_sling(game_state):
                                 "This weapon propels rocks more effectively than throwing them would."))
     sling.set_child(GraphicChar(None, colors.ORANGE, icon.SLING))
     sling.set_child(DataPoint(DataTypes.WEAPON_RANGE, 4))
-    sling.set_child(AttackProvider(2))
+    sling.set_child(AttackProvider())
     sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
     sling.set_child(DataPoint(DataTypes.HIT, 5))
-    sling.set_child(DataPoint(DataTypes.DAMAGE, 1))
+    sling.set_child(Damage(1, 3))
     return sling
 
 
@@ -165,10 +181,10 @@ def new_flame_orb(game_state):
                                 "An orb with a living flame inside, it allows the weilder to channel fire from it."))
     orb.set_child(GraphicChar(None, colors.RED, icon.ORB))
     orb.set_child(DataPoint(DataTypes.WEAPON_RANGE, 5))
-    orb.set_child(AttackProvider(2))
+    orb.set_child(AttackProvider())
     orb.set_child(DataPoint(DataTypes.WEIGHT, 2))
     orb.set_child(DataPoint(DataTypes.HIT, 5))
-    orb.set_child(DataPoint(DataTypes.DAMAGE, 2))
+    orb.set_child(Damage(2, 4))
     orb.set_child(MagicMissileEffect(GraphicChar(None, colors.RED, icon.BIG_CENTER_DOT)))
     return orb
 
@@ -587,11 +603,11 @@ def new_sword(game_state):
     sword.set_child(Description("Iron Sword",
                                 "This old blade has seen some better days, it's as sharp as ever tough."))
     sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-    sword.set_child(AttackProvider(1))
+    sword.set_child(AttackProvider())
     sword.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.2))
     sword.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2))
     sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
-    sword.set_child(DataPoint(DataTypes.DAMAGE, 4))
+    sword.set_child(Damage(2, 5))
     sword.set_child(DataPoint(DataTypes.HIT, 12))
     return sword
 
@@ -606,11 +622,11 @@ def new_mace(game_state):
     mace.set_child(Description("Iron Mace",
                                "This old club has an lump of iron at one end."))
     mace.set_child(GraphicChar(None, colors.GRAY, icon.MACE))
-    mace.set_child(AttackProvider(1))
+    mace.set_child(AttackProvider())
     mace.set_child(crit_chance_item_stat(0.1))
     mace.set_child(crit_multiplier_item_stat(2))
     mace.set_child(accuracy_item_stat(16))
-    mace.set_child(damage_item_stat(3))
+    mace.set_child(damage_item_stat(1, 6))
     mace.set_child(StunAttackEffect(1.0))
     mace.set_child(DataPoint(DataTypes.WEIGHT, 8))
     return mace
@@ -625,13 +641,13 @@ def new_knife(game_state):
     set_melee_weapon_component(knife)
     knife.set_child(Description("Knife", "A trusty knife, small and precise but will only inflict small wounds."))
     knife.set_child(GraphicChar(None, colors.GRAY, icon.KNIFE))
-    knife.set_child(AttackProvider(1))
+    knife.set_child(AttackProvider())
     knife.set_child(DamageType(DamageTypes.CUTTING))
     knife.set_child(DataPoint(DataTypes.WEIGHT, 5))
     knife.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.3))
     knife.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2.5))
     knife.set_child(DataPoint(DataTypes.HIT, 21))
-    knife.set_child(DataPoint(DataTypes.DAMAGE, 1))
+    knife.set_child(damage_item_stat(1, 3))
     knife.set_child(ExtraSwingAttackEffect(0.3))
     knife.set_child(IgnoreArmorAttackEffect(0.5))
     return knife
@@ -1188,13 +1204,15 @@ class AttackProvider(Leaf):
     The modify be us, actual damage will be calculated on use.
     """
 
-    def __init__(self, variance):
+    def __init__(self):
         super(AttackProvider, self).__init__()
         self.component_type = "attack_provider"
-        self.variance = variance
 
-    def damage_strength(self, source_entity):
-        return self.parent.damage.value + source_entity.strength.value / 2
+    def min_damage(self):
+        return self.parent.damage.min
+
+    def max_damage(self, source_entity):
+        return self.parent.damage.max + source_entity.strength.value / 2
 
     def actual_hit(self):
         return self.parent.hit.value
@@ -1215,7 +1233,9 @@ class AttackProvider(Leaf):
         self._before_attack_effects(source_entity, target_entity)
         attack_effects = [effect for effect in self.parent.get_children_with_tag("attack_effect")]
         damage_types = [effect.component_type for effect in self.parent.get_children_with_tag(Tags.DAMAGE_TYPE)]
-        attack = Attack(self.damage_strength(source_entity), self.variance, damage_types,
+        damage_min = self.min_damage()
+        damage_max = self.max_damage(source_entity)
+        attack = Attack(damage_min, damage_max, damage_types,
                         self.actual_hit(), crit_chance=self.actual_crit_chance(),
                         crit_multiplier=self.actual_crit_multiplier(),
                         target_entity_effects=attack_effects)

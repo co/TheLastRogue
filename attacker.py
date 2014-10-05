@@ -1,4 +1,5 @@
 import random
+from actionscheduler import ActionScheduler
 import colors
 import entityeffect
 import geometry
@@ -22,33 +23,29 @@ class Attacker(Leaf):
         self.component_type = "attacker"
 
     @property
-    def actual_thrown_rock_damage(self):
+    def thrown_rock_damage(self):
         damage_multiplier = 1
         if self.parent.has("throw_damage_multiplier"):
             damage_multiplier = self.parent.throw_damage_multiplier.value
         return int(2 * self.parent.strength.value * damage_multiplier / 3)
 
     @property
-    def thrown_rock_damage_variance(self):
-        return int(self.actual_thrown_rock_damage / 2)
-
-    @property
-    def actual_thrown_hit(self):
+    def thrown_hit(self):
         return self.parent.hit.value
 
     @property
-    def actual_thrown_crit_chance(self):
+    def thrown_crit_chance(self):
         return self.parent.crit_chance.value
 
     @property
-    def actual_thrown_crit_multiplier(self):
+    def thrown_crit_multiplier(self):
         if self.parent.has("crit_multiplier"):
             return self.parent.crit_multiplier.value
         return DEFAULT_CRIT_MULTIPLIER
 
 
     @property
-    def actual_unarmed_damage(self):
+    def unarmed_damage(self):
         damage_multiplier = 1
         if self.parent.has("melee_damage_multiplier"):
             damage_multiplier = self.parent.melee_damage_multiplier.value
@@ -59,12 +56,12 @@ class Attacker(Leaf):
         return self.parent.hit.value
 
     @property
-    def actual_unarmed_crit_chance(self):
+    def unarmed_crit_chance(self):
         return self.parent.crit_chance.value
 
     @property
-    def actual_unarmed_crit_multiplier(self):
-        return self.actual_thrown_crit_multiplier
+    def unarmed_crit_multiplier(self):
+        return self.thrown_crit_multiplier
 
     def try_hit_melee(self, position):
         """
@@ -84,8 +81,7 @@ class Attacker(Leaf):
         there or the entity is of the same faction.
         """
         entity = (self.parent.dungeon_level.value.get_tile(position).get_first_entity())
-        if (entity is None or
-                    entity.faction.value == self.parent.faction.value):
+        if entity is None or entity.faction.value == self.parent.faction.value:
             return False
         self.hit(entity)
         return True
@@ -95,9 +91,11 @@ class Attacker(Leaf):
         Makes entity to hit the target entity with the force of a thrown rock.
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
-        thrown_damage = Attack(self.actual_thrown_rock_damage, self.thrown_rock_damage_variance,
-                               damage_types, self.actual_thrown_hit, crit_chance=self.actual_thrown_crit_chance,
-                               crit_multiplier=self.actual_thrown_crit_multiplier)
+        damage_min = self.thrown_rock_damage
+        damage_max = 3
+        thrown_damage = Attack(damage_min, damage_max, damage_types, self.thrown_hit,
+                               crit_chance=self.thrown_crit_chance,
+                               crit_multiplier=self.thrown_crit_multiplier)
         thrown_damage.damage_entity(self.parent, target_entity)
 
     def hit(self, target_entity):
@@ -121,10 +119,12 @@ class Attacker(Leaf):
 
         target_entity_effects = [effect_factory_data_point.value() for effect_factory_data_point in
                                  self.parent.get_children_with_tag("unarmed_hit_target_entity_effect_factory")]
-        damage_strength = self.actual_unarmed_damage
-        return Attack(damage_strength, damage_strength / 4,
-                      damage_types, self.actual_unarmed_hit, crit_chance=self.actual_unarmed_crit_chance,
-                      crit_multiplier=self.actual_unarmed_crit_multiplier, target_entity_effects=target_entity_effects)
+        damage_min = self.unarmed_damage
+        damage_max = damage_min + 3
+        return Attack(damage_min, damage_max, damage_types, self.actual_unarmed_hit,
+                      crit_chance=self.unarmed_crit_chance,
+                      crit_multiplier=self.unarmed_crit_multiplier,
+                      target_entity_effects=target_entity_effects)
 
     def _on_hit(self, target_entity):
         pass
@@ -184,13 +184,15 @@ class ArmorChecker(Leaf):
         """
         Returns the damage taken after it goes through the armor.
         """
+        armor = self.parent.armor.value
         if armor_will_block_attack(damage_types):
-            armor = self.parent.armor.value
             if damage <= armor:
-                damage_reduction_mid = armor / 4
+                damage_reduction = armor / 4
             else:
-                damage_reduction_mid = armor / 8
-            return max(damage - rng.random_variance_no_negative(damage_reduction_mid, damage_reduction_mid), 0)
+                damage_reduction = armor / 8
+            if damage_reduction <= 0:
+                return damage
+            return max(damage - random.randrange(0, damage_reduction), 0)
         return damage
 
 
@@ -269,10 +271,10 @@ class PoisonImmunity(Leaf):
 
 
 class Attack(object):
-    def __init__(self, damage, variance,
+    def __init__(self, damage_min, damage_max,
                  damage_types, hit, crit_chance=0, crit_multiplier=2, damage_multiplier=1, target_entity_effects=[]):
-        self.damage = damage
-        self.variance = variance
+        self.damage_min = damage_min
+        self.damage_max = damage_max
         self.damage_multiplier = damage_multiplier
         self.damage_types = damage_types
         self.hit = hit
@@ -281,7 +283,7 @@ class Attack(object):
         self.crit_multiplier = crit_multiplier
 
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0, damage_multiplier=1):
-        damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
+        damage = calculate_damage(self.damage_min, self.damage_max, bonus_damage, damage_multiplier)
         damage_effect = entityeffect.AttackEntityEffect(source_entity, damage * self.damage_multiplier,
                                                         self.damage_types, self.hit + bonus_hit,
                                                         crit_chance=self.crit_chance,
@@ -291,21 +293,21 @@ class Attack(object):
 
 
 class UndodgeableAttack(object):
-    def __init__(self, damage, variance, damage_types, damage_multiplier=1):
-        self.damage = damage
-        self.variance = variance
+    def __init__(self, damage_min, damage_max, damage_types, damage_multiplier=1):
+        self.damage_min = damage_min
+        self.damage_max = damage_max
         self.damage_multiplier = damage_multiplier
         self.damage_types = damage_types
 
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, damage_multiplier=1):
-        damage = calculate_damage(self.damage, self.variance, bonus_damage, damage_multiplier)
+        damage = calculate_damage(self.damage_min, self.damage_max, bonus_damage, damage_multiplier)
         damage_effect = entityeffect.UndodgeableAttackEntityEffect(source_entity, damage * self.damage_multiplier,
                                                                    self.damage_types)
         target_entity.effect_queue.add(damage_effect)
 
 
-def calculate_damage(damage, damage_variance, bonus_damage, damage_multiplier):
-    return rng.random_variance_no_negative((damage + bonus_damage) * damage_multiplier, damage_variance)
+def calculate_damage(damage_min, damage_max, bonus_damage, damage_multiplier):
+    return (random.randrange(damage_min, damage_max) + bonus_damage) * damage_multiplier
 
 
 class OnAttackedEffect(Leaf):

@@ -358,9 +358,9 @@ def new_player_weapon_table(player, width):
         melee_crit_chance = int(melee_weapon.attack_provider.actual_crit_chance(player) * 100)
     else:
         melee_graphic = graphic.GraphicChar(None, colors.WHITE, icon.BIG_CENTER_DOT)
-        melee_damage = player.attacker.actual_unarmed_damage
+        melee_damage = player.attacker.unarmed_damage
         melee_hit = player.attacker.actual_unarmed_hit
-        melee_crit_chance = int(player.attacker.actual_unarmed_crit_chance * 100)
+        melee_crit_chance = int(player.attacker.unarmed_crit_chance * 100)
 
     if equipment.slot_is_equiped(EquipmentSlots.RANGED_WEAPON):
         range_weapon = equipment.get(EquipmentSlots.RANGED_WEAPON)
@@ -370,9 +370,9 @@ def new_player_weapon_table(player, width):
         range_crit_chance = int(range_weapon.attack_provider.actual_crit_chance(player) * 100)
     else:
         range_graphic = graphic.GraphicChar(None, colors.GRAY, icon.STONE)
-        range_damage = player.attacker.actual_thrown_rock_damage
-        range_hit = player.attacker.actual_thrown_hit
-        range_crit_chance = int(player.attacker.actual_thrown_crit_chance * 100)
+        range_damage = player.attacker.thrown_rock_damage
+        range_hit = player.attacker.thrown_hit
+        range_crit_chance = int(player.attacker.thrown_crit_chance * 100)
 
     value_width = 3
     text_box_margin = (0, 0)

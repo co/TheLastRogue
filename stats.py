@@ -40,6 +40,17 @@ class DataPointBonusSpoof(Leaf):
         self.next.value = new_value
 
 
+class Damage(Leaf):
+    """
+    Holds min and max damage.
+    """
+    def __init__(self, min, max):
+        super(Damage, self).__init__()
+        self.component_type = "damage_data_point"
+        self.min = min
+        self.max = max
+
+
 class Jobs:
     ROGUE = "Rogue"
     KNIGHT = "Knight"
@@ -57,7 +68,6 @@ class Races:
 
 class Tags:
     DAMAGE_TYPE = "damage_type"
-
 
 class DataTypes:
     JOB = "job"
