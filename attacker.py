@@ -5,7 +5,7 @@ import geometry
 import rng
 from compositecore import Leaf
 from equipment import EquipmentSlots
-from stats import DataTypes
+from stats import DataTypes, Flag, Tags
 from util import entity_skip_turn, entity_stunned_turn
 
 
@@ -184,9 +184,7 @@ class ArmorChecker(Leaf):
         """
         Returns the damage taken after it goes through the armor.
         """
-        if (DamageTypes.BLUNT in damage_types or
-                    DamageTypes.PIERCING in damage_types or
-                    DamageTypes.CUTTING in damage_types):
+        if armor_will_block_attack(damage_types):
             armor = self.parent.armor.value
             if damage <= armor:
                 damage_reduction_mid = armor / 4
@@ -194,6 +192,12 @@ class ArmorChecker(Leaf):
                 damage_reduction_mid = armor / 8
             return max(damage - rng.random_variance_no_negative(damage_reduction_mid, damage_reduction_mid), 0)
         return damage
+
+
+def armor_will_block_attack(damage_types):
+    return (not DamageTypes.IGNORE_ARMOR in damage_types) and (DamageTypes.BLUNT in damage_types or
+                                                               DamageTypes.PIERCING in damage_types or
+                                                               DamageTypes.CUTTING in damage_types)
 
 
 class ResistanceChecker(Leaf):
@@ -222,18 +226,30 @@ class ResistanceChecker(Leaf):
 
 
 class DamageTypes(object):
-    PHYSICAL = 0
-    MAGIC = 1
-    BLUNT = 2
-    PIERCING = 3
-    CUTTING = 4
-    BLEED = 5
-    ACID = 6
-    POISON = 7
-    FIRE = 8
-    REFLECT = 9
+    PHYSICAL = "physical_damage_type"
+    MAGIC = "magic_damage_type"
+    BLUNT = "blunt_damage_type"
+    PIERCING = "piercing_damage_type"
+    CUTTING = "cutting_damage_type"
+    BLEED = "bleed_damage_type"
+    ACID = "acid_damage_type"
+    POISON = "poison_damage_type"
+    FIRE = "fire_damage_type"
+    REFLECT = "reflect_damage_type"
 
-    FALL = 10
+    IGNORE_ARMOR = "ignore_armor_damage_type"
+
+    FALL = "fall_damage_type"
+
+
+class DamageType(Flag):
+    """
+    Component which only has a component type. Composites with this component has this flag.
+    """
+
+    def __init__(self, damage_type):
+        super(DamageType, self).__init__(damage_type)
+        self.tags = Tags.DAMAGE_TYPE
 
 
 class FireImmunity(Leaf):

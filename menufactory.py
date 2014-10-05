@@ -354,7 +354,7 @@ def new_player_weapon_table(player, width):
         melee_weapon = equipment.get(EquipmentSlots.MELEE_WEAPON)
         melee_graphic = melee_weapon.graphic_char
         melee_damage = melee_weapon.attack_provider.damage_strength(player)
-        melee_hit = melee_weapon.attack_provider.actual_hit(player)
+        melee_hit = melee_weapon.attack_provider.actual_hit()
         melee_crit_chance = int(melee_weapon.attack_provider.actual_crit_chance(player) * 100)
     else:
         melee_graphic = graphic.GraphicChar(None, colors.WHITE, icon.BIG_CENTER_DOT)
@@ -366,7 +366,7 @@ def new_player_weapon_table(player, width):
         range_weapon = equipment.get(EquipmentSlots.RANGED_WEAPON)
         range_graphic = range_weapon.graphic_char
         range_damage = range_weapon.attack_provider.damage_strength(player)
-        range_hit = range_weapon.attack_provider.actual_hit(player)
+        range_hit = range_weapon.attack_provider.actual_hit()
         range_crit_chance = int(range_weapon.attack_provider.actual_crit_chance(player) * 100)
     else:
         range_graphic = graphic.GraphicChar(None, colors.GRAY, icon.STONE)

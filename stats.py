@@ -5,8 +5,9 @@ class DataPoint(Leaf):
     """
     Class for components holding a single data point.
     """
-    def __init__(self, component_type, value):
+    def __init__(self, component_type, value, tags=[]):
         super(DataPoint, self).__init__()
+        self.tags |= set(tags)
         self.component_type = component_type
         self.value = value
 
@@ -52,6 +53,10 @@ class Races:
     RATMAN = "Ratman"
     CYCLOPS = "Cyclops"
     PIXIE = "Pixie"
+
+
+class Tags:
+    DAMAGE_TYPE = "damage_type"
 
 
 class DataTypes:

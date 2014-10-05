@@ -241,7 +241,7 @@ class AttackEntityEffect(EntityEffect):
     def execute_effects(self):
         for effect in self.attack_effects:
             if effect.roll_to_hit():
-                effect.execute_effect(self.source_entity, self.target_entity)
+                effect.effect(self.source_entity, self.target_entity)
 
     def on_attacked_effects(self):
         for effect in self.target_entity.get_children_with_tag("on_attacked_effect"):

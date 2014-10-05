@@ -6,7 +6,7 @@ from actor import DoNothingActor, StunnedActor
 from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud, new_fire_cloud
 from compositecommon import PoisonEntityEffectFactory
 from compositecore import Leaf, Composite
-from attacker import Attack, DamageTypes, AttackEnemyIStepNextToEffect
+from attacker import Attack, DamageTypes, DamageType
 import direction
 from dummyentities import dummy_flyer
 import geometry
@@ -20,7 +20,7 @@ from mover import Mover, RandomStepper
 from position import Position, DungeonLevel
 import rng
 from shapegenerator import extend_points
-from stats import DataPointBonusSpoof, DataPoint, Flag, DataTypes, GamePieceTypes
+from stats import DataPointBonusSpoof, DataPoint, Flag, DataTypes, GamePieceTypes, Tags
 from statusflags import StatusFlags
 from terrain import GlassWall
 from text import Description
@@ -62,6 +62,7 @@ def set_item_components(item, game_state):
     item.set_child(DungeonLevel())
     item.set_child(Mover())
     item.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ITEM))
+    item.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
     item.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
     item.set_child(CharPrinter())
     item.set_child(DropAction())
@@ -131,7 +132,7 @@ def new_gun(game_state):
                                The wooden handle is dry and gray, \
                                you see rust eating into the iron pipe."))
     gun.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
-    gun.set_child(AttackProvider(10, [DamageTypes.PHYSICAL, 15, DamageTypes.PIERCING]))
+    gun.set_child(AttackProvider(10))
     gun.set_child(DataPoint(DataTypes.WEAPON_RANGE, 15))
     gun.set_child(DataPoint(DataTypes.HIT, 13))
     gun.set_child(DataPoint(DataTypes.DAMAGE, 15))
@@ -148,7 +149,7 @@ def new_sling(game_state):
                                 "This weapon propels rocks more effectively than throwing them would."))
     sling.set_child(GraphicChar(None, colors.ORANGE, icon.SLING))
     sling.set_child(DataPoint(DataTypes.WEAPON_RANGE, 4))
-    sling.set_child(AttackProvider(2, [DamageTypes.PHYSICAL, DamageTypes.PIERCING]))
+    sling.set_child(AttackProvider(2))
     sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
     sling.set_child(DataPoint(DataTypes.HIT, 5))
     sling.set_child(DataPoint(DataTypes.DAMAGE, 1))
@@ -164,7 +165,7 @@ def new_flame_orb(game_state):
                                 "An orb with a living flame inside, it allows the weilder to channel fire from it."))
     orb.set_child(GraphicChar(None, colors.RED, icon.ORB))
     orb.set_child(DataPoint(DataTypes.WEAPON_RANGE, 5))
-    orb.set_child(AttackProvider(2, [DamageTypes.FIRE, DamageTypes.MAGIC]))
+    orb.set_child(AttackProvider(2))
     orb.set_child(DataPoint(DataTypes.WEIGHT, 2))
     orb.set_child(DataPoint(DataTypes.HIT, 5))
     orb.set_child(DataPoint(DataTypes.DAMAGE, 2))
@@ -572,6 +573,7 @@ def new_leather_cap(game_state):
 def set_melee_weapon_component(item):
     item.set_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
     item.set_child(ItemType(ItemType.WEAPON))
+    item.set_child(DamageType(DamageTypes.PHYSICAL))
     item.set_child(ReEquipAction())
 
 
@@ -585,7 +587,7 @@ def new_sword(game_state):
     sword.set_child(Description("Iron Sword",
                                 "This old blade has seen some better days, it's as sharp as ever tough."))
     sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-    sword.set_child(AttackProvider(1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+    sword.set_child(AttackProvider(1))
     sword.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.2))
     sword.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2))
     sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
@@ -604,7 +606,7 @@ def new_mace(game_state):
     mace.set_child(Description("Iron Mace",
                                "This old club has an lump of iron at one end."))
     mace.set_child(GraphicChar(None, colors.GRAY, icon.MACE))
-    mace.set_child(AttackProvider(1, [DamageTypes.PHYSICAL, DamageTypes.BLUNT]))
+    mace.set_child(AttackProvider(1))
     mace.set_child(crit_chance_item_stat(0.1))
     mace.set_child(crit_multiplier_item_stat(2))
     mace.set_child(accuracy_item_stat(16))
@@ -623,14 +625,15 @@ def new_knife(game_state):
     set_melee_weapon_component(knife)
     knife.set_child(Description("Knife", "A trusty knife, small and precise but will only inflict small wounds."))
     knife.set_child(GraphicChar(None, colors.GRAY, icon.KNIFE))
-    knife.set_child(AttackProvider(1, [DamageTypes.PHYSICAL, DamageTypes.CUTTING]))
+    knife.set_child(AttackProvider(1))
+    knife.set_child(DamageType(DamageTypes.CUTTING))
     knife.set_child(DataPoint(DataTypes.WEIGHT, 5))
     knife.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.3))
     knife.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2.5))
     knife.set_child(DataPoint(DataTypes.HIT, 21))
     knife.set_child(DataPoint(DataTypes.DAMAGE, 1))
     knife.set_child(ExtraSwingAttackEffect(0.3))
-    knife.set_child(TripAttackEffect(1))
+    knife.set_child(IgnoreArmorAttackEffect(0.5))
     return knife
 
 
@@ -1185,38 +1188,43 @@ class AttackProvider(Leaf):
     The modify be us, actual damage will be calculated on use.
     """
 
-    def __init__(self, variance, types):
+    def __init__(self, variance):
         super(AttackProvider, self).__init__()
         self.component_type = "attack_provider"
         self.variance = variance
-        self.types = types
 
     def damage_strength(self, source_entity):
         return self.parent.damage.value + source_entity.strength.value / 2
 
-    def actual_hit(self, source_entity):
+    def actual_hit(self):
         return self.parent.hit.value
 
-    def actual_crit_chance(self, source_entity):
+    def actual_crit_chance(self):
         crit_chance = 0
         if self.parent.has("crit_chance"):
             crit_chance = self.parent.crit_chance.value
         return crit_chance
 
-    def actual_crit_multiplier(self, source_entity):
+    def actual_crit_multiplier(self):
         crit_multiplier = 2
         if self.parent.has("crit_multiplier"):
             crit_multiplier = self.parent.crit_multiplier.value
         return crit_multiplier
 
     def attack_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
+        self._before_attack_effects(source_entity, target_entity)
         attack_effects = [effect for effect in self.parent.get_children_with_tag("attack_effect")]
-        attack = Attack(self.damage_strength(source_entity), self.variance,
-                        self.types, self.actual_hit(source_entity), crit_chance=self.actual_crit_chance(source_entity),
-                        crit_multiplier=self.actual_crit_multiplier(source_entity),
+        damage_types = [effect.component_type for effect in self.parent.get_children_with_tag(Tags.DAMAGE_TYPE)]
+        attack = Attack(self.damage_strength(source_entity), self.variance, damage_types,
+                        self.actual_hit(), crit_chance=self.actual_crit_chance(),
+                        crit_multiplier=self.actual_crit_multiplier(),
                         target_entity_effects=attack_effects)
 
         return attack.damage_entity(source_entity, target_entity, bonus_damage=bonus_damage, bonus_hit=bonus_hit)
+
+    def _before_attack_effects(self, source_entity, target_entity):
+        for e in self.parent.get_children_with_tag(BeforeAttackEffect.TAG):
+            e.effect(source_entity, target_entity)
 
 
 class AttackEffect(Leaf):
@@ -1228,7 +1236,22 @@ class AttackEffect(Leaf):
     def roll_to_hit(self):
         return random.random() < self.effect_chance
 
-    def execute_effect(self, source_entity, target_entity):
+    def effect(self, source_entity, target_entity):
+        pass
+
+
+class BeforeAttackEffect(Leaf):
+    TAG = "before_attack_effect"
+
+    def __init__(self, effect_chance):
+        super(BeforeAttackEffect, self).__init__()
+        self.effect_chance = effect_chance
+        self.tags.add(BeforeAttackEffect.TAG)
+
+    def roll_to_hit(self):
+        return random.random() < self.effect_chance
+
+    def effect(self, source_entity, target_entity):
         pass
 
 
@@ -1238,7 +1261,7 @@ class StunAttackEffect(AttackEffect):
         self.effect_chance = effect_chance
         self.component_type = "stun_attack_effect"
 
-    def execute_effect(self, source_entity, target_entity):
+    def effect(self, source_entity, target_entity):
         return target_entity.effect_queue.add(entityeffect.AddSpoofChild(source_entity, StunnedActor(),
                                                                          gametime.single_turn))
 
@@ -1256,7 +1279,7 @@ class TripAttackEffect(AttackEffect):
         self.effect_chance = effect_chance
         self.component_type = "trip_attack_effect"
 
-    def execute_effect(self, source_entity, target_entity):
+    def effect(self, source_entity, target_entity):
         return target_entity.effect_queue.add(entityeffect.AddSpoofChild(source_entity, RandomStepper(),
                                                                          gametime.single_turn))
 
@@ -1274,7 +1297,7 @@ class ExtraSwingAttackEffect(AttackEffect):
         self.effect_chance = effect_chance
         self.component_type = "extra_swing_attack_effect"
 
-    def execute_effect(self, source_entity, target_entity):
+    def effect(self, source_entity, target_entity):
         source_entity.attacker.try_hit_melee(target_entity.position.value)
 
     def first_tick(self, time):
@@ -1299,6 +1322,22 @@ class CounterAttackEffect(StatBonusEquipEffect):
 
     def _item_stat(self):
         return ItemStat("counter_attack_weapon_effect", self.effect_chance, colors.PURPLE, "Counter",
+                        ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
+
+
+class IgnoreArmorAttackEffect(BeforeAttackEffect):
+    def __init__(self, effect_chance):
+        super(IgnoreArmorAttackEffect, self).__init__(effect_chance)
+        self.component_type = "ignore_armor_attack"
+
+    def effect(self, source_entity, target_entity):
+        self.parent.add_spoof_child(DamageType(DamageTypes.IGNORE_ARMOR))
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(self._item_stat())
+
+    def _item_stat(self):
+        return ItemStat("ignore_armor_weapon_effect", self.effect_chance, colors.BLUE, "Ignore Armor",
                         ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
 
 
@@ -1335,13 +1374,14 @@ class DefenciveAttackEffect(StatBonusEquipEffect):
         return ItemStat("defencive_attack_weapon_effect", self.effect_chance, colors.LIGHT_GREEN, "Defencive Strike",
                         ItemStat.PERCENT_FORMAT, order=40, is_common_stat=False)
 
+
 class BleedAttackEffect(AttackEffect):
     def __init__(self, effect_chance):
         super(BleedAttackEffect, self).__init__(effect_chance)
         self.effect_chance = effect_chance
         self.component_type = "bleed_attack_effect"
 
-    def execute_effect(self, source_entity, target_entity):
+    def effect(self, source_entity, target_entity):
         turns = random.randrange(2, 6)
         damage_per_turn = 1
         damage_interval = 1
@@ -1364,7 +1404,7 @@ class KnockBackAttackEffect(AttackEffect):
         self.effect_chance = effect_chance
         self.component_type = "knock_back_attack_effect"
 
-    def execute_effect(self, source_entity, target_entity):
+    def effect(self, source_entity, target_entity):
         knock_position = geometry.other_side_of_point(self.parent.position.value,
                                                       target_entity.position.value)
         target_entity.mover.try_move(knock_position)
