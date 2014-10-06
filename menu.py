@@ -218,7 +218,6 @@ class EquipmentMenu(Menu):
         super(EquipmentMenu, self).__init__(offset, state_stack, margin=margin,
                                             may_escape=may_escape, selected_payload_callback=selected_payload_callback)
         self.player = player
-        self.try_set_index_to_valid_value()
 
     def _update_menu_items(self):
         self.menu_items = []
