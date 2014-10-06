@@ -262,7 +262,7 @@ class EquipSlotMenu(Menu):
         unequip_functions = [unequip_function, stack_pop_function]
         none_item_graphic = graphic.GraphicChar(None, colors.NOT_EQUIPPED_FG, self.equipment_slot.icon)
         self.menu_items.append(MenuOptionWithSymbols("- None -", none_item_graphic,
-                                                      none_item_graphic, unequip_functions))
+                                                     none_item_graphic, unequip_functions))
         #if self.selected_payload_callback.description is None:
             #self.call_payload_callback()
 

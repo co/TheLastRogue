@@ -119,9 +119,11 @@ class Equipment(Leaf):
             return True
         return False
 
+    def force_equip(self, equipment):
+        self._equip_into_slot(equipment, self.get_slots_of_type(equipment.equipment_type.value)[0])
+
     def _equip(self, equipment):
-        open_slots =\
-            self.get_open_slots_of_type(equipment.equipment_type.value)
+        open_slots = self.get_open_slots_of_type(equipment.equipment_type.value)
         self._equip_into_slot(equipment, open_slots[0])
 
     def _equip_into_slot(self, equipment, slot):
@@ -144,3 +146,36 @@ class Equipment(Leaf):
         for slot, content in self._equipment.iteritems():
             print(slot, content)
         print("###############################")
+
+    def first_tick(self, time):
+        """
+        Runs first_tick on all child components.
+        """
+        for key, e in self._equipment.iteritems():
+            if e:
+                e.first_tick(time)
+
+    def before_tick(self, time):
+        """
+        Runs before_tick on all child components.
+        """
+        for key, e in self._equipment.iteritems():
+            if e:
+                e.before_tick(time)
+
+    def on_tick(self, time):
+        """
+        Runs on_tick on all child components.
+        """
+        for key, e in self._equipment.iteritems():
+            if e:
+                e.on_tick(time)
+
+    def after_tick(self, time):
+        """
+        Runs after_tick on all child components.
+        """
+        for key, e in self._equipment.iteritems():
+            if e:
+                e.after_tick(time)
+

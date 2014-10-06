@@ -344,7 +344,7 @@ def magic_hit_position(damage, dungeon_level, position, source_entity):
     if target_entity is None:
         return
     damage_types = [DamageTypes.MAGIC]
-    thrown_damage = UndodgeableAttack(damage, 0, damage_types)
+    thrown_damage = UndodgeableAttack(damage, damage, damage_types)
     thrown_damage.damage_entity(source_entity, target_entity)
 
 

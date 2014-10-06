@@ -192,7 +192,7 @@ class ArmorChecker(Leaf):
                 damage_reduction = armor / 8
             if damage_reduction <= 0:
                 return damage
-            return max(damage - random.randrange(0, damage_reduction), 0)
+            return max(damage - random.randrange(0, damage_reduction + 1), 0)
         return damage
 
 
@@ -307,7 +307,7 @@ class UndodgeableAttack(object):
 
 
 def calculate_damage(damage_min, damage_max, bonus_damage, damage_multiplier):
-    return (random.randrange(damage_min, damage_max) + bonus_damage) * damage_multiplier
+    return (random.randrange(damage_min, damage_max + 1) + bonus_damage) * damage_multiplier
 
 
 class OnAttackedEffect(Leaf):

@@ -49,7 +49,7 @@ dungeon_equipment_table = \
         [DungeonTableItem(item.new_leather_cap)] * 10 +
         [DungeonTableItem(item.new_leather_armor)] * 10 +
 
-        [DungeonTableItem(item.new_knife)] * 8 +
+        [DungeonTableItem(item.new_dagger)] * 8 +
         [DungeonTableItem(item.new_sling)] * 8 +
 
         [DungeonTableItem(item.new_ring_of_evasion)] * 3 +

@@ -1,8 +1,9 @@
 from actor import Actor
 from entityeffect import Teleport, StatusAdder, StatusRemover
 from equipment import EquipmentSlots
-from item import RangeWeaponType
+from item import RangeWeaponType, new_dagger
 import monster
+import player
 import settings
 import spawner
 import menu
@@ -76,8 +77,7 @@ class InputActor(Actor):
             self.parent.health_modifier.heal(300)
 
         elif key == inputhandler.THREE:
-            effect = Teleport(self.parent, time_to_live=1)
-            self.parent.effect_queue.add(effect)
+            self.parent.equipment.force_equip(new_dagger(self.parent.game_state.value))
             self.newly_spent_energy += gametime.single_turn
 
         elif key == inputhandler.FOUR:

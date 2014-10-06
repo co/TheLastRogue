@@ -91,7 +91,7 @@ class ItemStat(DataPoint):
         self.format = formatting
         self.is_common_stat = is_common_stat
 
-    def _get_value_text(self):
+    def get_value_text(self):
         if self.format == ItemStat.PERCENT_FORMAT:
             return "{:.0f}".format(self.value * 100) + "% "
         elif self.format == ItemStat.MULTIPLIER_FORMAT:
@@ -100,7 +100,7 @@ class ItemStat(DataPoint):
             return str(self.value) + "  "
 
     def get_text(self, width):
-        return str(self._screen_name + self._get_value_text().rjust(width - len(self._screen_name)))
+        return str(self._screen_name + self.get_value_text().rjust(width - len(self._screen_name)))
 
 
 class RangeItemStat(ItemStat):
@@ -111,7 +111,7 @@ class RangeItemStat(ItemStat):
         self.min = min_value
         self.max = max_value
 
-    def _get_value_text(self):
+    def get_value_text(self):
         return str(self.min) + "-" + str(self.max) + "  "
 
 
@@ -150,7 +150,7 @@ def new_gun(game_state):
     gun.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
     gun.set_child(AttackProvider())
     gun.set_child(DataPoint(DataTypes.WEAPON_RANGE, 15))
-    gun.set_child(DataPoint(DataTypes.ACCURACY, 13))
+    gun.set_child(accuracy_item_stat(13))
     gun.set_child(damage_item_stat(5, 25))
     gun.set_child(DataPoint(DataTypes.WEIGHT, 5))
     return gun
@@ -167,7 +167,7 @@ def new_sling(game_state):
     sling.set_child(DataPoint(DataTypes.WEAPON_RANGE, 4))
     sling.set_child(AttackProvider())
     sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
-    sling.set_child(DataPoint(DataTypes.ACCURACY, 5))
+    sling.set_child(accuracy_item_stat(5))
     sling.set_child(Damage(1, 3))
     return sling
 
@@ -183,7 +183,7 @@ def new_flame_orb(game_state):
     orb.set_child(DataPoint(DataTypes.WEAPON_RANGE, 5))
     orb.set_child(AttackProvider())
     orb.set_child(DataPoint(DataTypes.WEIGHT, 2))
-    orb.set_child(DataPoint(DataTypes.ACCURACY, 5))
+    orb.set_child(accuracy_item_stat(5))
     orb.set_child(Damage(2, 4))
     orb.set_child(MagicMissileEffect(GraphicChar(None, colors.RED, icon.BIG_CENTER_DOT)))
     return orb
@@ -604,11 +604,11 @@ def new_sword(game_state):
                                 "This old blade has seen some better days, it's as sharp as ever tough."))
     sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
     sword.set_child(AttackProvider())
-    sword.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.2))
-    sword.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2))
+    sword.set_child(crit_chance_item_stat(0.2))
+    sword.set_child(crit_multiplier_item_stat(2))
     sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
     sword.set_child(Damage(2, 5))
-    sword.set_child(DataPoint(DataTypes.ACCURACY, 12))
+    sword.set_child(accuracy_item_stat(12))
     return sword
 
 
@@ -632,24 +632,26 @@ def new_mace(game_state):
     return mace
 
 
-def new_knife(game_state):
+def new_dagger(game_state):
     """
     A composite component representing a Knife item.
     """
     knife = Composite()
     set_item_components(knife, game_state)
     set_melee_weapon_component(knife)
-    knife.set_child(Description("Knife", "A trusty knife, small and precise but will only inflict small wounds."))
-    knife.set_child(GraphicChar(None, colors.GRAY, icon.KNIFE))
+    knife.set_child(Description("Dagger", "A trusty dagger, small and precise but will only inflict small wounds."))
+    knife.set_child(GraphicChar(None, colors.GRAY, icon.DAGGER))
     knife.set_child(AttackProvider())
     knife.set_child(DamageType(DamageTypes.CUTTING))
     knife.set_child(DataPoint(DataTypes.WEIGHT, 5))
-    knife.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.3))
-    knife.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2.5))
-    knife.set_child(DataPoint(DataTypes.ACCURACY, 21))
+    knife.set_child(crit_chance_item_stat(0.2))
+    knife.set_child(crit_multiplier_item_stat(3))
+    knife.set_child(accuracy_item_stat(15))
     knife.set_child(damage_item_stat(1, 3))
-    knife.set_child(ExtraSwingAttackEffect(0.3))
-    knife.set_child(IgnoreArmorAttackEffect(0.5))
+
+    knife.set_child(ExtraSwingAttackEffect(0.2))
+    knife.set_child(BleedAttackEffect(0.1))
+
     return knife
 
 
