@@ -78,7 +78,7 @@ class DataTypes:
     CRIT_CHANCE = "crit_chance"
     STRENGTH = "strength"
     ARMOR = "armor"
-    HIT = "hit"
+    ACCURACY = "accuracy"
     DAMAGE = "damage"
     STEALTH = "stealth"
     AWARENESS = "awareness"

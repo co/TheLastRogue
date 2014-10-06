@@ -142,7 +142,7 @@ class PlayerSlingStoneAction(PlayerMissileAction):
             return
         self.sling_weapon.attack_provider.attack_entity(source_entity, target_entity,
                                                         bonus_damage=source_entity.attacker.thrown_rock_damage,
-                                                        bonus_hit=source_entity.hit.value)
+                                                        bonus_hit=source_entity.accuracy.value)
 
     def can_act(self, **kwargs):
         return True
@@ -175,7 +175,7 @@ class PlayerCastMissileSpellAction(PlayerMissileAction):
             return
         self.item.attack_provider.attack_entity(source_entity, target_entity,
                                                         bonus_damage=source_entity.attacker.thrown_rock_damage,
-                                                        bonus_hit=source_entity.hit.value)
+                                                        bonus_hit=source_entity.accuracy.value)
 
     def can_act(self, **kwargs):
         return True

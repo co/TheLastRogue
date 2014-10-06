@@ -31,7 +31,7 @@ class Attacker(Leaf):
 
     @property
     def thrown_hit(self):
-        return self.parent.hit.value
+        return self.parent.accuracy.value
 
     @property
     def thrown_crit_chance(self):
@@ -53,7 +53,7 @@ class Attacker(Leaf):
 
     @property
     def actual_unarmed_hit(self):
-        return self.parent.hit.value
+        return self.parent.accuracy.value
 
     @property
     def unarmed_crit_chance(self):
@@ -162,13 +162,13 @@ class Dodger(Leaf):
         super(Dodger, self).__init__()
         self.component_type = "dodger"
 
-    def is_a_hit(self, hit):
+    def is_a_hit(self, accuracy):
         """
         Returns true if it is a hit, false otherwise.
         """
-        hit = max(hit, 1)
+        accuracy = max(accuracy, 1)
         evasion = max(self.parent.evasion.value, 1)
-        return rng.stat_check(hit, evasion)
+        return rng.stat_check(accuracy, evasion)
 
 
 class ArmorChecker(Leaf):
@@ -272,12 +272,12 @@ class PoisonImmunity(Leaf):
 
 class Attack(object):
     def __init__(self, damage_min, damage_max,
-                 damage_types, hit, crit_chance=0, crit_multiplier=2, damage_multiplier=1, target_entity_effects=[]):
+                 damage_types, accuracy, crit_chance=0, crit_multiplier=2, damage_multiplier=1, target_entity_effects=[]):
         self.damage_min = damage_min
         self.damage_max = damage_max
         self.damage_multiplier = damage_multiplier
         self.damage_types = damage_types
-        self.hit = hit
+        self.accuracy = accuracy
         self.target_entity_effects = target_entity_effects
         self.crit_chance = crit_chance
         self.crit_multiplier = crit_multiplier
@@ -285,7 +285,7 @@ class Attack(object):
     def damage_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0, damage_multiplier=1):
         damage = calculate_damage(self.damage_min, self.damage_max, bonus_damage, damage_multiplier)
         damage_effect = entityeffect.AttackEntityEffect(source_entity, damage * self.damage_multiplier,
-                                                        self.damage_types, self.hit + bonus_hit,
+                                                        self.damage_types, self.accuracy + bonus_hit,
                                                         crit_chance=self.crit_chance,
                                                         crit_multiplier=self.crit_multiplier,
                                                         attack_effects=self.target_entity_effects)

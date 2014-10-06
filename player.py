@@ -40,7 +40,7 @@ class Player(Composite):
         self.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.15))
         self.set_child(DataPoint(DataTypes.STRENGTH, 5))
         self.set_child(DataPoint(DataTypes.EVASION, 15))
-        self.set_child(DataPoint(DataTypes.HIT, 16))
+        self.set_child(DataPoint(DataTypes.ACCURACY, 16))
         self.set_child(DataPoint(DataTypes.ARMOR, 4))
         self.set_child(DataPoint(DataTypes.STEALTH, 6))
 

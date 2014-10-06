@@ -120,7 +120,7 @@ def damage_item_stat(min_value, max_value):
 
 
 def accuracy_item_stat(value):
-    return ItemStat(DataTypes.HIT, value, colors.LIGHT_ORANGE, "Accuracy", order=10)
+    return ItemStat(DataTypes.ACCURACY, value, colors.LIGHT_ORANGE, "Accuracy", order=10)
 
 
 def crit_chance_item_stat(value):
@@ -150,7 +150,7 @@ def new_gun(game_state):
     gun.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
     gun.set_child(AttackProvider())
     gun.set_child(DataPoint(DataTypes.WEAPON_RANGE, 15))
-    gun.set_child(DataPoint(DataTypes.HIT, 13))
+    gun.set_child(DataPoint(DataTypes.ACCURACY, 13))
     gun.set_child(damage_item_stat(5, 25))
     gun.set_child(DataPoint(DataTypes.WEIGHT, 5))
     return gun
@@ -167,7 +167,7 @@ def new_sling(game_state):
     sling.set_child(DataPoint(DataTypes.WEAPON_RANGE, 4))
     sling.set_child(AttackProvider())
     sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
-    sling.set_child(DataPoint(DataTypes.HIT, 5))
+    sling.set_child(DataPoint(DataTypes.ACCURACY, 5))
     sling.set_child(Damage(1, 3))
     return sling
 
@@ -183,7 +183,7 @@ def new_flame_orb(game_state):
     orb.set_child(DataPoint(DataTypes.WEAPON_RANGE, 5))
     orb.set_child(AttackProvider())
     orb.set_child(DataPoint(DataTypes.WEIGHT, 2))
-    orb.set_child(DataPoint(DataTypes.HIT, 5))
+    orb.set_child(DataPoint(DataTypes.ACCURACY, 5))
     orb.set_child(Damage(2, 4))
     orb.set_child(MagicMissileEffect(GraphicChar(None, colors.RED, icon.BIG_CENTER_DOT)))
     return orb
@@ -608,7 +608,7 @@ def new_sword(game_state):
     sword.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2))
     sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
     sword.set_child(Damage(2, 5))
-    sword.set_child(DataPoint(DataTypes.HIT, 12))
+    sword.set_child(DataPoint(DataTypes.ACCURACY, 12))
     return sword
 
 
@@ -646,7 +646,7 @@ def new_knife(game_state):
     knife.set_child(DataPoint(DataTypes.WEIGHT, 5))
     knife.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.3))
     knife.set_child(DataPoint(DataTypes.CRIT_MULTIPLIER, 2.5))
-    knife.set_child(DataPoint(DataTypes.HIT, 21))
+    knife.set_child(DataPoint(DataTypes.ACCURACY, 21))
     knife.set_child(damage_item_stat(1, 3))
     knife.set_child(ExtraSwingAttackEffect(0.3))
     knife.set_child(IgnoreArmorAttackEffect(0.5))
@@ -1214,9 +1214,6 @@ class AttackProvider(Leaf):
     def max_damage(self, source_entity):
         return self.parent.damage.max + source_entity.strength.value / 2
 
-    def actual_hit(self):
-        return self.parent.hit.value
-
     def actual_crit_chance(self):
         crit_chance = 0
         if self.parent.has("crit_chance"):
@@ -1236,9 +1233,8 @@ class AttackProvider(Leaf):
         damage_min = self.min_damage()
         damage_max = self.max_damage(source_entity)
         attack = Attack(damage_min, damage_max, damage_types,
-                        self.actual_hit(), crit_chance=self.actual_crit_chance(),
-                        crit_multiplier=self.actual_crit_multiplier(),
-                        target_entity_effects=attack_effects)
+                        self.parent.accuracy.value, crit_chance=self.actual_crit_chance(),
+                        crit_multiplier=self.actual_crit_multiplier(), target_entity_effects=attack_effects)
 
         return attack.damage_entity(source_entity, target_entity, bonus_damage=bonus_damage, bonus_hit=bonus_hit)
 
