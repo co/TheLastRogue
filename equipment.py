@@ -131,7 +131,13 @@ class Equipment(Leaf):
         for e in equipment.get_children_with_tag("on_equip_effect"):
             e.effect(self.parent)
 
+    def _reset_equipment_spoofed_children(self):
+        for _, equipment in self._equipment.iteritems():
+            if equipment:
+                equipment.reset_spoofed_children()
+
     def first_tick(self, time_spent):
+        self._reset_equipment_spoofed_children()
         self.execute_equip_effects()
 
     def execute_equip_effects(self):
@@ -139,37 +145,13 @@ class Equipment(Leaf):
             if self.slot_is_equiped(equipment_slot):
                 equipment = self._equipment[equipment_slot]
                 for e in equipment.get_children_with_tag("equipped_effect"):
-                    e.effect(self.parent)
+                    e.equipped_effect(self.parent)
 
     def print_equipment(self):
         print("###############################")
         for slot, content in self._equipment.iteritems():
             print(slot, content)
         print("###############################")
-
-    def first_tick(self, time):
-        """
-        Runs first_tick on all child components.
-        """
-        for key, e in self._equipment.iteritems():
-            if e:
-                e.first_tick(time)
-
-    def before_tick(self, time):
-        """
-        Runs before_tick on all child components.
-        """
-        for key, e in self._equipment.iteritems():
-            if e:
-                e.before_tick(time)
-
-    def on_tick(self, time):
-        """
-        Runs on_tick on all child components.
-        """
-        for key, e in self._equipment.iteritems():
-            if e:
-                e.on_tick(time)
 
     def after_tick(self, time):
         """
@@ -178,4 +160,3 @@ class Equipment(Leaf):
         for key, e in self._equipment.iteritems():
             if e:
                 e.after_tick(time)
-

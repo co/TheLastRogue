@@ -27,6 +27,7 @@ class ActionScheduler(object):
     def _actors_tick(self):
         if len(self._actors) > 0:
             entity = self._actors[0]
+            entity.reset_spoofed_children()
             entity.first_tick(gametime.normal_energy_gain)  # Equipped effects.
             self.effects_tick(entity)
             entity.before_tick(gametime.normal_energy_gain)

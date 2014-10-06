@@ -244,11 +244,7 @@ class Composite(Component):
     def first_tick(self, time):
         """
         Runs first_tick on all child components.
-
-        starts with removing spoofed children.
         """
-        self.reset_spoofed_children()
-
         visited_component_types = set()
         for component_type, component in self._spoofed_children.iteritems():
             visited_component_types.add(component_type)

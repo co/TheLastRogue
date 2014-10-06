@@ -319,7 +319,7 @@ class OnAttackedEffect(Leaf):
         super(OnAttackedEffect, self).__init__()
         self.tags.add("on_attacked_effect")
 
-    def effect(self, source_entity, damage_types=[]):
+    def attacked_effect(self, source_entity, damage_types=[]):
         pass
 
 
@@ -328,7 +328,7 @@ class CounterAttackOnDamageTakenEffect(OnAttackedEffect):
         super(CounterAttackOnDamageTakenEffect, self).__init__()
         self.component_type = "counter_attack_on_damage_taken"
 
-    def effect(self, source_entity, damage_types=[]):
+    def attacked_effect(self, source_entity, damage_types=[]):
         target_entity = self.parent
         melee_hit_entity_help_function(DataTypes.COUNTER_ATTACK_CHANCE, target_entity, source_entity)
 
