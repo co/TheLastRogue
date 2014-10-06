@@ -72,7 +72,6 @@ def set_item_components(item, game_state):
 
 
 class ItemStat(DataPoint):
-
     REGULAR_FORMAT = 0
     PERCENT_FORMAT = 1
     MULTIPLIER_FORMAT = 2
@@ -107,7 +106,8 @@ class RangeItemStat(ItemStat):
     def __init__(self, component_type, min_value, max_value, color_fg, screen_name=None,
                  order=50, is_common_stat=True):
         super(RangeItemStat, self).__init__(component_type, min_value, color_fg, screen_name=screen_name,
-                                       formatting=ItemStat.REGULAR_FORMAT, order=order, is_common_stat=is_common_stat)
+                                            formatting=ItemStat.REGULAR_FORMAT, order=order,
+                                            is_common_stat=is_common_stat)
         self.min = min_value
         self.max = max_value
 
@@ -135,6 +135,7 @@ def set_ranged_weapon_components(item):
     item.set_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
     item.set_child(ItemType(ItemType.WEAPON))
     item.set_child(ReEquipAction())
+    item.set_child(AttackProvider())
 
 
 def new_gun(game_state):
@@ -148,7 +149,6 @@ def new_gun(game_state):
                                The wooden handle is dry and gray, \
                                you see rust eating into the iron pipe."))
     gun.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
-    gun.set_child(AttackProvider())
     gun.set_child(DataPoint(DataTypes.WEAPON_RANGE, 15))
     gun.set_child(accuracy_item_stat(13))
     gun.set_child(damage_item_stat(5, 25))
@@ -165,7 +165,6 @@ def new_sling(game_state):
                                 "This weapon propels rocks more effectively than throwing them would."))
     sling.set_child(GraphicChar(None, colors.ORANGE, icon.SLING))
     sling.set_child(DataPoint(DataTypes.WEAPON_RANGE, 4))
-    sling.set_child(AttackProvider())
     sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
     sling.set_child(accuracy_item_stat(5))
     sling.set_child(Damage(1, 3))
@@ -178,10 +177,9 @@ def new_flame_orb(game_state):
     set_ranged_weapon_components(orb)
     orb.set_child(RangeWeaponType(RangeWeaponType.MAGIC))
     orb.set_child(Description("Flame Orb",
-                                "An orb with a living flame inside, it allows the weilder to channel fire from it."))
+                              "An orb with a living flame inside, it allows the wielder to channel fire from it."))
     orb.set_child(GraphicChar(None, colors.RED, icon.ORB))
     orb.set_child(DataPoint(DataTypes.WEAPON_RANGE, 5))
-    orb.set_child(AttackProvider())
     orb.set_child(DataPoint(DataTypes.WEIGHT, 2))
     orb.set_child(accuracy_item_stat(5))
     orb.set_child(Damage(2, 4))
@@ -591,6 +589,7 @@ def set_melee_weapon_component(item):
     item.set_child(ItemType(ItemType.WEAPON))
     item.set_child(DamageType(DamageTypes.PHYSICAL))
     item.set_child(ReEquipAction())
+    item.set_child(AttackProvider())
 
 
 def new_sword(game_state):
@@ -603,33 +602,56 @@ def new_sword(game_state):
     sword.set_child(Description("Iron Sword",
                                 "This old blade has seen some better days, it's as sharp as ever tough."))
     sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-    sword.set_child(AttackProvider())
-    sword.set_child(crit_chance_item_stat(0.2))
+    sword.set_child(crit_chance_item_stat(0.1))
     sword.set_child(crit_multiplier_item_stat(2))
-    sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
     sword.set_child(Damage(2, 5))
-    sword.set_child(accuracy_item_stat(12))
+    sword.set_child(accuracy_item_stat(10))
+    sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
+    sword.set_child(ExtraSwingAttackEffect(0.1))
+    sword.set_child(BleedAttackEffect(0.1))
     return sword
 
 
-def new_mace(game_state):
+def new_morning_star(game_state):
     """
     A composite component representing a Sword item.
     """
     mace = Composite()
     set_item_components(mace, game_state)
     set_melee_weapon_component(mace)
-    mace.set_child(Description("Iron Mace",
-                               "This old club has an lump of iron at one end."))
-    mace.set_child(GraphicChar(None, colors.GRAY, icon.MACE))
-    mace.set_child(AttackProvider())
+    mace.set_child(Description("Morning Star",
+                               "This old club has an lump of iron with rusty spikes at one end."))
+    mace.set_child(GraphicChar(None, colors.GRAY, icon.MORNING_STAR))
     mace.set_child(crit_chance_item_stat(0.1))
     mace.set_child(crit_multiplier_item_stat(2))
-    mace.set_child(accuracy_item_stat(16))
+    mace.set_child(accuracy_item_stat(8))
     mace.set_child(damage_item_stat(1, 6))
-    mace.set_child(StunAttackEffect(1.0))
+    mace.set_child(StunAttackEffect(0.2))
+    mace.set_child(IgnoreArmorAttackEffect(0.2))
+    mace.set_child(BleedAttackEffect(0.1))
     mace.set_child(DataPoint(DataTypes.WEIGHT, 8))
     return mace
+
+
+def new_spear(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    c = Composite()
+    set_item_components(c, game_state)
+    set_melee_weapon_component(c)
+    c.set_child(Description("Spear",
+                            "A stick with a sharp piece of metal at one end."
+                            "It's a useful weapon when you want to keep danger at bay."))
+    c.set_child(GraphicChar(None, colors.GRAY, icon.SPEAR))
+    c.set_child(crit_chance_item_stat(0.1))
+    c.set_child(crit_multiplier_item_stat(2))
+    c.set_child(accuracy_item_stat(10))
+    c.set_child(damage_item_stat(1, 5))
+    c.set_child(DefenciveAttackEffect(0.75))
+    c.set_child(CounterAttackEffect(0.1))
+    c.set_child(DataPoint(DataTypes.WEIGHT, 8))
+    return c
 
 
 def new_dagger(game_state):
@@ -641,7 +663,6 @@ def new_dagger(game_state):
     set_melee_weapon_component(knife)
     knife.set_child(Description("Dagger", "A trusty dagger, small and precise but will only inflict small wounds."))
     knife.set_child(GraphicChar(None, colors.GRAY, icon.DAGGER))
-    knife.set_child(AttackProvider())
     knife.set_child(DamageType(DamageTypes.CUTTING))
     knife.set_child(DataPoint(DataTypes.WEIGHT, 5))
     knife.set_child(crit_chance_item_stat(0.2))
@@ -1060,6 +1081,7 @@ class FlamePotionDrinkAction(DrinkAction):
     """
     Defines the healing potion drink action.
     """
+
     def __init__(self):
         super(FlamePotionDrinkAction, self).__init__()
         self.component_type = "flame_potion_drink_action"
@@ -1078,6 +1100,7 @@ class PoisonPotionDrinkAction(DrinkAction):
     """
     Defines the poison potion drink action.
     """
+
     def __init__(self):
         super(PoisonPotionDrinkAction, self).__init__()
         self.component_type = "poison_potion_drink_action"
@@ -1372,7 +1395,7 @@ class OffenciveAttackEffect(StatBonusEquipEffect):
         self.parent.add_spoof_child(self._item_stat())
 
     def _item_stat(self):
-        return ItemStat("offencive_attack_weapon_effect", self.effect_chance, colors.LIGHT_GREEN, "Offencive Strike",
+        return ItemStat(DataTypes.OFFENCIVE_ATTACK_CHANCE, self.effect_chance, colors.LIGHT_GREEN, "Strike Step",
                         ItemStat.PERCENT_FORMAT, order=40, is_common_stat=False)
 
 
@@ -1386,10 +1409,11 @@ class DefenciveAttackEffect(StatBonusEquipEffect):
         entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
 
     def first_tick(self, time):
+        print "add def"
         self.parent.add_spoof_child(self._item_stat())
 
     def _item_stat(self):
-        return ItemStat("defencive_attack_weapon_effect", self.effect_chance, colors.LIGHT_GREEN, "Defencive Strike",
+        return ItemStat(DataTypes.DEFENCIVE_ATTACK_CHANCE, self.effect_chance, colors.LIGHT_GREEN, "Def Strike",
                         ItemStat.PERCENT_FORMAT, order=40, is_common_stat=False)
 
 
@@ -1412,7 +1436,7 @@ class BleedAttackEffect(AttackEffect):
         self.parent.add_spoof_child(self._item_stat())
 
     def _item_stat(self):
-        return ItemStat("bleed_weapon_effect", self.effect_chance, colors.RED_D, "Bleed",
+        return ItemStat("bleed_weapon_effect", self.effect_chance, colors.RED, "Bleed",
                         ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
 
 
@@ -1487,6 +1511,7 @@ class Thrower(Leaf):
     """
     When the floor is a chasm it should not break the chasm will take care of the fall.
     """
+
     def _non_break(self, dungeon_level, position):
         self.parent.mover.try_move(position, dungeon_level)
 
@@ -1560,14 +1585,12 @@ class ThrowerBreakCreateCloud(ThrowerBreak):
 
 
 class ThrowerBreakCreateSteam(ThrowerBreakCreateCloud):
-
     def __init__(self):
         super(ThrowerBreakCreateSteam, self).__init__()
         self.cloud_factory = new_steam_cloud
 
 
 class ThrowerBreakCreatePoisonCloud(ThrowerBreakCreateCloud):
-
     def __init__(self):
         super(ThrowerBreakCreatePoisonCloud, self).__init__()
         self.cloud_factory = new_poison_cloud

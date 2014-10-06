@@ -1,9 +1,8 @@
 from actor import Actor
-from entityeffect import Teleport, StatusAdder, StatusRemover
+from entityeffect import StatusAdder, StatusRemover
 from equipment import EquipmentSlots
-from item import RangeWeaponType, new_dagger
+from item import RangeWeaponType, new_dagger, new_sword, new_morning_star, new_spear
 import monster
-import player
 import settings
 import spawner
 import menu
@@ -15,6 +14,8 @@ import inputhandler
 import menufactory
 import positionexaminer
 import util
+
+DEV_EQUIPMENT_FACTORY_LIST = [new_dagger, new_sword, new_morning_star, new_spear]
 
 
 class InputActor(Actor):
@@ -77,7 +78,9 @@ class InputActor(Actor):
             self.parent.health_modifier.heal(300)
 
         elif key == inputhandler.THREE:
-            self.parent.equipment.force_equip(new_dagger(self.parent.game_state.value))
+            global DEV_EQUIPMENT_FACTORY_LIST
+            self.parent.equipment.force_equip(DEV_EQUIPMENT_FACTORY_LIST[0](self.parent.game_state.value))
+            DEV_EQUIPMENT_FACTORY_LIST = DEV_EQUIPMENT_FACTORY_LIST[1:] + DEV_EQUIPMENT_FACTORY_LIST[:1]
             self.newly_spent_energy += gametime.single_turn
 
         elif key == inputhandler.FOUR:

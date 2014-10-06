@@ -232,7 +232,7 @@ class EquipmentMenu(Menu):
                 item_name = item_in_slot.description.name
                 item_graphic = item_in_slot.graphic_char
             self.menu_items.append(MenuOptionWithSymbols(item_name, item_graphic, item_graphic, [option_func],
-                                                          payload=item_in_slot))
+                                                         payload=item_in_slot))
 
 
 class EquipSlotMenu(Menu):
