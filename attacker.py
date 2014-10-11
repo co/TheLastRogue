@@ -1,143 +1,214 @@
 import random
-from actionscheduler import ActionScheduler
-import colors
 import entityeffect
 import geometry
 import rng
 from compositecore import Leaf
-from equipment import EquipmentSlots
 from stats import DataTypes, Flag, Tags
-from util import entity_skip_turn, entity_stunned_turn
+from util import entity_stunned_turn
 
 
 DEFAULT_CRIT_MULTIPLIER = 2
 
 
-class Attacker(Leaf):
-    """
-    Component for attacking and checking if an attacking is legal.
-    """
-
-    def __init__(self):
-        super(Attacker, self).__init__()
-        self.component_type = "attacker"
+class AttackerBase(Leaf):
+    def try_hit(self, entity):
+        if not self.can_hit(entity):
+            return False
+        self.hit(entity)
+        return True
 
     @property
-    def thrown_rock_damage(self):
+    def accuracy(self):
+        return self.parent.accuracy.value
+
+    @property
+    def min_damage(self):
+        return self.parent.strength.value / 2
+
+    @property
+    def max_damage(self):
+        return self.parent.strength.value / 2 + 3
+
+    @property
+    def crit_chance(self):
+        return self.parent.unarmed_crit_chance.value
+
+    @property
+    def crit_multiplier(self):
+        return DEFAULT_CRIT_MULTIPLIER
+
+    def can_hit(self, entity):
+        return True
+
+    def hit(self, entity):
+        self._on_hit(entity)
+        self._before_attack_effects(entity)
+        self._hit(entity)
+
+    def _hit(self, entity):
+        pass
+
+    def _on_hit(self, entity):
+        pass
+
+    def _before_attack_effects(self, target_entity):
+        for e in self.parent.get_children_with_tag("before_attack_effect"):
+            e.before_attack_effect(self.parent, target_entity)
+
+
+class WeaponRangedAttacker(AttackerBase):
+    def __init__(self, weapon):
+        super(WeaponRangedAttacker, self).__init__()
+        self.component_type = "ranged_attacker"
+        self.weapon = weapon
+
+    def can_hit(self, entity):
+        return True
+
+
+class WeaponMeleeAttacker(AttackerBase):
+    def __init__(self, weapon):
+        super(WeaponMeleeAttacker, self).__init__()
+        self.component_type = "melee_attacker"
+        self.weapon = weapon
+
+    @property
+    def accuracy(self):
+        return self.weapon.accuracy.value
+
+    @property
+    def min_damage(self):
+        return self.weapon.damage.min + self.parent.strength.value / 2
+
+    @property
+    def max_damage(self):
+        return self.weapon.damage.max + self.parent.strength.value / 2
+
+    def can_hit(self, entity):
+        if geometry.chess_distance(self.parent.position.value, entity.position.value) > 1:
+            return False
+
+    @property
+    def crit_chance(self):
+        crit_chance = 0
+        if self.parent.has(DataTypes.CRIT_CHANCE):
+            crit_chance += self.parent.crit_chance.value
+        if self.weapon.has(DataTypes.CRIT_CHANCE):
+            crit_chance += self.weapon.crit_chance.value
+        return crit_chance
+
+    @property
+    def crit_multiplier(self):
+        if self.parent.has("crit_multiplier"):
+            return self.parent.crit_multiplier.value
+        return DEFAULT_CRIT_MULTIPLIER
+
+    def attack_entity(self, target_entity, bonus_damage=0, bonus_hit=0):
+        attack_effects = [effect for effect in self.parent.get_children_with_tag("attack_effect")]
+        damage_types = [effect.component_type for effect in self.parent.get_children_with_tag(Tags.DAMAGE_TYPE)]
+        attack = Attack(self.min_damage, self.max_damage, damage_types, self.accuracy, crit_chance=self.crit_chance,
+                        crit_multiplier=self.crit_multiplier, target_entity_effects=attack_effects)
+
+        return attack.damage_entity(self.parent, target_entity, bonus_damage=bonus_damage, bonus_hit=bonus_hit)
+
+    def _hit(self, target_entity):
+        """
+        Causes the entity to hit the target entity.
+        """
+        self.attack_entity(target_entity)
+
+
+class UnarmedAttacker(AttackerBase):
+    def __init__(self):
+        super(UnarmedAttacker, self).__init__()
+        self.component_type = "melee_attacker"
+
+    @property
+    def damage(self):
+        damage_multiplier = 1
+        if self.parent.has("throw_damage_multiplier"):
+            damage_multiplier = self.parent.throw_damage_multiplier.value
+        return int(2 * self.parent.strength.value * damage_multiplier / 3)
+
+    def can_hit(self, entity):
+        if geometry.chess_distance(self.parent.position.value, entity.position.value) > 1:
+            return False
+
+        # TODO This check should not be here!
+        if entity is None or entity.faction.value == self.parent.faction.value:
+            return False
+        return True
+
+    def _hit(self, target_entity):
+        self._unarmed_damage().damage_entity(self.parent, target_entity)
+
+    def _unarmed_damage(self):
+        """
+        Calculates an instance of damage
+        caused by an unarmed hit by the entity.
+        o
+        """
+        damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
+        attack_effects = [effect for effect in self.parent.get_children_with_tag("attack_effect")]
+        damage_min = self.damage
+        damage_max = damage_min + 3
+        return Attack(damage_min, damage_max, damage_types, self.accuracy,
+                      crit_chance=self.crit_chance,
+                      crit_multiplier=self.crit_multiplier,
+                      target_entity_effects=attack_effects)
+
+
+class ThrowRockAttacker(AttackerBase):
+    def __init__(self):
+        super(ThrowRockAttacker, self).__init__()
+        self.component_type = "ranged_attacker"
+
+    @property
+    def damage(self):
         damage_multiplier = 1
         if self.parent.has("throw_damage_multiplier"):
             damage_multiplier = self.parent.throw_damage_multiplier.value
         return int(2 * self.parent.strength.value * damage_multiplier / 3)
 
     @property
-    def thrown_hit(self):
+    def accuracy(self):
         return self.parent.accuracy.value
 
     @property
-    def thrown_crit_chance(self):
-        return self.parent.crit_chance.value
+    def crit_chance(self):
+        return self.parent.unarmed_crit_chance.value
 
     @property
-    def thrown_crit_multiplier(self):
+    def crit_multiplier(self):
         if self.parent.has("crit_multiplier"):
             return self.parent.crit_multiplier.value
         return DEFAULT_CRIT_MULTIPLIER
 
+    def can_hit(self, entity):
+        #TODO: faction test does not belong here!
+        return not(entity is None or entity.faction.value == self.parent.faction.value)
 
-    @property
-    def unarmed_damage(self):
-        damage_multiplier = 1
-        if self.parent.has("melee_damage_multiplier"):
-            damage_multiplier = self.parent.melee_damage_multiplier.value
-        return 1 + int(self.parent.strength.value * damage_multiplier) / 2
-
-    @property
-    def actual_unarmed_hit(self):
-        return self.parent.accuracy.value
-
-    @property
-    def unarmed_crit_chance(self):
-        return self.parent.crit_chance.value
-
-    @property
-    def unarmed_crit_multiplier(self):
-        return self.thrown_crit_multiplier
-
-    def try_hit_melee(self, position):
-        """
-        Tries to hit an entity at a position.
-
-        will fail if it is not next to parent entity.
-        """
-        if geometry.chess_distance(self.parent.position.value, position) <= 1:
-            return self.try_hit(position)
-        return False
-
-    def try_hit(self, position):
-        """
-        Tries to hit an entity at a position.
-
-        Returns False if there is no entity
-        there or the entity is of the same faction.
-        """
-        entity = (self.parent.dungeon_level.value.get_tile(position).get_first_entity())
-        if entity is None or entity.faction.value == self.parent.faction.value:
-            return False
-        self.hit(entity)
-        return True
-
-    def throw_rock_damage_entity(self, target_entity):
+    def _hit(self, target_entity):
         """
         Makes entity to hit the target entity with the force of a thrown rock.
         """
         damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
-        damage_min = self.thrown_rock_damage
+        damage_min = self.damage
         damage_max = 3
-        thrown_damage = Attack(damage_min, damage_max, damage_types, self.thrown_hit,
-                               crit_chance=self.thrown_crit_chance,
-                               crit_multiplier=self.thrown_crit_multiplier)
+        thrown_damage = Attack(damage_min, damage_max, damage_types, self.accuracy,
+                               crit_chance=self.crit_chance,
+                               crit_multiplier=self.crit_multiplier)
         thrown_damage.damage_entity(self.parent, target_entity)
 
-    def hit(self, target_entity):
-        """
-        Causes the entity to hit the target entity.
-        """
-        equipment = self.parent.equipment
-        self._on_hit(target_entity)
-        if equipment.slot_is_equiped(EquipmentSlots.MELEE_WEAPON):
-            weapon = self.parent.equipment.get(EquipmentSlots.MELEE_WEAPON)
-            weapon.attack_provider.attack_entity(self.parent, target_entity)
-        else:
-            self._unarmed_damage().damage_entity(self.parent, target_entity)
 
-    def _unarmed_damage(self):
-        """
-        Calculates an instance of damage
-        caused by an unarmed hit by the entity.
-        """
-        damage_types = [DamageTypes.BLUNT, DamageTypes.PHYSICAL]
-
-        target_entity_effects = [effect_factory_data_point.value() for effect_factory_data_point in
-                                 self.parent.get_children_with_tag("unarmed_hit_target_entity_effect_factory")]
-        damage_min = self.unarmed_damage
-        damage_max = damage_min + 3
-        return Attack(damage_min, damage_max, damage_types, self.actual_unarmed_hit,
-                      crit_chance=self.unarmed_crit_chance,
-                      crit_multiplier=self.unarmed_crit_multiplier,
-                      target_entity_effects=target_entity_effects)
-
-    def _on_hit(self, target_entity):
-        pass
-
-
-class KnockBackAttacker(Attacker):
+class PushBackAttacker(AttackerBase):
     """
     Component for attacking and checking if an attacking is legal. Attacks will cause Knock Back.
     """
 
     def __init__(self):
-        super(Attacker, self).__init__()
-        self.component_type = "attacker"
+        super(PushBackAttacker, self).__init__()
+        self.component_type = "melee_attacker"
 
     def _on_hit(self, target_entity):
         self._knock_away_entity(target_entity)
@@ -307,6 +378,8 @@ class UndodgeableAttack(object):
 
 
 def calculate_damage(damage_min, damage_max, bonus_damage, damage_multiplier):
+    if damage_max < damage_min:
+        return damage_min
     return (random.randrange(damage_min, damage_max + 1) + bonus_damage) * damage_multiplier
 
 
@@ -385,4 +458,4 @@ def melee_hit_entity_help_function(attack_chance, source_entity, target_entity):
     distance = geometry.chess_distance(source_entity.position.value, source_entity.position.value)
     if (distance <= 1 and source_entity.has(attack_chance) and
                 random.random() < source_entity.get_child(attack_chance).value):
-        source_entity.attacker.try_hit_melee(target_entity.position.value)
+        source_entity.melee_attacker.try_hit(target_entity.position.value)

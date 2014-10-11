@@ -2,7 +2,7 @@ from Status import StatusDescriptionBar
 import constants
 from equipment import Equipment
 from item import PickUpItemAction
-from attacker import Attacker, Dodger, ArmorChecker, ResistanceChecker, CounterAttackOnDamageTakenEffect, AttackEnemyIStepNextToEffect, AttackEnemySteppingNextToMeEffect
+from attacker import Dodger, ArmorChecker, ResistanceChecker, CounterAttackOnDamageTakenEffect, AttackEnemyIStepNextToEffect, AttackEnemySteppingNextToMeEffect, UnarmedAttacker, ThrowRockAttacker
 from compositecore import Composite
 from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue
@@ -37,10 +37,11 @@ class Player(Composite):
         self.set_child(DataPoint(DataTypes.JOB, Jobs.ROGUE))
 
         self.set_child(DataPoint(DataTypes.ENERGY, -gametime.single_turn))
-        self.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.15))
-        self.set_child(DataPoint(DataTypes.STRENGTH, 5))
-        self.set_child(DataPoint(DataTypes.EVASION, 15))
+        self.set_child(DataPoint(DataTypes.UNARMED_CRIT_CHANCE, 0.15))
+        self.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.0))
         self.set_child(DataPoint(DataTypes.ACCURACY, 16))
+        self.set_child(DataPoint(DataTypes.STRENGTH, 5))
+        self.set_child(DataPoint(DataTypes.EVASION, 10))
         self.set_child(DataPoint(DataTypes.ARMOR, 4))
         self.set_child(DataPoint(DataTypes.STEALTH, 6))
 
@@ -70,7 +71,8 @@ class Player(Composite):
         self.set_child(Mover())
         self.set_child(PlayerStepper())
 
-        self.set_child(Attacker())
+        self.set_child(UnarmedAttacker())
+        self.set_child(ThrowRockAttacker())
         self.set_child(Dodger())
         self.set_child(ArmorChecker())
         self.set_child(ResistanceChecker())

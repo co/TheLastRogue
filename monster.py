@@ -2,9 +2,9 @@ import random
 from Status import StatusDescriptionBar
 from actor import DoNothingActor
 from animation import animate_flight
-from attacker import Attacker, Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity, KnockBackAttacker, PoisonImmunity
+from attacker import Dodger, DamageTypes, ArmorChecker, ResistanceChecker, FireImmunity, PoisonImmunity, PushBackAttacker, UnarmedAttacker, ThrowRockAttacker
 from cloud import new_fire_cloud, new_dust_cloud
-from compositecommon import EntityShareTileEffect, PoisonEntityEffectFactory
+from compositecommon import EntityShareTileEffect
 from compositecore import Composite, Leaf, Component
 import constants
 import direction
@@ -23,7 +23,7 @@ from mover import Mover, Stepper, SlimeCanShareTileEntityMover, CautiousStepper,
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath, LeaveCorpseTurnIntoEntityOnDeath
 from position import Position, DungeonLevel
 import rng
-from stats import Flag, UnArmedHitTargetEntityEffectFactory, DataPoint, DataTypes, Factions, IntelligenceLevel, Immunities
+from stats import Flag, DataPoint, DataTypes, Factions, IntelligenceLevel, Immunities
 from stats import GamePieceTypes
 from statusflags import StatusFlags
 from text import Description, EntityMessages
@@ -33,12 +33,14 @@ import colors
 from equipment import Equipment
 import gametime
 import icon
+from equipmenteffect import PoisonAttackEffect
 
 
 def set_monster_components(monster, game_state):
     monster.set_child(DataPoint(DataTypes.ENERGY, -gametime.single_turn))
     monster.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ENTITY))
-    monster.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.15))
+    #monster.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.15))
+    monster.set_child(DataPoint(DataTypes.UNARMED_CRIT_CHANCE, 0.15))
     monster.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn))
     monster.set_child(DataPoint(DataTypes.MELEE_SPEED, gametime.single_turn))
     monster.set_child(DataPoint(DataTypes.THROW_SPEED, gametime.single_turn))
@@ -71,7 +73,7 @@ def set_monster_components(monster, game_state):
     monster.set_child(Equipment())
     monster.set_child(Inventory())
     monster.set_child(EffectQueue())
-    monster.set_child(Attacker())
+    monster.set_child(UnarmedAttacker())
     monster.set_child(RemoveEntityOnDeath())
     monster.set_child(PrintDeathMessageOnDeath())
     monster.set_child(MonsterWeightedStepAction(100))
@@ -127,6 +129,7 @@ def new_ratman(gamestate):
     ratman.set_child(DataPoint(DataTypes.AWARENESS, 5))
 
     ratman.set_child(MonsterThrowStoneAction(20))
+    ratman.set_child(ThrowRockAttacker())
 
     ratman.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 1))
     return ratman
@@ -164,7 +167,7 @@ def new_worm(gamestate):
 
     worm.set_child(Description("Worm", "It's a giant earth worm."))
     worm.set_child(EntityMessages("The worm wiggles at you.", "The worm stops moving."))
-    worm.set_child(GraphicChar(None, colors.PINK, icon.BLOOD7+4))
+    worm.set_child(GraphicChar(None, colors.PINK, icon.BLOOD7 + 4))
 
     worm.set_child(Health(4))
     worm.set_child(DataPoint(DataTypes.STRENGTH, 3))
@@ -229,8 +232,8 @@ def new_spider(gamestate):
 
     spider.set_child(MakeSpiderWebs())
     spider.set_child(Flag(Immunities.SPIDER_WEB))
-    spider.set_child(UnArmedHitTargetEntityEffectFactory(PoisonEntityEffectFactory(spider, random.randrange(4, 8), 2,
-                                                                                   20)))
+    #spider.set_child(UnArmedHitTargetEntityEffectFactory(PoisonEntityEffectFactory(spider, random.randrange(4, 8), 2, 20)))
+    spider.set_child(PoisonAttackEffect(1.0))
     spider.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 3))
     return spider
 
@@ -276,7 +279,7 @@ def new_armored_beetle(gamestate):
     beetle.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn + gametime.one_third_turn))
     beetle.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 4))
 
-    beetle.set_child(KnockBackAttacker())
+    beetle.set_child(PushBackAttacker())
 
     return beetle
 
@@ -620,40 +623,6 @@ class ReviveAsGhostOnDeath(Leaf):
             self.parent.position.value)
 
 
-class AddEffectToOtherSeenEntities(Leaf):
-    """
-    Adds effects to seen entities other than self.
-    """
-
-    def __init__(self, effect_factory, ttl=1):
-        super(AddEffectToOtherSeenEntities, self).__init__()
-        self.component_type = "add_effect_to_other_seen_entities_" + str(effect_factory)
-        self.effect_factory = effect_factory
-        self.ttl = ttl
-
-    def before_tick(self, time):
-        seen_entities = self.parent.vision.get_seen_entities()
-        for entity in seen_entities:
-            if not entity is self.parent:
-                entity.effect_queue.add(AddSpoofChild(self.parent, self.effect_factory(), self.ttl))
-
-
-class HealAnEntityOnDeath(Leaf):
-    """
-    Will Heal an entity when parent has died.
-    """
-
-    def __init__(self, source_entity):
-        super(HealAnEntityOnDeath, self).__init__()
-        self.component_type = "heal_entity_on_death"
-        self.source_entity = source_entity
-        self.target_entity = source_entity
-
-    def on_tick(self, time):
-        if self.parent.health.is_dead():
-            self.target_entity.health_modifier.heal(1)
-
-
 class SplitAtFullHealth(Component):
     def __init__(self):
         super(SplitAtFullHealth, self).__init__()
@@ -709,7 +678,7 @@ class StuckInSlimeStepperSpoof(Stepper):
         my_strength = self.parent.strength.value
         slime_strength = self._slime.strength.value
         if self.has_sibling("attacker"):
-            self.parent.attacker.hit(self._slime)
+            self.parent.melee_attacker.hit(self._slime)
         if rng.stat_check(my_strength, slime_strength + 8):
             self._split_slime(geometry.sub_2d(self._slime.position.value, position))
             entity_skip_turn(self.parent, self._slime)

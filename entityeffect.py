@@ -173,7 +173,7 @@ class Teleport(EntityEffect):
 
 
 class AttackEntityEffect(EntityEffect):
-    def __init__(self, source_entity, damage, damage_types, hit, crit_chance=0, crit_multiplier=2,
+    def __init__(self, source_entity, damage, damage_types, accuracy, crit_chance=0, crit_multiplier=2,
                  hit_message=messenger.HIT_MESSAGE, miss_message=messenger.MISS_MESSAGE,
                  crit_message=messenger.CRIT_MESSAGE, hit_trigger_effect=[], meld_id=None, time_to_live=1,
                  attack_effects=[]):
@@ -181,7 +181,7 @@ class AttackEntityEffect(EntityEffect):
                                                  effect_type=EffectTypes.DAMAGE,
                                                  meld_id=meld_id,
                                                  time_to_live=time_to_live)
-        self.hit = hit
+        self.accuracy = accuracy
         self.damage = damage
         self.damage_types = damage_types
         self.miss_message = miss_message
@@ -207,7 +207,7 @@ class AttackEntityEffect(EntityEffect):
         messenger.msg.send_visual_message(m, self.target_entity.position.value)
 
     def is_a_hit(self):
-        return self.target_entity.dodger.is_a_hit(self.hit) or self.target_entity.has("sleeping")
+        return self.target_entity.dodger.is_a_hit(self.accuracy) or self.target_entity.has("sleeping")
 
     def is_a_crit(self):
         return self.crit_chance > random.random() or self.target_entity.has("sleeping")

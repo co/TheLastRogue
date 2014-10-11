@@ -1,9 +1,8 @@
 import random
-from Status import STUMBLE_STATUS_DESCRIPTION
 from action import Action, SOURCE_ENTITY, GAME_STATE
 from animation import animate_flight
 from attacker import DamageTypes, UndodgeableAttack
-from entityeffect import Heal, AddSpoofChild, StatusIconEntityEffect
+from entityeffect import Heal, AddSpoofChild
 import gametime
 import geometry
 from graphic import GraphicChar
@@ -112,7 +111,8 @@ def rock_hit_position(dungeon_level, position, source_entity):
     target_entity = dungeon_level.get_tile(position).get_first_entity()
     if target_entity is None:
         return
-    source_entity.attacker.throw_rock_damage_entity(target_entity)
+    # TODO cant be sure range attack is thrown rock, could possibly be a gun. Refactoring needed
+    source_entity.ranged_attacker.hit(target_entity)
 
 
 def max_throw_distance(strength):
@@ -130,6 +130,7 @@ class PlayerSlingStoneAction(PlayerMissileAction):
     def add_energy_spent_to_entity(self, entity):
         """
         Help method for spending energy for the act performing entity.
+
         """
         entity.actor.newly_spent_energy += entity.throw_speed.value
 
@@ -140,9 +141,8 @@ class PlayerSlingStoneAction(PlayerMissileAction):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
         if target_entity is None:
             return
-        self.sling_weapon.attack_provider.attack_entity(source_entity, target_entity,
-                                                        bonus_damage=source_entity.attacker.thrown_rock_damage,
-                                                        bonus_hit=source_entity.accuracy.value)
+        source_entity.ranged_attacker.hit(target_entity)
+
 
     def can_act(self, **kwargs):
         return True
@@ -173,9 +173,9 @@ class PlayerCastMissileSpellAction(PlayerMissileAction):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
         if target_entity is None:
             return
-        self.item.attack_provider.attack_entity(source_entity, target_entity,
-                                                        bonus_damage=source_entity.attacker.thrown_rock_damage,
-                                                        bonus_hit=source_entity.accuracy.value)
+        source_entity.ranged_attacker.attack_entity(source_entity, target_entity,
+                                                    bonus_damage=source_entity.attacker.thrown_rock_damage,
+                                                    bonus_hit=source_entity.accuracy.value)
 
     def can_act(self, **kwargs):
         return True
@@ -216,8 +216,7 @@ class PlayerShootWeaponAction(PlayerMissileAction):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
         if target_entity is None:
             return
-        self.ranged_weapon.attack_provider.attack_entity(source_entity,
-                                                         target_entity)
+        source_entity.ranged_attacker.hit(target_entity)
 
     def max_missile_distance(self, **kwargs):
         return self.ranged_weapon.weapon_range.value

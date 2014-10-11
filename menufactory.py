@@ -351,28 +351,20 @@ def new_player_status_stack(player, width):
 def new_player_weapon_table(player, width):
     equipment = player.equipment
     if equipment.slot_is_equiped(EquipmentSlots.MELEE_WEAPON):
-        melee_weapon = equipment.get(EquipmentSlots.MELEE_WEAPON)
-        melee_graphic = melee_weapon.graphic_char
-        melee_damage = melee_weapon.damage.get_value_text()
-        melee_accuracy = melee_weapon.accuracy.get_value_text()
-        melee_crit_chance = melee_weapon.crit_chance.get_value_text()
+        melee_graphic = equipment.get(EquipmentSlots.MELEE_WEAPON).graphic_char
     else:
         melee_graphic = graphic.GraphicChar(None, colors.WHITE, icon.BIG_CENTER_DOT)
-        melee_damage = player.attacker.unarmed_damage
-        melee_accuracy = player.attacker.actual_unarmed_hit
-        melee_crit_chance = int(player.attacker.unarmed_crit_chance * 100)
+    melee_damage = str(player.melee_attacker.min_damage) + "-" + str(player.melee_attacker.max_damage)
+    melee_accuracy = player.melee_attacker.accuracy
+    melee_crit_chance = "{:.0f}".format(player.melee_attacker.crit_chance * 100) + "%"
 
     if equipment.slot_is_equiped(EquipmentSlots.RANGED_WEAPON):
-        range_weapon = equipment.get(EquipmentSlots.RANGED_WEAPON)
-        range_graphic = range_weapon.graphic_char
-        range_damage = range_weapon.attack_provider.damage_strength(player)
-        melee_accuracy = range_weapon.attack_provider.actual_hit()
-        range_crit_chance = int(range_weapon.attack_provider.actual_crit_chance(player) * 100)
+        range_graphic = equipment.get(EquipmentSlots.RANGED_WEAPON).graphic_char
     else:
         range_graphic = graphic.GraphicChar(None, colors.GRAY, icon.STONE)
-        range_damage = player.attacker.thrown_rock_damage
-        range_hit = player.attacker.thrown_hit
-        range_crit_chance = int(player.attacker.thrown_crit_chance * 100)
+    range_damage = str(player.ranged_attacker.min_damage) + "-" + str(player.ranged_attacker.max_damage)
+    range_accuracy = player.ranged_attacker.accuracy
+    range_crit_chance = "{:.0f}".format(player.ranged_attacker.crit_chance * 100) + "%"
 
     value_width = 3
     text_box_margin = (0, 0)
@@ -386,7 +378,7 @@ def new_player_weapon_table(player, width):
                                   " " + str(range_damage).rjust(value_width),
                                   text_box_margin, colors.WHITE)
     hit_text_box = gui.TextBox("Hit " + str(melee_accuracy).rjust(value_width) +
-                               " " + str(range_hit).rjust(value_width),
+                               " " + str(range_accuracy).rjust(value_width),
                                text_box_margin, colors.YELLOW)
     crit_chance_text_box = gui.TextBox("Cri " + str(melee_crit_chance).rjust(value_width) +
                                        " " + str(range_crit_chance).rjust(value_width),

@@ -221,8 +221,9 @@ class Stepper(Leaf):
         return False
 
     def try_attack(self, position):
-        return (self.parent.has("attacker") and
-                self.parent.attacker.try_hit_melee(position))
+        entity = (self.parent.dungeon_level.value.get_tile(position).get_first_entity())
+        if self.parent.has("melee_attacker") and entity:
+            return self.parent.melee_attacker.try_hit(entity)
 
     def try_move_or_bump(self, position):
         """

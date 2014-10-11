@@ -1,12 +1,12 @@
 import random
-from Status import DAMAGE_REFLECT_STATUS_DESCRIPTION, LIFE_STEAL_STATUS_DESCRIPTION, BLEED_STATUS_DESCRIPTION
+from Status import DAMAGE_REFLECT_STATUS_DESCRIPTION
 
 from action import Action
-from actor import DoNothingActor, StunnedActor
+from actor import DoNothingActor
 from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud, new_fire_cloud
 from compositecommon import PoisonEntityEffectFactory
 from compositecore import Leaf, Composite
-from attacker import Attack, DamageTypes, DamageType
+from attacker import DamageTypes, DamageType, WeaponMeleeAttacker, WeaponRangedAttacker
 import direction
 from dummyentities import dummy_flyer
 import geometry
@@ -15,12 +15,11 @@ from health import ReflectDamageTakenEffect
 import menufactory
 import messenger
 from missileaction import PlayerThrowItemAction, PlayerCastMissileSpellAction
-from monster import HealAnEntityOnDeath, AddEffectToOtherSeenEntities
-from mover import Mover, RandomStepper
+from mover import Mover
 from position import Position, DungeonLevel
 import rng
 from shapegenerator import extend_points
-from stats import DataPointBonusSpoof, DataPoint, Flag, DataTypes, GamePieceTypes, Tags, Damage
+from stats import DataPoint, Flag, DataTypes, GamePieceTypes, Damage
 from statusflags import StatusFlags
 from terrain import GlassWall
 from text import Description
@@ -31,6 +30,7 @@ import equipment
 import gametime
 from messenger import msg
 import icon
+from equipmenteffect import StunAttackEffect, ExtraSwingAttackEffect, CounterAttackEffect, IgnoreArmorAttackEffect, CritChanceBonusEffect, DefenciveAttackEffect, BleedAttackEffect, ItemStat, RangeItemStat, StatBonusEquipEffect, LifeStealEffect, SetInvisibilityFlagEquippedEffect
 
 
 class ItemType(Leaf):
@@ -71,50 +71,6 @@ def set_item_components(item, game_state):
     return item
 
 
-class ItemStat(DataPoint):
-    REGULAR_FORMAT = 0
-    PERCENT_FORMAT = 1
-    MULTIPLIER_FORMAT = 2
-    RANGE_FORMAT = 3
-
-    def __init__(self, component_type, value, color_fg, screen_name=None, formatting=REGULAR_FORMAT, order=50,
-                 is_common_stat=True):
-        super(ItemStat, self).__init__(component_type, value)
-        self.tags.add("item_stat")
-        self.color_fg = color_fg
-        self.order = order
-        if screen_name:
-            self._screen_name = screen_name
-        else:
-            self._screen_name = component_type
-        self.format = formatting
-        self.is_common_stat = is_common_stat
-
-    def get_value_text(self):
-        if self.format == ItemStat.PERCENT_FORMAT:
-            return "{:.0f}".format(self.value * 100) + "% "
-        elif self.format == ItemStat.MULTIPLIER_FORMAT:
-            return "x {:.1f}".format(self.value)
-        else:
-            return str(self.value) + "  "
-
-    def get_text(self, width):
-        return str(self._screen_name + self.get_value_text().rjust(width - len(self._screen_name)))
-
-
-class RangeItemStat(ItemStat):
-    def __init__(self, component_type, min_value, max_value, color_fg, screen_name=None,
-                 order=50, is_common_stat=True):
-        super(RangeItemStat, self).__init__(component_type, min_value, color_fg, screen_name=screen_name,
-                                            formatting=ItemStat.REGULAR_FORMAT, order=order,
-                                            is_common_stat=is_common_stat)
-        self.min = min_value
-        self.max = max_value
-
-    def get_value_text(self):
-        return str(self.min) + "-" + str(self.max) + "  "
-
-
 def damage_item_stat(min_value, max_value):
     return RangeItemStat(DataTypes.DAMAGE, min_value, max_value, colors.WHITE, "Damage", order=0)
 
@@ -135,7 +91,7 @@ def set_ranged_weapon_components(item):
     item.set_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
     item.set_child(ItemType(ItemType.WEAPON))
     item.set_child(ReEquipAction())
-    item.set_child(AttackProvider())
+    item.set_child(AddSpoofChildEquipEffect2(WeaponRangedAttacker(item)))
 
 
 def new_gun(game_state):
@@ -482,26 +438,6 @@ def new_ammunition(game_state):
     return ammo
 
 
-class EquippedEffect(Leaf):
-    """
-    Parent items with this component has a
-    effect that happens while item is equipped.
-    """
-
-    def __init__(self):
-        super(EquippedEffect, self).__init__()
-        self.tags.add("equipped_effect")
-
-    def equipped_effect(self, entity):
-        pass
-
-
-def set_armor_components(item):
-    item.set_child(ItemType(ItemType.ARMOR))
-    item.set_child(ReEquipAction())
-    return item
-
-
 def new_leather_armor(game_state):
     """
     A composite component representing a Armor item.
@@ -588,8 +524,8 @@ def set_melee_weapon_component(item):
     item.set_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
     item.set_child(ItemType(ItemType.WEAPON))
     item.set_child(DamageType(DamageTypes.PHYSICAL))
+    item.set_child(AddSpoofChildEquipEffect2(WeaponMeleeAttacker(item)))
     item.set_child(ReEquipAction())
-    item.set_child(AttackProvider())
 
 
 def new_sword(game_state):
@@ -604,7 +540,7 @@ def new_sword(game_state):
     sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
     sword.set_child(crit_chance_item_stat(0.1))
     sword.set_child(crit_multiplier_item_stat(2))
-    sword.set_child(Damage(2, 5))
+    sword.set_child(damage_item_stat(2, 5))
     sword.set_child(accuracy_item_stat(10))
     sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
     sword.set_child(ExtraSwingAttackEffect(0.1))
@@ -658,22 +594,23 @@ def new_dagger(game_state):
     """
     A composite component representing a Knife item.
     """
-    knife = Composite()
-    set_item_components(knife, game_state)
-    set_melee_weapon_component(knife)
-    knife.set_child(Description("Dagger", "A trusty dagger, small and precise but will only inflict small wounds."))
-    knife.set_child(GraphicChar(None, colors.GRAY, icon.DAGGER))
-    knife.set_child(DamageType(DamageTypes.CUTTING))
-    knife.set_child(DataPoint(DataTypes.WEIGHT, 5))
-    knife.set_child(crit_chance_item_stat(0.2))
-    knife.set_child(crit_multiplier_item_stat(3))
-    knife.set_child(accuracy_item_stat(15))
-    knife.set_child(damage_item_stat(1, 3))
+    c = Composite()
+    set_item_components(c, game_state)
+    set_melee_weapon_component(c)
+    c.set_child(Description("Dagger", "A trusty dagger, small and precise but will only inflict small wounds."))
+    c.set_child(GraphicChar(None, colors.GRAY, icon.DAGGER))
+    c.set_child(DamageType(DamageTypes.CUTTING))
+    c.set_child(DataPoint(DataTypes.WEIGHT, 5))
+    #c.set_child(crit_chance_item_stat(0.2))
+    c.set_child(crit_multiplier_item_stat(3))
+    c.set_child(accuracy_item_stat(15))
+    c.set_child(damage_item_stat(1, 3))
 
-    knife.set_child(ExtraSwingAttackEffect(0.2))
-    knife.set_child(BleedAttackEffect(0.3))
+    c.set_child(CritChanceBonusEffect(0.2))
+    c.set_child(ExtraSwingAttackEffect(0.2))
+    c.set_child(BleedAttackEffect(0.3))
 
-    return knife
+    return c
 
 
 def set_ring_components(item):
@@ -764,20 +701,6 @@ def new_amulet_of_life_steal(game_state):
     return amulet
 
 
-class StatBonusEquipEffect(EquippedEffect):
-    def __init__(self, stat, bonus):
-        super(StatBonusEquipEffect, self).__init__()
-        self.component_type = "equip_stat_bonus_effect_" + stat
-        self.stat = stat
-        self.bonus = bonus
-
-    def equipped_effect(self, entity):
-        """
-        Causes the entity that equips this have a bonus to one stat.
-        """
-        entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
-
-
 class AddSpoofChildEquipEffect(Leaf):
     def __init__(self, spoof_child_factory, status_icon=None):
         super(AddSpoofChildEquipEffect, self).__init__()
@@ -796,43 +719,28 @@ class AddSpoofChildEquipEffect(Leaf):
             entity.effect_queue.add(entityeffect.StatusIconEntityEffect(entity, self.status_icon, 1))
 
 
-class LifeStealEffect(EquippedEffect):
-    def __init__(self):
-        super(LifeStealEffect, self).__init__()
-        self.component_type = "equipment_life_steal_effect"
+class AddSpoofChildEquipEffect2(Leaf):
+    def __init__(self, spoof_child, status_icon=None):
+        super(AddSpoofChildEquipEffect2, self).__init__()
+        self.component_type = "equipment_add_spoof_component_" + spoof_child.component_type
+        self.tags.add("equipped_effect")
+
+        self.spoof_child = spoof_child
+        self.status_icon = status_icon
 
     def equipped_effect(self, entity):
         """
-        Causes seen entities to heal holder of this effect upon death.
+        Causes the entity that equips this have a spoofed component child.
         """
-        effect = AddEffectToOtherSeenEntities(HealAnEntityDeathFactory(entity))
-        entity.effect_queue.add(entityeffect.AddSpoofChild(entity, effect, 1))
-        entity.effect_queue.add(entityeffect.StatusIconEntityEffect(entity, LIFE_STEAL_STATUS_DESCRIPTION,
-                                                                    1, "life_steal_effect"))
+        entity.effect_queue.add(entityeffect.AddSpoofChild(entity, self.spoof_child, 1))
+        if self.status_icon:
+            entity.effect_queue.add(entityeffect.StatusIconEntityEffect(entity, self.status_icon, 1))
 
 
-class HealAnEntityDeathFactory(object):
-    def __init__(self, entity):
-        super(HealAnEntityDeathFactory, self).__init__()
-        self.entity = entity
-
-    def __call__(self):
-        return HealAnEntityOnDeath(self.entity)
-
-
-class SetInvisibilityFlagEquippedEffect(EquippedEffect):
-    def __init__(self):
-        super(SetInvisibilityFlagEquippedEffect, self).__init__()
-        self.component_type = "equipment_invisibility_effect"
-
-    def equipped_effect(self, entity):
-        """
-        Causes the entity that equips this item to become invisible.
-        """
-        invisible_flag = entity.StatusFlags.INVISIBILE
-        invisibility_effect = entityeffect.StatusAdder(self.parent, self.parent,
-                                                       invisible_flag, time_to_live=1)
-        self.parent.effect_queue.add(invisibility_effect)
+def set_armor_components(item):
+    item.set_child(ItemType(ItemType.ARMOR))
+    item.set_child(ReEquipAction())
+    return item
 
 
 def set_potion_components(item):
@@ -1224,240 +1132,6 @@ class EquipmentType(Leaf):
         self.value = equipment_type
 
 
-class AttackProvider(Leaf):
-    """
-    The modify be us, actual damage will be calculated on use.
-    """
-
-    def __init__(self):
-        super(AttackProvider, self).__init__()
-        self.component_type = "attack_provider"
-
-    def min_damage(self):
-        return self.parent.damage.min
-
-    def max_damage(self, source_entity):
-        return self.parent.damage.max + source_entity.strength.value / 2
-
-    def actual_crit_chance(self):
-        crit_chance = 0
-        if self.parent.has("crit_chance"):
-            crit_chance = self.parent.crit_chance.value
-        return crit_chance
-
-    def actual_crit_multiplier(self):
-        crit_multiplier = 2
-        if self.parent.has("crit_multiplier"):
-            crit_multiplier = self.parent.crit_multiplier.value
-        return crit_multiplier
-
-    def attack_entity(self, source_entity, target_entity, bonus_damage=0, bonus_hit=0):
-        self._before_attack_effects(source_entity, target_entity)
-        attack_effects = [effect for effect in self.parent.get_children_with_tag("attack_effect")]
-        damage_types = [effect.component_type for effect in self.parent.get_children_with_tag(Tags.DAMAGE_TYPE)]
-        damage_min = self.min_damage()
-        damage_max = self.max_damage(source_entity)
-        attack = Attack(damage_min, damage_max, damage_types,
-                        self.parent.accuracy.value, crit_chance=self.actual_crit_chance(),
-                        crit_multiplier=self.actual_crit_multiplier(), target_entity_effects=attack_effects)
-
-        return attack.damage_entity(source_entity, target_entity, bonus_damage=bonus_damage, bonus_hit=bonus_hit)
-
-    def _before_attack_effects(self, source_entity, target_entity):
-        for e in self.parent.get_children_with_tag(BeforeAttackEffect.TAG):
-            e.before_attack_effect(source_entity, target_entity)
-
-
-class AttackEffect(Leaf):
-    def __init__(self, effect_chance):
-        super(AttackEffect, self).__init__()
-        self.effect_chance = effect_chance
-        self.tags.add("attack_effect")
-
-    def roll_to_hit(self):
-        return random.random() < self.effect_chance
-
-    def attack_effect(self, source_entity, target_entity):
-        pass
-
-
-class BeforeAttackEffect(Leaf):
-    TAG = "before_attack_effect"
-
-    def __init__(self, effect_chance):
-        super(BeforeAttackEffect, self).__init__()
-        self.effect_chance = effect_chance
-        self.tags.add(BeforeAttackEffect.TAG)
-
-    def roll_to_hit(self):
-        return random.random() < self.effect_chance
-
-    def before_attack_effect(self, source_entity, target_entity):
-        pass
-
-
-class StunAttackEffect(AttackEffect):
-    def __init__(self, effect_chance):
-        super(StunAttackEffect, self).__init__(effect_chance)
-        self.effect_chance = effect_chance
-        self.component_type = "stun_attack_effect"
-        self.tags.add("equipped_effect")
-
-    def attack_effect(self, source_entity, target_entity):
-        return target_entity.effect_queue.add(entityeffect.AddSpoofChild(source_entity, StunnedActor(),
-                                                                         gametime.single_turn))
-
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
-
-    def _item_stat(self):
-        return ItemStat("Stun", self.effect_chance, colors.CHAMPAGNE, "Stun",
-                        ItemStat.PERCENT_FORMAT, order=20, is_common_stat=False)
-
-
-class TripAttackEffect(AttackEffect):
-    def __init__(self, effect_chance):
-        super(TripAttackEffect, self).__init__(effect_chance)
-        self.effect_chance = effect_chance
-        self.component_type = "trip_attack_effect"
-        self.tags.add("equipped_effect")
-
-    def attack_effect(self, source_entity, target_entity):
-        return target_entity.effect_queue.add(entityeffect.AddSpoofChild(source_entity, RandomStepper(),
-                                                                         gametime.single_turn))
-
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
-
-    def _item_stat(self):
-        return ItemStat("trip", self.effect_chance, colors.YELLOW, "Trip",
-                        ItemStat.PERCENT_FORMAT, order=20, is_common_stat=False)
-
-
-class ExtraSwingAttackEffect(AttackEffect):
-    def __init__(self, effect_chance):
-        super(ExtraSwingAttackEffect, self).__init__(effect_chance)
-        self.effect_chance = effect_chance
-        self.component_type = "extra_swing_attack_effect"
-        self.tags.add("equipped_effect")
-
-    def attack_effect(self, source_entity, target_entity):
-        source_entity.attacker.try_hit_melee(target_entity.position.value)
-
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
-
-    def _item_stat(self):
-        return ItemStat("extra_swing", self.effect_chance, colors.LIGHT_BLUE, "Extra Swing",
-                        ItemStat.PERCENT_FORMAT, order=10, is_common_stat=False)
-
-
-class CounterAttackEffect(StatBonusEquipEffect):
-    def __init__(self, effect_chance):
-        super(CounterAttackEffect, self).__init__(DataTypes.COUNTER_ATTACK_CHANCE, effect_chance)
-        self.effect_chance = effect_chance
-        self.component_type = "counter_attack"
-
-    def equipped_effect(self, entity):
-        entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
-        entity.add_spoof_child(self._item_stat())
-
-    def _item_stat(self):
-        return ItemStat("counter_attack_weapon_effect", self.effect_chance, colors.PURPLE, "Counter",
-                        ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
-
-
-class IgnoreArmorAttackEffect(BeforeAttackEffect):
-    def __init__(self, effect_chance):
-        super(IgnoreArmorAttackEffect, self).__init__(effect_chance)
-        self.component_type = "ignore_armor_attack"
-        self.tags.add("equipped_effect")
-
-    def before_attack_effect(self, source_entity, target_entity):
-        self.parent.add_spoof_child(DamageType(DamageTypes.IGNORE_ARMOR))
-
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
-
-    def _item_stat(self):
-        return ItemStat("ignore_armor_weapon_effect", self.effect_chance, colors.BLUE, "Ignore Armor",
-                        ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
-
-
-class OffenciveAttackEffect(StatBonusEquipEffect):
-    def __init__(self, effect_chance):
-        super(OffenciveAttackEffect, self).__init__(DataTypes.OFFENCIVE_ATTACK_CHANCE, effect_chance)
-        self.effect_chance = effect_chance
-        self.component_type = "offencive_attack"
-
-    def equipped_effect(self, entity):
-        entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
-        entity.add_spoof_child(self._item_stat())
-
-    def _item_stat(self):
-        return ItemStat(DataTypes.OFFENCIVE_ATTACK_CHANCE, self.effect_chance, colors.LIGHT_GREEN, "Strike Step",
-                        ItemStat.PERCENT_FORMAT, order=40, is_common_stat=False)
-
-
-class DefenciveAttackEffect(StatBonusEquipEffect):
-    def __init__(self, effect_chance):
-        super(DefenciveAttackEffect, self).__init__(DataTypes.DEFENCIVE_ATTACK_CHANCE, effect_chance)
-        self.effect_chance = effect_chance
-        self.component_type = "defencive_attack"
-
-    def equipped_effect(self, entity):
-        entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
-        self.parent.add_spoof_child(self._item_stat())
-
-    def _item_stat(self):
-        return ItemStat(DataTypes.DEFENCIVE_ATTACK_CHANCE, self.effect_chance, colors.LIGHT_GREEN, "Def Strike",
-                        ItemStat.PERCENT_FORMAT, order=40, is_common_stat=False)
-
-
-class BleedAttackEffect(AttackEffect):
-    def __init__(self, effect_chance):
-        super(BleedAttackEffect, self).__init__(effect_chance)
-        self.effect_chance = effect_chance
-        self.component_type = "bleed_attack_effect"
-        self.tags.add("equipped_effect")
-
-    def attack_effect(self, source_entity, target_entity):
-        turns = random.randrange(2, 6)
-        damage_per_turn = 1
-        damage_interval = 1
-        bleed_effect = entityeffect.BleedEffect(source_entity, damage_per_turn, [DamageTypes.BLEED],
-                                                damage_interval, turns,
-                                                messenger.BLEED_MESSAGE, BLEED_STATUS_DESCRIPTION)
-        target_entity.effect_queue.add(bleed_effect)
-
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
-
-    def _item_stat(self):
-        return ItemStat("bleed_weapon_effect", self.effect_chance, colors.RED, "Bleed",
-                        ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
-
-
-class KnockBackAttackEffect(AttackEffect):
-    def __init__(self, effect_chance):
-        super(KnockBackAttackEffect, self).__init__(effect_chance)
-        self.effect_chance = effect_chance
-        self.component_type = "knock_back_attack_effect"
-        self.tags.add("equipped_effect")
-
-    def attack_effect(self, source_entity, target_entity):
-        knock_position = geometry.other_side_of_point(self.parent.position.value,
-                                                      target_entity.position.value)
-        target_entity.mover.try_move(knock_position)
-
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
-
-    def _item_stat(self):
-        return ItemStat("knock_back_weapon_effect", self.effect_chance, colors.CHAMPAGNE, "Knock Back",
-                        ItemStat.PERCENT_FORMAT, order=25, is_common_stat=False)
-
-
 class OnUnequipEffect(Leaf):
     """
     Parent items with this component has a effect that happens on equipping.
@@ -1507,11 +1181,10 @@ class Thrower(Leaf):
         """
         pass
 
-    """
-    When the floor is a chasm it should not break the chasm will take care of the fall.
-    """
-
     def _non_break(self, dungeon_level, position):
+        """
+        When the floor is a chasm it should not break the chasm will take care of the fall.
+        """
         self.parent.mover.try_move(position, dungeon_level)
 
 

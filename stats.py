@@ -69,12 +69,14 @@ class Races:
 class Tags:
     DAMAGE_TYPE = "damage_type"
 
+
 class DataTypes:
     JOB = "job"
     RACE = "race"
 
     ENERGY = "energy"
     CRIT_MULTIPLIER = "crit_multiplier"
+    UNARMED_CRIT_CHANCE = "unarmed_crit_chance"
     CRIT_CHANCE = "crit_chance"
     STRENGTH = "strength"
     ARMOR = "armor"
