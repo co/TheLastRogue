@@ -9,7 +9,7 @@ def init_libtcod():
     libtcod.console_set_custom_font(FONT_FILE_PATH,
                                     libtcod.FONT_LAYOUT_ASCII_INROW |
                                     libtcod.FONT_TYPE_GREYSCALE,
-                                    16, 32)
+                                    16, 34)
     libtcod.console_init_root(settings.SCREEN_WIDTH,
                               settings.SCREEN_HEIGHT,
                               b'The Last Rogue',

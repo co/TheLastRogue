@@ -375,7 +375,7 @@ class MonsterHealTargetEntityEffect(MonsterMissileApplyEntityEffect):
 
 class MonsterTripTargetEffect(MonsterMissileApplyEntityEffect):
     def __init__(self,  weight=100):
-        missile_graphic = GraphicChar(None, colors.YELLOW, "+")
+        missile_graphic = GraphicChar(None, colors.YELLOW, icon.MAGIC_SHOT)
         super(MonsterTripTargetEffect, self).__init__(2, 4, missile_graphic, weight)
         self.component_type = "monster_range_trip_action"
 
