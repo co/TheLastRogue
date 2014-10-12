@@ -56,20 +56,9 @@ class AttackerBase(Leaf):
             e.before_attack_effect(self.parent, target_entity)
 
 
-class WeaponRangedAttacker(AttackerBase):
+class WeaponAttacker(AttackerBase):
     def __init__(self, weapon):
-        super(WeaponRangedAttacker, self).__init__()
-        self.component_type = "ranged_attacker"
-        self.weapon = weapon
-
-    def can_hit(self, entity):
-        return True
-
-
-class WeaponMeleeAttacker(AttackerBase):
-    def __init__(self, weapon):
-        super(WeaponMeleeAttacker, self).__init__()
-        self.component_type = "melee_attacker"
+        super(WeaponAttacker, self).__init__()
         self.weapon = weapon
 
     @property
@@ -83,11 +72,6 @@ class WeaponMeleeAttacker(AttackerBase):
     @property
     def max_damage(self):
         return self.weapon.damage.max + self.parent.strength.value / 2
-
-    def can_hit(self, entity):
-        if geometry.chess_distance(self.parent.position.value, entity.position.value) > 1:
-            return False
-        return True
 
     @property
     def crit_chance(self):
@@ -117,6 +101,26 @@ class WeaponMeleeAttacker(AttackerBase):
         Causes the entity to hit the target entity.
         """
         self.attack_entity(target_entity)
+
+
+class WeaponRangedAttacker(WeaponAttacker):
+    def __init__(self, weapon):
+        super(WeaponRangedAttacker, self).__init__(weapon)
+        self.component_type = "ranged_attacker"
+
+    def can_hit(self, entity):
+        return True
+
+
+class WeaponMeleeAttacker(WeaponAttacker):
+    def __init__(self, weapon):
+        super(WeaponMeleeAttacker, self).__init__(weapon)
+        self.component_type = "melee_attacker"
+
+    def can_hit(self, entity):
+        if geometry.chess_distance(self.parent.position.value, entity.position.value) > 1:
+            return False
+        return True
 
 
 class UnarmedAttacker(AttackerBase):

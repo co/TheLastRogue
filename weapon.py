@@ -3,7 +3,7 @@ from attacker import DamageType, DamageTypes, WeaponMeleeAttacker, WeaponRangedA
 import colors
 from compositecore import Composite, Leaf
 import equipment
-from equipmenteffect import CritChanceBonusEffect, ExtraSwingAttackEffect, BleedAttackEffect, DefenciveAttackEffect, CounterAttackEffect, StunAttackEffect, IgnoreArmorAttackEffect, RangeItemStat, ItemStat
+from equipmenteffect import CritChanceBonusEffect, ExtraSwingAttackEffect, BleedAttackEffect, DefenciveAttackEffect, CounterAttackEffect, StunAttackEffect, IgnoreArmorAttackEffect, RangeItemStat, ItemStat, OffenciveAttackEffect, KnockBackAttackEffect, TripAttackEffect
 from graphic import GraphicChar
 import icon
 from item import EquipmentType, ItemType, AddSpoofChildEquipEffect2, ReEquipAction, set_item_components
@@ -161,28 +161,96 @@ def new_claw(game_state):
     return c
 
 
-def new_spear(game_state):
+def new_sword(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    sword = Composite()
+    set_item_components(sword, game_state)
+    set_melee_weapon_component(sword)
+    sword.set_child(Description("Iron Sword",
+                                "This old blade has seen some better days, it's as sharp as ever tough."))
+    sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
+    sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
+
+    sword.set_child(damage_item_stat(2, 5))
+    sword.set_child(accuracy_item_stat(10))
+
+    sword.set_child(crit_chance_item_stat(0.1))
+    sword.set_child(crit_multiplier_item_stat(2))
+
+    sword.set_child(ExtraSwingAttackEffect(0.1))
+    sword.set_child(BleedAttackEffect(0.1))
+    return sword
+
+
+def new_rapier(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    sword = Composite()
+    set_item_components(sword, game_state)
+    set_melee_weapon_component(sword)
+    sword.set_child(Description("Rapier",
+                                "A sword with a thin sharp blade, swift but deadly."))
+    sword.set_child(GraphicChar(None, colors.CHAMPAGNE, icon.RAPIER))
+    sword.set_child(DataPoint(DataTypes.WEIGHT, 8))
+
+    sword.set_child(damage_item_stat(2, 5))
+    sword.set_child(accuracy_item_stat(10))
+
+    sword.set_child(crit_chance_item_stat(0.2))
+    sword.set_child(crit_multiplier_item_stat(2.5))
+
+    sword.set_child(ExtraSwingAttackEffect(0.1))
+    sword.set_child(CounterAttackEffect(0.1))
+    sword.set_child(OffenciveAttackEffect(0.1))
+    return sword
+
+
+def new_scimitar(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    sword = Composite()
+    set_item_components(sword, game_state)
+    set_melee_weapon_component(sword)
+    sword.set_child(Description("Scimitar",
+                                "A curved sword, an ancient design from the east."))
+    sword.set_child(GraphicChar(None, colors.WHITE, icon.SCIMITAR))
+    sword.set_child(DataPoint(DataTypes.WEIGHT, 8))
+
+    sword.set_child(damage_item_stat(2, 5))
+    sword.set_child(accuracy_item_stat(12))
+
+    sword.set_child(crit_chance_item_stat(0.2))
+    sword.set_child(crit_multiplier_item_stat(2.5))
+
+    sword.set_child(ExtraSwingAttackEffect(0.1))
+    sword.set_child(DefenciveAttackEffect(0.1))
+    sword.set_child(OffenciveAttackEffect(0.1))
+    return sword
+
+
+def new_club(game_state):
     """
     A composite component representing a Sword item.
     """
     c = Composite()
     set_item_components(c, game_state)
     set_melee_weapon_component(c)
-    c.set_child(Description("Spear",
-                            "A stick with a sharp piece of metal at one end."
-                            "It's a useful weapon when you want to keep danger at bay."))
-    c.set_child(GraphicChar(None, colors.GRAY, icon.SPEAR))
+    c.set_child(Description("Club",
+                                "A thick wooden stick, It may be used as a weapon."))
+    c.set_child(GraphicChar(None, colors.ORANGE_D, icon.CLUB))
     c.set_child(DataPoint(DataTypes.WEIGHT, 8))
 
-    c.set_child(accuracy_item_stat(10))
-    c.set_child(damage_item_stat(1, 5))
+    c.set_child(damage_item_stat(1, 6))
+    c.set_child(accuracy_item_stat(8))
 
     c.set_child(crit_chance_item_stat(0.1))
-    c.set_child(crit_multiplier_item_stat(2))
+    c.set_child(crit_multiplier_item_stat(1.5))
 
-    c.set_child(DefenciveAttackEffect(0.75))
-    c.set_child(CounterAttackEffect(0.1))
-
+    c.set_child(StunAttackEffect(0.3))
     return c
 
 
@@ -211,24 +279,197 @@ def new_morning_star(game_state):
     return mace
 
 
-def new_sword(game_state):
+def new_flail(game_state):
     """
     A composite component representing a Sword item.
     """
-    sword = Composite()
-    set_item_components(sword, game_state)
-    set_melee_weapon_component(sword)
-    sword.set_child(Description("Iron Sword",
-                                "This old blade has seen some better days, it's as sharp as ever tough."))
-    sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-    sword.set_child(crit_chance_item_stat(0.1))
-    sword.set_child(crit_multiplier_item_stat(2))
-    sword.set_child(damage_item_stat(2, 5))
-    sword.set_child(accuracy_item_stat(10))
-    sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
-    sword.set_child(ExtraSwingAttackEffect(0.1))
-    sword.set_child(BleedAttackEffect(0.1))
-    return sword
+    c = Composite()
+    set_item_components(c, game_state)
+    set_melee_weapon_component(c)
+    c.set_child(Description("Flail",
+                            "A wooden handle with a chain and metal ball attached to it."))
+    c.set_child(GraphicChar(None, colors.GRAY, icon.FLAIL))
+    c.set_child(DataPoint(DataTypes.WEIGHT, 8))
+
+    c.set_child(damage_item_stat(1, 7))
+    c.set_child(accuracy_item_stat(7))
+
+    c.set_child(crit_chance_item_stat(0.15))
+    c.set_child(crit_multiplier_item_stat(2))
+
+    c.set_child(IgnoreArmorAttackEffect(0.3))
+    c.set_child(KnockBackAttackEffect(0.2))
+    c.set_child(OffenciveAttackEffect(0.1))
+    return c
+
+
+def new_hammer(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    c = Composite()
+    set_item_components(c, game_state)
+    set_melee_weapon_component(c)
+    c.set_child(Description("Hammer",
+                            "A heavy hammer, it may knock away enemies."))
+    c.set_child(GraphicChar(None, colors.GRAY, icon.HAMMER))
+    c.set_child(DataPoint(DataTypes.WEIGHT, 8))
+
+    c.set_child(damage_item_stat(1, 7))
+    c.set_child(accuracy_item_stat(8))
+
+    c.set_child(crit_chance_item_stat(0.15))
+    c.set_child(crit_multiplier_item_stat(2))
+
+    c.set_child(KnockBackAttackEffect(0.35))
+    return c
+
+
+def new_chain_and_ball(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    c = Composite()
+    set_item_components(c, game_state)
+    set_melee_weapon_component(c)
+    c.set_child(Description("Chain and Spike Ball",
+                            "A huge metal ball on a chain, hard to use but can deal massive damage."))
+    c.set_child(GraphicChar(None, colors.GRAY, icon.BALL_AND_CHAIN))
+    c.set_child(DataPoint(DataTypes.WEIGHT, 8))
+
+    c.set_child(damage_item_stat(2, 9))
+    c.set_child(accuracy_item_stat(5))
+
+    c.set_child(crit_chance_item_stat(0.10))
+    c.set_child(crit_multiplier_item_stat(2))
+
+    c.set_child(KnockBackAttackEffect(0.20))
+    c.set_child(DefenciveAttackEffect(0.60))
+    c.set_child(IgnoreArmorAttackEffect(0.10))
+    return c
+
+
+def new_spear(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    c = Composite()
+    set_item_components(c, game_state)
+    set_melee_weapon_component(c)
+    c.set_child(Description("Spear",
+                            "A stick with a sharp piece of metal at one end."
+                            "It's a useful weapon when you want to keep danger at bay."))
+    c.set_child(GraphicChar(None, colors.GRAY, icon.SPEAR))
+    c.set_child(DataPoint(DataTypes.WEIGHT, 8))
+
+    c.set_child(accuracy_item_stat(10))
+    c.set_child(damage_item_stat(1, 5))
+
+    c.set_child(crit_chance_item_stat(0.1))
+    c.set_child(crit_multiplier_item_stat(2))
+
+    c.set_child(DefenciveAttackEffect(0.75))
+    c.set_child(CounterAttackEffect(0.1))
+
+    return c
+
+
+def new_halberd(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    c = Composite()
+    set_item_components(c, game_state)
+    set_melee_weapon_component(c)
+    c.set_child(Description("Halberd",
+                            "A long stick with a with an axe-head at one end."
+                            "It's a useful weapon when you want to keep danger at bay."))
+    c.set_child(GraphicChar(None, colors.GRAY, icon.HALBERD))
+    c.set_child(DataPoint(DataTypes.WEIGHT, 8))
+
+    c.set_child(accuracy_item_stat(10))
+    c.set_child(damage_item_stat(1, 5))
+
+    c.set_child(crit_chance_item_stat(0.1))
+    c.set_child(crit_multiplier_item_stat(2))
+
+    c.set_child(DefenciveAttackEffect(0.75))
+    c.set_child(OffenciveAttackEffect(0.20))
+
+    return c
+
+
+def new_trident(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    c = Composite()
+    set_item_components(c, game_state)
+    set_melee_weapon_component(c)
+    c.set_child(Description("Trident",
+                            "A long stick with a with three sharp points at one end."
+                            "It's a useful weapon when you want to keep danger at bay."))
+    c.set_child(GraphicChar(None, colors.ORANGE_D, icon.TRIDENT))
+    c.set_child(DataPoint(DataTypes.WEIGHT, 8))
+
+    c.set_child(accuracy_item_stat(10))
+    c.set_child(damage_item_stat(1, 5))
+
+    c.set_child(crit_chance_item_stat(0.15))
+    c.set_child(crit_multiplier_item_stat(2.5))
+
+    c.set_child(DefenciveAttackEffect(0.75))
+    c.set_child(BleedAttackEffect(0.20))
+
+    return c
+
+
+def new_whip(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    c = Composite()
+    set_item_components(c, game_state)
+    set_melee_weapon_component(c)
+    c.set_child(Description("Whip",
+                            "An unusual weapon, most often used for torture."))
+    c.set_child(GraphicChar(None, colors.ORANGE_D, icon.WHIP))
+    c.set_child(DataPoint(DataTypes.WEIGHT, 8))
+
+    c.set_child(accuracy_item_stat(10))
+    c.set_child(damage_item_stat(1, 4))
+
+    c.set_child(crit_chance_item_stat(0.15))
+    c.set_child(crit_multiplier_item_stat(2.5))
+
+    c.set_child(TripAttackEffect(0.50))
+    c.set_child(DefenciveAttackEffect(0.30))
+    c.set_child(StunAttackEffect(0.10))
+
+    return c
+
+
+def new_axe(game_state):
+    """
+    A composite component representing a Sword item.
+    """
+    c = Composite()
+    set_item_components(c, game_state)
+    set_melee_weapon_component(c)
+    c.set_child(Description("Axe",
+                                "This old axe has seen many battles, but age hasn't dulled the blade."))
+    c.set_child(GraphicChar(None, colors.GRAY, icon.AXE))
+    c.set_child(DataPoint(DataTypes.WEIGHT, 10))
+
+    c.set_child(damage_item_stat(3, 5))
+    c.set_child(accuracy_item_stat(8))
+
+    c.set_child(crit_chance_item_stat(0.1))
+    c.set_child(crit_multiplier_item_stat(2))
+
+    c.set_child(OffenciveAttackEffect(0.75))
+    c.set_child(BleedAttackEffect(0.1))
+    return c
 
 
 def damage_item_stat(min_value, max_value):

@@ -59,7 +59,7 @@ class Dungeon(object):
 def place_items_in_dungeon(dungeon_level, game_state):
     spawner.place_health_potions(dungeon_level, game_state)
     equipments = from_table_pick_n_items_for_depth(dungeon_equipment_table,
-                                                   random.randrange(int(2 + dungeon_level.depth * 0.3)),
+                                                   random.randrange(int(2 + dungeon_level.depth * 0.5)),
                                                    dungeon_level.depth, game_state)
     usable_items = from_table_pick_n_items_for_depth(dungeon_usable_item_table,
                                                      random.randrange(int(3 + dungeon_level.depth * 0.3)),

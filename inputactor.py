@@ -13,9 +13,12 @@ import inputhandler
 import menufactory
 import positionexaminer
 import util
-from weapon import new_dagger, new_spear, new_morning_star, new_sword, RangeWeaponType, new_kris, new_katar, new_cestus, new_iron_hand, new_claw
+from weapon import new_dagger, new_spear, new_morning_star, new_sword, RangeWeaponType, new_kris, new_katar, new_cestus, new_iron_hand, new_claw, new_rapier, new_scimitar, new_club, new_flail, new_hammer, new_chain_and_ball, new_halberd, new_trident, new_whip, new_axe, new_gun, new_sling, new_flame_orb
 
-DEV_EQUIPMENT_FACTORY_LIST = [new_dagger, new_sword, new_morning_star, new_spear, new_kris, new_katar, new_cestus, new_iron_hand, new_claw]
+DEV_EQUIPMENT_FACTORY_LIST =  \
+[new_dagger, new_kris, new_katar, new_cestus, new_iron_hand, new_claw, new_sword,
+new_rapier, new_scimitar, new_club, new_morning_star, new_flail, new_hammer,
+new_chain_and_ball, new_spear, new_halberd, new_trident, new_whip, new_axe, new_gun, new_sling, new_flame_orb]
 
 
 class InputActor(Actor):

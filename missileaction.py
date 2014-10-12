@@ -173,9 +173,7 @@ class PlayerCastMissileSpellAction(PlayerMissileAction):
         target_entity = dungeon_level.get_tile(position).get_first_entity()
         if target_entity is None:
             return
-        source_entity.ranged_attacker.attack_entity(source_entity, target_entity,
-                                                    bonus_damage=source_entity.attacker.thrown_rock_damage,
-                                                    bonus_hit=source_entity.accuracy.value)
+        source_entity.ranged_attacker.try_hit(target_entity)
 
     def can_act(self, **kwargs):
         return True

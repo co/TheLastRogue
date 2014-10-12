@@ -1,7 +1,7 @@
 import random
 import item
 import monster
-from weapon import new_dagger, new_sword, new_gun, new_sling, new_kris, new_katar, new_cestus, new_iron_hand, new_spear, new_claw, new_morning_star
+from weapon import new_dagger, new_sword, new_gun, new_sling, new_kris, new_katar, new_cestus, new_iron_hand, new_spear, new_claw, new_morning_star, new_rapier, new_scimitar, new_club, new_flail, new_hammer, new_chain_and_ball, new_trident, new_whip, new_axe
 
 
 class DungeonTableItem(object):
@@ -67,14 +67,24 @@ dungeon_weapon_table = \
         [DungeonTableItem(new_sword)] * 7 +
         [DungeonTableItem(new_spear)] * 7 +
         [DungeonTableItem(new_sling)] * 7 +
+        [DungeonTableItem(new_axe)] * 7 +
+        [DungeonTableItem(new_club)] * 7 +
+
+        [DungeonTableItem(new_whip)] * 5 +
+        [DungeonTableItem(new_cestus)] * 5 +
 
         # Uncommon Weapons:
         [DungeonTableItem(new_kris)] * 3 +
         [DungeonTableItem(new_katar)] * 3 +
         [DungeonTableItem(new_morning_star)] * 3 +
-        [DungeonTableItem(new_cestus)] * 3 +
         [DungeonTableItem(new_iron_hand)] * 3 +
         [DungeonTableItem(new_claw)] * 3 +
+        [DungeonTableItem(new_rapier)] * 3 +
+        [DungeonTableItem(new_scimitar)] * 3 +
+        [DungeonTableItem(new_flail)] * 3 +
+        [DungeonTableItem(new_hammer)] * 3 +
+        [DungeonTableItem(new_chain_and_ball)] * 3 +
+        [DungeonTableItem(new_trident)] * 3 +
         [DungeonTableItem(new_gun)] * 3
     )
 
