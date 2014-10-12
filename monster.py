@@ -334,6 +334,7 @@ def new_cyclops(game_state):
     cyclops.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.one_and_half_turn))
     cyclops.set_child(DataPoint(DataTypes.THROW_SPEED, gametime.double_turn))
     cyclops.set_child(DataPoint(DataTypes.MELEE_DAMAGE_MULTIPLIER, 0.5))
+    cyclops.set_child(ThrowRockAttacker())
 
     cyclops.set_child(MonsterThrowRockAction(900))
     cyclops.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 5))
@@ -410,7 +411,7 @@ def set_slime_components(slime):
     slime.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.PLANT))
     slime.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn + gametime.one_third_turn))
     slime.set_child(Flag("is_slime"))
-    slime.remove_component_of_type("attacker")
+    slime.remove_component_of_type("melee_attacker")
 
 
 def new_slime(game_state):
@@ -677,7 +678,7 @@ class StuckInSlimeStepperSpoof(Stepper):
     def try_move_or_bump(self, position):
         my_strength = self.parent.strength.value
         slime_strength = self._slime.strength.value
-        if self.has_sibling("attacker"):
+        if self.has_sibling("melee_attacker"):
             self.parent.melee_attacker.hit(self._slime)
         if rng.stat_check(my_strength, slime_strength + 8):
             self._split_slime(geometry.sub_2d(self._slime.position.value, position))

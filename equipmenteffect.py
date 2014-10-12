@@ -16,14 +16,37 @@ from stats import DataTypes, DataPointBonusSpoof, DataPoint
 class AttackEffect(Leaf):
     def __init__(self, effect_chance):
         super(AttackEffect, self).__init__()
-        self.effect_chance = effect_chance
         self.tags.add("attack_effect")
+        self.effect_chance = effect_chance
 
     def roll_to_hit(self):
         return random.random() < self.effect_chance
 
     def attack_effect(self, source_entity, target_entity):
         pass
+
+
+class AttackEffectWithItemStat(AttackEffect):
+    def __init__(self, effect_chance):
+        super(AttackEffectWithItemStat, self).__init__(effect_chance)
+        self.tags.add("equipped_effect")
+
+    def equipped_effect(self, entity):
+        self.parent.add_spoof_child(self._item_stat())
+        self._equipped_effect(entity)
+
+    def _equipped_effect(self, entity):
+        pass
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(self._item_stat())
+        self._first_tick(time)
+
+    def _first_tick(self, time):
+        pass
+
+    def _item_stat(self):
+        return None
 
 
 class BeforeAttackEffect(Leaf):
@@ -41,56 +64,44 @@ class BeforeAttackEffect(Leaf):
         pass
 
 
-class StunAttackEffect(AttackEffect):
+class StunAttackEffect(AttackEffectWithItemStat):
     def __init__(self, effect_chance):
         super(StunAttackEffect, self).__init__(effect_chance)
         self.effect_chance = effect_chance
         self.component_type = "stun_attack_effect"
-        self.tags.add("equipped_effect")
 
     def attack_effect(self, source_entity, target_entity):
         return target_entity.effect_queue.add(entityeffect.AddSpoofChild(source_entity, StunnedActor(),
                                                                          gametime.single_turn))
-
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
 
     def _item_stat(self):
         return ItemStat("Stun", self.effect_chance, colors.CHAMPAGNE, "Stun",
                         ItemStat.PERCENT_FORMAT, order=20, is_common_stat=False)
 
 
-class TripAttackEffect(AttackEffect):
+class TripAttackEffect(AttackEffectWithItemStat):
     def __init__(self, effect_chance):
         super(TripAttackEffect, self).__init__(effect_chance)
         self.effect_chance = effect_chance
         self.component_type = "trip_attack_effect"
-        self.tags.add("equipped_effect")
 
     def attack_effect(self, source_entity, target_entity):
         return target_entity.effect_queue.add(entityeffect.AddSpoofChild(source_entity, RandomStepper(),
                                                                          gametime.single_turn))
-
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
 
     def _item_stat(self):
         return ItemStat("trip", self.effect_chance, colors.YELLOW, "Trip",
                         ItemStat.PERCENT_FORMAT, order=20, is_common_stat=False)
 
 
-class ExtraSwingAttackEffect(AttackEffect):
+class ExtraSwingAttackEffect(AttackEffectWithItemStat):
     def __init__(self, effect_chance):
         super(ExtraSwingAttackEffect, self).__init__(effect_chance)
         self.effect_chance = effect_chance
         self.component_type = "extra_swing_attack_effect"
-        self.tags.add("equipped_effect")
 
     def attack_effect(self, source_entity, target_entity):
         source_entity.melee_attacker.try_hit(target_entity)
-
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
 
     def _item_stat(self):
         return ItemStat("extra_swing", self.effect_chance, colors.LIGHT_BLUE, "Extra Swing",
@@ -129,14 +140,37 @@ class StatBonusEquipEffect(EquippedEffect):
         pass
 
 
-class CounterAttackEffect(StatBonusEquipEffect):
+class StatBonusEquipEffectWithItemStat(StatBonusEquipEffect):
+    def __init__(self, stat, bonus):
+        super(StatBonusEquipEffectWithItemStat, self).__init__(stat, bonus)
+
+    def equipped_effect(self, entity):
+        """
+        Causes the entity that equips this have a bonus to one stat.
+        """
+        entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
+        self.parent.add_spoof_child(self._item_stat())
+        self._equipped_effect(entity)
+
+    def _equipped_effect(self, entity):
+        pass
+
+    def first_tick(self, time):
+        self.parent.add_spoof_child(self._item_stat())
+        self._first_tick(time)
+
+    def _first_tick(self, time):
+        pass
+
+    def _item_stat(self):
+        return None
+
+
+class CounterAttackEffect(StatBonusEquipEffectWithItemStat):
     def __init__(self, effect_chance):
         super(CounterAttackEffect, self).__init__(DataTypes.COUNTER_ATTACK_CHANCE, effect_chance)
         self.effect_chance = effect_chance
         self.component_type = "counter_attack"
-
-    def _equipped_effect(self, entity):
-        entity.add_spoof_child(self._item_stat())
 
     def _item_stat(self):
         return ItemStat("counter_attack_weapon_effect", self.effect_chance, colors.PURPLE, "Counter",
@@ -160,55 +194,44 @@ class IgnoreArmorAttackEffect(BeforeAttackEffect):
                         ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
 
 
-class CritChanceBonusEffect(StatBonusEquipEffect):
+class CritChanceBonusEffect(StatBonusEquipEffectWithItemStat):
     def __init__(self, effect_chance):
         super(CritChanceBonusEffect, self).__init__(DataTypes.CRIT_CHANCE, effect_chance)
         self.effect_chance = effect_chance
         self.component_type = "crit_chance_bonus"
 
-    def _equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
-
     def _item_stat(self):
         return ItemStat("crit_chance_weapon_effect", self.effect_chance, colors.RED, "Crit %",
-                        ItemStat.PERCENT_FORMAT, order=40, is_common_stat=False)
+                        ItemStat.PERCENT_FORMAT, order=40, is_common_stat=True)
 
 
-class OffenciveAttackEffect(StatBonusEquipEffect):
+class OffenciveAttackEffect(StatBonusEquipEffectWithItemStat):
     def __init__(self, effect_chance):
         super(OffenciveAttackEffect, self).__init__(DataTypes.OFFENCIVE_ATTACK_CHANCE, effect_chance)
         self.effect_chance = effect_chance
         self.component_type = "offencive_attack"
-
-    def _equipped_effect(self, entity):
-        entity.add_spoof_child(self._item_stat())
 
     def _item_stat(self):
         return ItemStat(DataTypes.OFFENCIVE_ATTACK_CHANCE, self.effect_chance, colors.LIGHT_GREEN, "Strike Step",
                         ItemStat.PERCENT_FORMAT, order=40, is_common_stat=False)
 
 
-class DefenciveAttackEffect(StatBonusEquipEffect):
+class DefenciveAttackEffect(StatBonusEquipEffectWithItemStat):
     def __init__(self, effect_chance):
         super(DefenciveAttackEffect, self).__init__(DataTypes.DEFENCIVE_ATTACK_CHANCE, effect_chance)
         self.effect_chance = effect_chance
         self.component_type = "defencive_attack"
-
-    def _equipped_effect(self, entity):
-        entity.add_spoof_child(DataPointBonusSpoof(self.stat, self.bonus))
-        self.parent.add_spoof_child(self._item_stat())
 
     def _item_stat(self):
         return ItemStat(DataTypes.DEFENCIVE_ATTACK_CHANCE, self.effect_chance, colors.LIGHT_GREEN, "Def Strike",
                         ItemStat.PERCENT_FORMAT, order=40, is_common_stat=False)
 
 
-class BleedAttackEffect(AttackEffect):
+class BleedAttackEffect(AttackEffectWithItemStat):
     def __init__(self, effect_chance):
         super(BleedAttackEffect, self).__init__(effect_chance)
         self.effect_chance = effect_chance
         self.component_type = "bleed_attack_effect"
-        self.tags.add("equipped_effect")
 
     def attack_effect(self, source_entity, target_entity):
         turns = random.randrange(2, 6)
@@ -219,20 +242,16 @@ class BleedAttackEffect(AttackEffect):
                                                 messenger.BLEED_MESSAGE, BLEED_STATUS_DESCRIPTION)
         target_entity.effect_queue.add(bleed_effect)
 
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
-
     def _item_stat(self):
         return ItemStat("bleed_weapon_effect", self.effect_chance, colors.RED, "Bleed",
                         ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
 
 
-class PoisonAttackEffect(AttackEffect):
+class PoisonAttackEffect(AttackEffectWithItemStat):
     def __init__(self, effect_chance):
         super(PoisonAttackEffect, self).__init__(effect_chance)
         self.effect_chance = effect_chance
         self.component_type = "poison_attack_effect"
-        self.tags.add("equipped_effect")
 
     def attack_effect(self, source_entity, target_entity):
         min_damage = 4
@@ -242,28 +261,21 @@ class PoisonAttackEffect(AttackEffect):
         factory = PoisonEntityEffectFactory(source_entity, random.randrange(min_damage, max_damage), turn_interval, turns)
         target_entity.effect_queue.add(factory())
 
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
-
     def _item_stat(self):
         return ItemStat("bleed_weapon_effect", self.effect_chance, colors.RED, "Bleed",
                         ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
 
 
-class KnockBackAttackEffect(AttackEffect):
+class KnockBackAttackEffect(AttackEffectWithItemStat):
     def __init__(self, effect_chance):
         super(KnockBackAttackEffect, self).__init__(effect_chance)
         self.effect_chance = effect_chance
         self.component_type = "knock_back_attack_effect"
-        self.tags.add("equipped_effect")
 
     def attack_effect(self, source_entity, target_entity):
         knock_position = geometry.other_side_of_point(self.parent.position.value,
                                                       target_entity.position.value)
         target_entity.mover.try_move(knock_position)
-
-    def equipped_effect(self, entity):
-        self.parent.add_spoof_child(self._item_stat())
 
     def _item_stat(self):
         return ItemStat("knock_back_weapon_effect", self.effect_chance, colors.CHAMPAGNE, "Knock Back",

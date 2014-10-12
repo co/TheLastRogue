@@ -1,7 +1,6 @@
 from actor import Actor
 from entityeffect import StatusAdder, StatusRemover
 from equipment import EquipmentSlots
-from item import RangeWeaponType, new_dagger, new_sword, new_morning_star, new_spear
 import monster
 import settings
 import spawner
@@ -14,8 +13,9 @@ import inputhandler
 import menufactory
 import positionexaminer
 import util
+from weapon import new_dagger, new_spear, new_morning_star, new_sword, RangeWeaponType, new_kris, new_katar, new_cestus, new_iron_hand, new_claw
 
-DEV_EQUIPMENT_FACTORY_LIST = [new_dagger, new_sword, new_morning_star, new_spear]
+DEV_EQUIPMENT_FACTORY_LIST = [new_dagger, new_sword, new_morning_star, new_spear, new_kris, new_katar, new_cestus, new_iron_hand, new_claw]
 
 
 class InputActor(Actor):

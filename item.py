@@ -6,7 +6,6 @@ from actor import DoNothingActor
 from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud, new_fire_cloud
 from compositecommon import PoisonEntityEffectFactory
 from compositecore import Leaf, Composite
-from attacker import DamageTypes, DamageType, WeaponMeleeAttacker, WeaponRangedAttacker
 import direction
 from dummyentities import dummy_flyer
 import geometry
@@ -14,12 +13,12 @@ from graphic import GraphicChar, CharPrinter
 from health import ReflectDamageTakenEffect
 import menufactory
 import messenger
-from missileaction import PlayerThrowItemAction, PlayerCastMissileSpellAction
+from missileaction import PlayerThrowItemAction
 from mover import Mover
 from position import Position, DungeonLevel
 import rng
 from shapegenerator import extend_points
-from stats import DataPoint, Flag, DataTypes, GamePieceTypes, Damage
+from stats import DataPoint, Flag, DataTypes, GamePieceTypes
 from statusflags import StatusFlags
 from terrain import GlassWall
 from text import Description
@@ -30,7 +29,7 @@ import equipment
 import gametime
 from messenger import msg
 import icon
-from equipmenteffect import StunAttackEffect, ExtraSwingAttackEffect, CounterAttackEffect, IgnoreArmorAttackEffect, CritChanceBonusEffect, DefenciveAttackEffect, BleedAttackEffect, ItemStat, RangeItemStat, StatBonusEquipEffect, LifeStealEffect, SetInvisibilityFlagEquippedEffect
+from equipmenteffect import StatBonusEquipEffect, LifeStealEffect, SetInvisibilityFlagEquippedEffect
 
 
 class ItemType(Leaf):
@@ -53,129 +52,6 @@ class ItemType(Leaf):
         super(ItemType, self).__init__()
         self.component_type = "item_type"
         self.value = item_type
-
-
-def set_item_components(item, game_state):
-    item.set_child(DataPoint(DataTypes.ENERGY, -gametime.single_turn))
-    item.set_child(Position())
-    item.set_child(DoNothingActor())
-    item.set_child(DungeonLevel())
-    item.set_child(Mover())
-    item.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ITEM))
-    item.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
-    item.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
-    item.set_child(CharPrinter())
-    item.set_child(DropAction())
-    item.set_child(PlayerThrowItemAction())
-    item.set_child(ThrowerNonBreak())
-    return item
-
-
-def damage_item_stat(min_value, max_value):
-    return RangeItemStat(DataTypes.DAMAGE, min_value, max_value, colors.WHITE, "Damage", order=0)
-
-
-def accuracy_item_stat(value):
-    return ItemStat(DataTypes.ACCURACY, value, colors.LIGHT_ORANGE, "Accuracy", order=10)
-
-
-def crit_chance_item_stat(value):
-    return ItemStat(DataTypes.CRIT_CHANCE, value, colors.RED, "Crit %", ItemStat.PERCENT_FORMAT, order=20)
-
-
-def crit_multiplier_item_stat(value):
-    return ItemStat(DataTypes.CRIT_MULTIPLIER, value, colors.RED, "Crit x", ItemStat.MULTIPLIER_FORMAT, order=30)
-
-
-def set_ranged_weapon_components(item):
-    item.set_child(EquipmentType(equipment.EquipmentTypes.RANGED_WEAPON))
-    item.set_child(ItemType(ItemType.WEAPON))
-    item.set_child(ReEquipAction())
-    item.set_child(AddSpoofChildEquipEffect2(WeaponRangedAttacker(item)))
-
-
-def new_gun(game_state):
-    gun = Composite()
-    set_item_components(gun, game_state)
-    set_ranged_weapon_components(gun)
-    gun.set_child(RangeWeaponType(RangeWeaponType.GUN))
-    gun.set_child(Description("Gun",
-                              "This was once a fine weapon, \
-                               but age has torn it real bad.\n\
-                               The wooden handle is dry and gray, \
-                               you see rust eating into the iron pipe."))
-    gun.set_child(GraphicChar(None, colors.WHITE, icon.GUN))
-    gun.set_child(DataPoint(DataTypes.WEAPON_RANGE, 15))
-    gun.set_child(accuracy_item_stat(13))
-    gun.set_child(damage_item_stat(5, 25))
-    gun.set_child(DataPoint(DataTypes.WEIGHT, 5))
-    return gun
-
-
-def new_sling(game_state):
-    sling = Composite()
-    set_item_components(sling, game_state)
-    set_ranged_weapon_components(sling)
-    sling.set_child(RangeWeaponType(RangeWeaponType.SLING))
-    sling.set_child(Description("Sling",
-                                "This weapon propels rocks more effectively than throwing them would."))
-    sling.set_child(GraphicChar(None, colors.ORANGE, icon.SLING))
-    sling.set_child(DataPoint(DataTypes.WEAPON_RANGE, 4))
-    sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
-    sling.set_child(accuracy_item_stat(5))
-    sling.set_child(Damage(1, 3))
-    return sling
-
-
-def new_flame_orb(game_state):
-    orb = Composite()
-    set_item_components(orb, game_state)
-    set_ranged_weapon_components(orb)
-    orb.set_child(RangeWeaponType(RangeWeaponType.MAGIC))
-    orb.set_child(Description("Flame Orb",
-                              "An orb with a living flame inside, it allows the wielder to channel fire from it."))
-    orb.set_child(GraphicChar(None, colors.RED, icon.ORB))
-    orb.set_child(DataPoint(DataTypes.WEAPON_RANGE, 5))
-    orb.set_child(DataPoint(DataTypes.WEIGHT, 2))
-    orb.set_child(accuracy_item_stat(5))
-    orb.set_child(Damage(2, 4))
-    orb.set_child(MagicMissileEffect(GraphicChar(None, colors.RED, icon.BIG_CENTER_DOT)))
-    return orb
-
-
-class MagicEffect(Leaf):
-    def __init__(self):
-        super(MagicEffect, self).__init__()
-        self.component_type = "magic_effect"
-
-    def cast_magic(self):
-        pass
-
-
-class MagicMissileEffect(MagicEffect):
-    def __init__(self, missile_graphic):
-        super(MagicMissileEffect, self).__init__()
-        self.missile_graphic = missile_graphic
-
-    def cast_magic(self, **kwargs):
-        source_entity = kwargs[action.SOURCE_ENTITY]
-        casting = PlayerCastMissileSpellAction(self.parent, self.missile_graphic)
-        game_state = self.parent.game_state.value
-        if casting.can_act(source_entity=source_entity, game_state=game_state):
-            casting.act(source_entity=source_entity, game_state=game_state)
-
-
-class RangeWeaponType(DataPoint):
-    """
-    Component that marks a weapon as a ranged weapon.
-    """
-
-    GUN = 0
-    SLING = 1
-    MAGIC = 2
-
-    def __init__(self, range_weapon_type):
-        super(RangeWeaponType, self).__init__("range_weapon_type", range_weapon_type)
 
 
 def set_device_components(item):
@@ -518,99 +394,6 @@ def new_leather_cap(game_state):
     cap.set_child(StatBonusEquipEffect("armor", 1))
     cap.set_child(EquipmentType(equipment.EquipmentTypes.HEADGEAR))
     return cap
-
-
-def set_melee_weapon_component(item):
-    item.set_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
-    item.set_child(ItemType(ItemType.WEAPON))
-    item.set_child(DamageType(DamageTypes.PHYSICAL))
-    item.set_child(AddSpoofChildEquipEffect2(WeaponMeleeAttacker(item)))
-    item.set_child(ReEquipAction())
-
-
-def new_sword(game_state):
-    """
-    A composite component representing a Sword item.
-    """
-    sword = Composite()
-    set_item_components(sword, game_state)
-    set_melee_weapon_component(sword)
-    sword.set_child(Description("Iron Sword",
-                                "This old blade has seen some better days, it's as sharp as ever tough."))
-    sword.set_child(GraphicChar(None, colors.GRAY, icon.SWORD))
-    sword.set_child(crit_chance_item_stat(0.1))
-    sword.set_child(crit_multiplier_item_stat(2))
-    sword.set_child(damage_item_stat(2, 5))
-    sword.set_child(accuracy_item_stat(10))
-    sword.set_child(DataPoint(DataTypes.WEIGHT, 10))
-    sword.set_child(ExtraSwingAttackEffect(0.1))
-    sword.set_child(BleedAttackEffect(0.1))
-    return sword
-
-
-def new_morning_star(game_state):
-    """
-    A composite component representing a Sword item.
-    """
-    mace = Composite()
-    set_item_components(mace, game_state)
-    set_melee_weapon_component(mace)
-    mace.set_child(Description("Morning Star",
-                               "This old club has an lump of iron with rusty spikes at one end."))
-    mace.set_child(GraphicChar(None, colors.GRAY, icon.MORNING_STAR))
-    mace.set_child(crit_chance_item_stat(0.1))
-    mace.set_child(crit_multiplier_item_stat(2))
-    mace.set_child(accuracy_item_stat(8))
-    mace.set_child(damage_item_stat(1, 6))
-    mace.set_child(StunAttackEffect(0.2))
-    mace.set_child(IgnoreArmorAttackEffect(0.2))
-    mace.set_child(BleedAttackEffect(0.1))
-    mace.set_child(DataPoint(DataTypes.WEIGHT, 8))
-    return mace
-
-
-def new_spear(game_state):
-    """
-    A composite component representing a Sword item.
-    """
-    c = Composite()
-    set_item_components(c, game_state)
-    set_melee_weapon_component(c)
-    c.set_child(Description("Spear",
-                            "A stick with a sharp piece of metal at one end."
-                            "It's a useful weapon when you want to keep danger at bay."))
-    c.set_child(GraphicChar(None, colors.GRAY, icon.SPEAR))
-    c.set_child(crit_chance_item_stat(0.1))
-    c.set_child(crit_multiplier_item_stat(2))
-    c.set_child(accuracy_item_stat(10))
-    c.set_child(damage_item_stat(1, 5))
-    c.set_child(DefenciveAttackEffect(0.75))
-    c.set_child(CounterAttackEffect(0.1))
-    c.set_child(DataPoint(DataTypes.WEIGHT, 8))
-    return c
-
-
-def new_dagger(game_state):
-    """
-    A composite component representing a Knife item.
-    """
-    c = Composite()
-    set_item_components(c, game_state)
-    set_melee_weapon_component(c)
-    c.set_child(Description("Dagger", "A trusty dagger, small and precise but will only inflict small wounds."))
-    c.set_child(GraphicChar(None, colors.GRAY, icon.DAGGER))
-    c.set_child(DamageType(DamageTypes.CUTTING))
-    c.set_child(DataPoint(DataTypes.WEIGHT, 5))
-    #c.set_child(crit_chance_item_stat(0.2))
-    c.set_child(crit_multiplier_item_stat(3))
-    c.set_child(accuracy_item_stat(15))
-    c.set_child(damage_item_stat(1, 3))
-
-    c.set_child(CritChanceBonusEffect(0.2))
-    c.set_child(ExtraSwingAttackEffect(0.2))
-    c.set_child(BleedAttackEffect(0.3))
-
-    return c
 
 
 def set_ring_components(item):
@@ -1316,3 +1099,19 @@ class ThrowerCreateExplosion(ThrowerBreak):
 
 def _item_flash_animation(entity, item):
     entity.char_printer.append_graphic_char_temporary_frames([item.graphic_char])
+
+
+def set_item_components(item, game_state):
+    item.set_child(DataPoint(DataTypes.ENERGY, -gametime.single_turn))
+    item.set_child(Position())
+    item.set_child(DoNothingActor())
+    item.set_child(DungeonLevel())
+    item.set_child(Mover())
+    item.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ITEM))
+    item.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
+    item.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
+    item.set_child(CharPrinter())
+    item.set_child(DropAction())
+    item.set_child(PlayerThrowItemAction())
+    item.set_child(ThrowerNonBreak())
+    return item

@@ -898,14 +898,14 @@ class ItemStatCard(RectangularUIElement):
         self.text_stack_panel_left.clear()
         self.text_stack_panel_right.clear()
         if self.item:
-            stats = self.item.get_children_with_tag("item_stat")
-            sorted_stats = sorted(stats, key=lambda s: s.order)
-            for stat in sorted_stats:
-                text = TextBox(stat.get_text(self.rect.width / 2 - 4), (0, 0), stat.color_fg)
-                if stat.is_common_stat:
-                    self.text_stack_panel_left.append(text)
-                else:
-                    self.text_stack_panel_right.append(text)
+            common_stats = [stat for stat in self.item.get_children_with_tag("item_stat") if stat.is_common_stat]
+            uncommon_stats = [stat for stat in self.item.get_children_with_tag("item_stat") if not stat.is_common_stat]
+            for common_stat in sorted(common_stats, key=lambda s: s.order):
+                text = TextBox(common_stat.get_text(self.rect.width / 2 - 4), (0, 0), common_stat.color_fg)
+                self.text_stack_panel_left.append(text)
+            for uncommon_stat in sorted(uncommon_stats, key=lambda s: s.order):
+                text = TextBox(uncommon_stat.get_text(self.rect.width / 2 - 4), (0, 0), uncommon_stat.color_fg)
+                self.text_stack_panel_right.append(text)
 
     def draw(self, offset=geo.zero2d()):
         if self.item:

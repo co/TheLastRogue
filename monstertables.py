@@ -1,6 +1,7 @@
 import random
 import item
 import monster
+from weapon import new_dagger, new_sword, new_gun, new_sling, new_kris, new_katar, new_cestus, new_iron_hand, new_spear, new_claw, new_morning_star
 
 
 class DungeonTableItem(object):
@@ -40,28 +41,41 @@ def from_table_pick_n_items_for_depth(table, n, depth, game_state):
     return [random.choice(filtered_table).creator(game_state) for _ in range(n)]
 
 
-# Weighted by the factor.
-dungeon_equipment_table = \
+dungeon_armor_table = \
     (
         [DungeonTableItem(item.new_leather_boots)] * 10 +
-        [DungeonTableItem(item.new_boots_of_running)] * 2 +
-        [DungeonTableItem(item.new_boots_of_sneaking)] * 2 +
+        [DungeonTableItem(item.new_boots_of_running)] * 4 +
+        [DungeonTableItem(item.new_boots_of_sneaking)] * 4 +
         [DungeonTableItem(item.new_leather_cap)] * 10 +
-        [DungeonTableItem(item.new_leather_armor)] * 10 +
+        [DungeonTableItem(item.new_leather_armor)] * 10
+    )
 
-        [DungeonTableItem(item.new_dagger)] * 8 +
-        [DungeonTableItem(item.new_sling)] * 8 +
+dungeon_jewellry_table = \
+    (
+        [DungeonTableItem(item.new_ring_of_evasion)] * 10 +
+        [DungeonTableItem(item.new_ring_of_stealth)] * 10 +
+        [DungeonTableItem(item.new_ring_of_strength)] * 10 +
 
-        [DungeonTableItem(item.new_ring_of_evasion)] * 3 +
-        [DungeonTableItem(item.new_ring_of_stealth)] * 3 +
-        [DungeonTableItem(item.new_ring_of_strength)] * 3 +
+        [DungeonTableItem(item.new_amulet_of_reflect_damage)] * 6 +
+        [DungeonTableItem(item.new_amulet_of_life_steal)] * 6
+    )
 
-        [DungeonTableItem(item.new_amulet_of_reflect_damage)] * 2 +
-        [DungeonTableItem(item.new_amulet_of_life_steal)] * 2 +
+dungeon_weapon_table = \
+    (
+        # Common Weapons:
+        [DungeonTableItem(new_dagger)] * 9 +
+        [DungeonTableItem(new_sword)] * 7 +
+        [DungeonTableItem(new_spear)] * 7 +
+        [DungeonTableItem(new_sling)] * 7 +
 
-        [DungeonTableItem(item.new_sword)] * 2 +
-        #[DungeonTableItem(new_mace)] * 1 +
-        [DungeonTableItem(item.new_gun)] * 2
+        # Uncommon Weapons:
+        [DungeonTableItem(new_kris)] * 3 +
+        [DungeonTableItem(new_katar)] * 3 +
+        [DungeonTableItem(new_morning_star)] * 3 +
+        [DungeonTableItem(new_cestus)] * 3 +
+        [DungeonTableItem(new_iron_hand)] * 3 +
+        [DungeonTableItem(new_claw)] * 3 +
+        [DungeonTableItem(new_gun)] * 3
     )
 
 dungeon_usable_item_table = \
@@ -81,3 +95,12 @@ dungeon_usable_item_table = \
         [DungeonTableItem(item.new_teleport_scroll)] * 8 +
         [DungeonTableItem(item.new_map_scroll)] * 8
     )
+
+# Weighted by the factor.
+dungeon_equipment_table = \
+    (
+        dungeon_armor_table * 8 +
+        dungeon_jewellry_table * 4 +
+        dungeon_weapon_table * 12
+    )
+

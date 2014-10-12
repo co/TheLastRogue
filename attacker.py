@@ -87,6 +87,7 @@ class WeaponMeleeAttacker(AttackerBase):
     def can_hit(self, entity):
         if geometry.chess_distance(self.parent.position.value, entity.position.value) > 1:
             return False
+        return True
 
     @property
     def crit_chance(self):
@@ -104,7 +105,7 @@ class WeaponMeleeAttacker(AttackerBase):
         return DEFAULT_CRIT_MULTIPLIER
 
     def attack_entity(self, target_entity, bonus_damage=0, bonus_hit=0):
-        attack_effects = [effect for effect in self.parent.get_children_with_tag("attack_effect")]
+        attack_effects = [effect for effect in self.weapon.get_children_with_tag("attack_effect")]
         damage_types = [effect.component_type for effect in self.parent.get_children_with_tag(Tags.DAMAGE_TYPE)]
         attack = Attack(self.min_damage, self.max_damage, damage_types, self.accuracy, crit_chance=self.crit_chance,
                         crit_multiplier=self.crit_multiplier, target_entity_effects=attack_effects)
@@ -458,4 +459,4 @@ def melee_hit_entity_help_function(attack_chance, source_entity, target_entity):
     distance = geometry.chess_distance(source_entity.position.value, source_entity.position.value)
     if (distance <= 1 and source_entity.has(attack_chance) and
                 random.random() < source_entity.get_child(attack_chance).value):
-        source_entity.melee_attacker.try_hit(target_entity.position.value)
+        source_entity.melee_attacker.try_hit(target_entity)
