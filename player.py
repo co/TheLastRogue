@@ -12,7 +12,7 @@ from inputactor import InputActor
 from inventory import Inventory
 from memorymap import MemoryMap
 from missileaction import PlayerThrowStoneAction
-from mover import Mover, Stepper, PlayerStepper
+from mover import Mover, PlayerStepper
 from ondeath import LeaveCorpseOnDeath
 from position import Position, DungeonLevel
 from stats import GamePieceTypes, Flag, DataPoint, DataTypes, Factions, IntelligenceLevel, Races, Jobs
@@ -39,7 +39,7 @@ class Player(Composite):
         self.set_child(DataPoint(DataTypes.ENERGY, -gametime.single_turn))
         self.set_child(DataPoint(DataTypes.UNARMED_CRIT_CHANCE, 0.15))
         self.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.0))
-        self.set_child(DataPoint(DataTypes.ACCURACY, 16))
+        self.set_child(DataPoint(DataTypes.ACCURACY, 10))
         self.set_child(DataPoint(DataTypes.STRENGTH, 5))
         self.set_child(DataPoint(DataTypes.EVASION, 10))
         self.set_child(DataPoint(DataTypes.ARMOR, 4))

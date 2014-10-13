@@ -31,10 +31,7 @@ def stat_check(stat1, stat2):
     """
     roll1 = random.randrange(stat1)
     roll2 = random.randrange(stat2)
-    if roll1 >= roll2:
-        return True
-    else:
-        return False
+    return roll1 >= roll2
 
 
 def weighted_choice(options, weight_function=(lambda option: option.weight)):
