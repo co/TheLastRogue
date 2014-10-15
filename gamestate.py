@@ -2,6 +2,7 @@ import os
 from os.path import isfile
 from os import listdir, getcwd
 import cPickle as pickle
+
 from cloud import new_steam_cloud
 import colors
 from dungeon import Dungeon, ReflexiveDungeon
@@ -17,7 +18,6 @@ import gui
 import item
 import menufactory
 import messenger
-import monster
 import rectfactory
 import sacrifice
 import settings
@@ -25,6 +25,7 @@ import state
 import statestack
 from tools import time_it
 import turn
+from weapon import new_flame_orb, new_gun, new_sling, new_dagger
 
 
 def reset_globals(player):
@@ -64,8 +65,6 @@ class GameStateBase(state.State):
         self._init_bg()
 
         self._gui_last_update_timestamp = -1
-
-        self.power_list = sacrifice.new_power_list()
 
     def __getstate__(self):
         state = {
@@ -194,9 +193,6 @@ class TestGameState(GameStateBase):
         cloud = new_steam_cloud(self, 32)
         cloud.mover.try_move((16, 10), self.dungeon_level)
 
-        demon = monster.new_dust_demon(self)
-        demon.mover.try_move((30, 16), self.dungeon_level)
-
         #ratman_mystic = monster.new_ratman_mystic(self)
         #ratman_mystic.mover.try_move((25, 16), self.dungeon_level)
 
@@ -213,7 +209,7 @@ class TestGameState(GameStateBase):
         potion = item.new_health_potion(self)
         potion.mover.try_move((20, 16), self.dungeon_level)
 
-        orb = item.new_flame_orb(self)
+        orb = new_flame_orb(self)
         orb.mover.try_move((22, 15), self.dungeon_level)
 
         amulet = item.new_amulet_of_life_steal(self)
@@ -240,17 +236,18 @@ class TestGameState(GameStateBase):
         scroll = item.new_map_scroll(self)
         scroll.mover.try_move((21, 13), self.dungeon_level)
 
-        gun = item.new_gun(self)
+        gun = new_gun(self)
         gun.mover.try_move((20, 13), self.dungeon_level)
 
-        sling = item.new_sling(self)
+        sling = new_sling(self)
         sling.mover.try_move((20, 14), self.dungeon_level)
-
-        mace = item.new_mace(self)
-        mace.mover.try_move((19, 13), self.dungeon_level)
 
         blood_fountain = dungeonfeature.new_blood_fountain()
         blood_fountain.mover.try_move((21, 10), self.dungeon_level)
+        blood_fountain = dungeonfeature.new_blood_fountain()
+        blood_fountain.mover.try_move((22, 10), self.dungeon_level)
+        blood_fountain = dungeonfeature.new_blood_fountain()
+        blood_fountain.mover.try_move((23, 10), self.dungeon_level)
 
         charge = item.new_energy_sphere(self)
         charge.mover.try_move((22, 10), self.dungeon_level)
@@ -293,7 +290,7 @@ class TestGameState(GameStateBase):
             ammo.mover.try_move((21 + i, 13), self.dungeon_level)
 
         for i in range(23):
-            knife = item.new_knife(self)
+            knife = new_dagger(self)
             knife.mover.try_move((10 + i, 23), self.dungeon_level)
 
 

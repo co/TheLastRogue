@@ -1,0 +1,48 @@
+from pygame.tests.test_utils import unittest
+from compositecore import Composite
+from sacrifice import get_possible_powers, StealthPower, RANK_ONE, RANK_TWO, RANK_THREE, get_possible_powers_of_list, StrengthPower
+
+
+LIGHT_FEET_POWER1 = StealthPower(3, 6, RANK_ONE)
+LIGHT_FEET_POWER2 = StealthPower(6, 8, RANK_TWO)
+LIGHT_FEET_POWER3 = StealthPower(9, 10, RANK_THREE)
+STRENGTH_FEET_POWER3 = StrengthPower(9, 10, RANK_THREE)
+
+
+POWERS = [LIGHT_FEET_POWER2, LIGHT_FEET_POWER1, LIGHT_FEET_POWER3, STRENGTH_FEET_POWER3]
+
+
+class TestComposition(unittest.TestCase):
+
+    def test_when_not_any_current_powers_power_list_should_contain_powers_without_prereqs(self):
+        possible_powers = get_possible_powers([])
+        self.assertTrue(len(possible_powers) > 0)
+        for p in possible_powers:
+            self.assertFalse(p.prereqs)
+
+    def test_when_not_any_current_powers_only_rank_one_power_available(self):
+        all_powers = POWERS
+        possible_powers = get_possible_powers_of_list([], all_powers)
+        self.assertEquals(len(possible_powers), 1)
+        self.assertTrue(possible_powers[0] is LIGHT_FEET_POWER1)
+
+    def test_when_got_rank_one_power_rank_two_should_be_available(self):
+        all_powers = POWERS
+        possible_powers = get_possible_powers_of_list([LIGHT_FEET_POWER1], all_powers)
+        self.assertEquals(len(possible_powers), 1)
+        self.assertTrue(possible_powers[0] is LIGHT_FEET_POWER2)
+
+    def test_when_got_rank_two_power_rank_three_should_be_available(self):
+        all_powers = POWERS
+        possible_powers = get_possible_powers_of_list([LIGHT_FEET_POWER2], all_powers)
+        self.assertEquals(len(possible_powers), 1)
+        self.assertTrue(possible_powers[0] is LIGHT_FEET_POWER3)
+
+    def test_when_composite_has_power_rank_two_rank_three_should_be_available(self):
+        all_powers = POWERS
+        c = Composite()
+        c.set_child(LIGHT_FEET_POWER1)
+        c.set_child(LIGHT_FEET_POWER2)
+        possible_powers = get_possible_powers_of_list(c.get_children_with_tag("power"), all_powers)
+        self.assertEquals(len(possible_powers), 1)
+        self.assertTrue(possible_powers[0] is LIGHT_FEET_POWER3)

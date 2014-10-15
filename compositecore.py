@@ -218,7 +218,8 @@ class Composite(Component):
         """
         if (child.component_type in self._children and
                     child is self._children[child.component_type]):
-            self.remove_component_of_type(child.component_type)
+                child.parent = None
+                del self._children[child.component_type]
         if (child.component_type in self._spoofed_children and
                     child in self._spoofed_children[child.component_type]):
             self._spoofed_children[child.component_type].remove(child)
@@ -230,10 +231,7 @@ class Composite(Component):
         """
         Removes a child component of a type of this component.
         """
-        if component_type in self._children:
-            self._children[component_type].parent = None
-            del self._children[component_type]
-        return
+        return self.remove_component(self._children[component_type])
 
     def update(self):
         """

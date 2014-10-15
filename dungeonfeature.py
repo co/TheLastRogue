@@ -8,6 +8,7 @@ import messenger
 from mover import Mover, teleport_monsters, Stepper
 from position import Position, DungeonLevel
 import rng
+from sacrifice import get_possible_powers
 import state
 from stats import DataPoint, DataTypes, GamePieceTypes, Immunities, Flag
 from text import Description
@@ -162,7 +163,8 @@ class SacrificeFountainAction(DrinkFromFountainAction):
         self.start_sacrifice_menu(target_entity)
 
     def start_sacrifice_menu(self, entity):
-        menu = menufactory.sacrifice_menu(entity, entity.game_state.value.power_list, self._dry_up_fountain)
+        menu = menufactory.sacrifice_menu(entity, get_possible_powers(entity.get_children_with_tag("power")),
+                                          self._dry_up_fountain)
         entity.game_state.value.start_prompt(state.UIState(menu))
 
 

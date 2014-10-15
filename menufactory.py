@@ -482,22 +482,30 @@ def sacrifice_menu(player, powers, post_power_gain_function):
     cancel_option = menu.MenuOption("Cancel", [stack_pop_function], (lambda: True))
     context_options.append(cancel_option)
 
-    context_menu_rect = rectfactory.center_of_screen_rect(max(option.width for option in context_options) + 4,
-                                                          len(context_options) * 2 + 6)
 
-    menu_stack_panel = gui.StackPanelVertical(context_menu_rect.top_left, style.menu_theme.margin, vertical_space=0,
+    tmp = (0, 0)
+    menu_stack_panel = gui.StackPanelVertical(tmp, style.menu_theme.margin, vertical_space=0,
                                               alignment=gui.StackPanelVertical.ALIGN_CENTER)
 
     heading_stack_panel = gui.StackPanelHorizontal((0, 0), (0, 0), horizontal_space=2)
     menu_stack_panel.append(heading_stack_panel)
-    power_caption = "Power" + str("Cost").rjust(width - len("Cost   "))
-    heading_stack_panel.append(gui.TextBox(power_caption, (1, 0), colors.GRAY))
-    heading_stack_panel.append(gui.SymbolUIElement((0, 0), graphic.GraphicChar(colors.DARK_BLUE, colors.HP_BAR_FULL, icon.HEALTH_STAT)))
-    menu_stack_panel.append(gui.VerticalSpace(2))
+    if any(powers):
+        power_caption = "Power" + str("Cost").rjust(width - len("Cost   "))
+        heading_stack_panel.append(gui.TextBox(power_caption, (1, 0), colors.GRAY))
+        heading_stack_panel.append(gui.SymbolUIElement((0, 0), graphic.GraphicChar(colors.DARK_BLUE, colors.HP_BAR_FULL, icon.HEALTH_STAT)))
+        menu_stack_panel.append(gui.VerticalSpace(2))
+    else:
+        power_caption = "There are no more powers."
+        menu_stack_panel.append(gui.VerticalSpace(4))
+        heading_stack_panel.append(gui.TextBox(power_caption, (1, 0), colors.GRAY))
 
     item_description_card = gui.new_item_description_card()
     resulting_menu = menu.StaticMenu((0, 0), context_options, state_stack, selected_payload_callback=(lambda item: item_description_card.set_item(item)))
     menu_stack_panel.append(resulting_menu)
+
+    context_menu_rect = rectfactory.center_of_screen_rect(max(menu_stack_panel.total_width, 24),
+                                                          max(menu_stack_panel.total_height, 6))
+    menu_stack_panel.offset = context_menu_rect.top_left
     background_rect = get_menu_background(context_menu_rect, style.sacrifice_menu_theme.rect_style)
 
     dock = gui.UIDock(rectfactory.full_screen_rect())
