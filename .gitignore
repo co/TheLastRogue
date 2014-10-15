@@ -12,3 +12,13 @@ to_exe.py
 *.png
 .ropeproject
 *.log
+*.exe
+*.7z
+*.txt
+*.md
+*.level
+*.gif
+*.xcf
+*.sav
+*.bat
+*.rej
