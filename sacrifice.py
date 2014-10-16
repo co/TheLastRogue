@@ -39,7 +39,6 @@ class NonPersistentPower(Power):
     def __init__(self, cost):
         super(NonPersistentPower, self).__init__(cost, RANK_ZERO)
         self.tags.add("power")
-        self.buy_cost = 1
 
     def on_tick(self, entity):
         self.parent.remove_component(self)
@@ -103,7 +102,7 @@ class CritPower(StatPower):
         super(CritPower, self).__init__(DataTypes.CRIT_CHANCE, bonus_value, cost, rank)
         self.component_type = "crit_power"
         self.set_child(Description("Ruthless " + rank_to_string(rank),
-                                   "You have an extra " + str( bonus_value) +
+                                   "You have an extra " + "{:.0f}".format(100 * bonus_value) +
                                    "% chance of inflicting a critical strike."))
 
 
