@@ -210,6 +210,18 @@ class InputActor(Actor):
                                                                     self.parent.dungeon_level.value)
             if destination:
                 self.parent.path.compute_path(destination)
+                return
+            fountain = next((f for f in
+                            self.parent.dungeon_level.value.dungeon_features
+                            if f.has("drink_action") and (not f.position.value == self.parent.position.value)), None)
+            if fountain:
+                destination = fountain.position.value
+                self.parent.path.compute_path(destination)
+                return
+
+            if 0 < len(self.parent.dungeon_level.value.down_stairs):
+                stairs_down = self.parent.dungeon_level.value.down_stairs[0]
+                self.parent.path.compute_path(stairs_down.position.value)
 
     def toggle_command_list(self):
         self.parent.game_state.value.command_list_bar.turn_page()

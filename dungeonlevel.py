@@ -77,7 +77,7 @@ class DungeonLevel(object):
     @property
     def down_stairs(self):
         return [feature for feature in self.dungeon_features
-                if isinstance(feature, dungeonfeature.new_stairs_down)]
+                if feature.has("is_stairs_down")]
 
     def _get_player_if_available(self):
         return next((entity for entity in self.entities

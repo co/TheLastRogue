@@ -231,7 +231,9 @@ class Composite(Component):
         """
         Removes a child component of a type of this component.
         """
-        return self.remove_component(self._children[component_type])
+        if component_type in self._children:
+            return self.remove_component(self._children[component_type])
+        return None
 
     def update(self):
         """
