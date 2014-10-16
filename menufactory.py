@@ -396,10 +396,8 @@ def new_player_weapon_table(player, width):
 
 def player_status_menu(player):
     split_width = 27
-    full_width = split_width * 2
-    status_position = ((settings.SCREEN_WIDTH - full_width) / 2, 10)
     content_padding = (2, 2)
-    player_status_stack_panel = gui.StackPanelVertical(geo.add_2d(status_position, content_padding),
+    player_status_stack_panel = gui.StackPanelVertical(geo.add_2d((0, 0), content_padding),
                                                        alignment=gui.StackPanelVertical.ALIGN_LEFT,
                                                        vertical_space=1)
     player_status_stack_panel_row_1 = gui.StackPanelHorizontal((0, 0), alignment=gui.StackPanelHorizontal.ALIGN_TOP,
@@ -421,33 +419,25 @@ def player_status_menu(player):
     player_status_stack_panel_row_2.append(new_player_status_stack(player, 8))
     player_status_stack_panel_row_2.append(new_player_weapon_table(player, 8))
 
-    game_state = player.game_state.value
-    state_stack = game_state.menu_prompt_stack
-    context_options = []
-    stack_pop_function = menu.BackToGameFunction(state_stack)
+    description_card = gui.new_item_description_card()
+    power_list = get_power_list(player, description_card)
+    if len(power_list.menu_items) > 0:
+        player_status_stack_panel.append(gui.VerticalSpace(1))
+    player_status_stack_panel.append(power_list)
 
-    cancel_option = menu.MenuOption("", [stack_pop_function], (lambda: True))
-    context_options.append(cancel_option)
+    bg_rect_height = (player_status_stack_panel.total_height + 4)
+    bg_rect = rectfactory.center_of_screen_rect(split_width, bg_rect_height)
 
-    resulting_menu = menu.StaticMenu(status_position, context_options, state_stack, margin=style.menu_theme.margin)
+    player_status_stack_panel.offset = geo.add_2d(bg_rect.top_left, (2, 2))
 
-    menu_stack_panel = gui.StackPanelVertical((0, 0), vertical_space=3)
-    ui_elements = [player_status_stack_panel, resulting_menu]
-    menu_stack_panel.append(gui.UIElementList(ui_elements))
-    status_list = get_status_list(player)
-    player_status_stack_panel.append(status_list)
+    styled_bg_rect = get_menu_background(bg_rect, style.rogue_classic_theme.rect_style)
 
-    v_split = [split_width]
-    bg_rect_height = (player_status_stack_panel_row_1.total_height +
-                      player_status_stack_panel_row_2.total_height +
-                      (status_list.total_height + 3 if status_list.total_height > 0 else 0) + 6)
-    bg_rect = geo.Rect(status_position, split_width * 2, bg_rect_height)
-
-    styled_bg_rect = get_menu_background(bg_rect, style.rogue_classic_theme.rect_style, v_split=v_split)
-
-    return state.UIState(gui.UIElementList([styled_bg_rect, menu_stack_panel]))
+    dock = gui.UIDock(rectfactory.full_screen_rect())
+    dock.bottom = description_card
+    return state.UIState(gui.UIElementList([styled_bg_rect, player_status_stack_panel, dock]))
 
 
+#TODO: This is not used now, but it should, it's pretty good! Need multiple menus at once for that.
 def get_status_list(player):
     context_options = []
     state_stack = player.game_state.value.menu_prompt_stack
@@ -459,6 +449,17 @@ def get_status_list(player):
     resulting_menu = menu.StaticMenu((0, 0), context_options, state_stack,
                                      margin=style.menu_theme.margin)
     return gui.UIElementList([resulting_menu])
+
+
+def get_power_list(player, description_card):
+    options = []
+    state_stack = player.game_state.value.menu_prompt_stack
+    for power in player.get_children_with_tag("power"):
+        status_option = menu.MenuOption(power.description.name, [], (lambda: True), payload=power)
+        options.append(status_option)
+    resulting_menu = menu.StaticMenu((0, 0), options, state_stack,
+                                     selected_payload_callback=(lambda item, dc=description_card: dc.set_item(item)))
+    return resulting_menu
 
 
 def sacrifice_menu(player, powers, post_power_gain_function):
@@ -481,7 +482,6 @@ def sacrifice_menu(player, powers, post_power_gain_function):
 
     cancel_option = menu.MenuOption("Cancel", [stack_pop_function], (lambda: True))
     context_options.append(cancel_option)
-
 
     tmp = (0, 0)
     menu_stack_panel = gui.StackPanelVertical(tmp, style.menu_theme.margin, vertical_space=0,
