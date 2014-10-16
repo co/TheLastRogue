@@ -868,7 +868,7 @@ class ItemDescriptionCard(UIElement):
 
     def draw(self, offset=geo.zero2d()):
         position = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
-        if self._item:
+        if self._item and self.text_stack_panel:
             self._main_stack_panel.draw(position)
 
 
@@ -908,7 +908,7 @@ class ItemStatCard(RectangularUIElement):
                 self.text_stack_panel_right.append(text)
 
     def draw(self, offset=geo.zero2d()):
-        if self.item:
+        if self.item and (any(self.text_stack_panel_left.elements) or any(self.text_stack_panel_right.elements)):
             position = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
             self._bg_rect.draw(position)
             self.main_stack_panel.draw(position)
