@@ -1310,3 +1310,28 @@ class InfoTextLine(UIElement):
     def draw(self):
         self._bg_stack_panel.draw()
         self.dock.draw()
+
+
+class GraphicCharMatrix(UIElement):
+    def __init__(self, matrix, margin=geo.zero2d()):
+        super(GraphicCharMatrix, self).__init__(margin)
+        self.matrix = matrix
+
+    @property
+    def width(self):
+        return len(self.matrix[0])
+
+    @property
+    def height(self):
+        return len(self.matrix)
+
+    def draw(self, offset=geo.zero2d()):
+        the_offset = geo.add_2d(offset, self.margin)
+        row_index, column_index = 0, 0
+        for column in self.matrix:
+            for graphic_char in column:
+                position = geo.add_2d(the_offset, (row_index, column_index))
+                graphic.draw_graphic_char_to_console(position, graphic_char)
+                row_index += 1
+            column_index += 1
+            row_index = 0

@@ -66,20 +66,6 @@ class CharPrinter(Leaf):
         self.component_type = "char_printer"
         self._temp_animation_frames = []
 
-    @staticmethod
-    def _draw(position, graphic_char, the_console=0):
-        """
-        Draws the char on the given position on the console.
-
-        Bypasses all effects.
-        """
-        if not graphic_char.color_bg is None:
-            console.console.set_color_bg(position, graphic_char.color_bg, console=the_console)
-        if not graphic_char.color_fg is None:
-            console.console.set_color_fg(position, graphic_char.color_fg, console=the_console)
-        if not graphic_char.icon is None:
-            console.console.set_symbol(position, graphic_char.icon, console=the_console)
-
     def _tick_animation(self):
         frame = None
         if len(self._temp_animation_frames) > 0:
@@ -95,8 +81,8 @@ class CharPrinter(Leaf):
         """
         animation_frame = self._tick_animation()
         if animation_frame:
-            return self._draw(position, animation_frame, the_console)
-        self._draw(position, self.parent.graphic_char, the_console)
+            return draw_graphic_char_to_console(position, animation_frame, the_console)
+        draw_graphic_char_to_console(position, self.parent.graphic_char, the_console)
 
     def draw_unseen(self, screen_position, the_console=0):
         """
@@ -151,6 +137,20 @@ class CharPrinter(Leaf):
         copy = CharPrinter()
         copy._temp_animation_frames = self._temp_animation_frames
         return copy
+
+
+def draw_graphic_char_to_console(position, graphic_char, the_console=0):
+    """
+    Draws the char on the given position on the console.
+
+    Bypasses all effects.
+    """
+    if not graphic_char.color_bg is None:
+        console.console.set_color_bg(position, graphic_char.color_bg, console=the_console)
+    if not graphic_char.color_fg is None:
+        console.console.set_color_fg(position, graphic_char.color_fg, console=the_console)
+    if not graphic_char.icon is None:
+        console.console.set_symbol(position, graphic_char.icon, console=the_console)
 
 
 def _expand_frames(graphic_char_frames, animation_delay):

@@ -538,43 +538,59 @@ def get_dungeon_feature_menu_options(player, stack_pop_function):
 
 
 def title_screen(state_stack):
-    title_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
-    line = gui.HorizontalLine(graphic.GraphicChar(colors.WHITE, colors.GRAY, icon.H_LINE), settings.SCREEN_WIDTH + 1)
-    the_text = gui.TextBox("T H E", (0, 0), colors.BLACK, (0, 1))
-    last_text = gui.TextBox("L A S T", (0, 0), colors.BLACK, (0, 1))
-    rogue_text = gui.TextBox("R O G U E", (0, 0), colors.BLACK, (0, 1))
+    line = gui.HorizontalLine(graphic.GraphicChar(colors.DARKNESS, colors.RED, icon.H_LINE), settings.SCREEN_WIDTH + 1)
 
-    vspace = gui.VerticalSpace(15)
+    _ = graphic.GraphicChar(colors.DARKNESS, colors.DARKNESS, " ")
+    x = graphic.GraphicChar(colors.RED, colors.RED, " ")
+    d = graphic.GraphicChar(colors.DARKNESS, colors.RED, icon.DIAGONAL_SE)
+    b = graphic.GraphicChar(colors.DARKNESS, colors.RED, icon.DIAGONAL_SW)
+    p = graphic.GraphicChar(colors.RED, colors.DARKNESS, icon.DIAGONAL_SE)
+    q = graphic.GraphicChar(colors.RED, colors.DARKNESS, icon.DIAGONAL_SW)
 
+
+    graphic_matrix = [
+    [_,_,_,x,x,x,_,_,x,_,x,_,_,x,x,x,_,_,_,_,_,_,_,x,_,_,_,_,d,x,b,_,_,d,x,p,_,_,x,x,x,_,_],
+    [_,_,_,_,x,_,_,_,x,_,x,_,_,x,_,_,_,_,_,_,_,_,_,x,_,_,_,_,x,_,x,_,_,x,_,_,_,_,_,x,_,_,_],
+    [_,_,_,_,x,_,_,_,x,x,x,_,_,x,x,_,_,_,_,_,_,_,_,x,_,_,_,_,x,x,x,_,_,q,x,b,_,_,_,x,_,_,_],
+    [_,_,_,_,x,_,_,_,x,_,x,_,_,x,_,_,_,_,_,_,_,_,_,x,_,_,_,_,x,_,x,_,_,_,_,x,_,_,_,x,_,_,_],
+    [_,_,_,_,x,_,_,_,x,_,x,_,_,x,x,x,_,_,_,_,_,_,_,x,x,x,_,_,x,_,x,_,_,x,x,p,_,_,_,x,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+    [q,x,x,x,x,x,x,b,_,_,d,x,x,x,x,x,b,_,_,d,x,x,x,x,x,b,_,q,x,x,p,_,q,x,x,p,q,x,x,x,x,x,x],
+    [_,x,x,_,_,q,x,x,_,_,x,x,p,_,q,x,x,_,_,x,x,p,_,q,x,x,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,q],
+    [_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,_,_,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,_],
+    [_,x,x,_,_,d,x,x,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,_,_,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,_],
+    [_,x,x,x,x,x,x,p,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,x,x,x,p,_,x,x,_,_,_,x,x,_,_,x,x,x,x,p,_],
+    [_,x,x,q,x,b,_,_,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,_],
+    [_,x,x,_,q,x,b,_,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,x,x,_,_,x,x,_,_,_,_],
+    [_,x,x,_,_,q,x,b,_,_,x,x,b,_,d,x,x,_,_,x,x,b,_,d,x,x,_,_,x,x,b,_,d,x,x,_,_,x,x,_,_,_,d],
+    [d,x,x,b,_,_,x,x,b,_,q,x,x,x,x,x,p,_,_,q,x,x,x,x,x,p,_,_,q,x,x,x,x,x,p,_,d,x,x,x,x,x,x]
+    ]
+    logo = gui.GraphicCharMatrix(graphic_matrix)
     hero_name_type_writer = gui.TypeWriter((0, 0), colors.WHITE, colors.GRAY_D, constants.LEFT_SIDE_BAR_WIDTH - 4,
                                            default_text=settings.DEFAULT_PLAYER_NAME)
 
-    title_stack_panel.append(vspace)
+    title_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
+    title_stack_panel.append(gui.VerticalSpace(int(settings.SCREEN_HEIGHT * 0.2)))
     title_stack_panel.append(line)
-    title_stack_panel.append(the_text)
-    title_stack_panel.append(last_text)
-    title_stack_panel.append(rogue_text)
+    title_stack_panel.append(gui.VerticalSpace(1))
+    title_stack_panel.append(logo)
+    title_stack_panel.append(gui.VerticalSpace(1))
     title_stack_panel.append(line)
     title_stack_panel.append(gui.VerticalSpace(5))
 
-    bg_rect = gui.FilledRectangle(rectfactory.full_screen_rect(), colors.DARK_BLUE)
-    bg_sign_rect = gui.FilledRectangle(geo.Rect((0, 15), settings.SCREEN_WIDTH, 11), colors.WHITE)
+    bg_rect = gui.FilledRectangle(rectfactory.full_screen_rect(), colors.DARKNESS)
 
     ui_state = state.UIState(gui.UIElementList(None))
     main_menu = _main_menu(ui_state, state_stack, lambda: hero_name_type_writer.text)
-    border_x = 6
-    border_y = 4
-    menu_bg = get_menu_background(geo.Rect((0, 0), main_menu.width + border_x, main_menu.height + border_y))
-    menu_and_bg = gui.UIElementList([menu_bg, main_menu])
 
     name_heading = gui.TextBox("Name:", (0, 0), colors.CYAN_D, (0, 1))
     menu_stack_panel = gui.StackPanelVertical((0, 0), (0, 0), vertical_space=0,
                                               alignment=gui.StackPanelVertical.ALIGN_CENTER)
     menu_stack_panel.append(name_heading)
     menu_stack_panel.append(hero_name_type_writer)
-    menu_stack_panel.append(gui.VerticalSpace(1))
-    menu_stack_panel.append(menu_and_bg)
-    menu_stack_panel.append(gui.VerticalSpace(2))
+    menu_stack_panel.append(main_menu)
 
     dock = gui.UIDock(rectfactory.full_screen_rect())
     dock.bottom = menu_stack_panel
@@ -585,7 +601,7 @@ def title_screen(state_stack):
                                                            main_menu, colors.WHITE,
                                                            colors.GRAY_D, [1, 2])])
 
-    ui_state.ui_element.elements = [bg_rect, bg_sign_rect, title_stack_panel, dock, type_writer_highlight_update]
+    ui_state.ui_element.elements = [bg_rect, title_stack_panel, dock, type_writer_highlight_update]
     return ui_state
 
 
