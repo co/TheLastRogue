@@ -524,7 +524,7 @@ def new_sling(game_state):
     sling.set_child(DataPoint(DataTypes.WEAPON_RANGE, 4))
     sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
     sling.set_child(accuracy_item_stat(5))
-    sling.set_child(Damage(1, 3))
+    sling.set_child(damage_item_stat(1, 3))
     return sling
 
 

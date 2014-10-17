@@ -189,7 +189,7 @@ class ReflectDamageTakenEffect(DamageTakenEffect):
             damage_effect = entityeffect.UndodgeableAttackEntityEffect(self.parent, self.damage,
                                                                        [DamageTypes.MAGIC, DamageTypes.REFLECT])
             source_entity.effect_queue.add(damage_effect)
-        if source_entity:
+        if source_entity and source_entity.has("effect_queue"):
             source_entity.effect_queue.add(entityeffect.StatusIconEntityEffect(source_entity, DAMAGE_REFLECT_STATUS_DESCRIPTION, 1))
 
 
