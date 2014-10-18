@@ -312,6 +312,7 @@ class DamageTypes(object):
     BLEED = "bleed_damage_type"
     ACID = "acid_damage_type"
     POISON = "poison_damage_type"
+    LIGHTNING = "lightning_damage_type"
     FIRE = "fire_damage_type"
     REFLECT = "reflect_damage_type"
 

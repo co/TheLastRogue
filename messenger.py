@@ -9,7 +9,7 @@ CRIT_MESSAGE = "%(source_entity)s critically hits %(target_entity)s for %(damage
 
 HAUNT_MESSAGE = "%(source_entity)s haunts the %(target_entity)s!"
 
-HEART_STOP_MESSAGE = "%(target_entity)s, clutches its heart."
+HEART_STOP_MESSAGE = "%(target_entity)s clutches its heart."
 DARKNESS_MESSAGE = "An unnatural darkness fills the dungeon."
 PICK_UP_MESSAGE = "You pick up %(item)s."
 POISON_MESSAGE = "%(target_entity)s takes %(damage)s in poison damage."
@@ -32,10 +32,12 @@ PLAYER_TELEPORT_MESSAGE = "Your surroundings seem different."
 
 POTION_SMASH_TO_GROUND = "The %(target_entity)s smashes to the ground and breaks into pieces."
 ITEM_HITS_THE_GROUND = "The %(target_entity)s hits the ground with a thud."
-ENTITY_EXPLODES = "The %(target_entity)s explodes!"
+ENTITY_EXPLODES = "%(target_entity)s explodes!"
 
 PLAYER_MAP_MESSAGE = "You surroundings suddenly seem familiar."
 GLASS_TURNING_MESSAGE = "You surroundings suddenly seem more transparent."
+
+DEVICE_ZAP_MESSAGE = "%(source_entity)s zaps %(target_entity)s for %(damage)s damage!"
 
 
 class Messenger(object):

@@ -1,4 +1,5 @@
 import random
+
 from action import Action, SOURCE_ENTITY, GAME_STATE
 from animation import animate_flight
 from attacker import DamageTypes, UndodgeableAttack
@@ -6,12 +7,12 @@ from entityeffect import Heal, AddSpoofChild
 import gametime
 import geometry
 from graphic import GraphicChar
-import libtcodpy as libtcod
 from monsteractor import MonsterWeightedAction
 from mover import RandomStepper
 import shoot
 import colors
 import icon
+from util import get_path
 
 
 class PlayerMissileAction(Action):
@@ -257,14 +258,14 @@ class MonsterMissileAction(MonsterTargetAction):
         """
         What about selfish creatures? that don't care about other creatures. Must know what kind of obstacle is blocking
         """
-        path = self._get_path(destination)
+        path = get_path(self.parent.position.value, destination)
         hit_detector = shoot.MissileHitDetection(False, False)
         dungeon_level = self.parent.dungeon_level.value
         path_taken = hit_detector.get_path_taken(path, dungeon_level)
         return geometry.chess_distance(self.parent.position.value, destination) != len(path_taken)
 
     def act(self, destination):
-        path = self._get_path(destination)
+        path = get_path(self.parent.position.value, destination)
         if path is None or path[-1] == self.parent.position.value:
             return False
         dungeon_level = self.parent.dungeon_level.value
@@ -275,22 +276,6 @@ class MonsterMissileAction(MonsterTargetAction):
         animate_flight(self.parent.game_state.value, path_taken, self.missile_graphic.icon, self.missile_graphic.color_fg)
         self.missile_hit_effect(dungeon_level, path[-1])
         self.add_energy_spent_to_entity(self.parent)
-
-    def _get_path(self, destination):
-        result = []
-        sx, sy = self.parent.position.value
-        dx, dy = destination
-        libtcod.line_init(sx, sy, dx, dy)
-        x, y = libtcod.line_step()
-        while not x is None:
-            result.append((x, y))
-            x, y = libtcod.line_step()
-        result.append(destination)
-        return result
-
-    # implemented by subclasses
-    def missile_hit_effect(self, dungeon_level, position):
-        pass
 
 
 #TODO: Most of content has moved to super class and should be removed.

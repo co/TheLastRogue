@@ -3,6 +3,8 @@ from Status import DAMAGE_REFLECT_STATUS_DESCRIPTION
 
 from action import Action
 from actor import DoNothingActor
+import animation
+from attacker import calculate_damage, DamageTypes
 from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud, new_fire_cloud
 from compositecommon import PoisonEntityEffectFactory
 from compositecore import Leaf, Composite
@@ -18,6 +20,7 @@ from mover import Mover
 from position import Position, DungeonLevel
 import rng
 from shapegenerator import extend_points
+from shoot import MissileHitDetection
 from stats import DataPoint, Flag, DataTypes, GamePieceTypes
 from statusflags import StatusFlags
 from terrain import GlassWall
@@ -30,6 +33,7 @@ import gametime
 from messenger import msg
 import icon
 from equipmenteffect import StatBonusEquipEffect, LifeStealEffect, SetInvisibilityFlagEquippedEffect
+import util
 
 
 class ItemType(Leaf):
@@ -110,6 +114,17 @@ def new_swap_device(game_state):
                                  "This ancient device will swap places with every creature in view."))
     device.set_child(SwapDeviceAction())
     device.set_child(GraphicChar(None, colors.YELLOW, icon.MACHINE))
+    return device
+
+
+def new_zap_device(game_state):
+    device = Composite()
+    set_item_components(device, game_state)
+    set_device_components(device)
+    device.set_child(Description("Device of Zapping",
+                                 "This ancient device will zap a random creature within view."))
+    device.set_child(ZapDeviceAction())
+    device.set_child(GraphicChar(None, colors.GRAY, icon.MACHINE))
     return device
 
 
@@ -277,6 +292,54 @@ class HeartStopDeviceAction(ActivateDeviceAction):
         target = random.sample(entities, 1)[0]
         heart_stop_effect = entityeffect.HeartStop(source_entity, time_to_live=ttl)
         target.effect_queue.add(heart_stop_effect)
+
+
+class ZapDeviceAction(ActivateDeviceAction):
+    """
+    Defines the device activate action.
+    """
+
+    def __init__(self):
+        super(ZapDeviceAction, self).__init__()
+        self.component_type = "zap_device_activate_action"
+
+    def _activate(self, source_entity):
+        """
+        The activate action subclasses should override
+        and define the activate action here.
+        """
+        entities = [entity for entity in source_entity.vision.get_seen_entities()
+                    if not entity is source_entity]
+        if len(entities) <= 0:
+            return
+        random.shuffle(entities)
+        missile_hit_detector = MissileHitDetection(passes_entity=True, passes_solid=False)
+        dungeon_level = source_entity.dungeon_level.value
+        zap_graphic = GraphicChar(None, colors.LIGHT_ORANGE, "*")
+        for entity in entities:
+            path = util.get_path(source_entity.position.value, entity.position.value)
+            path = path[1:]
+            new_path = missile_hit_detector.get_path_taken(path, dungeon_level)
+            if len(path) == len(new_path):
+                self.zap_path(new_path, source_entity)
+                animation.animate_path(source_entity.game_state.value, path, zap_graphic)
+                break
+
+    def zap_path(self, path, source_entity):
+        for position in path:
+            for entity in source_entity.dungeon_level.value.get_tile_or_unknown(position).get_entities():
+                self.zap_entity(source_entity, entity)
+
+    def zap_entity(self, source_entity, target_entity):
+        damage_min = 1
+        damage_max = 20
+        damage_types = [DamageTypes.LIGHTNING]
+        if target_entity.has("effect_queue"):
+            damage = calculate_damage(damage_min, damage_max, 0, 1)
+            damage_effect = entityeffect.UndodgeableAttackEntityEffect(source_entity, damage, damage_types,
+                                                                       hit_message=messenger.DEVICE_ZAP_MESSAGE)
+            target_entity.effect_queue.add(damage_effect)
+
 
 
 class Stacker(Leaf):

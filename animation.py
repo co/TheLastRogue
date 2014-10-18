@@ -74,3 +74,15 @@ def animate_fall(target_entity, animation_target_piece):
                      GraphicChar(None, color_fg, "+"),
                      GraphicChar(None, color_fg, icon.CENTER_DOT)]
     animation_target_piece.char_printer.append_graphic_char_temporary_frames(graphic_chars)
+
+
+def animate_path(game_state, path, graphic_char):
+    path = [p for p in path if game_state.player.dungeon_mask.can_see_point(p)]
+    camera = game_state.current_stack.get_game_state().camera
+    for _ in range(settings.MISSILE_ANIMATION_DELAY):
+        game_state.prepare_draw()
+        for position in path:
+            x, y = camera.dungeon_to_screen_position(position)
+            console.set_color_fg((x, y), graphic_char.color_fg)
+            console.set_symbol((x, y), graphic_char.icon)
+        console.flush()

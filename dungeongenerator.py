@@ -1,6 +1,5 @@
 import math
 import random
-import constants
 
 import terrain
 import rng

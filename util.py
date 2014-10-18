@@ -1,6 +1,7 @@
 from actor import DoNothingActor, StunnedActor
 from entityeffect import AddSpoofChild
 import gametime
+import libtcodpy as libtcod
 from mover import ImmobileStepper
 import turn
 import direction
@@ -136,3 +137,15 @@ def entity_stunned_turn(source_entity, target_entity):
 def entity_skip_step(source_entity, target_entity):
     add_spoof_effect = AddSpoofChild(source_entity, ImmobileStepper(), gametime.single_turn)
     target_entity.effect_queue.add(add_spoof_effect)
+
+
+def get_path(start, destination):
+    result = [start]
+    sx, sy = start
+    dx, dy = destination
+    libtcod.line_init(sx, sy, dx, dy)
+    x, y = libtcod.line_step()
+    while not x is None:
+        result.append((x, y))
+        x, y = libtcod.line_step()
+    return result

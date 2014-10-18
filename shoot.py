@@ -46,13 +46,13 @@ class MissileHitDetection(object):
                 return self._last_n_or_default(path, index, None)
             if tile.has_entity() and not self.passes_entity:
                 return self._last_n_or_default(path, index + 1, None)
-        return self._last_n_or_default(path, index, None)
+        return self._last_n_or_default(path, index + 1, None)
 
     def _last_n_or_default(self, the_list, n, default):
         """
         Help function for getting last n elements of a list or default value.
         """
-        if(n >= len(the_list)):
+        if n > len(the_list):
             return default
         else:
             return the_list[:n]
