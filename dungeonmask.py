@@ -138,7 +138,7 @@ class DungeonMask(Leaf):
         elif len(self._dirty_point_list) > 0:
             for point in self._dirty_point_list:
                 x, y = point
-            self.update_dungeon_map_point(x, y)
+                self.update_dungeon_map_point(x, y)
             self._dirty_point_list = []
             self.update_fov()
 
