@@ -97,6 +97,7 @@ dungeon_usable_item_table = \
         [DungeonTableItem(item.new_heart_stop_device)] * 2 +
         [DungeonTableItem(item.new_glass_device)] * 2 +
         [DungeonTableItem(item.new_zap_device)] * 2 +
+        [DungeonTableItem(item.new_healing_device)] * 2 +
         [DungeonTableItem(item.new_swap_device)] * 2 +
 
         [DungeonTableItem(item.new_bomb)] * 4 +

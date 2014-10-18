@@ -128,6 +128,17 @@ def new_zap_device(game_state):
     return device
 
 
+def new_healing_device(game_state):
+    device = Composite()
+    set_item_components(device, game_state)
+    set_device_components(device)
+    device.set_child(Description("Device of Healing",
+                                 "This ancient device will heal everything within view."))
+    device.set_child(HealDeviceAction())
+    device.set_child(GraphicChar(None, colors.PINK, icon.MACHINE))
+    return device
+
+
 def new_energy_sphere(game_state):
     """
     A composite component representing a gun ammunition item.
@@ -292,6 +303,32 @@ class HeartStopDeviceAction(ActivateDeviceAction):
         target = random.sample(entities, 1)[0]
         heart_stop_effect = entityeffect.HeartStop(source_entity, time_to_live=ttl)
         target.effect_queue.add(heart_stop_effect)
+
+class HealDeviceAction(ActivateDeviceAction):
+    """
+    Defines the device activate action.
+    """
+
+    def __init__(self):
+        super(HealDeviceAction, self).__init__()
+        self.component_type = "heal_device_activate_action"
+
+    def _activate(self, source_entity):
+        """
+        The activate action subclasses should override
+        and define the activate action here.
+        """
+        player = source_entity
+        entities = [entity for entity in source_entity.vision.get_seen_entities()
+                    if entity.health.is_damaged()] + [player]  # And the player too.
+        if len(entities) <= 0:
+            return
+        min_heal = 3
+        max_heal = 15
+        for target_entity in entities:
+            heal = random.randrange(min_heal, max_heal + 1)
+            heal_effect = entityeffect.Heal(target_entity, heal, heal_message=messenger.HEALTH_DEVICE_MESSAGE)
+            target_entity.effect_queue.add(heal_effect)
 
 
 class ZapDeviceAction(ActivateDeviceAction):

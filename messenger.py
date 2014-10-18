@@ -37,7 +37,8 @@ ENTITY_EXPLODES = "%(target_entity)s explodes!"
 PLAYER_MAP_MESSAGE = "You surroundings suddenly seem familiar."
 GLASS_TURNING_MESSAGE = "You surroundings suddenly seem more transparent."
 
-DEVICE_ZAP_MESSAGE = "%(source_entity)s zaps %(target_entity)s for %(damage)s damage!"
+ZAP_DEVICE_MESSAGE = "%(source_entity)s zaps %(target_entity)s for %(damage)s damage!"
+HEALTH_DEVICE_MESSAGE = "%(target_entity)s is healed by the device for %(health)s health."
 
 
 class Messenger(object):
