@@ -538,14 +538,16 @@ def get_dungeon_feature_menu_options(player, stack_pop_function):
 
 
 def title_screen(state_stack):
-    line = gui.HorizontalLine(graphic.GraphicChar(colors.DARKNESS, colors.RED, icon.H_LINE), settings.SCREEN_WIDTH + 1)
 
-    _ = graphic.GraphicChar(colors.DARKNESS, colors.DARKNESS, " ")
-    x = graphic.GraphicChar(colors.RED, colors.RED, " ")
-    d = graphic.GraphicChar(colors.DARKNESS, colors.RED, icon.DIAGONAL_SE)
-    b = graphic.GraphicChar(colors.DARKNESS, colors.RED, icon.DIAGONAL_SW)
-    p = graphic.GraphicChar(colors.RED, colors.DARKNESS, icon.DIAGONAL_SE)
-    q = graphic.GraphicChar(colors.RED, colors.DARKNESS, icon.DIAGONAL_SW)
+    bg_color = colors.DARKNESS
+    logo_fg = colors.RED
+
+    _ = graphic.GraphicChar(bg_color, bg_color, " ")
+    x = graphic.GraphicChar(logo_fg, logo_fg, " ")
+    d = graphic.GraphicChar(bg_color, logo_fg, icon.DIAGONAL_SE)
+    b = graphic.GraphicChar(bg_color, logo_fg, icon.DIAGONAL_SW)
+    p = graphic.GraphicChar(logo_fg, bg_color, icon.DIAGONAL_SE)
+    q = graphic.GraphicChar(logo_fg, bg_color, icon.DIAGONAL_SW)
 
 
     graphic_matrix = [
@@ -567,10 +569,9 @@ def title_screen(state_stack):
     [_,x,x,_,_,q,x,b,_,_,x,x,b,_,d,x,x,_,_,x,x,b,_,d,x,x,_,_,x,x,b,_,d,x,x,_,_,x,x,_,_,_,d],
     [d,x,x,b,_,_,x,x,b,_,q,x,x,x,x,x,p,_,_,q,x,x,x,x,x,p,_,_,q,x,x,x,x,x,p,_,d,x,x,x,x,x,x]
     ]
-    logo = gui.GraphicCharMatrix(graphic_matrix)
-    hero_name_type_writer = gui.TypeWriter((0, 0), colors.WHITE, colors.GRAY_D, constants.LEFT_SIDE_BAR_WIDTH - 4,
-                                           default_text=settings.DEFAULT_PLAYER_NAME)
 
+    logo = gui.GraphicCharMatrix(graphic_matrix)
+    line = gui.HorizontalLine(graphic.GraphicChar(bg_color, colors.RED, icon.H_LINE), settings.SCREEN_WIDTH + 1)
     title_stack_panel = gui.StackPanelVertical((0, 0), alignment=gui.StackPanelVertical.ALIGN_CENTER)
     title_stack_panel.append(gui.VerticalSpace(int(settings.SCREEN_HEIGHT * 0.2)))
     title_stack_panel.append(line)
@@ -580,9 +581,11 @@ def title_screen(state_stack):
     title_stack_panel.append(line)
     title_stack_panel.append(gui.VerticalSpace(5))
 
-    bg_rect = gui.FilledRectangle(rectfactory.full_screen_rect(), colors.DARKNESS)
+    bg_rect = gui.FilledRectangle(rectfactory.full_screen_rect(), bg_color)
 
     ui_state = state.UIState(gui.UIElementList(None))
+    hero_name_type_writer = gui.TypeWriter((0, 0), colors.WHITE, colors.GRAY_D, constants.LEFT_SIDE_BAR_WIDTH - 4,
+                                           default_text=settings.DEFAULT_PLAYER_NAME)
     main_menu = _main_menu(ui_state, state_stack, lambda: hero_name_type_writer.text)
 
     name_heading = gui.TextBox("Name:", (0, 0), colors.CYAN_D, (0, 1))
