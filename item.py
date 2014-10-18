@@ -1,4 +1,5 @@
 import random
+from time import sleep
 from Status import DAMAGE_REFLECT_STATUS_DESCRIPTION
 
 from action import Action
@@ -136,6 +137,17 @@ def new_healing_device(game_state):
                                  "This ancient device will heal everything within view."))
     device.set_child(HealDeviceAction())
     device.set_child(GraphicChar(None, colors.PINK, icon.MACHINE))
+    return device
+
+
+def new_blinks_device(game_state):
+    device = Composite()
+    set_item_components(device, game_state)
+    set_device_components(device)
+    device.set_child(Description("Device of Blinks",
+                                 "This ancient device will repeatedly teleport all creatuers within view short distances."))
+    device.set_child(BlinksDeviceAction())
+    device.set_child(GraphicChar(None, colors.PURPLE, icon.MACHINE))
     return device
 
 
@@ -304,6 +316,54 @@ class HeartStopDeviceAction(ActivateDeviceAction):
         heart_stop_effect = entityeffect.HeartStop(source_entity, time_to_live=ttl)
         target.effect_queue.add(heart_stop_effect)
 
+
+class BlinksDeviceAction(ActivateDeviceAction):
+    """
+    Defines the device activate action.
+    """
+
+    def __init__(self):
+        super(BlinksDeviceAction, self).__init__()
+        self.component_type = "blinks_device_activate_action"
+
+    def _activate(self, source_entity):
+        """
+        The activate action subclasses should override
+        and define the activate action here.
+        """
+        min_blinks = 2
+        max_blinks = 6
+        times = random.randrange(min_blinks, max_blinks + 1)
+        for _ in range(times):
+            self._blinks(source_entity)
+
+    def _blinks(self, source_entity):
+        player = source_entity
+        entities = [entity for entity in source_entity.vision.get_seen_entities()] + [player]  # And the player too.
+        for target_entity in entities:
+            self._blink(target_entity)
+        player.game_state.value.signal_need_total_redraw()
+        player.game_state.value.force_draw()
+        sleep(0.2)
+
+    def _blink(self, entity):
+        sight = entity.sight_radius.value
+        possible_destinations = []
+        for x in range(-sight, sight + 1):
+            for y in range(-sight, sight + 1):
+                if x == 0 and y == 0:
+                    continue
+                p = geometry.add_2d((x, y), entity.position.value)
+                if entity.dungeon_mask.can_see_point(p):
+                    possible_destinations.append(p)
+        random.shuffle(possible_destinations)
+        for position in possible_destinations:
+            is_safe = (entity.dungeon_level.value.get_tile_or_unknown(position).get_terrain().has("is_floor")
+                       or entity.status_flags.has_status(StatusFlags.FLYING))
+            if is_safe and entity.mover.try_move(position):
+                break
+
+
 class HealDeviceAction(ActivateDeviceAction):
     """
     Defines the device activate action.
@@ -374,7 +434,7 @@ class ZapDeviceAction(ActivateDeviceAction):
         if target_entity.has("effect_queue"):
             damage = calculate_damage(damage_min, damage_max, 0, 1)
             damage_effect = entityeffect.UndodgeableAttackEntityEffect(source_entity, damage, damage_types,
-                                                                       hit_message=messenger.DEVICE_ZAP_MESSAGE)
+                                                                       hit_message=messenger.ZAP_DEVICE_MESSAGE)
             target_entity.effect_queue.add(damage_effect)
 
 

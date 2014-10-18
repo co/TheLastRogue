@@ -1,8 +1,5 @@
-import random
-
 import geometry
 from compositecore import Leaf
-from geometry import add_2d
 import rng
 import turn
 
@@ -28,7 +25,7 @@ class Vision(Leaf):
         return self._seen_entities_cache
 
     def _calculate_seen_entities(self):
-        if not self.parent.dungeon_level.value == None:
+        if not self.parent.dungeon_level.value is None:
             seen_entities = []
             for entity in self.parent.dungeon_level.value.entities:
                 if self.parent.dungeon_mask.can_see_point(entity.position.value):

@@ -99,6 +99,7 @@ dungeon_usable_item_table = \
         [DungeonTableItem(item.new_zap_device)] * 2 +
         [DungeonTableItem(item.new_healing_device)] * 2 +
         [DungeonTableItem(item.new_swap_device)] * 2 +
+        [DungeonTableItem(item.new_blinks_device)] * 2 +
 
         [DungeonTableItem(item.new_bomb)] * 4 +
         [DungeonTableItem(item.new_poison_potion)] * 6 +
