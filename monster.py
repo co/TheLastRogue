@@ -17,7 +17,8 @@ from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
 import messenger
 from missileaction import MonsterThrowStoneAction, MonsterThrowRockAction, SpiritMissile, MonsterHealTargetEntityEffect, MonsterTripTargetEffect
-from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor, MonsterWeightedStepAction
+from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor, MonsterWeightedStepAction, \
+    StartHuntOnAttack
 from monsterspells import SummonEntityMonsterAction
 from mover import Mover, Stepper, SlimeCanShareTileEntityMover, CautiousStepper, TolerateDamage
 from ondeath import PrintDeathMessageOnDeath, LeaveCorpseOnDeath, RemoveEntityOnDeath, LeaveCorpseTurnIntoEntityOnDeath
@@ -67,9 +68,12 @@ def set_monster_components(monster, game_state):
     monster.set_child(DungeonMask())
     monster.set_child(Vision())
     monster.set_child(Path())
+
     monster.set_child(ChasePlayerActor())
     monster.set_child(MonsterActorState())
     monster.set_child(HuntPlayerIfHurtMe())
+    monster.set_child(StartHuntOnAttack())
+
     monster.set_child(Equipment())
     monster.set_child(Inventory())
     monster.set_child(EffectQueue())

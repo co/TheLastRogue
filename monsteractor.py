@@ -1,9 +1,11 @@
 import random
+
 import Status
 from action import Action
 import colors
 from compositecore import Leaf
 from entityeffect import RemoveChildEffect, AddSpoofChild
+from equipmenteffect import BeforeAttackEffect
 import gametime
 import geometry as geo
 from graphic import GraphicChar
@@ -54,6 +56,15 @@ class MonsterActor(Actor):
 
     def __init__(self):
         super(MonsterActor, self).__init__()
+
+    def act(self):
+        if not self.parent.dungeon_level.value:
+            print "DBG MonsterActor without dungeon"
+            return gametime.single_turn
+        return self._act()
+
+    def _act(self):
+        return gametime.single_turn
 
     def try_step_random_direction(self):
         """
@@ -130,12 +141,16 @@ class MonsterActor(Actor):
         chosen_action = rng.weighted_choice(targeted_actions)
         if "monster_target_action" in chosen_action.tags:
             chosen_target = random.choice(chosen_action.get_target_options())
-            return chosen_action.act(chosen_target.position.value)
+            if (not chosen_target.has("is_player")  # Only target the player if monster is aware of the player.
+                or self.parent.monster_actor_state.value == MonsterActorState.HUNTING):
+                return chosen_action.act(chosen_target.position.value)
+            else:
+                return
         return chosen_action.act()
 
-        #def can_do_weighted_action(self):
-        #    """
-        #    Returns true if it's possible for the monster to do a ranged attack at the player.
+        # def can_do_weighted_action(self):
+        # """
+        # Returns true if it's possible for the monster to do a ranged attack at the player.
         #    """
         #    player = self.get_player_if_seen()
         #    if player is None or MonsterActorState.HUNTING != self.parent.monster_actor_state.value:
@@ -144,6 +159,15 @@ class MonsterActor(Actor):
         #        if action.can_act(destination=player.position.value):
         #            return True
         #    return False
+
+    def update_monster_actor_state(self):
+        # Perform Stealth Check
+        if self.notice_player_check():
+            self.parent.monster_actor_state.value = MonsterActorState.HUNTING
+        elif (not self.can_see_player() and  # forget player check.
+                      self.parent.monster_actor_state.value == MonsterActorState.HUNTING and
+                  rng.coin_flip() and rng.coin_flip() and rng.coin_flip()):
+            self.parent.monster_actor_state.value = MonsterActorState.WANDERING
 
 
 class StepRandomDirectionActor(MonsterActor):
@@ -154,7 +178,7 @@ class StepRandomDirectionActor(MonsterActor):
     def __init__(self):
         super(StepRandomDirectionActor, self).__init__()
 
-    def act(self):
+    def _act(self):
         return self.try_step_random_direction()
 
 
@@ -169,27 +193,18 @@ class ChasePlayerActor(MonsterActor):
     def no_action_taken(self):
         return self.newly_spent_energy <= 0
 
-    def act(self):
-        if not self.parent.dungeon_level.value:
-            return gametime.single_turn
+    def _act(self):
         self.parent.dungeon_mask.update_fov()
         self.newly_spent_energy = 0
 
-        #  Perform Stealth Check
-        if self.notice_player_check():
-            self.parent.monster_actor_state.value = MonsterActorState.HUNTING
-        elif (self.parent.monster_actor_state.value == MonsterActorState.HUNTING and
-                  rng.coin_flip() and rng.coin_flip() and rng.coin_flip()):
-            self.parent.monster_actor_state.value = MonsterActorState.WANDERING
+        self.update_monster_actor_state()
 
-        #  Set Path
         self.set_path_to_player_if_seen()
         if not self.parent.path.has_path() and not self._is_standing_on_player():
             self.set_path_to_random_walkable_point()
 
-        #  Do action
-        if self.no_action_taken():
-            self.try_do_weighted_action()
+        # Do action
+        self.try_do_weighted_action()
         if self.no_action_taken() and self.parent.path.has_path():
             self.newly_spent_energy += self.parent.path.try_step_path()
         if self.no_action_taken():
@@ -212,15 +227,11 @@ class KeepPlayerAtDistanceActor(MonsterActor):
         super(KeepPlayerAtDistanceActor, self).__init__()
         self.optimal_distance = optimal_distance
 
-    def act(self):
+    def _act(self):
         self.parent.dungeon_mask.update_fov()
         self.newly_spent_energy = 0
 
-        #  Perform Stealth Check
-        if self.notice_player_check():
-            self.parent.monster_actor_state.value = MonsterActorState.HUNTING
-        elif rng.coin_flip() and rng.coin_flip() and rng.coin_flip():
-            self.parent.monster_actor_state.value = MonsterActorState.WANDERING
+        self.update_monster_actor_state()
 
         self.try_do_weighted_action()
         if not self._keep_player_at_distance():
@@ -267,6 +278,16 @@ class HuntPlayerIfHurtMe(DamageTakenEffect):
             self.parent.monster_actor_state.value = MonsterActorState.HUNTING
 
 
+class StartHuntOnAttack(BeforeAttackEffect):
+    def __init__(self):
+        super(StartHuntOnAttack, self).__init__(1.0)
+        self.component_type = "start_hunt_on_attack"
+
+    def before_attack_effect(self, source_entity, target_entity):
+        if target_entity.has("is_player"):
+            self.parent.monster_actor_state.value = MonsterActorState.HUNTING
+
+
 class MonsterWeightedAction(Action):
     def __init__(self, weight=100):
         super(MonsterWeightedAction, self).__init__()
@@ -279,7 +300,7 @@ class MonsterWeightedStepAction(MonsterWeightedAction):
         super(MonsterWeightedStepAction, self).__init__(weight)
         self.component_type = "monster_weighted_step_action"
 
-    def act(self, **kwargs):
+    def _act(self, **kwargs):
         self.parent.actor.newly_spent_energy += self.parent.path.try_step_path()
 
 
@@ -298,7 +319,7 @@ class SleepingActor(MonsterActor):
             self.parent.monster_actor_state.value = MonsterActorState.SLEEPING
         self.parent.effect_queue.add(AddSpoofChild(self.parent, DataPoint(DataTypes.AWARENESS, 1), time_to_live=1))
 
-    def act(self):
+    def _act(self):
         """
         Just returns energy spent, shows it's stunned.
         """

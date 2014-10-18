@@ -219,10 +219,11 @@ class Path(Leaf):
         Tries to step the entity along the path, relies on the mover module.
         """
         if not self.has_path():
-            return False
+            return 0
         next_point = self.position_list.pop()
         if not geometry.chess_distance(next_point, self.parent.position.value) == 1:
             self.set_line_path(next_point)
+            next_point = self.position_list.pop()
         energy_spent = self.parent.stepper.try_move_or_bump(next_point)
         if energy_spent <= 0:
             energy_spent = self.try_step_left_or_right(next_point)
