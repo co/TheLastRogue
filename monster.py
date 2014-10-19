@@ -16,7 +16,8 @@ from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged
 from inventory import Inventory
 import messenger
-from missileaction import MonsterThrowStoneAction, MonsterThrowRockAction, SpiritMissile, MonsterHealTargetEntityEffect, MonsterTripTargetEffect
+from missileaction import MonsterThrowStoneAction, MonsterThrowRockAction, SpiritMissile, MonsterHealTargetEntityEffect, MonsterTripTargetEffect, \
+    ParalyzeOnStare
 from monsteractor import ChasePlayerActor, MonsterActorState, HuntPlayerIfHurtMe, KeepPlayerAtDistanceActor, MonsterWeightedStepAction, \
     StartHuntOnAttack
 from monsterspells import SummonEntityMonsterAction
@@ -461,6 +462,29 @@ def new_dark_slime(game_state):
     slime.set_child(DataPoint(DataTypes.MINIMUM_DEPTH, 3))
     slime.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_dark_slime))
     return slime
+
+
+def new_floating_eye(game_state):
+    c = Composite()
+    set_monster_components(c, game_state)
+    c.set_child(StatusFlags([StatusFlags.IS_ALIVE, StatusFlags.FLYING]))
+    c.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.PLANT))
+
+    c.set_child(EntityMessages("The eye looks intently.", "The eye falls to the ground."))
+    c.set_child(Description("Floating Eye",
+                            "A giant eye floating in mid-air How is this even possible?"
+                            "The eye stairs at you..."))
+    c.set_child(GraphicChar(None, colors.WHITE, "e"))
+    c.set_child(Health(20))
+    c.set_child(DataPoint(DataTypes.STRENGTH, 4))
+    c.set_child(DataPoint(DataTypes.EVASION, 8))
+    c.set_child(DataPoint(DataTypes.ACCURACY, 12))
+    c.set_child(DataPoint(DataTypes.ARMOR, 0))
+    c.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.one_and_half_turn))
+    c.set_child(DataPoint(DataTypes.AWARENESS, 10))
+    c.set_child(ParalyzeOnStare(0, c.sight_radius.value, 100))
+    c.set_child(KeepPlayerAtDistanceActor(3))
+    return c
 
 
 def new_giant_amoeba(game_state):

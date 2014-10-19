@@ -75,3 +75,22 @@ class StunnedActor(Actor):
         """
         self.parent.char_printer.append_fg_color_blink_frames([colors.CHAMPAGNE])
         return gametime.single_turn
+
+
+class ParalyzedActor(Actor):
+    """
+    Entities with this actor will do nothing.
+    """
+    def __init__(self):
+        super(ParalyzedActor, self).__init__()
+
+    def on_tick(self, time):
+        if self.parent.has("status_bar"):
+            self.parent.status_bar.add(Status.PARALYZED_STATUS_DESCRIPTION)
+
+    def act(self):
+        """
+        Just returns energy spent, shows it's stunned.
+        """
+        self.parent.char_printer.append_fg_color_blink_frames([colors.YELLOW])
+        return gametime.single_turn

@@ -1,14 +1,17 @@
 import random
 
 from action import Action, SOURCE_ENTITY, GAME_STATE
+from actor import DoNothingActor, ParalyzedActor
 from animation import animate_flight
 from attacker import DamageTypes, UndodgeableAttack
 from entityeffect import Heal, AddSpoofChild
 import gametime
 import geometry
 from graphic import GraphicChar
+from messenger import STARE_PARALYZE_MESSAGE
 from monsteractor import MonsterWeightedAction
 from mover import RandomStepper
+from rng import coin_flip
 import shoot
 import colors
 import icon
@@ -227,7 +230,6 @@ class PlayerShootWeaponAction(PlayerMissileAction):
 
 
 class MonsterTargetAction(MonsterWeightedAction):
-
     def __init__(self, min_range, max_range, weight=100):
         super(MonsterTargetAction, self).__init__(weight)
         self.tags.add("monster_target_action")
@@ -238,6 +240,38 @@ class MonsterTargetAction(MonsterWeightedAction):
 
     def get_target_options(self):
         return self.target_chooser_function(self.parent)
+
+
+#  TODO Introduce Gaze effect super class?
+class ParalyzeOnStare(MonsterTargetAction):
+    def __init__(self, min_range, max_range, weight=100):
+        super(ParalyzeOnStare, self).__init__(min_range, max_range, weight)
+        self.component_type = "monster_paralyze_on_stare"
+
+    def can_act(self, **kwargs):
+        possible_targets = self.get_target_options()
+        return any([target for target in possible_targets
+                    if target.dungeon_mask.can_see_point(self.parent.position.value)])
+
+    def act(self, destination):
+        if not self.parent.dungeon_mask.can_see_point(destination):
+            return
+        if coin_flip():  # Should be replaced by spell resist.
+            return
+        targets = self.parent.dungeon_level.value.get_tile_or_unknown(destination).get_entities()
+        if not any(targets):
+            return
+        for target_entity in targets:
+            if target_entity.dungeon_mask.can_see_point(self.parent.position.value):
+                target_entity.effect_queue.add(self.effect_factory())
+        self.add_energy_spent_to_entity(self.parent)
+
+    def effect_factory(self):
+        min_turns = 1
+        max_turns = 3
+        turns = random.randrange(min_turns, max_turns + 1)
+        return AddSpoofChild(self.parent, ParalyzedActor(), turns * gametime.single_turn,
+                             message_effect=STARE_PARALYZE_MESSAGE, effect_id="paralyze")
 
 
 class MonsterMissileAction(MonsterTargetAction):

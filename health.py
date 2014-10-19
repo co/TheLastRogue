@@ -8,6 +8,7 @@ import entityeffect
 import geometry
 from graphic import GraphicChar
 import icon
+from messenger import NO_LONGER_PARALYZED_MESSAGE
 import rng
 import settings
 import shapegenerator
@@ -188,6 +189,17 @@ class ReflectDamageTakenEffect(DamageTakenEffect):
             damage_effect = entityeffect.UndodgeableAttackEntityEffect(self.parent, self.damage,
                                                                        [DamageTypes.MAGIC, DamageTypes.REFLECT])
             source_entity.effect_queue.add(damage_effect)
+
+
+class LoseParalyzeWhenDamaged(DamageTakenEffect):
+
+    def __init__(self):
+        super(LoseParalyzeWhenDamaged, self).__init__()
+        self.component_type = "lose_paralyze_when_damaged"
+
+    def effect(self, damage, source_entity, damage_types=[]):
+        if rng.coin_flip():
+            self.parent.effect_queue.add(entityeffect.EffectRemover(self.parent, "paralyze", message=NO_LONGER_PARALYZED_MESSAGE))
 
 
 class BleedWhenDamaged(DamageTakenEffect):

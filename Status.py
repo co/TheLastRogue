@@ -34,3 +34,4 @@ LIFE_STEAL_STATUS_DESCRIPTION = StatusDescription("Life Steal", GraphicChar(None
 STUMBLE_STATUS_DESCRIPTION = StatusDescription("Stumble Curse", GraphicChar(None, colors.YELLOW, icon.STUMBLE_ICON), "Your next step will be in a random direction.")
 SLEEP_STATUS_DESCRIPTION = StatusDescription("Sleeping", GraphicChar(None, colors.GRAY, "Z"), "You will be unable to do anything until you take damage.")
 BLEED_STATUS_DESCRIPTION = StatusDescription("Bleed", GraphicChar(None, colors.RED, icon.DROP_ICON), "You will take damage each turn you do not rest.")
+PARALYZED_STATUS_DESCRIPTION = StatusDescription("Paralyzed", GraphicChar(None, colors.YELLOW, icon.GUNSLINGER), "You cannot make any action for a few turns. Taking damage may cancel this effect.")

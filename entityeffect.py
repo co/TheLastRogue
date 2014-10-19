@@ -10,21 +10,23 @@ import icon
 import messenger
 from statusflags import StatusFlags
 
+# TODO: Idea replace effect types with spoofchildren and add time to live to spoof children.
 
 # Effect types in execution order
 class EffectTypes(object):
-    STATUS_REMOVER = 0
-    ADD_SPOOF_CHILD = 1
-    REMOVE_CHILD = 2
-    BLOCKER = 3
-    STATUS_ADDER = 4
-    TELEPORT = 5
-    HEAL = 6
-    UI = 7
-    DAMAGE = 8
-    EQUIPMENT = 9
+    EFFECT_REMOVER = 0
+    STATUS_REMOVER = 1
+    ADD_SPOOF_CHILD = 2
+    REMOVE_CHILD = 3
+    BLOCKER = 4
+    STATUS_ADDER = 5
+    TELEPORT = 6
+    HEAL = 7
+    UI = 8
+    DAMAGE = 9
+    EQUIPMENT = 10
 
-    ALLTYPES = [STATUS_REMOVER, ADD_SPOOF_CHILD, REMOVE_CHILD, BLOCKER, STATUS_ADDER,
+    ALLTYPES = [EFFECT_REMOVER, STATUS_REMOVER, ADD_SPOOF_CHILD, REMOVE_CHILD, BLOCKER, STATUS_ADDER,
                 TELEPORT, HEAL, UI, DAMAGE, EQUIPMENT]
 
 
@@ -42,7 +44,7 @@ class EffectQueue(Leaf):
 
     @property
     def effects(self):
-        return [effect for effect_group in self._effect_queue for effect in effect_group]
+        return self._effect_queue
 
     def add(self, effect):
         if effect.meld_id:
@@ -61,6 +63,7 @@ class EffectQueue(Leaf):
         self._effect_queue[effect.effect_type].remove(effect)
         effect.queue = None
 
+    # TODO this is old lookup if can remove.
     def remove_status_adder_of_status(self, status_to_remove):
         for effect in self._effect_queue[EffectTypes.STATUS_ADDER]:
             if effect.status_flag == status_to_remove:
@@ -73,12 +76,13 @@ class EffectQueue(Leaf):
 
 
 class EntityEffect(object):
-    def __init__(self, source_entity, time_to_live, effect_type, meld_id=None):
+    def __init__(self, source_entity, time_to_live, effect_type, meld_id=None, effect_id=None):
         self.source_entity = source_entity
         self.time_to_live = time_to_live
         self.effect_type = effect_type
         self.is_blocked = False
         self.meld_id = meld_id
+        self.effect_id = effect_id
         self.queue = None
         self.time_alive = 0
 
@@ -118,6 +122,32 @@ class StatusRemover(EntityEffect):
     def update(self, time_spent):
         self.queue.remove_status_adder_of_status(self.status_type_to_remove)
         self.tick(time_spent)
+
+
+class EffectRemover(EntityEffect):
+    def __init__(self, source_entity, effect_to_remove, time_to_live=1, message=None):
+        super(EffectRemover, self).__init__(source_entity, time_to_live,
+                                                  EffectTypes.EFFECT_REMOVER)
+        self.the_message = message
+        self.effect_to_remove = effect_to_remove
+
+    def update(self, time_spent):
+        removed_an_effect = False
+        for index in range(len(self.queue.effects)):
+            old_size = len(self.queue.effects[index])
+            self.queue.effects[index] = [effect for effect in self.queue.effects[index]
+                                         if not effect.effect_id == self.effect_to_remove]
+            if not old_size == len(self.queue.effects[index]):
+                removed_an_effect = True
+
+        if removed_an_effect:
+            self.message()
+        self.tick(time_spent)
+
+    def message(self):
+        messenger.msg.send_visual_message(self.the_message % {"source_entity": self.source_entity.description.long_name,
+                                                              "target_entity": self.target_entity.description.long_name},
+                                          self.target_entity.position.value)
 
 
 class HeartStop(EntityEffect):
@@ -401,16 +431,25 @@ class Heal(EntityEffect):
 
 
 class AddSpoofChild(EntityEffect):
-    def __init__(self, source_entity, spoof_child, time_to_live, meld_id=None):
+    def __init__(self, source_entity, spoof_child, time_to_live, message_effect=None, meld_id=None, effect_id=None):
         super(AddSpoofChild, self).__init__(source_entity=source_entity,
                                             effect_type=EffectTypes.ADD_SPOOF_CHILD,
                                             time_to_live=time_to_live,
-                                            meld_id=meld_id)
+                                            meld_id=meld_id,
+                                            effect_id=effect_id)
+        self.message_effect = message_effect
         self.spoof_child = spoof_child
 
     def update(self, time_spent):
         self.target_entity.add_spoof_child(self.spoof_child)
+        if self.message_effect:
+            self.message()
         self.tick(time_spent)
+
+    def message(self):
+        messenger.msg.send_visual_message(self.message_effect % {"source_entity": self.source_entity.description.long_name,
+                                                                 "target_entity": self.target_entity.description.long_name},
+                                          self.target_entity.position.value)
 
 
 class RemoveChildEffect(EntityEffect):

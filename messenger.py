@@ -40,6 +40,9 @@ GLASS_TURNING_MESSAGE = "You surroundings suddenly seem more transparent."
 ZAP_DEVICE_MESSAGE = "%(source_entity)s zaps %(target_entity)s for %(damage)s damage!"
 HEALTH_DEVICE_MESSAGE = "%(target_entity)s is healed by the device for %(health)s health."
 
+STARE_PARALYZE_MESSAGE = "%(source_entity)s stares at %(target_entity)s, it's paralyzed!."
+NO_LONGER_PARALYZED_MESSAGE = "%(source_entity)s is no longer paralyzed."
+
 
 class Messenger(object):
     def __init__(self):

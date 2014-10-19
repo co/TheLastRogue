@@ -7,7 +7,7 @@ from compositecore import Composite
 from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue
 from graphic import CharPrinter, GraphicChar
-from health import Health, HealthModifier, BleedWhenDamaged
+from health import Health, HealthModifier, BleedWhenDamaged, LoseParalyzeWhenDamaged
 from inputactor import InputActor
 from inventory import Inventory
 from memorymap import MemoryMap
@@ -84,6 +84,7 @@ class Player(Composite):
 
         self.set_child(HealthModifier())
         self.set_child(BleedWhenDamaged())
+        self.set_child(LoseParalyzeWhenDamaged())
 
         self.set_child(CounterAttackOnDamageTakenEffect())
         self.set_child(AttackEnemyIStepNextToEffect())
