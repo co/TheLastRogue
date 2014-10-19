@@ -474,7 +474,7 @@ def new_floating_eye(game_state):
     c.set_child(Description("Floating Eye",
                             "A giant eye floating in mid-air How is this even possible?"
                             "The eye stairs at you..."))
-    c.set_child(GraphicChar(None, colors.WHITE, "e"))
+    c.set_child(GraphicChar(None, colors.LIGHT_ORANGE, icon.EYE))
     c.set_child(Health(20))
     c.set_child(DataPoint(DataTypes.STRENGTH, 4))
     c.set_child(DataPoint(DataTypes.EVASION, 8))
@@ -688,7 +688,7 @@ class DissolveEntitySlimeShareTileEffect(EntityShareTileEffect):
             #Damage other creature.
             dissolve_effect = UndodgeableDamagAndBlockSameEffect(source_entity, damage, [DamageTypes.ACID],
                                                                  messenger.DISSOLVE_MESSAGE,
-                                                                 EffectStackID.SLIME_DISSOLVE,
+                                                                 meld_id=EffectStackID.SLIME_DISSOLVE,
                                                                  time_to_live=gametime.single_turn)
             target_entity.effect_queue.add(dissolve_effect)
 

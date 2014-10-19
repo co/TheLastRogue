@@ -44,7 +44,7 @@ class EffectQueue(Leaf):
 
     @property
     def effects(self):
-        return self._effect_queue
+        return [effect for effect_group in self._effect_queue for effect in effect_group]
 
     def add(self, effect):
         if effect.meld_id:
@@ -63,11 +63,16 @@ class EffectQueue(Leaf):
         self._effect_queue[effect.effect_type].remove(effect)
         effect.queue = None
 
+    def remove_effects_with_id(self, effect_id):
+        for index in range(len(self._effect_queue)):
+            self._effect_queue[index] = [effect for effect in self._effect_queue[index]
+                                         if not effect.effect_id == effect_id]
+
     # TODO this is old lookup if can remove.
-    def remove_status_adder_of_status(self, status_to_remove):
-        for effect in self._effect_queue[EffectTypes.STATUS_ADDER]:
-            if effect.status_flag == status_to_remove:
-                self._effect_queue[EffectTypes.STATUS_ADDER].remove(effect)
+    def remove_status_adder_of_status(self, id_to_remove):
+        for index in range(len(self.queue.effects)):
+            self.queue.effects[index] = [effect for effect in self.queue.effects[index]
+                                         if not effect.effect_id == id_to_remove]
 
     def update(self, time):
         for effect_type_queue in EffectTypes.ALLTYPES:
@@ -125,22 +130,17 @@ class StatusRemover(EntityEffect):
 
 
 class EffectRemover(EntityEffect):
-    def __init__(self, source_entity, effect_to_remove, time_to_live=1, message=None):
+    def __init__(self, source_entity, effect_id_to_remove, time_to_live=1, message=None):
         super(EffectRemover, self).__init__(source_entity, time_to_live,
-                                                  EffectTypes.EFFECT_REMOVER)
+                                            EffectTypes.EFFECT_REMOVER)
         self.the_message = message
-        self.effect_to_remove = effect_to_remove
+        self.effect_id_to_remove = effect_id_to_remove
 
     def update(self, time_spent):
-        removed_an_effect = False
-        for index in range(len(self.queue.effects)):
-            old_size = len(self.queue.effects[index])
-            self.queue.effects[index] = [effect for effect in self.queue.effects[index]
-                                         if not effect.effect_id == self.effect_to_remove]
-            if not old_size == len(self.queue.effects[index]):
-                removed_an_effect = True
+        old_size = len(self.queue.effects)
+        self.queue.remove_effects_with_id(self.effect_id_to_remove)
+        if not old_size == len(self.queue.effects):
 
-        if removed_an_effect:
             self.message()
         self.tick(time_spent)
 
@@ -250,7 +250,8 @@ class AttackEntityEffect(EntityEffect):
             animate_point(self.target_entity.game_state.value, self.target_entity.position.value,
                           [GraphicChar(None, colors.RED, "X")])
         damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(damage, self.damage_types)
-        damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
+        damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor,
+                                                                                                self.damage_types)
         damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity)
         self.execute_effects()
         if is_crit:
@@ -307,14 +308,14 @@ class HealthRegain(EntityEffect):
 
 
 class StatusIconEntityEffect(EntityEffect):
-    def __init__(self, source_entity, status_icon, time_to_live, meld_id=None):
+    def __init__(self, source_entity, status_description, time_to_live, meld_id=None):
         super(StatusIconEntityEffect, self).__init__(source_entity=source_entity, effect_type=EffectTypes.UI,
                                                      meld_id=meld_id, time_to_live=time_to_live)
-        self.status_icon = status_icon
+        self.status_description = status_description
 
     def update(self, time_spent):
-        if self.status_icon and self.target_entity.has("status_bar"):
-            self.target_entity.status_bar.add(self.status_icon)
+        if self.status_description and self.target_entity.has("status_bar"):
+            self.target_entity.status_bar.add(self.status_description)
         self.tick(time_spent)
 
 
@@ -342,7 +343,8 @@ class DamageOverTimeEffect(EntityEffect):
 
     def damage_target(self):
         damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
-        damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
+        damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor,
+                                                                                                self.damage_types)
         damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity,
                                                                 damage_types=self.damage_types)
         return damage_caused
@@ -363,7 +365,6 @@ class DamageOverTimeEffect(EntityEffect):
 
 
 class BleedEffect(DamageOverTimeEffect):
-
     MAX_DAMAGE_PER_TURN = 3
 
     def __init__(self, source_entity, damage, damage_types, turn_interval, turns_to_live,
@@ -379,7 +380,7 @@ class BleedEffect(DamageOverTimeEffect):
 
 class UndodgeableDamagAndBlockSameEffect(EntityEffect):
     def __init__(self, source_entity, damage, damage_types,
-                 damage_message, meld_id, status_icon=None, time_to_live=1):
+                 damage_message, meld_id, status_description=None, time_to_live=1):
         super(UndodgeableDamagAndBlockSameEffect, self).__init__(source_entity=source_entity,
                                                                  effect_type=EffectTypes.DAMAGE,
                                                                  time_to_live=time_to_live,
@@ -387,27 +388,30 @@ class UndodgeableDamagAndBlockSameEffect(EntityEffect):
         self.damage = damage
         self.damage_types = damage_types
         self.damage_message = damage_message
-        self.status_icon = status_icon
+        self.status_description = status_description
 
     def send_damage_message(self, damage_caused):
-        messenger.msg.send_visual_message(self.damage_message % {"source_entity": self.source_entity.description.long_name,
-                                                     "target_entity": self.target_entity.description.long_name,
-                                                     "damage": str(damage_caused)},
-                                          self.target_entity.position.value)
+        messenger.msg.send_visual_message(
+            self.damage_message % {"source_entity": self.source_entity.description.long_name,
+                                   "target_entity": self.target_entity.description.long_name,
+                                   "damage": str(damage_caused)},
+            self.target_entity.position.value)
 
     def update(self, time_spent):
         if not self.target_entity.resistance_checker.is_immune(self.damage_types):
             if self.time_alive == 0:
-                damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage, self.damage_types)
-                damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(damage_after_armor, self.damage_types)
+                damage_after_armor = self.target_entity.armor_checker.get_damage_after_armor(self.damage,
+                                                                                             self.damage_types)
+                damage_after_resist = self.target_entity.resistance_checker.get_damage_after_resistance(
+                    damage_after_armor, self.damage_types)
                 damage_caused = self.target_entity.health_modifier.hurt(damage_after_resist, entity=self.source_entity)
                 self.send_damage_message(damage_caused)
             self.update_status_icon()
         self.tick(time_spent)
 
     def update_status_icon(self):
-        if self.status_icon and self.target_entity.has("status_bar"):
-            self.target_entity.status_bar.add(self.status_icon)
+        if self.status_description and self.target_entity.has("status_bar"):
+            self.target_entity.status_bar.add(self.status_description)
 
 
 class Heal(EntityEffect):
@@ -419,10 +423,11 @@ class Heal(EntityEffect):
         self.heal_message = heal_message
 
     def message(self):
-        messenger.msg.send_visual_message(self.heal_message % {"source_entity": self.source_entity.description.long_name,
-                                                   "target_entity": self.target_entity.description.long_name,
-                                                   "health": str(self.health)},
-                                          self.target_entity.position.value)
+        messenger.msg.send_visual_message(
+            self.heal_message % {"source_entity": self.source_entity.description.long_name,
+                                 "target_entity": self.target_entity.description.long_name,
+                                 "health": str(self.health)},
+            self.target_entity.position.value)
 
     def update(self, time_spent):
         self.target_entity.health_modifier.heal(self.health)
@@ -432,13 +437,13 @@ class Heal(EntityEffect):
 
 class AddSpoofChild(EntityEffect):
     def __init__(self, source_entity, spoof_child, time_to_live, message_effect=None, meld_id=None, effect_id=None,
-                 status_icon=status_icon):
+                 status_description=None):
         super(AddSpoofChild, self).__init__(source_entity=source_entity,
                                             effect_type=EffectTypes.ADD_SPOOF_CHILD,
                                             time_to_live=time_to_live,
                                             meld_id=meld_id,
                                             effect_id=effect_id)
-        self.status_icon = status_icon
+        self.status_description = status_description
         self.message_effect = message_effect
         self.spoof_child = spoof_child
 
@@ -448,15 +453,17 @@ class AddSpoofChild(EntityEffect):
             self.message()
         self.update_status_icon()
         self.tick(time_spent)
+        print self.time_to_live
 
     def update_status_icon(self):
-        if self.status_icon and self.target_entity.has("status_bar"):
-            self.target_entity.status_bar.add(self.status_icon)
+        if self.status_description and self.target_entity.has("status_bar"):
+            self.target_entity.status_bar.add(self.status_description)
 
     def message(self):
-        messenger.msg.send_visual_message(self.message_effect % {"source_entity": self.source_entity.description.long_name,
-                                                                 "target_entity": self.target_entity.description.long_name},
-                                          self.target_entity.position.value)
+        messenger.msg.send_visual_message(
+            self.message_effect % {"source_entity": self.source_entity.description.long_name,
+                                   "target_entity": self.target_entity.description.long_name},
+            self.target_entity.position.value)
 
 
 class RemoveChildEffect(EntityEffect):
@@ -481,10 +488,11 @@ class Equip(EntityEffect):
         self.equip_message = equip_message
 
     def message(self):
-        messenger.msg.send_visual_message(self.equip_message % {"source_entity": self.source_entity.description.long_name,
-                                                                "target_entity": self.target_entity.description.long_name,
-                                                                "item": self.item.description.long_name},
-                                          self.target_entity.position.value)
+        messenger.msg.send_visual_message(
+            self.equip_message % {"source_entity": self.source_entity.description.long_name,
+                                  "target_entity": self.target_entity.description.long_name,
+                                  "item": self.item.description.long_name},
+            self.target_entity.position.value)
 
     def update(self, time_spent):
         equipment = self.queue.target_entity.equipment
@@ -517,10 +525,11 @@ class Unequip(EntityEffect):
         self.unequip_message = messenger.UNEQUIP_MESSAGE
 
     def message(self):
-        messenger.msg.send_visual_message(self.unequip_message % {"source_entity": self.source_entity.description.long_name,
-                                                      "target_entity": self.target_entity.description.long_name,
-                                                      "item": self.item.description.long_name},
-                                          self.target_entity.position.value)
+        messenger.msg.send_visual_message(
+            self.unequip_message % {"source_entity": self.source_entity.description.long_name,
+                                    "target_entity": self.target_entity.description.long_name,
+                                    "item": self.item.description.long_name},
+            self.target_entity.position.value)
 
     def update(self, time_spent):
         equipment = self.target_entity.equipment

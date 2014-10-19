@@ -2,7 +2,9 @@ from Status import POISON_STATUS_DESCRIPTION
 from attacker import DamageTypes
 from compositecore import Leaf
 from entityeffect import DamageOverTimeEffect, AddSpoofChild
+import gametime
 import messenger
+from stats import DataPointBonusSpoof, DataTypes
 
 
 class EntityShareTileEffect(Leaf):
@@ -72,3 +74,6 @@ class HealAnEntityOnDeath(Leaf):
     def on_tick(self, time):
         if self.parent.health.is_dead():
             self.target_entity.health_modifier.heal(1)
+
+
+frost_effect_factory = lambda: DataPointBonusSpoof(DataTypes.MOVEMENT_SPEED, gametime.half_turn)

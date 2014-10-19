@@ -1,9 +1,10 @@
 import random
-from Status import StatusDescription, FIRE_STATUS_DESCRIPTION
+
+from Status import FIRE_STATUS_DESCRIPTION, FROST_SLOW_STATUS_DESCRIPTION
 from actor import Actor
 from attacker import DamageTypes
 import colors
-from compositecommon import EntityShareTileEffect, PoisonEntityEffectFactory
+from compositecommon import EntityShareTileEffect, PoisonEntityEffectFactory, frost_effect_factory
 from compositecore import Composite
 import direction
 from entityeffect import UndodgeableDamagAndBlockSameEffect, AddSpoofChild
@@ -40,6 +41,7 @@ def set_cloud_components(game_state, cloud, density):
     cloud.set_child(Mover())
     cloud.set_child(GraphicChar(None, None, 178))
     cloud.set_child(DataPoint(DataTypes.DENSITY, density))
+    cloud.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn))
     cloud.set_child(StatusFlags([StatusFlags.FLYING]))
     cloud.set_child(CloudChangeAppearanceShareTileEffect())
 
@@ -68,11 +70,11 @@ def new_poison_cloud(game_state, density):
 def new_frost_cloud(game_state, density):
     cloud = Composite()
     set_cloud_components(game_state, cloud, density)
-    cloud.graphic_char.color_fg = colors.LIGHT_GREEN
+    cloud.graphic_char.color_fg = colors.LIGHT_BLUE
     cloud.set_child(CloudActor())
     cloud.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_frost_cloud))
     cloud.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.FROST))
-    cloud.set_child(PoisonCloudShareTileEffect())
+    cloud.set_child(FrostCloudShareTileEffect())
     return cloud
 
 
@@ -134,7 +136,7 @@ class FireDamageShareTileEffect(EntityShareTileEffect):
         damage_effect = UndodgeableDamagAndBlockSameEffect(source_entity, damage, self.damage_types,
                                                            messenger.HURT_BY_FIRE, "fire_damage",
                                                            time_to_live=gametime.single_turn,
-                                                           status_icon=FIRE_STATUS_DESCRIPTION)
+                                                           status_description=FIRE_STATUS_DESCRIPTION)
         target_entity.effect_queue.add(damage_effect)
 
 
@@ -199,13 +201,12 @@ class FrostCloudShareTileEffect(AddEntityEffectShareTile):
     def __init__(self):
         super(FrostCloudShareTileEffect, self).__init__()
         self.component_type = "frost_share_tile_effect"
-        self.poison_effect_factory = EntityEffectFactory(None, random.randrange(8, 14), 2, random.randrange(10, 20))
 
     @property
     def entity_effect(self):
-        slow_effect = DataPoint(DataTypes.MOVEMENT_SPEED, -gametime.one_third_turn)
-        AddSpoofChild()
-        return self.poison_effect_factory()
+        slow_turns = random.randrange(8, 20)
+        return AddSpoofChild(None, frost_effect_factory(), slow_turns * gametime.single_turn, meld_id="frost",
+                             status_description=FROST_SLOW_STATUS_DESCRIPTION)
 
 
 class ExplosionDamageShareTileEffect(EntityShareTileEffect):
@@ -267,7 +268,7 @@ class CloudActor(Actor):
 
     def act(self):
         self.spread()
-        return gametime.single_turn
+        return self.parent.movement_speed.value
 
     def spread(self):
         minimal_cloud_size = 2

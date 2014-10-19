@@ -1,13 +1,13 @@
 import random
 from time import sleep
-from Status import DAMAGE_REFLECT_STATUS_DESCRIPTION
 
+from Status import DAMAGE_REFLECT_STATUS_DESCRIPTION, FROST_SLOW_STATUS_DESCRIPTION
 from action import Action
 from actor import DoNothingActor
 import animation
 from attacker import calculate_damage, DamageTypes
-from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud, new_fire_cloud
-from compositecommon import PoisonEntityEffectFactory
+from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud, new_fire_cloud, new_frost_cloud
+from compositecommon import PoisonEntityEffectFactory, frost_effect_factory
 from compositecore import Leaf, Composite
 import direction
 from dummyentities import dummy_flyer
@@ -737,11 +737,11 @@ def new_frost_potion(game_state):
     set_item_components(potion, game_state)
     set_potion_components(potion)
     potion.set_child(GraphicChar(None, colors.BLUE, icon.POTION))
-    potion.set_child(FlamePotionDrinkAction())
+    potion.set_child(FrostPotionDrinkAction())
     potion.set_child(Description("Potion of Frost",
                                  "A soapy liquid contained in a glass bottle."
                                  "Drinking from it would freeze you badly."))
-    potion.set_child(ThrowerBreakCreateFire())
+    potion.set_child(ThrowerBreakCreateCloud(cloud_factory=new_frost_cloud))
     return potion
 
 
@@ -943,7 +943,7 @@ class HealthPotionDrinkAction(DrinkAction):
 
 class FlamePotionDrinkAction(DrinkAction):
     """
-    Defines the healing potion drink action.
+    Defines the potion drink action.
     """
 
     def __init__(self):
@@ -958,6 +958,27 @@ class FlamePotionDrinkAction(DrinkAction):
         """
         put_tile_and_surrounding_tiles_on_fire(target_entity.dungeon_level.value, target_entity.position.value,
                                                self.min_fire_time, self.max_fire_time, target_entity.game_state.value)
+
+
+class FrostPotionDrinkAction(DrinkAction):
+    """
+    Defines the potion drink action.
+    """
+
+    def __init__(self):
+        super(FrostPotionDrinkAction, self).__init__()
+        self.component_type = "frost_potion_drink_action"
+
+    def _act(self, target_entity):
+        """
+        When an entity drinks a flame potion, surrounding tiles and players tile catch fire.
+        """
+        slow_turns = random.randrange(10, 19)
+        print slow_turns, slow_turns * gametime.single_turn
+        msg.send_global_message(messenger.FROST_POTION_DRINK_MESSAGE)
+        target_entity.effect_queue.add(entityeffect.AddSpoofChild(None, frost_effect_factory(),
+                                                                  slow_turns*gametime.single_turn, meld_id="frost",
+                                                                  status_description=FROST_SLOW_STATUS_DESCRIPTION))
 
 
 class PoisonPotionDrinkAction(DrinkAction):
@@ -1201,14 +1222,15 @@ class ThrowerBreakCreateCloud(ThrowerBreak):
     Should be sub-classed to items with this component will create and create a puff of cloud.
     """
 
-    def __init__(self):
+    def __init__(self, cloud_factory=None, density=32):
         super(ThrowerBreakCreateCloud, self).__init__()
-        self.cloud_factory = None
+        self.density = density
+        self.cloud_factory = cloud_factory
 
     def _break_effect(self, dungeon_level, position):
         message = messenger.POTION_SMASH_TO_GROUND % {"target_entity": self.parent.description.name}
         msg.send_visual_message(message, position)
-        steam = self.cloud_factory(self.parent.game_state.value, 32)
+        steam = self.cloud_factory(self.parent.game_state.value, self.density)
         steam.mover.try_move(position, dungeon_level)
 
 
