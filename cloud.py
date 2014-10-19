@@ -25,6 +25,7 @@ class CloudTypes:
     EXPLOSION = "explosion"
     STEAM = "steam"
     FIRE = "fire"
+    FROST = "frost"
     DUST = "dust"
     POISON = "poison"
 
@@ -40,6 +41,7 @@ def set_cloud_components(game_state, cloud, density):
     cloud.set_child(GraphicChar(None, None, 178))
     cloud.set_child(DataPoint(DataTypes.DENSITY, density))
     cloud.set_child(StatusFlags([StatusFlags.FLYING]))
+    cloud.set_child(CloudChangeAppearanceShareTileEffect())
 
 
 def new_steam_cloud(game_state, density):
@@ -49,7 +51,6 @@ def new_steam_cloud(game_state, density):
     cloud.set_child(CloudActor())
     cloud.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_steam_cloud))
     cloud.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.STEAM))
-    cloud.set_child(CloudChangeAppearanceShareTileEffect())
     return cloud
 
 
@@ -61,7 +62,17 @@ def new_poison_cloud(game_state, density):
     cloud.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_poison_cloud))
     cloud.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.POISON))
     cloud.set_child(PoisonCloudShareTileEffect())
-    cloud.set_child(CloudChangeAppearanceShareTileEffect())
+    return cloud
+
+
+def new_frost_cloud(game_state, density):
+    cloud = Composite()
+    set_cloud_components(game_state, cloud, density)
+    cloud.graphic_char.color_fg = colors.LIGHT_GREEN
+    cloud.set_child(CloudActor())
+    cloud.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_frost_cloud))
+    cloud.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.FROST))
+    cloud.set_child(PoisonCloudShareTileEffect())
     return cloud
 
 
@@ -72,7 +83,6 @@ def new_dust_cloud(game_state, density):
     cloud.set_child(CloudActor())
     cloud.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_dust_cloud))
     cloud.set_child(DustLowerHitOfEntityShareTileEffect())
-    cloud.set_child(CloudChangeAppearanceShareTileEffect())
     cloud.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.DUST))
     return cloud
 
@@ -86,7 +96,6 @@ def new_explosion_cloud(game_state, density):
     explosion.set_child(ExplosionDamageShareTileEffect())
     explosion.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_explosion_cloud))
     explosion.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.EXPLOSION))
-    explosion.set_child(CloudChangeAppearanceShareTileEffect())
     return explosion
 
 
@@ -105,7 +114,6 @@ def new_fire_cloud(game_state, density):
     fire.set_child(FireDamageShareTileEffect())
     fire.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_explosion_cloud))
     fire.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.FIRE))
-    fire.set_child(CloudChangeAppearanceShareTileEffect())
     return fire
 
 
@@ -184,6 +192,19 @@ class PoisonCloudShareTileEffect(AddEntityEffectShareTile):
 
     @property
     def entity_effect(self):
+        return self.poison_effect_factory()
+
+
+class FrostCloudShareTileEffect(AddEntityEffectShareTile):
+    def __init__(self):
+        super(FrostCloudShareTileEffect, self).__init__()
+        self.component_type = "frost_share_tile_effect"
+        self.poison_effect_factory = EntityEffectFactory(None, random.randrange(8, 14), 2, random.randrange(10, 20))
+
+    @property
+    def entity_effect(self):
+        slow_effect = DataPoint(DataTypes.MOVEMENT_SPEED, -gametime.one_third_turn)
+        AddSpoofChild()
         return self.poison_effect_factory()
 
 

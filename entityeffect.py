@@ -320,7 +320,7 @@ class StatusIconEntityEffect(EntityEffect):
 
 class DamageOverTimeEffect(EntityEffect):
     def __init__(self, source_entity, damage, damage_types, turn_interval, turns_to_live,
-                 damage_message, status_icon=None, meld_id=None):
+                 damage_message, status_description=None, meld_id=None):
         super(DamageOverTimeEffect, self).__init__(source_entity=source_entity, effect_type=EffectTypes.DAMAGE,
                                                    meld_id=meld_id, time_to_live=turns_to_live * gametime.single_turn)
         self.damage = damage
@@ -328,7 +328,7 @@ class DamageOverTimeEffect(EntityEffect):
         self.time_interval = turn_interval * gametime.single_turn
         self.damage_message = damage_message
         self.time_until_next_damage = self.time_interval
-        self.status_icon = status_icon
+        self.status_description = status_description
 
     def send_damage_message(self, damage_caused):
         message_arguments = {}
@@ -348,8 +348,8 @@ class DamageOverTimeEffect(EntityEffect):
         return damage_caused
 
     def update_status_icon(self):
-        if self.status_icon and self.target_entity.has("status_bar"):
-            self.target_entity.status_bar.add(self.status_icon)
+        if self.status_description and self.target_entity.has("status_bar"):
+            self.target_entity.status_bar.add(self.status_description)
 
     def update(self, time_spent):
         if not self.target_entity.resistance_checker.is_immune(self.damage_types):
@@ -367,14 +367,14 @@ class BleedEffect(DamageOverTimeEffect):
     MAX_DAMAGE_PER_TURN = 3
 
     def __init__(self, source_entity, damage, damage_types, turn_interval, turns_to_live,
-                 damage_message, status_icon):
+                 damage_message, status_description):
         super(BleedEffect, self).__init__(source_entity, damage, damage_types, turn_interval, turns_to_live,
-                                          damage_message, status_icon=status_icon, meld_id="bleed_effect")
+                                          damage_message, status_description=status_description, meld_id="bleed_effect")
 
     def meld(self, other_effect):
         self.time_to_live = max(other_effect.time_to_live, self.time_to_live)
         self.damage = min(self.damage + 1, BleedEffect.MAX_DAMAGE_PER_TURN)
-        self.status_icon.graphic_char.icon = str(self.damage)
+        self.status_description.graphic_char.icon = str(self.damage)
 
 
 class UndodgeableDamagAndBlockSameEffect(EntityEffect):
@@ -431,12 +431,14 @@ class Heal(EntityEffect):
 
 
 class AddSpoofChild(EntityEffect):
-    def __init__(self, source_entity, spoof_child, time_to_live, message_effect=None, meld_id=None, effect_id=None):
+    def __init__(self, source_entity, spoof_child, time_to_live, message_effect=None, meld_id=None, effect_id=None,
+                 status_icon=status_icon):
         super(AddSpoofChild, self).__init__(source_entity=source_entity,
                                             effect_type=EffectTypes.ADD_SPOOF_CHILD,
                                             time_to_live=time_to_live,
                                             meld_id=meld_id,
                                             effect_id=effect_id)
+        self.status_icon = status_icon
         self.message_effect = message_effect
         self.spoof_child = spoof_child
 
@@ -444,7 +446,12 @@ class AddSpoofChild(EntityEffect):
         self.target_entity.add_spoof_child(self.spoof_child)
         if self.message_effect:
             self.message()
+        self.update_status_icon()
         self.tick(time_spent)
+
+    def update_status_icon(self):
+        if self.status_icon and self.target_entity.has("status_bar"):
+            self.target_entity.status_bar.add(self.status_icon)
 
     def message(self):
         messenger.msg.send_visual_message(self.message_effect % {"source_entity": self.source_entity.description.long_name,

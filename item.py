@@ -732,6 +732,19 @@ def new_flame_potion(game_state):
     return potion
 
 
+def new_frost_potion(game_state):
+    potion = Composite()
+    set_item_components(potion, game_state)
+    set_potion_components(potion)
+    potion.set_child(GraphicChar(None, colors.BLUE, icon.POTION))
+    potion.set_child(FlamePotionDrinkAction())
+    potion.set_child(Description("Potion of Frost",
+                                 "A soapy liquid contained in a glass bottle."
+                                 "Drinking from it would freeze you badly."))
+    potion.set_child(ThrowerBreakCreateFire())
+    return potion
+
+
 def set_scroll_components(item):
     item.set_child(ItemType(ItemType.SCROLL))
     item.set_child(PlayerAutoPickUp())
