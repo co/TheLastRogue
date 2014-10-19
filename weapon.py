@@ -176,7 +176,7 @@ def new_sword(game_state):
     sword.set_child(damage_item_stat(2, 5))
     sword.set_child(accuracy_item_stat(10))
 
-    sword.set_child(crit_chance_item_stat(0.1))
+    sword.set_child(CritChanceBonusEffect(0.1))
     sword.set_child(crit_multiplier_item_stat(2))
 
     sword.set_child(ExtraSwingAttackEffect(0.1))
@@ -199,7 +199,7 @@ def new_rapier(game_state):
     sword.set_child(damage_item_stat(2, 5))
     sword.set_child(accuracy_item_stat(10))
 
-    sword.set_child(crit_chance_item_stat(0.2))
+    sword.set_child(CritChanceBonusEffect(0.2))
     sword.set_child(crit_multiplier_item_stat(2.5))
 
     sword.set_child(ExtraSwingAttackEffect(0.1))
@@ -223,7 +223,7 @@ def new_scimitar(game_state):
     sword.set_child(damage_item_stat(2, 5))
     sword.set_child(accuracy_item_stat(12))
 
-    sword.set_child(crit_chance_item_stat(0.2))
+    sword.set_child(CritChanceBonusEffect(0.2))
     sword.set_child(crit_multiplier_item_stat(2.5))
 
     sword.set_child(ExtraSwingAttackEffect(0.1))
@@ -247,7 +247,7 @@ def new_club(game_state):
     c.set_child(damage_item_stat(1, 6))
     c.set_child(accuracy_item_stat(8))
 
-    c.set_child(crit_chance_item_stat(0.1))
+    c.set_child(CritChanceBonusEffect(0.1))
     c.set_child(crit_multiplier_item_stat(1.5))
 
     c.set_child(StunAttackEffect(0.3))
@@ -269,7 +269,7 @@ def new_morning_star(game_state):
     mace.set_child(accuracy_item_stat(8))
     mace.set_child(damage_item_stat(1, 6))
 
-    mace.set_child(crit_chance_item_stat(0.1))
+    mace.set_child(CritChanceBonusEffect(0.1))
     mace.set_child(crit_multiplier_item_stat(2))
 
     mace.set_child(StunAttackEffect(0.2))
@@ -294,7 +294,7 @@ def new_flail(game_state):
     c.set_child(damage_item_stat(1, 7))
     c.set_child(accuracy_item_stat(7))
 
-    c.set_child(crit_chance_item_stat(0.15))
+    c.set_child(CritChanceBonusEffect(0.15))
     c.set_child(crit_multiplier_item_stat(2))
 
     c.set_child(IgnoreArmorAttackEffect(0.3))
@@ -318,7 +318,7 @@ def new_hammer(game_state):
     c.set_child(damage_item_stat(1, 7))
     c.set_child(accuracy_item_stat(8))
 
-    c.set_child(crit_chance_item_stat(0.15))
+    c.set_child(CritChanceBonusEffect(0.15))
     c.set_child(crit_multiplier_item_stat(2))
 
     c.set_child(KnockBackAttackEffect(0.35))
@@ -340,7 +340,7 @@ def new_chain_and_ball(game_state):
     c.set_child(damage_item_stat(2, 9))
     c.set_child(accuracy_item_stat(5))
 
-    c.set_child(crit_chance_item_stat(0.10))
+    c.set_child(CritChanceBonusEffect(0.10))
     c.set_child(crit_multiplier_item_stat(2))
 
     c.set_child(KnockBackAttackEffect(0.20))
@@ -365,7 +365,7 @@ def new_spear(game_state):
     c.set_child(accuracy_item_stat(10))
     c.set_child(damage_item_stat(1, 5))
 
-    c.set_child(crit_chance_item_stat(0.1))
+    c.set_child(CritChanceBonusEffect(0.1))
     c.set_child(crit_multiplier_item_stat(2))
 
     c.set_child(DefenciveAttackEffect(0.75))
@@ -390,7 +390,7 @@ def new_halberd(game_state):
     c.set_child(accuracy_item_stat(10))
     c.set_child(damage_item_stat(1, 5))
 
-    c.set_child(crit_chance_item_stat(0.1))
+    c.set_child(CritChanceBonusEffect(0.1))
     c.set_child(crit_multiplier_item_stat(2))
 
     c.set_child(DefenciveAttackEffect(0.75))
@@ -415,7 +415,7 @@ def new_trident(game_state):
     c.set_child(accuracy_item_stat(10))
     c.set_child(damage_item_stat(1, 5))
 
-    c.set_child(crit_chance_item_stat(0.15))
+    c.set_child(CritChanceBonusEffect(0.15))
     c.set_child(crit_multiplier_item_stat(2.5))
 
     c.set_child(DefenciveAttackEffect(0.75))
@@ -439,7 +439,7 @@ def new_whip(game_state):
     c.set_child(accuracy_item_stat(10))
     c.set_child(damage_item_stat(1, 4))
 
-    c.set_child(crit_chance_item_stat(0.15))
+    c.set_child(CritChanceBonusEffect(0.15))
     c.set_child(crit_multiplier_item_stat(2.5))
 
     c.set_child(TripAttackEffect(0.50))
@@ -464,7 +464,7 @@ def new_axe(game_state):
     c.set_child(damage_item_stat(3, 5))
     c.set_child(accuracy_item_stat(8))
 
-    c.set_child(crit_chance_item_stat(0.1))
+    c.set_child(CritChanceBonusEffect(0.1))
     c.set_child(crit_multiplier_item_stat(2))
 
     c.set_child(OffenciveAttackEffect(0.75))
@@ -478,10 +478,6 @@ def damage_item_stat(min_value, max_value):
 
 def accuracy_item_stat(value):
     return ItemStat(DataTypes.ACCURACY, value, colors.LIGHT_ORANGE, "Accuracy", order=10)
-
-
-def crit_chance_item_stat(value):
-    return ItemStat(DataTypes.CRIT_CHANCE, value, colors.RED, "Crit %", ItemStat.PERCENT_FORMAT, order=20)
 
 
 def crit_multiplier_item_stat(value):

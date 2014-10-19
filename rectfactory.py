@@ -46,5 +46,9 @@ def description_rectangle():
     return geo.Rect((0, 0), min(40, settings.SCREEN_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH), 10)
 
 
+def item_stat_rectangle():
+    return geo.Rect((0, 0), min(40, settings.SCREEN_WIDTH - constants.RIGHT_SIDE_BAR_WIDTH), 12)
+
+
 def command_list_rectangle():
     return geo.Rect((0, 0), constants.RIGHT_SIDE_BAR_WIDTH, constants.GUI_BOX_HEIGHT)

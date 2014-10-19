@@ -829,15 +829,15 @@ class ItemDescriptionCard(UIElement):
     """
     def __init__(self, rect, gui_style, text_fg=colors.WHITE, heading_fg=colors.WHITE, margin=(0, 0), vertical_space=1):
         super(ItemDescriptionCard, self).__init__(margin=margin)
-        self._main_stack_panel = StackPanelVertical((0, 0), vertical_space=-1,
+        self._main_stack_panel = StackPanelVertical((0, 0), vertical_space=0,
                                                     alignment=StackPanelVertical.ALIGN_RIGHT)
         self._item_stat_card = new_item_stat_card()
         self._main_stack_panel.append(self._item_stat_card)
 
-        bg_rect = StyledRectangle(rect, gui_style.rect_style)
+        self.bg_rect = StyledRectangle(rect, gui_style.rect_style)
         self.text_stack_panel = StackPanelVertical(gui_style.margin, vertical_space=vertical_space,
                                                    alignment=StackPanelVertical.ALIGN_LEFT)
-        description_card = UIElementList([bg_rect, self.text_stack_panel])
+        description_card = UIElementList([self.bg_rect, self.text_stack_panel])
         self._main_stack_panel.append(description_card)
         self._item = None
         self.heading_fg = heading_fg
@@ -873,21 +873,18 @@ class ItemDescriptionCard(UIElement):
 
 
 def new_item_stat_card():
-    return ItemStatCard(rectfactory.description_rectangle(), style.rogue_classic_theme)
+    return ItemStatCard(style.rogue_classic_theme)
 
 
 class ItemStatCard(RectangularUIElement):
-    def __init__(self, rect, gui_style, text_fg=colors.WHITE, heading_fg=colors.WHITE, margin=(0, 0)):
+    def __init__(self, gui_style, text_fg=colors.WHITE, heading_fg=colors.WHITE, margin=(0, 0)):
+        rect = rectfactory.item_stat_rectangle()
         super(ItemStatCard, self).__init__(rect, margin=margin)
-        self._bg_rect = StyledRectangle(self.rect, gui_style.rect_style)
+        self._bg_rect = StyledRectangle(rect, gui_style.rect_style)  # height will be dynamic.
         self.main_stack_panel = StackPanelHorizontal(gui_style.margin, horizontal_space=3,
                                                      alignment=StackPanelHorizontal.ALIGN_TOP)
-        self.text_stack_panel_left = StackPanelVertical((0, 0), vertical_space=0,
-                                                        alignment=StackPanelVertical.ALIGN_LEFT)
-        self.main_stack_panel.append(self.text_stack_panel_left)
-        self.text_stack_panel_right = StackPanelVertical(gui_style.margin, vertical_space=0,
-                                                         alignment=StackPanelVertical.ALIGN_LEFT)
-        self.main_stack_panel.append(self.text_stack_panel_right)
+        self.text_stack_panel = StackPanelVertical((0, 0), vertical_space=0, alignment=StackPanelVertical.ALIGN_LEFT)
+        self.main_stack_panel.append(self.text_stack_panel)
         self.item = None
         self.heading_fg = heading_fg
         self._inner_margin = gui_style.margin
@@ -895,20 +892,24 @@ class ItemStatCard(RectangularUIElement):
         self.text_fg = text_fg
 
     def update(self):
-        self.text_stack_panel_left.clear()
-        self.text_stack_panel_right.clear()
+        self.text_stack_panel.clear()
         if self.item:
             common_stats = [stat for stat in self.item.get_children_with_tag("item_stat") if stat.is_common_stat]
             uncommon_stats = [stat for stat in self.item.get_children_with_tag("item_stat") if not stat.is_common_stat]
+            width = self.rect.width - 4
             for common_stat in sorted(common_stats, key=lambda s: s.order):
-                text = TextBox(common_stat.get_text(self.rect.width / 2 - 4), (0, 0), common_stat.color_fg)
-                self.text_stack_panel_left.append(text)
-            for uncommon_stat in sorted(uncommon_stats, key=lambda s: s.order):
-                text = TextBox(uncommon_stat.get_text(self.rect.width / 2 - 4), (0, 0), uncommon_stat.color_fg)
-                self.text_stack_panel_right.append(text)
+                text = TextBox(common_stat.get_text(width), (0, 0), common_stat.color_fg)
+                self.text_stack_panel.append(text)
+            if any(uncommon_stats):
+                self.text_stack_panel.append(VerticalSpace(1))
+            for uncommon_stat in sorted(uncommon_stats, key=lambda s: (-s.value, s.order)):
+                text = TextBox(uncommon_stat.get_text(width), (0, 0), uncommon_stat.color_fg)
+                self.text_stack_panel.append(text)
+            self.text_stack_panel.append(VerticalSpace(1))
+        self._bg_rect.rect.bottom = self.text_stack_panel.total_height + 3
 
     def draw(self, offset=geo.zero2d()):
-        if self.item and (any(self.text_stack_panel_left.elements) or any(self.text_stack_panel_right.elements)):
+        if self.item and any(e for e in self.text_stack_panel.elements if not isinstance(e, VerticalSpace)):
             position = geo.int_2d(geo.add_2d(geo.add_2d(offset, self.offset), self.margin))
             self._bg_rect.draw(position)
             self.main_stack_panel.draw(position)
