@@ -1,6 +1,5 @@
 import random
 import direction
-import dungeonfeature
 import actionscheduler
 import libtcodpy
 import turn

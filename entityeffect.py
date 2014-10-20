@@ -453,7 +453,6 @@ class AddSpoofChild(EntityEffect):
             self.message()
         self.update_status_icon()
         self.tick(time_spent)
-        print self.time_to_live
 
     def update_status_icon(self):
         if self.status_description and self.target_entity.has("status_bar"):

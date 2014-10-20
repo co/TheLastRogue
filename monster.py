@@ -474,7 +474,7 @@ def new_floating_eye(game_state):
     c.set_child(Description("Floating Eye",
                             "A giant eye floating in mid-air How is this even possible?"
                             "The eye stairs at you..."))
-    c.set_child(GraphicChar(None, colors.LIGHT_ORANGE, icon.EYE))
+    c.set_child(GraphicChar(None, colors.WHITE, icon.EYE))
     c.set_child(Health(20))
     c.set_child(DataPoint(DataTypes.STRENGTH, 4))
     c.set_child(DataPoint(DataTypes.EVASION, 8))

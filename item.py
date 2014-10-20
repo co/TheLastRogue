@@ -342,7 +342,7 @@ class BlinksDeviceAction(ActivateDeviceAction):
         entities = [entity for entity in source_entity.vision.get_seen_entities()] + [player]  # And the player too.
         for target_entity in entities:
             self._blink(target_entity)
-        player.game_state.value.signal_need_total_redraw()
+        player.game_state.value.dungeon_needs_redraw = True
         player.game_state.value.force_draw()
         sleep(0.2)
 

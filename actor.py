@@ -27,7 +27,7 @@ class Actor(Leaf):
             turn.current_turn += 1
         while self.parent.energy.value > 0:
             if self.parent.has("is_player"):
-                self._post_player_act()
+                self._pre_player_act()
             self.parent.energy.value -= self.act()
 
     def act(self):
@@ -40,7 +40,7 @@ class Actor(Leaf):
     def add_energy_spent(self, energy):
         self.newly_spent_energy += energy
 
-    def _post_player_act(self):
+    def _pre_player_act(self):
         self.parent.game_state.value.force_draw()
 
 
