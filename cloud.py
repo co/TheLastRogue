@@ -5,7 +5,7 @@ from actor import Actor
 from attacker import DamageTypes
 import colors
 from compositecommon import EntityShareTileEffect, PoisonEntityEffectFactory, frost_effect_factory
-from compositecore import Composite
+from compositecore import Composite, Leaf
 import direction
 from entityeffect import UndodgeableDamagAndBlockSameEffect, AddSpoofChild
 import gametime
@@ -17,7 +17,7 @@ from mover import Mover
 from position import Position, DungeonLevel
 import rng
 from stats import DataTypes, DataPoint, GamePieceTypes, DataPointBonusSpoof
-from statusflags import StatusFlags
+from statusflags import StatusFlags, Flags
 from text import Description
 import turn
 
@@ -112,11 +112,12 @@ def new_fire_cloud(game_state, density):
     fire.graphic_char.icon = icon.FIRE
     fire.graphic_char.color_fg = colors.RED
     fire.set_child(Description("Fire", "Don't get burnt."))
-    fire.set_child(DisappearCloudActor())
+    fire.set_child(SpreadToFlammableDisappearActor())
     fire.set_child(FireDamageShareTileEffect())
-    fire.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_explosion_cloud))
+    fire.set_child(DataPoint(DataTypes.CLONE_FUNCTION, new_fire_cloud))
     fire.set_child(DataPoint(DataTypes.CLOUD_TYPE, CloudTypes.FIRE))
     return fire
+
 
 
 class FireDamageShareTileEffect(EntityShareTileEffect):
@@ -240,10 +241,39 @@ class DisappearCloudActor(Actor):
         turn.current_turn += 1
 
     def act(self):
+        self._before_act()
         self.parent.density.value -= 1
         if self.parent.density.value <= 0:
             self.parent.mover.try_remove_from_dungeon()
         return gametime.single_turn
+
+    def _before_act(self):
+        pass
+
+
+class SpreadToFlammableDisappearActor(DisappearCloudActor):
+    def _before_act(self):
+        neighbours = [geometry.add_2d(offset, self.parent.position.value) for offset in direction.AXIS_DIRECTIONS]
+        random.shuffle(neighbours)
+        for neighbour in neighbours:
+            if self.point_has_flammable(neighbour) and self.try_spread_to_position(neighbour):
+                break
+        return gametime.single_turn
+
+    def point_has_flammable(self, position):
+        return any(True for df in self.parent.dungeon_level.value.get_tile_or_unknown(position).get_dungeon_features()
+                   if df.has(Flags.FLAMMABLE))
+
+    def try_spread_to_position(self, position):
+        flame = self.parent.clone_function.value(self.parent.game_state.value, self.parent.density.value + 1)
+
+        if flame.mover.try_move(position, self.parent.dungeon_level.value):
+            flammables = [df for df in self.parent.dungeon_level.value.get_tile_or_unknown(position).get_dungeon_features()
+                          if df.has(Flags.FLAMMABLE)]
+            for flammable in flammables:
+                flammable.mover.try_remove_from_dungeon()
+            return True
+        return False
 
 
 class CloudActor(Actor):

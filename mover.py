@@ -29,8 +29,7 @@ class Mover(Leaf):
             new_tile = new_dungeon_level.get_tile_or_unknown(new_position)
         except IndexError:
             return False
-        return (self._can_fit_on_tile(new_tile) and
-                self.can_move_to_terrain(new_tile.get_terrain()))
+        return self._can_fit_on_tile(new_tile) and self.can_move_to_terrain(new_tile.get_terrain())
 
     def move_push_over(self, new_position, dungeon_level=None):
         """
@@ -166,13 +165,27 @@ class Mover(Leaf):
         """
         Removes parent from previous tile.
         """
-        if (not self.has_sibling("dungeon_level") or
-                    self.parent.dungeon_level.value is None):
+        if not self.has_sibling("dungeon_level") or self.parent.dungeon_level.value is None:
             return True
         position = self.parent.position.value
         tile_i_might_be_on = (self.parent.dungeon_level.
                               value.get_tile(position))
-        return tile_i_might_be_on.remove(self.parent)
+        if tile_i_might_be_on.remove(self.parent):
+            for c in self.parent.get_children_with_tag(AfterRemoveEffect.TAG):
+                c.effect()
+            return True
+        return False
+
+
+class AfterRemoveEffect(Leaf):
+    TAG = "after_remove_effect"
+
+    def __init__(self):
+        super(AfterRemoveEffect, self).__init__()
+        self.tags.add(AfterRemoveEffect.TAG)
+
+    def effect(self):
+        pass
 
 
 class Stepper(Leaf):

@@ -5,12 +5,13 @@ import entityeffect
 from graphic import GraphicChar, CharPrinter
 import menufactory
 import messenger
-from mover import Mover, teleport_monsters, Stepper
+from mover import Mover, teleport_monsters, Stepper, AfterRemoveEffect
 from position import Position, DungeonLevel
 import rng
 from sacrifice import get_possible_powers
 import state
 from stats import DataPoint, DataTypes, GamePieceTypes, Immunities, Flag
+from statusflags import Flags
 from text import Description
 import action
 import colors
@@ -67,6 +68,7 @@ def new_spider_web():
     web.set_child(GraphicChar(None, colors.WHITE, icon.SPIDER+2))
     web.set_child(DataPoint(DataTypes.STRENGTH, 10))
     web.set_child(StuckInSpiderWebShareTileEffect())
+    web.set_child(Flag(Flags.FLAMMABLE))
     return web
 
 class StuckInSpiderWebShareTileEffect(EntityShareTileEffect):
@@ -205,9 +207,21 @@ class DescendStairsAction(action.Action):
         target_entity.effect_queue.add(heal_effect)
 
 
+class UpdateDungeonMaskWhenRemoved(AfterRemoveEffect):
+    def __init__(self):
+        super(UpdateDungeonMaskWhenRemoved, self).__init__()
+        self.component_type = "opaque"
+
+    def effect(self):
+        self.parent.dungeon_level.value.signal_terrain_changed(self.parent.position.value)
+
+
 def new_plant():
     plant = Composite()
     set_dungeon_feature_components(plant)
     plant.set_child(GraphicChar(None, colors.GREEN_D, icon.PLANT))
     plant.set_child(Flag("is_opaque"))
+    plant.set_child(Flag(Flags.FLAMMABLE))
+    plant.set_child(UpdateDungeonMaskWhenRemoved())
+
     return plant

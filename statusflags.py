@@ -1,6 +1,7 @@
 from compositecore import Leaf
 
 
+# Todo should merge with Flag and Flags
 class StatusFlags(Leaf):
     """
     Composites holding this has status flags, describing their behaviour.
@@ -38,3 +39,7 @@ class StatusFlags(Leaf):
 
     def before_tick(self, time):
         self._temp_status_flags = set()
+
+
+class Flags(object):
+    FLAMMABLE = "flammable"

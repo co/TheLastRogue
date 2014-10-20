@@ -101,6 +101,9 @@ class Tile(object):
         return self.\
             get_first_piece_of_type(GamePieceTypes.DUNGEON_FEATURE)
 
+    def get_dungeon_features(self):
+        return self.game_pieces[GamePieceTypes.DUNGEON_FEATURE]
+
     def get_all_pieces(self):
         return [piece for piece_list in self.game_pieces.values()
                 for piece in piece_list]
