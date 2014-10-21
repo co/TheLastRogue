@@ -290,7 +290,7 @@ class SwapDeviceAction(ActivateDeviceAction):
 
         for entity in entities_in_sight:
             entity.mover.try_move(positions.pop(), dungeon_level)
-        msg.send_global_message(messenger.GLASS_TURNING_MESSAGE)
+        msg.send_global_message(messenger.SWAP_DEVICE_MESSAGE)
 
 
 class HeartStopDeviceAction(ActivateDeviceAction):
@@ -756,7 +756,6 @@ def new_teleport_scroll(game_state):
     scroll = Composite()
     set_item_components(scroll, game_state)
     set_scroll_components(scroll)
-    scroll.set_child(GraphicChar(None, colors.CHAMPAGNE, icon.SCROLL))
     scroll.set_child(TeleportScrollReadAction())
     scroll.set_child(Description("Scroll of Teleport",
                                  "A scroll with strange symbols on."
@@ -764,11 +763,20 @@ def new_teleport_scroll(game_state):
     return scroll
 
 
+def new_swap_scroll(game_state):
+    scroll = Composite()
+    set_item_components(scroll, game_state)
+    set_scroll_components(scroll)
+    scroll.set_child(SwapScrollReadAction())
+    scroll.set_child(Description("Scroll of Swap",
+                                 "A scroll with strange symbols on."
+                                 "When read you will swap position with another creature on the same floor."))
+    return scroll
+
 def new_map_scroll(game_state):
     scroll = Composite()
     set_item_components(scroll, game_state)
     set_scroll_components(scroll)
-    scroll.set_child(GraphicChar(None, colors.CHAMPAGNE, icon.SCROLL))
     scroll.set_child(MapScrollReadAction())
     scroll.set_child(Description("Scroll of magic mapping.",
                                  "A scroll which will make a map of your surroundings."))
@@ -1017,6 +1025,36 @@ class TeleportScrollReadAction(ReadAction):
         msg.send_global_message(messenger.PLAYER_TELEPORT_MESSAGE)
         teleport_effect = entityeffect.Teleport(target_entity)
         target_entity.effect_queue.add(teleport_effect)
+
+
+class SwapScrollReadAction(ReadAction):
+    """
+    Defines the healing potion drink action.
+    """
+
+    def __init__(self):
+        super(SwapScrollReadAction, self).__init__()
+        self.component_type = "swap_scroll_read_action"
+
+    def _act(self, source_entity):
+        dungeon_level = source_entity.dungeon_level.value
+        other_entities = [e for e in dungeon_level.entities if not e is source_entity]
+        if not any(other_entities):
+            return
+
+        random.shuffle(other_entities)
+
+        other_entity = other_entities[0]
+        other_pos = other_entity.position.value
+        my_pos = source_entity.position.value
+
+        other_entity.mover.try_remove_from_dungeon()
+        source_entity.mover.try_remove_from_dungeon()
+
+        source_entity.mover.try_move(other_pos, dungeon_level)
+        other_entity.mover.try_move(my_pos, dungeon_level)
+        source_entity.game_state.value.dungeon_needs_redraw = True
+        msg.send_global_message(messenger.PLAYER_SWITCH_MESSAGE)
 
 
 class MapScrollReadAction(ReadAction):

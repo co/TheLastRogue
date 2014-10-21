@@ -68,7 +68,7 @@ class Mover(Leaf):
         """
         if self.try_move(new_position, new_dungeon_level):
             return True
-            #  Do not shuffle public constants!
+            # Do not shuffle public constants!
         directions = list(direction.DIRECTIONS)
         random.shuffle(directions)
         for d in directions:
@@ -153,8 +153,7 @@ class Mover(Leaf):
         """
         Tries to remove parent from dungeon.
         """
-        if (not self.has_sibling("dungeon_level") or
-                    self.parent.dungeon_level.value is None):
+        if not self.has_sibling("dungeon_level") or self.parent.dungeon_level.value is None:
             return True
         if self._remove_from_old_tile():
             self.parent.dungeon_level.value = None
@@ -297,8 +296,9 @@ class CautiousStepper(Stepper):
         self.component_type = "stepper"
 
     def dares_to_step(self, position):
-        current_position_dangerous =\
-            is_tile_dangerous(self.parent.dungeon_level.value.get_tile_or_unknown(self.parent.position.value), self.parent)
+        current_position_dangerous = \
+            is_tile_dangerous(self.parent.dungeon_level.value.get_tile_or_unknown(self.parent.position.value),
+                              self.parent)
         if current_position_dangerous:
             return True  # If the current tile is dangerous any tile is ok. Panic!
         return not is_tile_dangerous(self.parent.dungeon_level.value.get_tile_or_unknown(position), self.parent)

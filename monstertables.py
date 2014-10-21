@@ -106,7 +106,8 @@ dungeon_usable_item_table = \
         [DungeonTableItem(item.new_flame_potion)] * 6 +
 
         [DungeonTableItem(item.new_teleport_scroll)] * 8 +
-        [DungeonTableItem(item.new_map_scroll)] * 8
+        [DungeonTableItem(item.new_map_scroll)] * 8 +
+        [DungeonTableItem(item.new_swap_scroll)] * 8
     )
 
 # Weighted by the factor.

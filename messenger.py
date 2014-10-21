@@ -29,6 +29,7 @@ WANT_TO_JUMP_DOWN_CHASM = "Are you sure you want to drop down the chasm?"
 PRESS_ENTER_TO_ACCEPT = "Press ENTER to accept, another key to reject."
 
 PLAYER_TELEPORT_MESSAGE = "Your surroundings seem different."
+PLAYER_SWITCH_MESSAGE = "Your surrounding is replaced."
 
 POTION_SMASH_TO_GROUND = "The %(target_entity)s smashes to the ground and breaks into pieces."
 ITEM_HITS_THE_GROUND = "The %(target_entity)s hits the ground with a thud."
@@ -36,6 +37,7 @@ ENTITY_EXPLODES = "%(target_entity)s explodes!"
 
 PLAYER_MAP_MESSAGE = "You surroundings suddenly seem familiar."
 GLASS_TURNING_MESSAGE = "You surroundings suddenly seem more transparent."
+SWAP_DEVICE_MESSAGE = "Your surroundings has changed."
 
 ZAP_DEVICE_MESSAGE = "%(source_entity)s zaps %(target_entity)s for %(damage)s damage!"
 HEALTH_DEVICE_MESSAGE = "%(target_entity)s is healed by the device for %(health)s health."
