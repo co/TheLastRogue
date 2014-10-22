@@ -1,14 +1,14 @@
-from audioop import add
 import random
+
 from animation import animate_point
 import colors
-
 from compositecore import Leaf
 import gametime
 from graphic import GraphicChar
 import icon
 import messenger
 from statusflags import StatusFlags
+
 
 # TODO: Idea replace effect types with spoofchildren and add time to live to spoof children.
 

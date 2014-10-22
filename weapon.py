@@ -505,6 +505,11 @@ def new_gun(game_state):
     gun.set_child(DataPoint(DataTypes.WEAPON_RANGE, 15))
     gun.set_child(accuracy_item_stat(13))
     gun.set_child(damage_item_stat(5, 25))
+    gun.set_child(BleedAttackEffect(1))
+
+    gun.set_child(CritChanceBonusEffect(0.3))
+    gun.set_child(crit_multiplier_item_stat(2.0))
+
     gun.set_child(DataPoint(DataTypes.WEIGHT, 5))
     return gun
 
@@ -521,6 +526,32 @@ def new_sling(game_state):
     sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
     sling.set_child(accuracy_item_stat(5))
     sling.set_child(damage_item_stat(1, 3))
+
+    sling.set_child(CritChanceBonusEffect(0.2))
+    sling.set_child(crit_multiplier_item_stat(2.0))
+
+    sling.set_child(StunAttackEffect(1))
+
+    return sling
+
+
+def new_bolas(game_state):
+    sling = Composite()
+    set_item_components(sling, game_state)
+    set_ranged_weapon_components(sling)
+    sling.set_child(RangeWeaponType(RangeWeaponType.SLING))
+    sling.set_child(Description("Bolas",
+                                "Two weights strung together by a string, when thrown they may trip the victim."))
+    sling.set_child(GraphicChar(None, colors.CHAMPAGNE, icon.HEART + 18))
+    sling.set_child(DataPoint(DataTypes.WEAPON_RANGE, 4))
+    sling.set_child(DataPoint(DataTypes.WEIGHT, 3))
+    sling.set_child(accuracy_item_stat(3))
+    sling.set_child(damage_item_stat(1, 2))
+
+    sling.set_child(CritChanceBonusEffect(0.2))
+    sling.set_child(crit_multiplier_item_stat(2.0))
+
+    sling.set_child(TripAttackEffect(1))
     return sling
 
 

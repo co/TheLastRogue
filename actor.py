@@ -12,6 +12,10 @@ class Actor(Leaf):
         self.newly_spent_energy = 0
         self.energy_recovery = gametime.normal_energy_gain
 
+    @property
+    def ticks_per_turn(self):
+        return gametime.single_turn / self.energy_recovery
+
     def tick(self):
         """
         Gives the actor an opportunity to act.
@@ -23,12 +27,19 @@ class Actor(Leaf):
             self.parent.energy.value - gametime.single_turn
             return
         self.parent.energy.value += self.energy_recovery
-        if self.parent.energy.value > 0:
-            turn.current_turn += 1
+        self.check_new_turn()
         while self.parent.energy.value > 0:
-            if self.parent.has("is_player"):
-                self._pre_player_act()
             self.parent.energy.value -= self.act()
+            if self.parent.has("is_player"):  # can be second to act since check_new_turn will draw.
+                self.parent.game_state.value.force_draw()
+
+    def check_new_turn(self):
+        if self.parent.has("is_player"):
+            turn.ticks_this_turn += 1
+            if turn.ticks_this_turn >= self.ticks_per_turn:
+                turn.current_turn += 1
+                turn.ticks_this_turn = 0
+                self.parent.game_state.value.force_draw()
 
     def act(self):
         raise NotImplementedError("act method not implemented for parent:" +
@@ -39,9 +50,6 @@ class Actor(Leaf):
 
     def add_energy_spent(self, energy):
         self.newly_spent_energy += energy
-
-    def _pre_player_act(self):
-        self.parent.game_state.value.force_draw()
 
 
 class DoNothingActor(Actor):
