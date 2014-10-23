@@ -1,4 +1,5 @@
 import logging
+
 from attacker import DamageTypes
 from compositecore import Leaf
 import counter
@@ -12,7 +13,6 @@ from messenger import NO_LONGER_PARALYZED_MESSAGE
 import rng
 import settings
 import shapegenerator
-import terrain
 
 
 class Health(Leaf):
@@ -216,7 +216,7 @@ class BleedWhenDamaged(DamageTakenEffect):
 
     def put_blood_on_tile(self, dungeon_level, position):
         the_terrain = dungeon_level.get_tile_or_unknown(position).get_terrain()
-        if isinstance(the_terrain, terrain.Wall):
+        if the_terrain.has("is_wall"):
             the_terrain.graphic_char.color_fg = colors.RED
         elif not the_terrain.has("is_chasm"):
             spawn_blood_on_position(position, dungeon_level)

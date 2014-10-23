@@ -5,10 +5,10 @@ from compositecommon import EntityShareTileEffect
 from compositecore import Leaf, Composite
 import entityeffect
 from graphic import GraphicChar, CharPrinter, GraphicCharTerrainCorners
-from menufactory import start_accept_reject_prompt
 import messenger
 from mover import Mover
 from position import Position, DungeonLevel
+from prompt import start_accept_reject_prompt
 from stats import Flag, DataPoint, DataTypes, GamePieceTypes
 from statusflags import StatusFlags
 import colors

@@ -16,7 +16,7 @@ class PositionExaminer(state.State):
         self._cursor_position = position
         self.start_position = position
         self.max_distance = max_distance
-        self.camera = background_state.current_stack.get_game_state().camera
+        self.camera = background_state.camera  # Ugly, but we know the bg state is the game state.
         self.cursor_symbol = 'X'
         self.cursor_color = colors.CURSOR
         self._background_state = background_state

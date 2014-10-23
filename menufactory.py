@@ -4,7 +4,6 @@ import colors
 from counter import Counter
 import dungeoncreatorvisualizer
 from equipment import EquipmentSlots
-import gamestate
 import gametime
 import geometry as geo
 import graphic
@@ -12,20 +11,20 @@ import gui
 import menu
 import rectfactory
 import sacrifice
+import save
 import settings
 import state
 import style
 import icon
 
 
-def _main_menu(ui_state, state_stack, player_name_func):
+def _main_menu(ui_state, state_stack, player_name_func, game_state_factory, test_game_state_factory):
     """
     Creates the first menu of the game.
     """
-    continue_game_function = lambda: ui_state.current_stack.push(gamestate.load_first_game())
-    start_game_function = lambda: ui_state.current_stack.push(gamestate.GameState(player_name_func()))
-    save_game_function = lambda: gamestate.save(ui_state.current_stack.get_game_state())
-    start_test_game_function = lambda: ui_state.current_stack.push(gamestate.TestGameState(player_name_func()))
+    continue_game_function = lambda: ui_state.current_stack.push(save.load_first_game())
+    start_game_function = lambda: ui_state.current_stack.push(game_state_factory(player_name_func()))
+    start_test_game_function = lambda: ui_state.current_stack.push(test_game_state_factory(player_name_func()))
     quit_game_function = lambda: ui_state.current_stack.pop()
     dungeon_visualizer_function = \
         lambda: ui_state.current_stack.push(dungeoncreatorvisualizer.DungeonCreatorVisualizer())
@@ -35,11 +34,11 @@ def _main_menu(ui_state, state_stack, player_name_func):
     menu_items = []
 
     continue_game_option = menu.MenuOptionWithSymbols("Continue", gun_icon, no_icon, [continue_game_function],
-                                                      gamestate.is_there_a_saved_game)
+                                                      save.is_there_a_saved_game)
     menu_items.append(continue_game_option)
 
     start_game_option = \
-        menu.MenuOptionWithSymbols("New Game", gun_icon, no_icon, [start_game_function, save_game_function])
+        menu.MenuOptionWithSymbols("New Game", gun_icon, no_icon, [start_game_function])
     menu_items.append(start_game_option)
 
     if settings.DEV_MODE_FLAG:
@@ -67,7 +66,7 @@ def get_save_quit_menu(player, state_stack):
     save_and_quit_graphic_inactive = graphic.GraphicChar(None, colors.GRAY, icon.GUNSLINGER_THIN)
     options.append(menu.MenuOptionWithSymbols("Save and Quit", save_and_quit_graphic_active,
                                               save_and_quit_graphic_inactive,
-                                              [lambda: gamestate.save(game_state), exit_menu_function,
+                                              [lambda: save.save(game_state), exit_menu_function,
                                                game_state.current_stack.pop,
                                                (lambda: player.actor.add_energy_spent(gametime.single_turn))]))
 
@@ -78,12 +77,6 @@ def get_save_quit_menu(player, state_stack):
                                                (lambda: player.actor.add_energy_spent(gametime.single_turn))]))
 
     return get_menu_with_options(options, state_stack, 6, 5)
-
-
-def start_accept_reject_prompt(state_stack, game_state, message):
-    prompt = menu.AcceptRejectPrompt(state_stack, message)
-    game_state.start_prompt(state.UIState(prompt))
-    return prompt.result
 
 
 def get_menu_with_options(options, state_stack, x_border=4, y_border=5):
@@ -537,7 +530,7 @@ def get_dungeon_feature_menu_options(player, stack_pop_function):
     return feature_options
 
 
-def title_screen(state_stack):
+def title_screen(state_stack, game_state_factory, test_game_state_factory):
 
     bg_color = colors.DARKNESS
     logo_fg = colors.RED
@@ -586,7 +579,7 @@ def title_screen(state_stack):
     ui_state = state.UIState(gui.UIElementList(None))
     hero_name_type_writer = gui.TypeWriter((0, 0), colors.WHITE, colors.GRAY_D, constants.LEFT_SIDE_BAR_WIDTH - 4,
                                            default_text=settings.DEFAULT_PLAYER_NAME)
-    main_menu = _main_menu(ui_state, state_stack, lambda: hero_name_type_writer.text)
+    main_menu = _main_menu(ui_state, state_stack, lambda: hero_name_type_writer.text, game_state_factory, test_game_state_factory)
 
     name_heading = gui.TextBox("Name:", (0, 0), colors.CYAN_D, (0, 1))
     menu_stack_panel = gui.StackPanelVertical((0, 0), (0, 0), vertical_space=0,

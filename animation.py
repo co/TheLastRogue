@@ -18,7 +18,7 @@ class MissileAnimation(InstantAnimation):
         self.symbol = symbol
         self.color_fg = color_fg
         self.path = path
-        self.camera = game_state.current_stack.get_game_state().camera
+        self.camera = game_state.camera
         self.player = game_state.player
 
     def run_animation(self):
@@ -44,7 +44,7 @@ def animate_flight(game_state, path, symbol_char, color_fg):
 def animate_point(game_state, position, graphic_chars):
     if not game_state.player.dungeon_mask.can_see_point(position):
         return
-    camera = game_state.current_stack.get_game_state().camera
+    camera = game_state.camera
     x, y = camera.dungeon_to_screen_position(position)
     for graphic_char in graphic_chars:
         game_state.prepare_draw()
@@ -78,7 +78,7 @@ def animate_fall(target_entity, animation_target_piece):
 
 def animate_path(game_state, path, graphic_char):
     path = [p for p in path if game_state.player.dungeon_mask.can_see_point(p)]
-    camera = game_state.current_stack.get_game_state().camera
+    camera = game_state.camera
     for _ in range(settings.MISSILE_ANIMATION_DELAY):
         game_state.prepare_draw()
         for position in path:

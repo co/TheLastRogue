@@ -31,6 +31,8 @@ class Player(Composite):
     """
     def __init__(self, game_state):
         super(Player, self).__init__()
+        self.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
+
         self.set_child(Health(25))
 
         self.set_child(DataPoint(DataTypes.RACE, Races.HUMAN))
@@ -62,8 +64,6 @@ class Player(Composite):
         self.set_child(DataPoint(DataTypes.SIGHT_RADIUS, constants.COMMON_SIGHT_RADIUS))
         self.set_child(DataPoint(DataTypes.FACTION, Factions.PLAYER))
         self.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.NORMAL))
-
-        self.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
 
         self.set_child(DungeonLevel())
         self.set_child(Position())

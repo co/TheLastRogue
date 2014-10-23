@@ -291,7 +291,7 @@ class ItemActionsMenu(Menu):
         self.update()
 
     def _update_menu_items(self):
-        game_state = self._state_stack.get_game_state()
+        game_state = self._player.game_state.value
         self.menu_items = []
         for item_action in self._actions:
             action_function = item_action.delayed_call(source_entity=self._player, target_entity=self._player,

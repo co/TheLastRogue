@@ -283,8 +283,6 @@ class Composite(Component):
     def after_tick(self, time):
         """
         Runs after_tick on all child components.
-
-        It also resets all spoofed children.
         """
         visited_component_types = set()
         for component_type, component in self._spoofed_children.iteritems():

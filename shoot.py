@@ -4,7 +4,7 @@ import positionexaminer
 
 
 def player_select_missile_path(source_entity, max_throw_distance,
-                               game_gamestate):
+                               game_state):
     """
     Method initiating a prompt for the player to select a missile path.
     """
@@ -20,7 +20,7 @@ def player_select_missile_path(source_entity, max_throw_distance,
         MissileDestinationSelector(choose_target_prompt,
                                    source_entity.position.value,
                                    source_entity,
-                                   game_gamestate,
+                                   game_state,
                                    max_throw_distance,
                                    init_target=init_target)
     choose_target_prompt.push(destination_selector)

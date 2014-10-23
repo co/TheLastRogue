@@ -184,9 +184,8 @@ class InputActor(Actor):
         self.parent.game_state.value.start_prompt(context_menu)
 
     def start_examine(self):
-        destination_selector = positionexaminer.PositionSelector(self.parent.game_state.value.menu_prompt_stack,
-                                                                 self.parent.position.value,
-                                                                 self.parent.game_state.value)
+        destination_selector = positionexaminer.PositionSelector(self.parent.game_state.value,
+                                                                 self.parent.position.value)
         self.parent.game_state.value.start_prompt(destination_selector)
         destination = destination_selector.selected_position
         self.set_path_destination(destination)

@@ -1,14 +1,10 @@
-import os
-from os.path import isfile
-from os import listdir, getcwd
-import cPickle as pickle
-
 from cloud import new_steam_cloud
 import colors
 from dungeon import Dungeon, ReflexiveDungeon
 import dungeonfeature
 from dungeonlevelfactory import dungeon_level_from_file
 import libtcodpy
+import monster
 from mover import teleport_monsters
 from player import Player
 import camera
@@ -19,13 +15,13 @@ import item
 import menufactory
 import messenger
 import rectfactory
-import sacrifice
+from save import save, delete_save_file_of_game_state
 import settings
 import state
 import statestack
-from tools import time_it
 import turn
 from weapon import new_flame_orb, new_gun, new_sling, new_dagger
+import weapon
 
 
 def reset_globals(player):
@@ -311,38 +307,3 @@ class GameState(GameStateBase):
                 return
         raise Exception("Could not put player at first up stairs.")
 
-
-def get_save_file_name():
-    save_file = "game.sav"
-    return save_file
-
-
-def save(game_state):
-    game_state.draw_loading_screen("Saving...")
-    save_file = open(get_save_file_name(), 'wb')
-    time_it("save", lambda: pickle.dump(game_state, save_file, -1))
-    save_file.close()
-
-
-def get_save_files():
-    directory = getcwd()
-    return [f for f in listdir(directory)
-            if isfile(f) and f == get_save_file_name()]
-
-
-def delete_save_file_of_game_state():
-    file_name = get_save_file_name()
-    if os.path.isfile(file_name):
-        os.remove(file_name)
-
-
-def is_there_a_saved_game():
-    return len(get_save_files()) > 0
-
-
-def load_first_game():
-    save_file = open(get_save_files()[0], 'rb')
-    print save_file
-    game_state = time_it("load", (lambda: pickle.load(save_file)))
-    save_file.close()
-    return game_state

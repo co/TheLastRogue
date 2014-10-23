@@ -12,6 +12,8 @@ import messenger
 from mover import RandomStepper
 from stats import DataTypes, DataPointBonusSpoof, DataPoint
 
+COUNTER_ITEM_STAT_TYPE = "counter_attack_weapon_effect"
+
 
 class AttackEffect(Leaf):
     def __init__(self, effect_chance):
@@ -173,7 +175,7 @@ class CounterAttackEffect(StatBonusEquipEffectWithItemStat):
         self.component_type = "counter_attack"
 
     def _item_stat(self):
-        return ItemStat("counter_attack_weapon_effect", self.effect_chance, colors.PURPLE, "Counter",
+        return ItemStat(COUNTER_ITEM_STAT_TYPE, self.effect_chance, colors.PURPLE, "Counter",
                         ItemStat.PERCENT_FORMAT, order=30, is_common_stat=False)
 
 

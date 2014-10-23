@@ -1,4 +1,3 @@
-import gamestate
 import frame
 import gui
 import rectfactory
@@ -8,7 +7,6 @@ import colors
 class StateStack(object):
     def __init__(self):
         self._stack = []
-        self._current_game_state_cache = None
 
     def main_loop(self):
         while len(self._stack) > 0:
@@ -22,28 +20,16 @@ class StateStack(object):
     def push(self, state):
         state.current_stack = self
         self._stack.append(state)
-        if isinstance(state, gamestate.GameStateBase):
-            self._current_game_state_cache = state
 
     def peek(self):
         if len(self._stack) < 1:
             return None
         return self._stack[-1]
 
-    def get_game_state(self):
-        return self._current_game_state_cache
-
     def pop(self):
         state = self._stack.pop()
         state.current_stack = None
-        if state is self._current_game_state_cache:
-            self._current_game_state_cache is None
         return state
-
-    def pop_to_game_state(self):
-        while(len(self._stack) > 0 and
-              not isinstance(self.peek(), gamestate.GameStateBase)):
-            self.pop()
 
     def pop_to_main_menu(self):
         while len(self._stack) > 1:
@@ -63,6 +49,12 @@ class GameMenuStateStack(StateStack):
             self._draw_background()
             state.draw()
             state.update()
+
+    def pop_to_game_state(self):
+        if not self._game_state:
+            raise Exception("Cannot pop to GameState without GameState set.")
+        while len(self._stack) > 0 and not self.peek() is self._game_state:
+            self.pop()
 
     def get_game_state(self):
         return self._game_state

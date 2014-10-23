@@ -121,7 +121,7 @@ def new_iron_hand(game_state):
     c = Composite()
     set_item_components(c, game_state)
     set_melee_weapon_component(c)
-    c.set_child(Description("Iron Hand", "A pair of iron battle gloves, they put weight into your punches."))
+    c.set_child(Description("Iron Hand", "A pair of iron battle gloves, they put some weight behind your punches."))
     c.set_child(GraphicChar(None, colors.GRAY, icon.GLOVE))
     c.set_child(DataPoint(DataTypes.WEIGHT, 5))
     c.set_child(DamageType(DamageTypes.BLUNT))
@@ -551,7 +551,7 @@ def new_bolas(game_state):
     sling.set_child(CritChanceBonusEffect(0.2))
     sling.set_child(crit_multiplier_item_stat(2.0))
 
-    sling.set_child(TripAttackEffect(1))
+    sling.set_child(TripAttackEffect(0.4))
     return sling
 
 
