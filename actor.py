@@ -28,11 +28,13 @@ class Actor(Leaf):
             return
         self.parent.energy.value += self.energy_recovery
         self.check_new_turn()
+        need_draw = False
         while self.parent.energy.value > 0:
-            self.parent.energy.value -= self.act()
-            if self.parent.has("is_player"):  # need a draw in this loop to draw animations but,
-                                              # it can be second to act since check_new_turn will draw.
+            if need_draw and self.parent.has("is_player"):  # need a draw in this loop to draw animations but,
+                                                                # can skip first draw check_new_turn will draw.
                 self.parent.game_state.value.force_draw()
+            need_draw = True
+            self.parent.energy.value -= self.act()
 
     def check_new_turn(self):
         if self.parent.has("is_player"):

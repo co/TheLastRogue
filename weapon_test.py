@@ -31,7 +31,7 @@ class TestComposition(unittest.TestCase):
         self.dummy_actor = get_dummy_actor()
         self.scheduler.register(self.dummy_actor)
 
-    def test_weapon_with_counter_attack_effect_has_counter_attack_bonus(self):
+    def test_weapon_with_counter_attack_effect_gives_weilder_counter_attack_bonus(self):
         test_weapon = get_dummy_weapon()
         bonus = 0.5
         test_weapon.set_child(CounterAttackEffect(bonus))
