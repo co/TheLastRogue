@@ -78,6 +78,7 @@ class DataTypes:
     CRIT_MULTIPLIER = "crit_multiplier"
     UNARMED_CRIT_CHANCE = "unarmed_crit_chance"
     CRIT_CHANCE = "crit_chance"
+    CRIT_CHANCE_WEAPON = "crit_chance_weapon_effect"
     STRENGTH = "strength"
     ARMOR = "armor"
     ACCURACY = "accuracy"

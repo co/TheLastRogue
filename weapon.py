@@ -14,7 +14,6 @@ from text import Description
 __author__ = 'co'
 
 
-
 def set_melee_weapon_component(item):
     item.set_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
     item.set_child(ItemType(ItemType.WEAPON))

@@ -203,7 +203,7 @@ class CritChanceBonusEffect(StatBonusEquipEffectWithItemStat):
         self.component_type = "crit_chance_bonus"
 
     def _item_stat(self):
-        return ItemStat("crit_chance_weapon_effect", self.effect_chance, colors.RED, "Crit %",
+        return ItemStat(DataTypes.CRIT_CHANCE_WEAPON, self.effect_chance, colors.RED, "Crit %",
                         ItemStat.PERCENT_FORMAT, order=40, is_common_stat=True)
 
 
