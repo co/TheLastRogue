@@ -36,6 +36,7 @@ ITEM_HITS_THE_GROUND = "The %(target_entity)s hits the ground with a thud."
 ENTITY_EXPLODES = "%(target_entity)s explodes!"
 
 PLAYER_MAP_MESSAGE = "You surroundings suddenly seem familiar."
+PLAYER_PUSH_SCROLL_MESSAGE = "You as you form the words of the scroll your voice turns into a strong wind."
 GLASS_TURNING_MESSAGE = "You surroundings suddenly seem more transparent."
 SWAP_DEVICE_MESSAGE = "Your surroundings has changed."
 

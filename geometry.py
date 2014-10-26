@@ -35,7 +35,7 @@ def other_side_of_point(point1, point2):
     return add_2d(point2, direction)
 
 
-def distance_sqrd(point1, point2):
+def distance_squared(point1, point2):
     """
     Returns the distance between two points squared.
     Marginally faster than Distance()
@@ -47,7 +47,7 @@ def distance(point1, point2):
     """
     Returns the distance between two points
     """
-    return math.sqrt(distance_sqrd(point1, point2))
+    return math.sqrt(distance_squared(point1, point2))
 
 
 def chess_distance(point1, point2):

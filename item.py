@@ -344,7 +344,7 @@ class BlinksDeviceAction(ActivateDeviceAction):
             self._blink(target_entity)
         player.game_state.value.dungeon_needs_redraw = True
         player.game_state.value.force_draw()
-        sleep(0.2)
+        sleep(0.2) # todo: standardise frame show time
 
     def _blink(self, entity):
         sight = entity.sight_radius.value
@@ -783,6 +783,16 @@ def new_map_scroll(game_state):
     return scroll
 
 
+def new_push_scroll(game_state):
+    scroll = Composite()
+    set_item_components(scroll, game_state)
+    set_scroll_components(scroll)
+    scroll.set_child(PushScrollReadAction())
+    scroll.set_child(Description("Scroll of Pushing.",
+                                 "A scroll which will push all seen entities away from you."))
+    return scroll
+
+
 def new_bomb(game_state):
     bomb = Composite()
     set_item_components(bomb, game_state)
@@ -1058,10 +1068,6 @@ class SwapScrollReadAction(ReadAction):
 
 
 class MapScrollReadAction(ReadAction):
-    """
-    Defines the healing potion drink action.
-    """
-
     def __init__(self):
         super(MapScrollReadAction, self).__init__()
         self.component_type = "map_scroll_read_action"
@@ -1079,6 +1085,51 @@ class MapScrollReadAction(ReadAction):
             tile = dungeon_level.get_tile_or_unknown(p)
             target_entity.memory_map.gain_knowledge_of_terrain_of_tile(tile, p, dungeon_level.depth)
         target_entity.game_state.value.dungeon_needs_redraw = True
+
+
+class PushScrollReadAction(ReadAction):
+    def __init__(self):
+        super(PushScrollReadAction, self).__init__()
+        self.component_type = "push_scroll_read_action"
+
+    def _act(self, target_entity):
+        """
+        When an entity reads a scroll of pushing it will push enemies in sight.
+        """
+        entities_in_sight = target_entity.vision.get_seen_entities_closest_first()
+        entities_in_sight.reverse()
+        print [e.description.name for e in entities_in_sight]
+        if not any(entities_in_sight):
+            return
+        min_push = 2
+        max_push = 4
+        entity_direction = {}
+        entity_push_steps = {}
+        max_push_distance = 0
+        for entity in entities_in_sight:
+            print entity.description.name
+            push_direction = geometry.other_side_of_point_direction(target_entity.position.value, entity.position.value)
+            entity_direction[entity] = push_direction
+            entity_push_steps[entity] = random.randrange(min_push, max_push + 1)
+            max_push_distance = max(entity_push_steps[entity], max_push_distance)
+        for index in range(max_push_distance):
+            for entity in entities_in_sight:
+                if (entity_push_steps[entity] <= index or
+                        self._entity_is_about_to_fall(entity)):
+                    break
+                entity.stepper.try_push_in_direction(entity_direction[entity])
+            target_entity.game_state.value.dungeon_needs_redraw = True
+            target_entity.game_state.value.force_draw()
+            sleep(0.07) # todo: standardise frame show time
+        msg.send_global_message(messenger.PLAYER_PUSH_SCROLL_MESSAGE)
+
+    def _entity_is_about_to_fall(self, entity):
+        if entity.status_flags.has_status(StatusFlags.FLYING):
+            return False
+        dungeon_level = entity.dungeon_level.value
+        tile = dungeon_level.get_tile_or_unknown(entity.position.value)
+        result = tile.get_terrain().has("is_chasm")
+        return result
 
 
 class PickUpItemAction(Action):

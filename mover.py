@@ -198,6 +198,9 @@ class Stepper(Leaf):
         super(Stepper, self).__init__()
         self.component_type = "stepper"
 
+    def try_push_in_direction(self, direction):
+        return self._try_move_to_destination(geometry.add_2d(self.parent.position.value, direction))
+
     def _try_move_to_destination(self, position):
         """
         This method should wrap the move component for the stepper.
