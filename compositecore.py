@@ -146,19 +146,19 @@ class Composite(Component):
         If the child already has a parent an exception is thrown.
         """
         if child.tags is None:
-            raise Exception("Component {0} tried ta add_child"
-                            "component: {1} to its children."
-                            "But tags"
+            raise Exception("Component {0} tried ta add_child "
+                            "component: {1} to its children. "
+                            "But tags "
                             "was not set.".format(str(self), str(child)))
         if child.component_type is None:
-            raise Exception("Component {0} tried ta add_child"
-                            "component: {1} to its children."
-                            "But component_type"
+            raise Exception("Component {0} tried ta add_child "
+                            "component: {1} to its children. "
+                            "But component_type "
                             "was not set.".format(str(self), str(child)))
         if not child._parent is None:
-            raise Exception("Component {0} tried ta add_child"
-                            "component: {1} to its children."
-                            "But it already"
+            raise Exception("Component {0} tried ta add_child "
+                            "component: {1} to its children. "
+                            "But it already "
                             "had parent: {2}.".format(str(self), str(child), str(child.parent)))
         if self.has(child.component_type):
             self.remove_component_of_type(child.component_type)

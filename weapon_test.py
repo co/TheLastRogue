@@ -2,7 +2,7 @@ import unittest
 
 from actionscheduler import ActionScheduler
 from actor import DoNothingActor
-from attacker import UnarmedAttacker, WeaponMeleeAttacker
+from attacker import WeaponMeleeAttacker
 from compositecore import Composite
 from equipment import Equipment
 import equipment
@@ -46,25 +46,25 @@ class TestComposition(unittest.TestCase):
         self.assertTrue(actor.has(bonus_type), "The actor has no '" + bonus_type + "' bonus stat.")
         self.assertEqual(actor.get_child(bonus_type).value, expected_bonus)
 
-    def test_weapon_with_counter_attack_effect_gives_weilder_counter_attack_bonus(self):
+    def test_weapon_with_counter_attack_effect_gives_wielder_counter_attack_bonus(self):
         test_weapon = get_dummy_weapon()
         test_weapon.set_child(CounterAttackEffect(TEST_VALUE))
         self.weapon_with_player_stat_bonus_should_give_player_stat_bonus(DataTypes.COUNTER_ATTACK_CHANCE, TEST_VALUE,
                                                                          test_weapon, get_dummy_actor())
 
-    def test_weapon_with_offencive_attack_effect_gives_weilder_counter_attack_bonus(self):
+    def test_weapon_with_offencive_attack_effect_gives_wielder_counter_attack_bonus(self):
         test_weapon = get_dummy_weapon()
         test_weapon.set_child(OffenciveAttackEffect(TEST_VALUE))
         self.weapon_with_player_stat_bonus_should_give_player_stat_bonus(DataTypes.OFFENCIVE_ATTACK_CHANCE, TEST_VALUE,
                                                                          test_weapon, get_dummy_actor())
 
-    def test_weapon_with_defencive_attack_effect_gives_weilder_counter_attack_bonus(self):
+    def test_weapon_with_defencive_attack_effect_gives_wielder_counter_attack_bonus(self):
         test_weapon = get_dummy_weapon()
         test_weapon.set_child(DefenciveAttackEffect(TEST_VALUE))
         self.weapon_with_player_stat_bonus_should_give_player_stat_bonus(DataTypes.DEFENCIVE_ATTACK_CHANCE, TEST_VALUE,
                                                                          test_weapon, get_dummy_actor())
 
-    def test_weapon_with_defencive_attack_effect_gives_weilder_counter_attack_bonus(self):
+    def test_weapon_with_defencive_attack_effect_gives_wielder_counter_attack_bonus(self):
         test_weapon = get_dummy_weapon()
         test_weapon.set_child(CritChanceBonusEffect(TEST_VALUE))
         actor = get_dummy_actor()

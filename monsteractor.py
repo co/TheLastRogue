@@ -304,6 +304,20 @@ class MonsterWeightedStepAction(MonsterWeightedAction):
         self.parent.actor.newly_spent_energy += self.parent.path.try_step_path()
 
 
+class TryPutToSleep(Leaf):
+    def __init__(self):
+        super(TryPutToSleep, self).__init__()
+        self.component_type = "try_put_to_sleep"
+
+    def first_tick(self, time):
+        if self.parent_may_sleep():
+            self.parent.set_child(SleepingActor())
+        self.parent.remove_component(self)
+
+    def parent_may_sleep(self):
+        return self.parent.status_flags.has_status(StatusFlags.IS_ALIVE)
+
+
 class SleepingActor(MonsterActor):
     """
     Entities with this actor will do nothing.

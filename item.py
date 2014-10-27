@@ -17,6 +17,7 @@ from health import ReflectDamageTakenEffect
 import menufactory
 import messenger
 from missileaction import PlayerThrowItemAction
+from monsteractor import TryPutToSleep
 from mover import Mover
 from position import Position, DungeonLevel
 import rng
@@ -789,7 +790,17 @@ def new_push_scroll(game_state):
     set_scroll_components(scroll)
     scroll.set_child(PushScrollReadAction())
     scroll.set_child(Description("Scroll of Pushing.",
-                                 "A scroll which will push all seen entities away from you."))
+                                 "A scroll which will push all seen creatures away from you."))
+    return scroll
+
+
+def new_sleep_scroll(game_state):
+    scroll = Composite()
+    set_item_components(scroll, game_state)
+    set_scroll_components(scroll)
+    scroll.set_child(PutToSleepScrollReadAction())
+    scroll.set_child(Description("Scroll of Sleep.",
+                                 "A scroll which will put all seen creatures to sleep."))
     return scroll
 
 
@@ -992,7 +1003,6 @@ class FrostPotionDrinkAction(DrinkAction):
         When an entity drinks a flame potion, surrounding tiles and players tile catch fire.
         """
         slow_turns = random.randrange(10, 19)
-        print slow_turns, slow_turns * gametime.single_turn
         msg.send_global_message(messenger.FROST_POTION_DRINK_MESSAGE)
         target_entity.effect_queue.add(entityeffect.AddSpoofChild(None, frost_effect_factory(),
                                                                   slow_turns*gametime.single_turn, meld_id="frost",
@@ -1087,6 +1097,22 @@ class MapScrollReadAction(ReadAction):
         target_entity.game_state.value.dungeon_needs_redraw = True
 
 
+class PutToSleepScrollReadAction(ReadAction):
+    def __init__(self):
+        super(PutToSleepScrollReadAction, self).__init__()
+        self.component_type = "sleep_scroll_read_action"
+
+    def _act(self, target_entity):
+        """
+        When an entity reads a scroll of sleep it will put enemies in sight to sleep.
+        """
+        entities_in_sight = target_entity.vision.get_seen_entities_closest_first()
+        for entity in entities_in_sight:
+            entity.set_child(TryPutToSleep())
+        if any(entities_in_sight):
+            msg.send_global_message(messenger.PLAYER_SLEEP_SCROLL_MESSAGE)
+
+
 class PushScrollReadAction(ReadAction):
     def __init__(self):
         super(PushScrollReadAction, self).__init__()
@@ -1098,7 +1124,6 @@ class PushScrollReadAction(ReadAction):
         """
         entities_in_sight = target_entity.vision.get_seen_entities_closest_first()
         entities_in_sight.reverse()
-        print [e.description.name for e in entities_in_sight]
         if not any(entities_in_sight):
             return
         min_push = 2
@@ -1107,7 +1132,6 @@ class PushScrollReadAction(ReadAction):
         entity_push_steps = {}
         max_push_distance = 0
         for entity in entities_in_sight:
-            print entity.description.name
             push_direction = geometry.other_side_of_point_direction(target_entity.position.value, entity.position.value)
             entity_direction[entity] = push_direction
             entity_push_steps[entity] = random.randrange(min_push, max_push + 1)
