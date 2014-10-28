@@ -311,7 +311,7 @@ class TryPutToSleep(Leaf):
 
     def first_tick(self, time):
         if self.parent_may_sleep():
-            self.parent.set_child(SleepingActor())
+            self.parent.set_child(SleepingEntity())
         self.parent.remove_component(self)
 
     def parent_may_sleep(self):
