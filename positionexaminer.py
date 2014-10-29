@@ -1,6 +1,7 @@
 import geometry as geo
 from console import console
 import gui
+import icon
 import libtcodpy as libtcod
 import colors
 import inputhandler
@@ -178,11 +179,11 @@ class MissileDestinationSelector(PositionSelector):
             get_tile_or_unknown(point).get_terrain()
         if(self.entity.dungeon_mask.can_see_point(point) and
            terrain.has("is_solid")):
-            console.set_symbol(screen_position, ' ')
+            console.set_symbol(screen_position, icon.DIAGONAL_STRIPES)
             console.set_color_bg(screen_position, colors.BLOCKED_PATH)
         else:
-            console.set_color_bg(screen_position, colors.PATH,
-                                 libtcod.BKGND_ADD)
+            console.set_symbol(screen_position, icon.DIAGONAL_STRIPES)
+            console.set_color_fg(screen_position, colors.PATH)
 
     def draw(self):
         self._draw_background()
