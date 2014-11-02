@@ -30,7 +30,36 @@ def reset_globals(player):
     messenger.msg.player = player
 
 
-class GameStateBase(state.State):
+class GameStateInterface(state.State):
+    def __init__(self):
+        super(GameStateInterface, self).__init__()
+
+    def signal_new_level(self):
+        pass
+
+    def start_prompt(self, prompt_state):
+        pass
+
+    def signal_should_redraw_screen(self):
+        pass
+
+    def draw(self):
+        pass
+
+    def force_draw(self):
+        pass
+
+    def prepare_draw(self):
+        pass
+
+    def prepare_draw_gui(self):
+        pass
+
+    def update(self):
+        pass
+
+
+class GameStateBase(GameStateInterface):
     def __init__(self, player_name=""):
         super(GameStateBase, self).__init__()
         self.dungeon = Dungeon(self)
@@ -189,20 +218,20 @@ class TestGameState(GameStateBase):
         cloud = new_steam_cloud(self, 32)
         cloud.mover.try_move((16, 10), self.dungeon_level)
 
-        #ratman_mystic = monster.new_ratman_mystic(self)
-        #ratman_mystic.mover.try_move((25, 16), self.dungeon_level)
+        m = monster.new_spider(self)
+        m.mover.try_move((25, 30), self.dungeon_level)
 
-        #amoeba = monster.new_giant_amoeba(self)
-        #amoeba.mover.try_move((26, 14), self.dungeon_level)
+        #m = monster.new_cyclops(self)
+        #m.mover.try_move((26, 14), self.dungeon_level)
 
         for i in range(5):
-            bomb = item.new_bomb(self)
-            bomb.mover.try_move((18, 12 + i), self.dungeon_level)
+            r = monster.new_ratman(self)
+            r.mover.try_move((18, 12 + i), self.dungeon_level)
 
-        potion = item.new_poison_potion(self)
+        potion = weapon.new_sling(self)
         potion.mover.try_move((20, 12), self.dungeon_level)
 
-        potion = item.new_health_potion(self)
+        potion = weapon.new_bolas(self)
         potion.mover.try_move((20, 16), self.dungeon_level)
 
         orb = new_flame_orb(self)
@@ -226,7 +255,7 @@ class TestGameState(GameStateBase):
         device2 = item.new_heart_stop_device(self)
         device2.mover.try_move((25, 12), self.dungeon_level)
 
-        scroll = item.new_teleport_scroll(self)
+        scroll = item.new_sleep_scroll(self)
         scroll.mover.try_move((26, 12), self.dungeon_level)
 
         scroll = item.new_map_scroll(self)
@@ -307,3 +336,14 @@ class GameState(GameStateBase):
                 return
         raise Exception("Could not put player at first up stairs.")
 
+
+class GameStateDummy(GameStateInterface):
+    def __init__(self):
+        super(GameStateDummy, self).__init__()
+        self.dungeon = Dungeon(self)
+        self.player = Player(self)
+        self.player.description.name = "Mr. Test Hero"
+
+    def update(self):
+        dungeon_level = self.player.dungeon_level.value
+        dungeon_level.tick()

@@ -149,3 +149,10 @@ def get_path(start, destination):
         result.append((x, y))
         x, y = libtcod.line_step()
     return result
+
+
+def add_energy_spent_to_entity(entity, time):
+    """
+    Help method for spending energy for the act performing entity.
+    """
+    entity.actor.newly_spent_energy += time

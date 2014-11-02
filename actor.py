@@ -9,6 +9,8 @@ class Actor(Leaf):
     def __init__(self):
         super(Actor, self).__init__()
         self.component_type = "actor"
+
+        # used by actor to keep track of how much energy was spent this tick.
         self.newly_spent_energy = 0
         self.energy_recovery = gametime.normal_energy_gain
 

@@ -584,6 +584,8 @@ class PutAdjacentTilesOnFire(Leaf):
         for d in direction.DIRECTIONS:
             point = geometry.add_2d(my_position, d)
             dungeon_level = self.parent.dungeon_level.value
+            if not dungeon_level:
+                break
             fire = new_fire_cloud(self.parent.game_state.value, random.randrange(6, 10))
             if (random.random() < chance and len(dungeon_level.get_tile_or_unknown(point).get_entities()) == 0 and
                     fire.mover.can_move(point, dungeon_level)):

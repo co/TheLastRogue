@@ -11,7 +11,7 @@ from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud, new_fi
 from compositecommon import PoisonEntityEffectFactory, frost_effect_factory
 from compositecore import Leaf, Composite
 import direction
-from dummyentities import dummy_flyer
+from dummyentities import dummy_flyer_open_doors
 import geometry
 from graphic import GraphicChar, CharPrinter
 from health import ReflectDamageTakenEffect
@@ -746,6 +746,7 @@ def new_frost_potion(game_state):
     potion.set_child(ThrowerBreakCreateCloud(cloud_factory=new_frost_cloud))
     return potion
 
+# Scrolls
 
 def set_scroll_components(item):
     item.set_child(ItemType(ItemType.SCROLL))
@@ -758,7 +759,7 @@ def new_teleport_scroll(game_state):
     scroll = Composite()
     set_item_components(scroll, game_state)
     set_scroll_components(scroll)
-    scroll.set_child(TeleportScrollReadAction())
+    set_read_item_action(scroll, [TeleportTriggeredEffect()])
     scroll.set_child(Description("Scroll of Teleport",
                                  "A scroll with strange symbols on."
                                  "When read you will appear in a different position."))
@@ -769,20 +770,10 @@ def new_swap_scroll(game_state):
     scroll = Composite()
     set_item_components(scroll, game_state)
     set_scroll_components(scroll)
-    scroll.set_child(SwapScrollReadAction())
+    set_read_item_action(scroll, [SingleSwapTriggeredEffect()])
     scroll.set_child(Description("Scroll of Swap",
                                  "A scroll with strange symbols on"
                                  "When read you will swap position with another creature on the same floor."))
-    return scroll
-
-
-def new_map_scroll(game_state):
-    scroll = Composite()
-    set_item_components(scroll, game_state)
-    set_scroll_components(scroll)
-    scroll.set_child(MapScrollReadAction())
-    scroll.set_child(Description("Scroll of Magic Mapping",
-                                 "A scroll which will make a map of your surroundings."))
     return scroll
 
 
@@ -790,15 +781,43 @@ def new_push_scroll(game_state):
     scroll = Composite()
     set_item_components(scroll, game_state)
     set_scroll_components(scroll)
-    scroll.set_child(PushScrollReadAction())
+    set_read_item_action(scroll, [PushOthersTriggeredEffect()])
     scroll.set_child(Description("Scroll of Pushing",
                                  "A scroll which will push all seen creatures away from you."))
     return scroll
 
 
-def set_use_item_action(item, triggered_effects):
-    read_effect = Composite("read_action")
-    read_effect.set_child(ActionTrigger("Read", 90, READ_ACTION_TAG))
+def new_map_scroll(game_state):
+    scroll = Composite()
+    set_item_components(scroll, game_state)
+    set_scroll_components(scroll)
+    set_read_item_action(scroll, [MagicMappingTriggeredEffect()])
+    scroll.set_child(Description("Scroll of Magic Mapping",
+                                 "A scroll which will make a map of your surroundings."))
+    return scroll
+
+
+def new_sleep_scroll(game_state):
+    scroll = Composite()
+    set_item_components(scroll, game_state)
+    set_scroll_components(scroll)
+    scroll.remove_component_of_type("player_throw_item_action")
+
+    set_read_item_action(scroll, [PutToSleepTriggeredEffect()])
+    scroll.set_child(Description("Scroll of Sleep",
+                                 "A scroll which will put all seen creatures to sleep."))
+    return scroll
+
+
+def set_read_item_action(item, triggered_effects):
+    set_use_item_action(READ_ACTION_TAG, item, [ActionTrigger("Read", 90, READ_ACTION_TAG)] + triggered_effects)
+
+
+scroll_factories = [new_sleep_scroll, new_map_scroll, new_teleport_scroll, new_swap_scroll]
+
+
+def set_use_item_action(component_type, item, triggered_effects):
+    read_effect = Composite(component_type)
     read_effect.set_child(FlashItemEffect())
     read_effect.set_child(RemoveItemEffect())
     read_effect.set_child(AddEnergySpentEffect())
@@ -808,17 +827,20 @@ def set_use_item_action(item, triggered_effects):
     item.set_child(read_effect)
 
 
-def new_sleep_scroll(game_state):
-    scroll = Composite()
-    set_item_components(scroll, game_state)
-    set_scroll_components(scroll)
-    scroll.remove_component_of_type("drop_action")
-    scroll.remove_component_of_type("player_throw_item_action")
+def new_drop_action(component_type, item):
+    effect = Composite(component_type)
+    effect.set_child(DropItemTriggeredEffect())
+    effect.set_child(DataPoint("item", item))
+    effect.set_child(ActionTrigger("Drop", 110, DROP_ACTION_TAG))
+    item.set_child(effect)
 
-    set_use_item_action(scroll, [PutToSleepTriggeredEffect()])
-    scroll.set_child(Description("Scroll of Sleep",
-                                 "A scroll which will put all seen creatures to sleep."))
-    return scroll
+
+def new_throw_item_action(component_type, item):
+    effect = Composite(component_type)
+    effect.set_child(DropItemTriggeredEffect())
+    effect.set_child(DataPoint("item", item))
+    effect.set_child(ActionTrigger("Throw", 110, THROW_ACTION_TAG))
+    item.set_child(effect)
 
 
 def new_bomb(game_state):
@@ -833,31 +855,6 @@ def new_bomb(game_state):
                                "Throwing it will cause some serious damage."))
     bomb.set_child(ThrowerCreateExplosion())
     return bomb
-
-
-class DropAction(Action):
-    """
-    An entity holding the parent item in its inventory should be able to drop
-    the item using this action.
-    """
-
-    def __init__(self):
-        super(DropAction, self).__init__()
-        self.component_type = "drop_action"
-        self.name = "Drop"
-        self.display_order = 110
-
-    def act(self, **kwargs):
-        """
-        Attempts to drop the parent item at the entity's feet.
-        """
-        source_entity = kwargs[action.SOURCE_ENTITY]
-        if not source_entity.inventory is None:
-            drop_successful = \
-                source_entity.inventory.try_drop_item(self.parent)
-            if drop_successful:
-                self.add_energy_spent_to_entity(source_entity)
-        return
 
 
 class ReEquipAction(Action):
@@ -983,6 +980,23 @@ class TriggeredEffect(Leaf):
         return True
 
 
+class DropItemTriggeredEffect(TriggeredEffect):
+    def __init__(self, energy_cost=gametime.single_turn):
+        super(DropItemTriggeredEffect, self).__init__("drop_item_triggered_effect")
+        self.energy_cost = energy_cost
+
+    def trigger(self, **kwargs):
+        """
+        Attempts to drop the parent item at the entity's feet.
+        """
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        item = self.get_relative_of_type("item").value
+        if not source_entity.inventory is None:
+            if source_entity.inventory.try_drop_item(item):
+                util.add_energy_spent_to_entity(source_entity, gametime.single_turn)
+        return
+
+
 class AddEnergySpentEffect(TriggeredEffect):
     def __init__(self, energy_cost=gametime.single_turn):
         super(AddEnergySpentEffect, self).__init__("add_energy_spent_effect")
@@ -1039,18 +1053,6 @@ class DrinkAction(UsableOnceItemAction):
         self.display_order = 90
 
 
-class ReadAction(UsableOnceItemAction):
-    """
-    Abstract class, drink actions should inherit from this class.
-    """
-
-    def __init__(self):
-        super(ReadAction, self).__init__()
-        self.name = "Read"
-        self.tags.add("read_action")
-        self.display_order = 90
-
-
 class ActionTrigger(Action):
     def __init__(self, name, display_order, extra_tag=None):
         super(ActionTrigger, self).__init__()
@@ -1070,6 +1072,8 @@ class ActionTrigger(Action):
         return all(c.can_trigger(**kwargs) for c in self.parent.get_children_with_tag("triggered_effect"))
 
 READ_ACTION_TAG = "read_action"
+DROP_ACTION_TAG = "drop_action"
+THROW_ACTION_TAG = "throw_action"
 
 
 class HealthPotionDrinkAction(DrinkAction):
@@ -1151,34 +1155,29 @@ class PoisonPotionDrinkAction(DrinkAction):
         target_entity.effect_queue.add(damage_effect_factory())
 
 
-class TeleportScrollReadAction(ReadAction):
-    """
-    Defines the healing potion drink action.
-    """
-
+class TeleportTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(TeleportScrollReadAction, self).__init__()
-        self.component_type = "teleport_scroll_read_action"
+        super(TeleportTriggeredEffect, self).__init__("teleport_triggered_effect")
 
-    def _act(self, target_entity):
+    def trigger(self, **kwargs):
         """
-        When an entity reads a scroll of teleportation it's teleported.
+        teleports target entity.
         """
+        target_entity = kwargs[action.TARGET_ENTITY]
         msg.send_global_message(messenger.PLAYER_TELEPORT_MESSAGE)
         teleport_effect = entityeffect.Teleport(target_entity)
         target_entity.effect_queue.add(teleport_effect)
 
 
-class SwapScrollReadAction(ReadAction):
-    """
-    Defines the healing potion drink action.
-    """
-
+class SingleSwapTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(SwapScrollReadAction, self).__init__()
-        self.component_type = "swap_scroll_read_action"
+        super(SingleSwapTriggeredEffect, self).__init__("single_swap_triggered_effect")
 
-    def _act(self, source_entity):
+    def trigger(self, **kwargs):
+        """
+        swaps target entity with another random entity on the floor.
+        """
+        source_entity = kwargs[action.SOURCE_ENTITY]
         dungeon_level = source_entity.dungeon_level.value
         other_entities = [e for e in dungeon_level.entities if not e is source_entity]
         if not any(other_entities):
@@ -1199,19 +1198,19 @@ class SwapScrollReadAction(ReadAction):
         msg.send_global_message(messenger.PLAYER_SWITCH_MESSAGE)
 
 
-class MapScrollReadAction(ReadAction):
-    def __init__(self):
-        super(MapScrollReadAction, self).__init__()
-        self.component_type = "map_scroll_read_action"
+class MagicMappingTriggeredEffect(TriggeredEffect):
+    def __init__(self, energy_cost=gametime.single_turn):
+        super(MagicMappingTriggeredEffect, self).__init__("drop_item_triggered_effect")
+        self.energy_cost = energy_cost
 
-    def _act(self, target_entity):
+    def trigger(self, **kwargs):
         """
-        When an entity reads a scroll of mapping it gains knowledge of the surrounding terrain.
+        Attempts to drop the parent item at the entity's feet.
         """
+        target_entity = kwargs[action.TARGET_ENTITY]
         msg.send_global_message(messenger.PLAYER_MAP_MESSAGE)
         dungeon_level = target_entity.dungeon_level.value
-        walkable_positions = dungeon_level.get_walkable_positions(dummy_flyer,
-                                                                  target_entity.position.value)
+        walkable_positions = dungeon_level.get_walkable_positions(dummy_flyer_open_doors, target_entity.position.value)
         map_positions = extend_points(walkable_positions)
         for p in map_positions:
             tile = dungeon_level.get_tile_or_unknown(p)
@@ -1219,31 +1218,31 @@ class MapScrollReadAction(ReadAction):
         target_entity.game_state.value.dungeon_needs_redraw = True
 
 
-class PutToSleepScrollReadAction(ReadAction):
+class DropItemTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(PutToSleepScrollReadAction, self).__init__()
-        self.component_type = "sleep_scroll_read_action"
+        super(DropItemTriggeredEffect, self).__init__("drop_item_triggered_effect")
 
-    def _act(self, target_entity):
+    def trigger(self, **kwargs):
         """
-        When an entity reads a scroll of sleep it will put enemies in sight to sleep.
+        Attempts to drop the parent item at the entity's feet.
         """
-        entities_in_sight = target_entity.vision.get_seen_entities_closest_first()
-        for entity in entities_in_sight:
-            entity.set_child(TryPutToSleep())
-        if any(entities_in_sight):
-            msg.send_global_message(messenger.PLAYER_SLEEP_SCROLL_MESSAGE)
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        item = self.get_relative_of_type("item").value
+        if not source_entity.inventory is None:
+            if source_entity.inventory.try_drop_item(item):
+                util.add_energy_spent_to_entity(source_entity, gametime.single_turn)
+        return
 
 
-class PushScrollReadAction(ReadAction):
+class PushOthersTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(PushScrollReadAction, self).__init__()
-        self.component_type = "push_scroll_read_action"
+        super(PushOthersTriggeredEffect, self).__init__("push_others_triggered_effect")
 
-    def _act(self, target_entity):
+    def trigger(self, **kwargs):
         """
-        When an entity reads a scroll of pushing it will push enemies in sight.
+        Attempts to drop the parent item at the entity's feet.
         """
+        target_entity = kwargs[action.TARGET_ENTITY]
         entities_in_sight = target_entity.vision.get_seen_entities_closest_first()
         entities_in_sight.reverse()
         if not any(entities_in_sight):
@@ -1540,7 +1539,7 @@ def set_item_components(item, game_state):
     item.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ITEM))
     item.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
     item.set_child(CharPrinter())
-    item.set_child(DropAction())
+    new_drop_action(DROP_ACTION_TAG, item)
     item.set_child(PlayerThrowItemAction())
     item.set_child(ThrowerNonBreak())
     return item

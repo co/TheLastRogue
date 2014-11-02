@@ -315,8 +315,11 @@ class Composite(Component):
                 return self._spoofed_children[component_type][0]
             return self._children[component_type]
         except KeyError:
-            raise AttributeError("Tried to access component {0} from composite {1} "
-                                 "But it doesn't exist.".format(str(component_type), str(self)))
+            error_message = ("Tried to access component {0} from composite {1} "
+                             "But it doesn't exist.".format(str(component_type), str(self)))
+            if self.has("description"):
+                error_message += "\n The name of the composite is: " + self.description.name
+            raise AttributeError(error_message)
 
     def get_original_child(self, component_type):
         """

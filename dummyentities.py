@@ -8,6 +8,11 @@ dummy_flyer.set_child(StatusFlags([StatusFlags.FLYING]))
 dummy_flyer.set_child(Mover())
 dummy_flyer.set_child(Description("flyer_dummy", "Just a dummy used for instead a flyer for calculations."))
 
+dummy_flyer_open_doors = Composite()
+dummy_flyer_open_doors.set_child(StatusFlags([StatusFlags.FLYING, StatusFlags.CAN_OPEN_DOORS]))
+dummy_flyer_open_doors.set_child(Mover())
+dummy_flyer_open_doors.set_child(Description("flyer_dummy", "Just a dummy used for instead a flyer for calculations."))
+
 dummy_player = Composite()
 dummy_player.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS]))
 dummy_player.set_child(Mover())

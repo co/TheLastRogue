@@ -16,11 +16,36 @@ class TestComposition(unittest.TestCase):
         self.assertTrue(any(scroll.get_children_with_tag("user_action")), "The actor has no user action.")
         self.assertTrue(scroll.get_children_with_tag("user_action")[0].can_act(), "The actor has no user action.")
 
-    def test_scroll_item_should_have_read_action(self):
-        scroll = item.new_sleep_scroll(None)
+    def test_scroll_items_should_have_read_action(self):
+        scrolls = map(lambda f: f(None), item.scroll_factories)
         dummy_actor = get_dummy_player()
-        dummy_actor.inventory.try_add(scroll)
-        scroll.read_action.action_trigger.act(source_entity=dummy_actor, target_entity=dummy_actor)
+        for scroll in scrolls:
+            dummy_actor.inventory.try_add(scroll)
+            old_energy = dummy_actor.actor.newly_spent_energy
+            self.assertFalse(dummy_actor.inventory.is_empty())
+            scroll.read_action.action_trigger.act(source_entity=dummy_actor, target_entity=dummy_actor)
+            self.assertTrue(dummy_actor.inventory.is_empty())
+            self.assertGreater(dummy_actor.actor.newly_spent_energy, old_energy)
+
+    def test_scroll_item_should_have_drop_action(self):
+        scrolls = map(lambda f: f(None), item.scroll_factories)
+        dummy_actor = get_dummy_player()
+        for scroll in scrolls:
+            dummy_actor.inventory.try_add(scroll)
+            self.assertFalse(dummy_actor.inventory.is_empty())
+            scroll.drop_action.action_trigger.act(source_entity=dummy_actor, target_entity=dummy_actor)
+            self.assertTrue(dummy_actor.inventory.is_empty())
+            scroll.mover.try_remove_from_dungeon()
+
+    def test_scroll_item_should_have_drop_action(self):
+        scrolls = map(lambda f: f(None), item.scroll_factories)
+        for scroll in scrolls:
+            dummy_actor = get_dummy_player()
+            dummy_actor.inventory.try_add(scroll)
+            self.assertFalse(dummy_actor.inventory.is_empty())
+            scroll.drop_action.action_trigger.act(source_entity=dummy_actor, target_entity=dummy_actor)
+            self.assertTrue(dummy_actor.inventory.is_empty())
+            scroll.mover.try_remove_from_dungeon()
 
     def test_triggering_an_actiontrigger_should_trigger_all_triggereffect_siblings(self):
         flash_effect = item.FlashItemEffect()
