@@ -1,5 +1,6 @@
 import random
 from time import sleep
+from __builtin__ import all
 
 from Status import DAMAGE_REFLECT_STATUS_DESCRIPTION, FROST_SLOW_STATUS_DESCRIPTION
 from action import Action
@@ -770,16 +771,17 @@ def new_swap_scroll(game_state):
     set_scroll_components(scroll)
     scroll.set_child(SwapScrollReadAction())
     scroll.set_child(Description("Scroll of Swap",
-                                 "A scroll with strange symbols on."
+                                 "A scroll with strange symbols on"
                                  "When read you will swap position with another creature on the same floor."))
     return scroll
+
 
 def new_map_scroll(game_state):
     scroll = Composite()
     set_item_components(scroll, game_state)
     set_scroll_components(scroll)
     scroll.set_child(MapScrollReadAction())
-    scroll.set_child(Description("Scroll of magic mapping.",
+    scroll.set_child(Description("Scroll of Magic Mapping",
                                  "A scroll which will make a map of your surroundings."))
     return scroll
 
@@ -789,17 +791,32 @@ def new_push_scroll(game_state):
     set_item_components(scroll, game_state)
     set_scroll_components(scroll)
     scroll.set_child(PushScrollReadAction())
-    scroll.set_child(Description("Scroll of Pushing.",
+    scroll.set_child(Description("Scroll of Pushing",
                                  "A scroll which will push all seen creatures away from you."))
     return scroll
+
+
+def set_use_item_action(item, triggered_effects):
+    read_effect = Composite("read_action")
+    read_effect.set_child(ActionTrigger("Read", 90, READ_ACTION_TAG))
+    read_effect.set_child(FlashItemEffect())
+    read_effect.set_child(RemoveItemEffect())
+    read_effect.set_child(AddEnergySpentEffect())
+    for triggered_effect in triggered_effects:
+        read_effect.set_child(triggered_effect)
+    read_effect.set_child(DataPoint("item", item))
+    item.set_child(read_effect)
 
 
 def new_sleep_scroll(game_state):
     scroll = Composite()
     set_item_components(scroll, game_state)
     set_scroll_components(scroll)
-    scroll.set_child(PutToSleepScrollReadAction())
-    scroll.set_child(Description("Scroll of Sleep.",
+    scroll.remove_component_of_type("drop_action")
+    scroll.remove_component_of_type("player_throw_item_action")
+
+    set_use_item_action(scroll, [PutToSleepTriggeredEffect()])
+    scroll.set_child(Description("Scroll of Sleep",
                                  "A scroll which will put all seen creatures to sleep."))
     return scroll
 
@@ -903,6 +920,29 @@ class ReEquipAction(Action):
         target_entity.inventory.remove_item(self.parent)
 
 
+class RemoveParentItemEffect(Action):
+    """
+    Abstract class, drink actions should inherit from this class.
+    """
+
+    def trigger(self, **kwargs):
+        """
+        Performs the drink action, subclasses should not override this.
+        """
+        target_entity = kwargs[action.TARGET_ENTITY]
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        self._act(target_entity)
+        self.remove_from_inventory(target_entity)
+        _item_flash_animation(source_entity, self.parent)
+        self.add_energy_spent_to_entity(source_entity)
+
+    def remove_from_inventory(self, target_entity):
+        """
+        Removes the parent item from the inventory.
+        """
+        target_entity.inventory.remove_one_item_from_stack(self.parent)
+
+
 class UsableOnceItemAction(Action):
     """
     Abstract class, drink actions should inherit from this class.
@@ -924,6 +964,67 @@ class UsableOnceItemAction(Action):
         Removes the parent item from the inventory.
         """
         target_entity.inventory.remove_one_item_from_stack(self.parent)
+
+
+class UseItemTrigger(Action):
+    pass
+
+
+class TriggeredEffect(Leaf):
+    def __init__(self, component_type):
+        super(TriggeredEffect, self).__init__()
+        self.component_type = component_type
+        self.tags.add("triggered_effect")
+
+    def trigger(self, **kwargs):
+        pass
+
+    def can_trigger(self, **kwargs):
+        return True
+
+
+class AddEnergySpentEffect(TriggeredEffect):
+    def __init__(self, energy_cost=gametime.single_turn):
+        super(AddEnergySpentEffect, self).__init__("add_energy_spent_effect")
+        self.energy_cost = energy_cost
+
+    def trigger(self, **kwargs):
+        target_entity = kwargs[action.TARGET_ENTITY]
+        target_entity.actor.newly_spent_energy += self.energy_cost
+
+
+class PutToSleepTriggeredEffect(TriggeredEffect):
+    def __init__(self):
+        super(PutToSleepTriggeredEffect, self).__init__("put_to_sleep_effect")
+
+    def trigger(self, **kwargs):
+        """
+        When an entity reads a scroll of sleep it will put enemies in sight to sleep.
+        """
+        target_entity = kwargs[action.TARGET_ENTITY]
+        entities_in_sight = target_entity.vision.get_seen_entities_closest_first()
+        for entity in entities_in_sight:
+            entity.set_child(TryPutToSleep())
+
+
+class RemoveItemEffect(TriggeredEffect):
+    def __init__(self):
+        super(RemoveItemEffect, self).__init__("remove_item_effect")
+
+    def trigger(self, **kwargs):
+        target_entity = kwargs[action.TARGET_ENTITY]
+        item = self.get_relative_of_type("item").value
+        target_entity.inventory.remove_one_item_from_stack(item)
+
+
+class FlashItemEffect(TriggeredEffect):
+    def __init__(self):
+        super(FlashItemEffect, self).__init__("flash_item_effect")
+
+    def trigger(self, **kwargs):
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        item = self.get_relative_of_type("item").value
+        _item_flash_animation(source_entity, item)
 
 
 class DrinkAction(UsableOnceItemAction):
@@ -948,6 +1049,27 @@ class ReadAction(UsableOnceItemAction):
         self.name = "Read"
         self.tags.add("read_action")
         self.display_order = 90
+
+
+class ActionTrigger(Action):
+    def __init__(self, name, display_order, extra_tag=None):
+        super(ActionTrigger, self).__init__()
+        self.component_type = "action_trigger"
+        self.name = name
+        self.tags.add("user_action")
+        if extra_tag:
+            self.tags.add(extra_tag)
+        self.display_order = display_order
+
+    def act(self, **kwargs):
+        for c in self.parent.get_children_with_tag("triggered_effect"):
+            if c.can_trigger(**kwargs):
+                c.trigger(**kwargs)
+
+    def can_act(self, **kwargs):
+        return all(c.can_trigger(**kwargs) for c in self.parent.get_children_with_tag("triggered_effect"))
+
+READ_ACTION_TAG = "read_action"
 
 
 class HealthPotionDrinkAction(DrinkAction):
@@ -1416,7 +1538,6 @@ def set_item_components(item, game_state):
     item.set_child(DungeonLevel())
     item.set_child(Mover())
     item.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ITEM))
-    item.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
     item.set_child(DataPoint(DataTypes.GAME_STATE, game_state))
     item.set_child(CharPrinter())
     item.set_child(DropAction())

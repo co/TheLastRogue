@@ -14,7 +14,7 @@ class Component(object):
         means of identifying a component.
     """
 
-    def __init__(self, *args, **kw):
+    def __init__(self):
         self._parent = None
         self.component_type = None
         self.tags = set()
@@ -116,8 +116,14 @@ class Leaf(Component):
     Component classes of leaf type should inherit from this class.
     """
 
-    def __init__(self, *args, **kw):
-        super(Leaf, self).__init__(*args, **kw)
+    def __init__(self):
+        super(Leaf, self).__init__()
+
+    def get_relative_of_type(self, component_type):
+        return self.parent.get_child_or_ancestor(component_type)
+
+    def has_relative_of_type(self, component_type):
+        return self.parent.has_child_or_ancestor(component_type)
 
 
 class Composite(Component):
@@ -126,10 +132,13 @@ class Composite(Component):
 
     Component classes of composite type should inherit from this class.
     Composite objects may hold other Components.
+
+    component_type is needed if this composite will be a child.
     """
 
-    def __init__(self, *args, **kw):
-        super(Composite, self).__init__(*args, **kw)
+    def __init__(self, component_type=None):
+        super(Composite, self).__init__()
+        self.component_type = component_type
         self._spoofed_children = {}
         self._children = {}
         self._children_tag_table = {}
@@ -146,15 +155,11 @@ class Composite(Component):
         If the child already has a parent an exception is thrown.
         """
         if child.tags is None:
-            raise Exception("Component {0} tried ta add_child "
-                            "component: {1} to its children. "
-                            "But tags "
-                            "was not set.".format(str(self), str(child)))
+            raise Exception("Missing tags when: Component {0} tried ta add_child "
+                            "component: {1} to its children. ".format(str(self), str(child)))
         if child.component_type is None:
-            raise Exception("Component {0} tried ta add_child "
-                            "component: {1} to its children. "
-                            "But component_type "
-                            "was not set.".format(str(self), str(child)))
+            raise Exception("Missing component_type when: Component {0} tried ta add_child "
+                            "component: {1} to its children. ".format(str(self), str(child)))
         if not child._parent is None:
             raise Exception("Component {0} tried ta add_child "
                             "component: {1} to its children. "
@@ -344,13 +349,36 @@ class Composite(Component):
         """
         return tag in self.tags
 
+    # TODO: rename to descendant
     def get_children_with_tag(self, tag):
         """
         Gets the list of all children with the given tag.
         """
-        if not tag in self._children_tag_table:
-            return []
-        return self._children_tag_table[tag]
+        if tag in self._children_tag_table:
+            result = self._children_tag_table[tag]
+        else:
+            result = []
+        composite_children = [c for c in self._children.values() if isinstance(c, Composite)]
+        grand_children = []
+        for c in composite_children:
+            grand_children += c.get_children_with_tag(tag)
+        return result + grand_children
+
+    def get_child_or_ancestor(self, component_type):
+        if component_type in self._children:
+            return self._children[component_type]
+        elif self._parent:
+            return self.parent.get_child_or_ancestor(component_type)
+        else:
+            raise Exception("Tried to find relative of type: [" + component_type + "] but it doesn't exist")
+
+    def has_child_or_ancestor(self, component_type):
+        if component_type in self._children:
+            return True
+        elif self._parent:
+            return self.parent.get_child_or_ancestor(component_type)
+        else:
+            return False
 
 
 class CompositeMessage(object):

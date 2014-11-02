@@ -1,15 +1,13 @@
 import unittest
 
 from actionscheduler import ActionScheduler
-from actor import DoNothingActor
 from attacker import WeaponMeleeAttacker
+from common_test import get_dummy_actor
 from compositecore import Composite
-from equipment import Equipment
 import equipment
 from equipmenteffect import CounterAttackEffect, OffenciveAttackEffect, DefenciveAttackEffect, CritChanceBonusEffect
-import gametime
 from item import EquipmentType
-from stats import DataPoint, DataTypes
+from stats import DataTypes
 
 TEST_VALUE = 0.4711
 
@@ -18,19 +16,6 @@ def get_dummy_weapon():
     weapon = Composite()
     weapon.set_child(EquipmentType(equipment.EquipmentTypes.MELEE_WEAPON))
     return weapon
-
-
-def get_dummy_actor():
-    dummy_actor = Composite()
-    dummy_actor.set_child(DoNothingActor())
-    dummy_actor.set_child(Equipment())
-    dummy_actor.set_child(DataPoint(DataTypes.ENERGY, -gametime.single_turn))
-    dummy_actor.set_child(DataPoint(DataTypes.OFFENCIVE_ATTACK_CHANCE, 0.0))
-    dummy_actor.set_child(DataPoint(DataTypes.COUNTER_ATTACK_CHANCE, 0.0))
-    dummy_actor.set_child(DataPoint(DataTypes.DEFENCIVE_ATTACK_CHANCE, 0.0))
-    dummy_actor.set_child(DataPoint(DataTypes.CRIT_CHANCE, 0.0))
-
-    return dummy_actor
 
 
 class TestComposition(unittest.TestCase):

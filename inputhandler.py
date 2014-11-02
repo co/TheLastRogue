@@ -47,8 +47,9 @@ EQUIPMENT = 129
 END = 130
 WEAR_WIELD = 131
 DRINK = 132
-AUTO_EXPLORE = 133
-USE_PICK_UP = 134
+READ = 133
+AUTO_EXPLORE = 134
+USE_PICK_UP = 135
 
 #Aliases:
 UP = NORTH
@@ -124,6 +125,7 @@ controls = {
     settings.KEY_AUTO_EXPLORE: AUTO_EXPLORE,
     settings.KEY_WEAR_WIELD: WEAR_WIELD,
     settings.KEY_DRINK: DRINK,
+    settings.KEY_READ: READ,
     libtcod.KEY_0: ZERO,
     libtcod.KEY_1: ONE,
     libtcod.KEY_2: TWO,

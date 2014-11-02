@@ -65,7 +65,7 @@ class PlayerThrowItemAction(PlayerMissileAction):
 
     def __init__(self):
         super(PlayerThrowItemAction, self).__init__()
-        self.component_type = "action"
+        self.component_type = "player_throw_item_action"
         self.name = "Throw"
         self.display_order = 95
 

@@ -38,7 +38,6 @@ ENTITY_EXPLODES = "%(target_entity)s explodes!"
 PLAYER_MAP_MESSAGE = "You surroundings suddenly seem familiar."
 PLAYER_PUSH_SCROLL_MESSAGE = "You as you form the words of the scroll your voice turns into a strong wind."
 
-PLAYER_SLEEP_SCROLL_MESSAGE = "As you finish reading the scroll you see that all your enemies are fast asleep."
 GLASS_TURNING_MESSAGE = "You surroundings suddenly seem more transparent."
 SWAP_DEVICE_MESSAGE = "Your surroundings has changed."
 

@@ -32,6 +32,7 @@ defaults = {
     'examine': 'x',
     'auto_explore': 'o',
     'drink': 'q',
+    'read': 'r',
     'activate': 'a',
     'wear_wield': 'w',
     'use_pick_up': ',',
@@ -82,6 +83,7 @@ KEY_REST = config.get('KeyBind', 'rest')
 KEY_EXAMINE = config.get('KeyBind', 'examine')
 KEY_AUTO_EXPLORE = config.get('KeyBind', 'auto_explore')
 KEY_DRINK = config.get('KeyBind', 'drink')
+KEY_READ = config.get('KeyBind', 'read')
 KEY_ACTIVATE = config.get('KeyBind', 'activate')
 KEY_WEAR_WIELD = config.get('KeyBind', 'wear_wield')
 KEY_USE_PICK_UP = config.get('KeyBind', 'use_pick_up')

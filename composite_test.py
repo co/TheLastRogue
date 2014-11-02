@@ -63,3 +63,20 @@ class TestComposition(unittest.TestCase):
         c.reset_spoofed_children()
         self.assertIn(component_1, c.get_children_with_tag(tag_1))
         self.assertNotIn(component_2, c.get_children_with_tag(tag_1))
+
+    def test_get_children_with_tag_should_also_get_grandchildren_with_tag(self):
+        parent = Composite()
+        child_1 = TestComponent(id_1, [])
+        child_2 = Composite("test")
+        grandchild_1 = TestComponent(id_1, [tag_1])
+        grandchild_2 = TestComponent(id_2, [tag_2])
+
+        parent.set_child(child_1)
+        parent.set_child(child_2)
+
+        child_2.set_child(grandchild_1)
+        child_2.set_child(grandchild_2)
+
+        children_with_tag_1 = parent.get_children_with_tag(tag_1)
+        self.assertFalse(grandchild_2 in children_with_tag_1, "Grandchild with wrong tag is returned.")
+        self.assertTrue(grandchild_1 in children_with_tag_1, "Grandchild is not found.")

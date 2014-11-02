@@ -158,6 +158,8 @@ class InputActor(Actor):
             self.open_wear_wield_item_action_menu()
         elif key == inputhandler.DRINK:
             self.open_drink_item_action_menu()
+        elif key == inputhandler.READ:
+            self.open_read_item_action_menu()
         if settings.DEV_MODE_FLAG:
             self.handle_dev_mode_commands(key)
 
@@ -288,4 +290,12 @@ class InputActor(Actor):
             equip_menu = menufactory.filtered_by_action_item_menu(self.parent,
                                                                   self.parent.game_state.value.menu_prompt_stack,
                                                                   drink_tag, "Drink")
+            self.parent.game_state.value.start_prompt(equip_menu)
+
+    def open_read_item_action_menu(self):
+        read_tag = "read_action"
+        if menufactory._has_item_with_action_tag(self.parent, read_tag):
+            equip_menu = menufactory.filtered_by_action_item_menu(self.parent,
+                                                                  self.parent.game_state.value.menu_prompt_stack,
+                                                                  read_tag, "Read")
             self.parent.game_state.value.start_prompt(equip_menu)
