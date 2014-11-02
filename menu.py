@@ -295,7 +295,8 @@ class ItemActionsMenu(Menu):
         self.menu_items = []
         for item_action in self._actions:
             action_function = item_action.delayed_call(source_entity=self._player, target_entity=self._player,
-                                                       game_state=game_state)
+                                                       game_state=game_state,
+                                                       target_position=self._player.position.value)
             back_to_game_function = BackToGameFunction(self._state_stack)
             functions = [action_function, back_to_game_function]
             option = MenuOption(item_action.name, functions, can_activate=item_action.can_act)

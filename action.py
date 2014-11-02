@@ -6,9 +6,10 @@ from compositecore import Leaf
 SOURCE_ENTITY = "source_entity"
 TARGET_ENTITY = "target_entity"
 GAME_STATE = "game_state"
+TARGET_POSITION = "target_position"
 EQUIPMENT_SLOT = "equipment_slot"
 ACTION = "action"
-DESTINATION = "destination"
+DESTINATION = "destination" #TODO: Replace with target_position?
 
 
 class Action(Leaf):

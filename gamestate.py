@@ -226,9 +226,17 @@ class TestGameState(GameStateBase):
 
         for i in range(5):
             r = monster.new_ratman(self)
-            r.mover.try_move((18, 12 + i), self.dungeon_level)
+            #r.mover.try_move((18, 12 + i), self.dungeon_level)
 
-        potion = weapon.new_sling(self)
+        for i, e in enumerate(item.potion_factories):
+            element = e(self)
+            element.mover.try_move((22 + i, 14), self.dungeon_level)
+
+        for i, e in enumerate(item.scroll_factories):
+            element = e(self)
+            element.mover.try_move((23 + i, 15), self.dungeon_level)
+
+        potion = item.new_frost_potion(self)
         potion.mover.try_move((20, 12), self.dungeon_level)
 
         potion = weapon.new_bolas(self)

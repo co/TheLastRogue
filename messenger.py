@@ -47,7 +47,9 @@ HEALTH_DEVICE_MESSAGE = "%(target_entity)s is healed by the device for %(health)
 STARE_PARALYZE_MESSAGE = "%(source_entity)s stares at %(target_entity)s, it's paralyzed!."
 NO_LONGER_PARALYZED_MESSAGE = "%(source_entity)s is no longer paralyzed."
 
+
 FROST_POTION_DRINK_MESSAGE = "That potion was cold as ice! You feel yourself slow down."
+POTION_SMASHES_AGAINST_FLOOR_MESSAGE = "The potion smashes to the ground and breaks into pieces."
 
 
 class Messenger(object):

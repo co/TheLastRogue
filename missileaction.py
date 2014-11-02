@@ -1,7 +1,7 @@
 import random
 
 from action import Action, SOURCE_ENTITY, GAME_STATE
-from actor import DoNothingActor, ParalyzedActor
+from actor import ParalyzedActor
 from animation import animate_flight
 from attacker import DamageTypes, UndodgeableAttack
 from entityeffect import Heal, AddSpoofChild
@@ -83,11 +83,16 @@ class PlayerThrowItemAction(PlayerMissileAction):
         source_entity.inventory.remove_item(self.parent)
 
     def missile_hit_effect(self, dungeon_level, position, game_state, source_entity):
-        """
-        The final step of the throw.
-        """
-        self.remove_from_inventory(source_entity)
-        self.parent.thrower.throw_effect(dungeon_level, position)
+        if is_hitting_ground(dungeon_level, position):
+            for c in self.parent.get_children_with_tag("hit_floor_action_tag"):
+                c.act(source_entity=source_entity, game_state=game_state, target_position=position)
+        else:
+            for c in self.parent.get_children_with_tag("hit_chasm_action_tag"):
+                c.act(source_entity=source_entity, game_state=game_state, target_position=position)
+
+
+def is_hitting_ground(dungeon_level, position):
+    return not dungeon_level.get_tile_or_unknown(position).get_terrain().has("is_chasm")
 
 
 class PlayerThrowStoneAction(PlayerMissileAction):

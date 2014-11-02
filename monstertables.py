@@ -90,31 +90,40 @@ dungeon_weapon_table = \
 
 scrolls = \
     (
-        [DungeonTableItem(item.new_teleport_scroll)] * 8 +
-        [DungeonTableItem(item.new_push_scroll)] * 8 +
-        [DungeonTableItem(item.new_map_scroll)] * 8 +
-        [DungeonTableItem(item.new_swap_scroll)] * 8
+        [DungeonTableItem(item.new_teleport_scroll)] +
+        [DungeonTableItem(item.new_push_scroll)] +
+        [DungeonTableItem(item.new_map_scroll)] +
+        [DungeonTableItem(item.new_swap_scroll)]
+    )
+
+potions = \
+    (
+        [DungeonTableItem(item.new_poison_potion)] +
+        [DungeonTableItem(item.new_flame_potion)] +
+        [DungeonTableItem(item.new_frost_potion)]
+    )
+
+
+devices = \
+    (
+        [DungeonTableItem(item.new_darkness_device)] +
+        [DungeonTableItem(item.new_heart_stop_device)] +
+        [DungeonTableItem(item.new_glass_device)] +
+        [DungeonTableItem(item.new_zap_device)] +
+        [DungeonTableItem(item.new_healing_device)] +
+        [DungeonTableItem(item.new_swap_device)] +
+        [DungeonTableItem(item.new_blinks_device)]
     )
 
 dungeon_usable_item_table = \
     (
         [DungeonTableItem(item.new_ammunition)] * 10 +
         [DungeonTableItem(item.new_energy_sphere)] * 7 +
-
-        [DungeonTableItem(item.new_darkness_device)] * 2 +
-        [DungeonTableItem(item.new_heart_stop_device)] * 2 +
-        [DungeonTableItem(item.new_glass_device)] * 2 +
-        [DungeonTableItem(item.new_zap_device)] * 2 +
-        [DungeonTableItem(item.new_healing_device)] * 2 +
-        [DungeonTableItem(item.new_swap_device)] * 2 +
-        [DungeonTableItem(item.new_blinks_device)] * 2 +
-
         [DungeonTableItem(item.new_bomb)] * 4 +
-        [DungeonTableItem(item.new_poison_potion)] * 6 +
-        [DungeonTableItem(item.new_flame_potion)] * 6 +
-        [DungeonTableItem(item.new_frost_potion)] * 6 +
 
-        scrolls
+        devices * 2 +
+        potions * 6 +
+        scrolls * 8
     )
 
 # Weighted by the factor.

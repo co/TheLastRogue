@@ -33,6 +33,6 @@ fire=f
 rest=.
 examine=x
 drink=q
-drink=r
+read=r
 pick_up_use=,
 wear_wield=w

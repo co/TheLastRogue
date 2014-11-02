@@ -36,6 +36,7 @@ import gametime
 from messenger import msg
 import icon
 from equipmenteffect import StatBonusEquipEffect, LifeStealEffect, SetInvisibilityFlagEquippedEffect
+from triggeredeffect import TriggeredEffect
 import util
 
 
@@ -346,7 +347,7 @@ class BlinksDeviceAction(ActivateDeviceAction):
             self._blink(target_entity)
         player.game_state.value.dungeon_needs_redraw = True
         player.game_state.value.force_draw()
-        sleep(0.2) # todo: standardise frame show time
+        sleep(0.2)  # todo: standardise frame show time
 
     def _blink(self, entity):
         sight = entity.sight_radius.value
@@ -438,7 +439,6 @@ class ZapDeviceAction(ActivateDeviceAction):
             damage_effect = entityeffect.UndodgeableAttackEntityEffect(source_entity, damage, damage_types,
                                                                        hit_message=messenger.ZAP_DEVICE_MESSAGE)
             target_entity.effect_queue.add(damage_effect)
-
 
 
 class Stacker(Leaf):
@@ -692,7 +692,69 @@ def set_potion_components(item):
     item.set_child(ItemType(ItemType.POTION))
     item.set_child(PlayerAutoPickUp())
     item.set_child(DataPoint(DataTypes.WEIGHT, 4))
-    #potion.set_child(Stacker("health_potion", 3))
+    # potion.set_child(Stacker("health_potion", 3))
+
+
+# Potions
+class HealTriggeredEffect(TriggeredEffect):
+    def __init__(self):
+        super(HealTriggeredEffect, self).__init__("heal_triggered_effect")
+
+    def trigger(self, **kwargs):
+        min_heal = 10
+        max_heal = 15
+        target_entity = kwargs[action.TARGET_ENTITY]
+        heal = random.randrange(min_heal, max_heal + 1)
+        heal_effect = entityeffect.Heal(target_entity, heal, heal_message=messenger.HEALTH_POTION_MESSAGE)
+        target_entity.effect_queue.add(heal_effect)
+
+
+class ApplyPoisonTriggeredEffect(TriggeredEffect):
+    def __init__(self):
+        super(ApplyPoisonTriggeredEffect, self).__init__("apply_poison_triggered_effect")
+
+    def trigger(self, **kwargs):
+        min_damage = 10
+        max_damage = 15
+        target_entity = kwargs[action.TARGET_ENTITY]
+        damage = random.randrange(min_damage, max_damage + 1)
+        damage_effect_factory = PoisonEntityEffectFactory(target_entity, damage, 2, random.randrange(8, 12))
+        target_entity.effect_queue.add(damage_effect_factory())
+
+
+class CreateFlameCloudTriggeredEffect(TriggeredEffect):
+    def __init__(self):
+        super(CreateFlameCloudTriggeredEffect, self).__init__("create_flame_cloud_triggered_effect")
+
+    def trigger(self, **kwargs):
+        min_fire_time = 3
+        max_fire_time = 8
+        game_state = kwargs[action.GAME_STATE]
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        target_position = kwargs[action.TARGET_POSITION]
+        put_tile_and_surrounding_tiles_on_fire(source_entity.dungeon_level.value, target_position, min_fire_time, max_fire_time, game_state)
+
+
+def put_tile_and_surrounding_tiles_on_fire(dungeon_level, position, min_fire_time, max_fire_time, game_state):
+    fire = new_fire_cloud(game_state, random.randrange(min_fire_time, max_fire_time))
+    fire.mover.replace_move(position, dungeon_level)
+    for d in direction.DIRECTIONS:
+        point = geometry.add_2d(d, position)
+        fire = new_fire_cloud(game_state, random.randrange(min_fire_time, max_fire_time))
+        fire.mover.replace_move(point, dungeon_level)
+
+
+class ApplyFrostTriggeredEffect(TriggeredEffect):
+    def __init__(self):
+        super(ApplyFrostTriggeredEffect, self).__init__("apply_frost_triggered_action")
+
+    def trigger(self, **kwargs):
+        target_entity = kwargs[action.TARGET_ENTITY]
+        slow_turns = random.randrange(10, 19)
+        msg.send_global_message(messenger.FROST_POTION_DRINK_MESSAGE)
+        target_entity.effect_queue.add(entityeffect.AddSpoofChild(None, frost_effect_factory(),
+                                                                  slow_turns * gametime.single_turn, meld_id="frost",
+                                                                  status_description=FROST_SLOW_STATUS_DESCRIPTION))
 
 
 def new_health_potion(game_state):
@@ -700,11 +762,12 @@ def new_health_potion(game_state):
     set_item_components(potion, game_state)
     set_potion_components(potion)
     potion.set_child(GraphicChar(None, colors.PINK, icon.POTION))
-    potion.set_child(HealthPotionDrinkAction())
+    set_drink_item_action(potion, [HealTriggeredEffect()])
     potion.set_child(Description("Potion of Health",
                                  "An unusually thick liquid contained in a glass bottle."
                                  "Drinking from it will heal you."))
     potion.set_child(ThrowerBreakCreateSteam())
+    set_thrown_item_hit_floor_action(potion, [LocalMessageEffect(messenger.POTION_SMASHES_AGAINST_FLOOR_MESSAGE)])
     return potion
 
 
@@ -713,7 +776,7 @@ def new_poison_potion(game_state):
     set_item_components(potion, game_state)
     set_potion_components(potion)
     potion.set_child(GraphicChar(None, colors.GREEN, icon.POTION))
-    potion.set_child(PoisonPotionDrinkAction())
+    set_drink_item_action(potion, [ApplyPoisonTriggeredEffect()])
     potion.set_child(Description("Potion of Poison",
                                  "An unusually sluggish liquid contained in a glass bottle."
                                  "Drinking from it would poison you."))
@@ -726,11 +789,12 @@ def new_flame_potion(game_state):
     set_item_components(potion, game_state)
     set_potion_components(potion)
     potion.set_child(GraphicChar(None, colors.RED, icon.POTION))
-    potion.set_child(FlamePotionDrinkAction())
+    set_drink_item_action(potion, [CreateFlameCloudTriggeredEffect()])
     potion.set_child(Description("Potion of Fire",
                                  "An unusually muddy liquid contained in a glass bottle."
                                  "Drinking from it would burn you badly."))
-    potion.set_child(ThrowerBreakCreateFire())
+    #potion.set_child(ThrowerBreakCreateFire())
+    set_thrown_item_hit_floor_action(potion, [CreateFlameCloudTriggeredEffect()])
     return potion
 
 
@@ -739,15 +803,30 @@ def new_frost_potion(game_state):
     set_item_components(potion, game_state)
     set_potion_components(potion)
     potion.set_child(GraphicChar(None, colors.BLUE, icon.POTION))
-    potion.set_child(FrostPotionDrinkAction())
+    set_drink_item_action(potion, [ApplyFrostTriggeredEffect()])
     potion.set_child(Description("Potion of Frost",
                                  "A soapy liquid contained in a glass bottle."
                                  "Drinking from it would freeze you badly."))
     potion.set_child(ThrowerBreakCreateCloud(cloud_factory=new_frost_cloud))
     return potion
 
-# Scrolls
 
+def set_drink_item_action(item, triggered_effects):
+    set_use_item_action(DRINK_ACTION_TAG, item, [ActionTrigger("Drink", 90, DRINK_ACTION_TAG)] + triggered_effects)
+
+
+def set_thrown_item_hit_floor_action(item, triggered_effects):
+    set_use_item_action(HIT_FLOOR_ACTION_TAG, item, [ActionTrigger("Thrown Hit Floor", 90, HIT_FLOOR_ACTION_TAG)] + triggered_effects)
+
+
+def set_thrown_item_hit_chasm_action(item, triggered_effects):
+    set_use_item_action(HIT_CHASM_ACTION_TAG, item, [ActionTrigger("Thrown Hit Chasm", 90, HIT_CHASM_ACTION_TAG)] + triggered_effects)
+
+
+potion_factories = [new_health_potion, new_poison_potion, new_flame_potion, new_frost_potion]
+
+
+# Scrolls
 def set_scroll_components(item):
     item.set_child(ItemType(ItemType.SCROLL))
     item.set_child(PlayerAutoPickUp())
@@ -894,12 +973,12 @@ class ReEquipAction(Action):
         Finds the right equipment slot.
         """
         open_slots = (source_entity.equipment.get_open_slots_of_type
-                          (self.parent.equipment_type.value))
+                      (self.parent.equipment_type.value))
         if len(open_slots) > 0:
             return open_slots[0]
         else:
             return (source_entity.equipment.get_slots_of_type
-                        (self.parent.equipment_type.value))[0]
+                    (self.parent.equipment_type.value))[0]
 
     def can_act(self, **kwargs):
         """
@@ -911,35 +990,12 @@ class ReEquipAction(Action):
         """
         Performs the actual reequip.
         """
-        re_equip_effect = \
-            entityeffect.ReEquip(target_entity, equipment_slot, self.parent)
+        re_equip_effect = entityeffect.ReEquip(target_entity, equipment_slot, self.parent)
         target_entity.effect_queue.add(re_equip_effect)
         target_entity.inventory.remove_item(self.parent)
 
 
-class RemoveParentItemEffect(Action):
-    """
-    Abstract class, drink actions should inherit from this class.
-    """
-
-    def trigger(self, **kwargs):
-        """
-        Performs the drink action, subclasses should not override this.
-        """
-        target_entity = kwargs[action.TARGET_ENTITY]
-        source_entity = kwargs[action.SOURCE_ENTITY]
-        self._act(target_entity)
-        self.remove_from_inventory(target_entity)
-        _item_flash_animation(source_entity, self.parent)
-        self.add_energy_spent_to_entity(source_entity)
-
-    def remove_from_inventory(self, target_entity):
-        """
-        Removes the parent item from the inventory.
-        """
-        target_entity.inventory.remove_one_item_from_stack(self.parent)
-
-
+#TODO to be removed
 class UsableOnceItemAction(Action):
     """
     Abstract class, drink actions should inherit from this class.
@@ -961,23 +1017,6 @@ class UsableOnceItemAction(Action):
         Removes the parent item from the inventory.
         """
         target_entity.inventory.remove_one_item_from_stack(self.parent)
-
-
-class UseItemTrigger(Action):
-    pass
-
-
-class TriggeredEffect(Leaf):
-    def __init__(self, component_type):
-        super(TriggeredEffect, self).__init__()
-        self.component_type = component_type
-        self.tags.add("triggered_effect")
-
-    def trigger(self, **kwargs):
-        pass
-
-    def can_trigger(self, **kwargs):
-        return True
 
 
 class DropItemTriggeredEffect(TriggeredEffect):
@@ -1003,8 +1042,8 @@ class AddEnergySpentEffect(TriggeredEffect):
         self.energy_cost = energy_cost
 
     def trigger(self, **kwargs):
-        target_entity = kwargs[action.TARGET_ENTITY]
-        target_entity.actor.newly_spent_energy += self.energy_cost
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        source_entity.actor.newly_spent_energy += self.energy_cost
 
 
 class PutToSleepTriggeredEffect(TriggeredEffect):
@@ -1026,7 +1065,7 @@ class RemoveItemEffect(TriggeredEffect):
         super(RemoveItemEffect, self).__init__("remove_item_effect")
 
     def trigger(self, **kwargs):
-        target_entity = kwargs[action.TARGET_ENTITY]
+        target_entity = kwargs[action.SOURCE_ENTITY]
         item = self.get_relative_of_type("item").value
         target_entity.inventory.remove_one_item_from_stack(item)
 
@@ -1041,16 +1080,15 @@ class FlashItemEffect(TriggeredEffect):
         _item_flash_animation(source_entity, item)
 
 
-class DrinkAction(UsableOnceItemAction):
-    """
-    Abstract class, drink actions should inherit from this class.
-    """
+class LocalMessageEffect(TriggeredEffect):
+    def __init__(self, message):
+        super(LocalMessageEffect, self).__init__("local_message_effect")
+        self.the_message = message
 
-    def __init__(self):
-        super(DrinkAction, self).__init__()
-        self.name = "Drink"
-        self.tags.add("drink_action")
-        self.display_order = 90
+    def trigger(self, **kwargs):
+        print "wot"
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        msg.send_visual_message(self.the_message, source_entity.position.value)
 
 
 class ActionTrigger(Action):
@@ -1071,88 +1109,13 @@ class ActionTrigger(Action):
     def can_act(self, **kwargs):
         return all(c.can_trigger(**kwargs) for c in self.parent.get_children_with_tag("triggered_effect"))
 
+
 READ_ACTION_TAG = "read_action"
+DRINK_ACTION_TAG = "drink_action"
 DROP_ACTION_TAG = "drop_action"
 THROW_ACTION_TAG = "throw_action"
-
-
-class HealthPotionDrinkAction(DrinkAction):
-    """
-    Defines the healing potion drink action.
-    """
-
-    def __init__(self):
-        super(HealthPotionDrinkAction, self).__init__()
-        self.component_type = "health_potion_drink_action"
-        self.min_heal = 10
-        self.max_heal = 15
-
-    def _act(self, target_entity):
-        """
-        When an entity drinks a healing potion, it is healed.
-        """
-        heal = random.randrange(self.min_heal, self.max_heal + 1)
-        heal_effect = entityeffect.Heal(target_entity, heal, heal_message=messenger.HEALTH_POTION_MESSAGE)
-        target_entity.effect_queue.add(heal_effect)
-
-
-class FlamePotionDrinkAction(DrinkAction):
-    """
-    Defines the potion drink action.
-    """
-
-    def __init__(self):
-        super(FlamePotionDrinkAction, self).__init__()
-        self.component_type = "flame_potion_drink_action"
-        self.min_fire_time = 3
-        self.max_fire_time = 8
-
-    def _act(self, target_entity):
-        """
-        When an entity drinks a flame potion, surrounding tiles and players tile catch fire.
-        """
-        put_tile_and_surrounding_tiles_on_fire(target_entity.dungeon_level.value, target_entity.position.value,
-                                               self.min_fire_time, self.max_fire_time, target_entity.game_state.value)
-
-
-class FrostPotionDrinkAction(DrinkAction):
-    """
-    Defines the potion drink action.
-    """
-
-    def __init__(self):
-        super(FrostPotionDrinkAction, self).__init__()
-        self.component_type = "frost_potion_drink_action"
-
-    def _act(self, target_entity):
-        """
-        When an entity drinks a flame potion, surrounding tiles and players tile catch fire.
-        """
-        slow_turns = random.randrange(10, 19)
-        msg.send_global_message(messenger.FROST_POTION_DRINK_MESSAGE)
-        target_entity.effect_queue.add(entityeffect.AddSpoofChild(None, frost_effect_factory(),
-                                                                  slow_turns*gametime.single_turn, meld_id="frost",
-                                                                  status_description=FROST_SLOW_STATUS_DESCRIPTION))
-
-
-class PoisonPotionDrinkAction(DrinkAction):
-    """
-    Defines the poison potion drink action.
-    """
-
-    def __init__(self):
-        super(PoisonPotionDrinkAction, self).__init__()
-        self.component_type = "poison_potion_drink_action"
-        self.min_damage = 10
-        self.max_damage = 15
-
-    def _act(self, target_entity):
-        """
-        When an entity drinks a poison potion, it is poisoned.
-        """
-        damage = random.randrange(self.min_damage, self.max_damage + 1)
-        damage_effect_factory = PoisonEntityEffectFactory(target_entity, damage, 2, random.randrange(8, 12))
-        target_entity.effect_queue.add(damage_effect_factory())
+HIT_FLOOR_ACTION_TAG = "hit_floor_action_tag"
+HIT_CHASM_ACTION_TAG = "hit_chasm_action_tag"
 
 
 class TeleportTriggeredEffect(TriggeredEffect):
@@ -1265,7 +1228,7 @@ class PushOthersTriggeredEffect(TriggeredEffect):
                 entity.stepper.try_push_in_direction(entity_direction[entity])
             target_entity.game_state.value.dungeon_needs_redraw = True
             target_entity.game_state.value.force_draw()
-            sleep(0.07) # todo: standardise frame show time
+            sleep(0.07)  # todo: standardise frame show time
         msg.send_global_message(messenger.PLAYER_PUSH_SCROLL_MESSAGE)
 
     def _entity_is_about_to_fall(self, entity):
@@ -1375,6 +1338,7 @@ class OnEquipEffect(Leaf):
         self.effect = effect_function
 
 
+#TODO Delete
 class Thrower(Leaf):
     """
     Items with this component can be thrown.
@@ -1399,6 +1363,7 @@ class Thrower(Leaf):
         self.parent.mover.try_move(position, dungeon_level)
 
 
+#TODO Delete
 class ThrowerNonBreak(Thrower):
     """
     Items with this component can be thrown, but will survive the fall.
@@ -1418,6 +1383,9 @@ class ThrowerNonBreak(Thrower):
         msg.send_visual_message(message, position)
 
 
+
+
+#TODO Delete
 class ThrowerBreak(Thrower):
     """
     Items with this component can be thrown, but will survive the fall.
@@ -1447,10 +1415,12 @@ class ThrowerBreak(Thrower):
         msg.send_visual_message(message, position)
 
 
+#TODO Delete
 def is_hitting_ground(dungeon_level, position):
     return not dungeon_level.get_tile_or_unknown(position).get_terrain().has("is_chasm")
 
 
+# TODO DELETE
 class ThrowerBreakCreateCloud(ThrowerBreak):
     """
     Should be sub-classed to items with this component will create and create a puff of cloud.
@@ -1468,18 +1438,21 @@ class ThrowerBreakCreateCloud(ThrowerBreak):
         steam.mover.try_move(position, dungeon_level)
 
 
+# TODO DELETE
 class ThrowerBreakCreateSteam(ThrowerBreakCreateCloud):
     def __init__(self):
         super(ThrowerBreakCreateSteam, self).__init__()
         self.cloud_factory = new_steam_cloud
 
 
+# TODO DELETE
 class ThrowerBreakCreatePoisonCloud(ThrowerBreakCreateCloud):
     def __init__(self):
         super(ThrowerBreakCreatePoisonCloud, self).__init__()
         self.cloud_factory = new_poison_cloud
 
 
+# TODO DELETE
 class ThrowerBreakCreateFire(ThrowerBreakCreateCloud):
     def __init__(self):
         super(ThrowerBreakCreateFire, self).__init__()
@@ -1491,14 +1464,7 @@ class ThrowerBreakCreateFire(ThrowerBreakCreateCloud):
                                                self.parent.game_state.value)
 
 
-def put_tile_and_surrounding_tiles_on_fire(dungeon_level, position, min_fire_time, max_fire_time, game_state):
-    fire = new_fire_cloud(game_state, random.randrange(min_fire_time, max_fire_time))
-    fire.mover.replace_move(position, dungeon_level)
-    for d in direction.DIRECTIONS:
-        point = geometry.add_2d(d, position)
-        fire = new_fire_cloud(game_state, random.randrange(min_fire_time, max_fire_time))
-        fire.mover.replace_move(point, dungeon_level)
-
+# TODO DELETE
 
 class ThrowerCreateExplosion(ThrowerBreak):
     """
