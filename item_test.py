@@ -1,4 +1,5 @@
 import unittest
+from action import TriggerAction
 
 from common_test import get_dummy_player
 import mock
@@ -23,7 +24,7 @@ class TestComposition(unittest.TestCase):
             dummy_actor.inventory.try_add(scroll)
             old_energy = dummy_actor.actor.newly_spent_energy
             self.assertFalse(dummy_actor.inventory.is_empty())
-            scroll.read_action.action_trigger.act(source_entity=dummy_actor, target_entity=dummy_actor)
+            scroll.read_action.trigger.act(source_entity=dummy_actor, target_entity=dummy_actor)
             self.assertTrue(dummy_actor.inventory.is_empty())
             self.assertGreater(dummy_actor.actor.newly_spent_energy, old_energy)
 
@@ -33,7 +34,7 @@ class TestComposition(unittest.TestCase):
         for scroll in scrolls:
             dummy_actor.inventory.try_add(scroll)
             self.assertFalse(dummy_actor.inventory.is_empty())
-            scroll.drop_action.action_trigger.act(source_entity=dummy_actor)
+            scroll.drop_action.trigger.act(source_entity=dummy_actor)
             self.assertTrue(dummy_actor.inventory.is_empty())
             scroll.mover.try_remove_from_dungeon()
 
@@ -44,7 +45,7 @@ class TestComposition(unittest.TestCase):
             dummy_actor = get_dummy_player()
             dummy_actor.inventory.try_add(e)
             self.assertFalse(dummy_actor.inventory.is_empty())
-            e.drop_action.action_trigger.act(source_entity=dummy_actor, target_entity=dummy_actor)
+            e.drop_action.trigger.act(source_entity=dummy_actor, target_entity=dummy_actor)
             self.assertTrue(dummy_actor.inventory.is_empty())
             e.mover.try_remove_from_dungeon()
 
@@ -54,9 +55,9 @@ class TestComposition(unittest.TestCase):
         for e in scrolls + potions:
             dummy_actor = get_dummy_player()
             dummy_actor.inventory.try_add(e)
-            e.hit_floor_action_tag.action_trigger.act(target_position=(1, 3), source_entity=dummy_actor,
-                                                           game_state=None)
-            e.hit_chasm_action_tag.action_trigger.act(target_position=(1, 3))
+            e.hit_floor_action_tag.trigger.act(target_position=(1, 3), source_entity=dummy_actor,
+                                               game_state=None)
+            e.hit_chasm_action_tag.trigger.act(target_position=(1, 3))
             e.mover.try_remove_from_dungeon()
 
     def test_potion_items_should_have_drink_action(self):
@@ -66,8 +67,8 @@ class TestComposition(unittest.TestCase):
             dummy_actor.inventory.try_add(potion)
             old_energy = dummy_actor.actor.newly_spent_energy
             self.assertFalse(dummy_actor.inventory.is_empty())
-            potion.drink_action.action_trigger.act(source_entity=dummy_actor, target_entity=dummy_actor,
-                                                   game_state=None, target_position=dummy_actor.position.value)
+            potion.drink_action.trigger.act(source_entity=dummy_actor, target_entity=dummy_actor,
+                                            game_state=None, target_position=dummy_actor.position.value)
             self.assertTrue(dummy_actor.inventory.is_empty())
             self.assertGreater(dummy_actor.actor.newly_spent_energy, old_energy)
 
@@ -80,13 +81,13 @@ class TestComposition(unittest.TestCase):
         add_energy_spent_effect.trigger = mock.MagicMock()
 
         read_effect = Composite("read_action")
-        read_effect.set_child(item.ActionTrigger("Read", 90, item.READ_ACTION_TAG))
+        read_effect.set_child(TriggerAction("Read", 90, item.READ_ACTION_TAG))
         read_effect.set_child(flash_effect)
         read_effect.set_child(remove_effect)
         read_effect.set_child(add_energy_spent_effect)
 
-        self.assertTrue(read_effect.action_trigger.can_act())
-        read_effect.action_trigger.act()
+        self.assertTrue(read_effect.trigger.can_act())
+        read_effect.trigger.act()
 
         flash_effect.trigger.assert_any_call()
         remove_effect.trigger.assert_any_call()

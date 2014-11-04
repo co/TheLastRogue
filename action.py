@@ -18,16 +18,12 @@ class Action(Leaf):
     action. A entity should be able to use the parent entity
     using the action.
     """
-    def __init__(self):
+    def __init__(self, name="XXX_Action_Name_XXX", display_order=100, energy_cost=gametime.single_turn):
         super(Action, self).__init__()
         self.tags.add("user_action")
-        self.name = "XXX_Action_Name_XX"
-        self.display_order = 100
-        self._energy_cost = gametime.single_turn
-
-    @property
-    def energy_cost(self):
-        return self._energy_cost
+        self.name = name
+        self.display_order = display_order
+        self.energy_cost = energy_cost
 
     def __call__(self, *args, **kwargs):
         self.act(*args, **kwargs)
@@ -53,6 +49,27 @@ class Action(Leaf):
         """
         entity.actor.newly_spent_energy += self.energy_cost
 
+
+class TriggerAction(Action):
+    """
+    An action which also triggers like a trigger.
+    """
+    def __init__(self, name, display_order, tags=[], energy_cost=gametime.single_turn):
+        super(TriggerAction, self).__init__(name=name, display_order=display_order, energy_cost=energy_cost)
+        self.component_type = "trigger"
+        self.tags.add("user_action")
+        self.tags |= set(tags)
+        self.name = name
+        self.display_order = display_order
+        self._energy_cost = gametime.single_turn
+
+    def act(self, **kwargs):
+        for c in self.parent.get_children_with_tag("triggered_effect"):
+            if c.can_trigger(**kwargs):
+                c.trigger(**kwargs)
+
+    def can_act(self, **kwargs):
+        return all(c.can_trigger(**kwargs) for c in self.parent.get_children_with_tag("triggered_effect"))
 
 class DelayedFunctionCall(object):
     def __init__(self, function, **kwargs):

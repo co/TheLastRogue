@@ -812,15 +812,15 @@ def new_frost_potion(game_state):
 
 
 def set_drink_item_action(item, triggered_effects):
-    set_use_item_action(DRINK_ACTION_TAG, item, [ActionTrigger("Drink", 90, DRINK_ACTION_TAG)] + triggered_effects)
+    set_use_item_action(DRINK_ACTION_TAG, item, [action.TriggerAction("Drink", 90, [DRINK_ACTION_TAG])] + triggered_effects)
 
 
 def set_thrown_item_hit_floor_action(item, triggered_effects):
-    set_use_item_action(HIT_FLOOR_ACTION_TAG, item, [ActionTrigger("Thrown Hit Floor", 90, HIT_FLOOR_ACTION_TAG)] + triggered_effects)
+    set_use_item_action(HIT_FLOOR_ACTION_TAG, item, [Trigger([HIT_FLOOR_ACTION_TAG])] + triggered_effects)
 
 
 def set_thrown_item_hit_chasm_action(item, triggered_effects):
-    set_use_item_action(HIT_CHASM_ACTION_TAG, item, [ActionTrigger("Thrown Hit Chasm", 90, HIT_CHASM_ACTION_TAG)] + triggered_effects)
+    set_use_item_action(HIT_CHASM_ACTION_TAG, item, [Trigger([HIT_CHASM_ACTION_TAG])] + triggered_effects)
 
 
 potion_factories = [new_health_potion, new_poison_potion, new_flame_potion, new_frost_potion]
@@ -889,28 +889,28 @@ def new_sleep_scroll(game_state):
 
 
 def set_read_item_action(item, triggered_effects):
-    set_use_item_action(READ_ACTION_TAG, item, [ActionTrigger("Read", 90, READ_ACTION_TAG)] + triggered_effects)
+    set_use_item_action(READ_ACTION_TAG, item, [action.TriggerAction("Read", 90, [READ_ACTION_TAG, USER_ACTION_TAG])] + triggered_effects)
 
 
 scroll_factories = [new_sleep_scroll, new_map_scroll, new_teleport_scroll, new_swap_scroll]
 
 
 def set_use_item_action(component_type, item, triggered_effects):
-    read_effect = Composite(component_type)
-    read_effect.set_child(FlashItemEffect())
-    read_effect.set_child(RemoveItemEffect())
-    read_effect.set_child(AddEnergySpentEffect())
+    item_trigger_effect = Composite(component_type)
+    item_trigger_effect.set_child(FlashItemEffect())  # todo: does this do anything?
+    item_trigger_effect.set_child(RemoveItemEffect())
+    item_trigger_effect.set_child(AddEnergySpentEffect())
     for triggered_effect in triggered_effects:
-        read_effect.set_child(triggered_effect)
-    read_effect.set_child(DataPoint("item", item))
-    item.set_child(read_effect)
+        item_trigger_effect.set_child(triggered_effect)
+    item_trigger_effect.set_child(DataPoint("item", item))
+    item.set_child(item_trigger_effect)
 
 
 def new_drop_action(component_type, item):
     effect = Composite(component_type)
     effect.set_child(DropItemTriggeredEffect())
     effect.set_child(DataPoint("item", item))
-    effect.set_child(ActionTrigger("Drop", 110, DROP_ACTION_TAG))
+    effect.set_child(action.TriggerAction("Drop", 110, [DROP_ACTION_TAG, USER_ACTION_TAG]))
     item.set_child(effect)
 
 
@@ -918,7 +918,7 @@ def new_throw_item_action(component_type, item):
     effect = Composite(component_type)
     effect.set_child(DropItemTriggeredEffect())
     effect.set_child(DataPoint("item", item))
-    effect.set_child(ActionTrigger("Throw", 110, THROW_ACTION_TAG))
+    effect.set_child(action.TriggerAction("Throw", 110, [THROW_ACTION_TAG, USER_ACTION_TAG]))
     item.set_child(effect)
 
 
@@ -1091,15 +1091,11 @@ class LocalMessageEffect(TriggeredEffect):
         msg.send_visual_message(self.the_message, source_entity.position.value)
 
 
-class ActionTrigger(Action):
-    def __init__(self, name, display_order, extra_tag=None):
-        super(ActionTrigger, self).__init__()
-        self.component_type = "action_trigger"
-        self.name = name
-        self.tags.add("user_action")
-        if extra_tag:
-            self.tags.add(extra_tag)
-        self.display_order = display_order
+class Trigger(Leaf):
+    def __init__(self, extra_tags=[]):
+        super(Trigger, self).__init__()
+        self.component_type = "trigger"
+        self.tags |= set(extra_tags)
 
     def act(self, **kwargs):
         for c in self.parent.get_children_with_tag("triggered_effect"):
@@ -1110,6 +1106,7 @@ class ActionTrigger(Action):
         return all(c.can_trigger(**kwargs) for c in self.parent.get_children_with_tag("triggered_effect"))
 
 
+USER_ACTION_TAG = "user_action" # An element with this tag will be visible in menus.
 READ_ACTION_TAG = "read_action"
 DRINK_ACTION_TAG = "drink_action"
 DROP_ACTION_TAG = "drop_action"
@@ -1507,5 +1504,5 @@ def set_item_components(item, game_state):
     item.set_child(CharPrinter())
     new_drop_action(DROP_ACTION_TAG, item)
     item.set_child(PlayerThrowItemAction())
-    item.set_child(ThrowerNonBreak())
+    #item.set_child(ThrowerNonBreak())
     return item
