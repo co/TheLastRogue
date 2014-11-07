@@ -2,6 +2,7 @@ import unittest
 from action import TriggerAction
 
 from common_test import get_dummy_player
+from item_components import AddEnergySpentEffect, RemoveItemEffect, FlashItemEffect
 import mock
 from compositecore import Composite
 import item
@@ -73,11 +74,11 @@ class TestComposition(unittest.TestCase):
             self.assertGreater(dummy_actor.actor.newly_spent_energy, old_energy)
 
     def test_triggering_an_actiontrigger_should_trigger_all_triggereffect_siblings(self):
-        flash_effect = item.FlashItemEffect()
+        flash_effect = FlashItemEffect()
         flash_effect.trigger = mock.MagicMock()
-        remove_effect = item.RemoveItemEffect()
+        remove_effect = RemoveItemEffect()
         remove_effect.trigger = mock.MagicMock()
-        add_energy_spent_effect = item.AddEnergySpentEffect()
+        add_energy_spent_effect = AddEnergySpentEffect()
         add_energy_spent_effect.trigger = mock.MagicMock()
 
         read_effect = Composite("read_action")

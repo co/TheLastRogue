@@ -6,7 +6,7 @@ from common_test import get_dummy_actor
 from compositecore import Composite
 import equipment
 from equipmenteffect import CounterAttackEffect, OffenciveAttackEffect, DefenciveAttackEffect, CritChanceBonusEffect
-from item import EquipmentType
+from item_components import EquipmentType
 from stats import DataTypes
 
 TEST_VALUE = 0.4711

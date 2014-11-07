@@ -6,7 +6,8 @@ import equipment
 from equipmenteffect import CritChanceBonusEffect, ExtraSwingAttackEffect, BleedAttackEffect, DefenciveAttackEffect, CounterAttackEffect, StunAttackEffect, IgnoreArmorAttackEffect, RangeItemStat, ItemStat, OffenciveAttackEffect, KnockBackAttackEffect, TripAttackEffect
 from graphic import GraphicChar
 import icon
-from item import EquipmentType, ItemType, AddSpoofChildEquipEffect2, ReEquipAction, set_item_components
+from item import set_item_components
+from item_components import AddSpoofChildEquipEffect2, ReEquipAction, EquipmentType, ItemType
 from missileaction import PlayerCastMissileSpellAction
 from stats import DataPoint, DataTypes, Damage
 from text import Description

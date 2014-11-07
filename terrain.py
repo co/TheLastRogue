@@ -1,4 +1,5 @@
 import random
+
 from animation import animate_fall, animate_fall_sync
 from attacker import DamageTypes
 from compositecommon import EntityShareTileEffect
@@ -8,7 +9,7 @@ from graphic import GraphicChar, CharPrinter, GraphicCharTerrainCorners
 import messenger
 from mover import Mover
 from position import Position, DungeonLevel
-from prompt import start_accept_reject_prompt
+from prompt import PromptPlayer
 from stats import Flag, DataPoint, DataTypes, GamePieceTypes
 from statusflags import StatusFlags
 import colors
@@ -112,18 +113,6 @@ class Chasm(Composite):
         self.set_child(PlayerFallDownChasmAction())
         self.set_child(FallRemoveNonPlayerNonFlying())
         self.set_child(PromptPlayerChasm())
-
-
-class PromptPlayer(Leaf):
-    def __init__(self, message):
-        super(PromptPlayer, self).__init__()
-        self.tags = ["prompt_player"]
-        self.text = message
-
-    def prompt_player(self, **kwargs):
-        target_entity = kwargs["target_entity"]
-        return start_accept_reject_prompt(target_entity.game_state.value.menu_prompt_stack,
-                                          target_entity.game_state.value, self.text)
 
 
 class PromptPlayerChasm(PromptPlayer):

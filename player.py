@@ -1,7 +1,6 @@
 from Status import StatusDescriptionBar
 import constants
 from equipment import Equipment
-from item import PickUpItemAction
 from attacker import Dodger, ArmorChecker, ResistanceChecker, CounterAttackOnDamageTakenEffect, AttackEnemyIStepNextToEffect, AttackEnemySteppingNextToMeEffect, UnarmedAttacker, ThrowRockAttacker
 from compositecore import Composite
 from dungeonmask import DungeonMask, Path
@@ -10,6 +9,7 @@ from graphic import CharPrinter, GraphicChar
 from health import Health, HealthModifier, BleedWhenDamaged, LoseParalyzeWhenDamaged
 from inputactor import InputActor
 from inventory import Inventory
+from item_components import PickUpItemAction
 from memorymap import MemoryMap
 from missileaction import PlayerThrowStoneAction
 from mover import Mover, PlayerStepper
