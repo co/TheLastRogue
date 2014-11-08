@@ -161,7 +161,7 @@ class DungeonMask(Leaf):
         self.dungeon_map_needs_total_update = False
         self._dirty_point_list = []
 
-    def message(self, message):
+    def send_message(self, message):
         """
         Handles received messages.
         """
@@ -284,6 +284,6 @@ class Path(Leaf):
             console.set_symbol(camera.dungeon_to_screen_position(point), "X")
             console.set_color_fg(camera.dungeon_to_screen_position(point), colors.LIGHT_ORANGE)
 
-    def message(self, message):
+    def send_message(self, message):
         if message == CompositeMessage.DUNGEON_LEVEL_CHANGED:
             self.init_path()

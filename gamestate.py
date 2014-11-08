@@ -3,6 +3,7 @@ import colors
 from dungeon import Dungeon, ReflexiveDungeon
 import dungeonfeature
 from dungeonlevelfactory import dungeon_level_from_file
+import gametime
 import libtcodpy
 import monster
 from mover import teleport_monsters
@@ -174,7 +175,7 @@ class GameStateBase(GameStateInterface):
         self._last_dungeon_level = dungeon_level
 
         #self._update_gui()
-        dungeon_level.tick()
+        dungeon_level.tick(gametime.normal_energy_gain)
 
         if self.player.health.is_dead():
             self.force_draw()
@@ -242,7 +243,7 @@ class TestGameState(GameStateBase):
         potion = weapon.new_bolas(self)
         potion.mover.try_move((20, 16), self.dungeon_level)
 
-        orb = new_flame_orb(self)
+        orb = item.new_bomb(self)
         orb.mover.try_move((22, 15), self.dungeon_level)
 
         amulet = item.new_amulet_of_life_steal(self)
@@ -351,7 +352,8 @@ class GameStateDummy(GameStateInterface):
         self.dungeon = Dungeon(self)
         self.player = Player(self)
         self.player.description.name = "Mr. Test Hero"
+        reset_globals(self.player)
 
     def update(self):
         dungeon_level = self.player.dungeon_level.value
-        dungeon_level.tick()
+        dungeon_level.tick(gametime.normal_energy_gain)

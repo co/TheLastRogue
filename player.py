@@ -56,11 +56,14 @@ class Player(Composite):
         self.set_child(StatusFlags([StatusFlags.CAN_OPEN_DOORS, StatusFlags.IS_ALIVE]))
 
         self.set_child(DataPoint(DataTypes.GAME_PIECE_TYPE, GamePieceTypes.ENTITY))
+
         self.set_child(DataPoint(DataTypes.MOVEMENT_SPEED, gametime.single_turn))
         self.set_child(DataPoint(DataTypes.MELEE_SPEED, gametime.single_turn))
         self.set_child(DataPoint(DataTypes.THROW_SPEED, gametime.double_turn))
         self.set_child(DataPoint(DataTypes.SHOOT_SPEED, gametime.single_turn))
+        self.set_child(DataPoint(DataTypes.THROW_ITEM_SPEED, gametime.single_turn))
         self.set_child(DataPoint(DataTypes.CAST_SPEED, gametime.single_turn))
+
         self.set_child(DataPoint(DataTypes.SIGHT_RADIUS, constants.COMMON_SIGHT_RADIUS))
         self.set_child(DataPoint(DataTypes.FACTION, Factions.PLAYER))
         self.set_child(DataPoint(DataTypes.INTELLIGENCE, IntelligenceLevel.NORMAL))

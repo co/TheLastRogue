@@ -15,12 +15,12 @@ __author__ = 'co'
 
 
 dungeon1 = ["#####",
-            "#...#",
+            "#._.#",
             "#.#.#",
             "#...#",
             "#####"]
-dungeon_level = \
-    dungeonlevelfactory.dungeon_level_from_lines(dungeon1)
+def get_test_level():
+    return dungeonlevelfactory.dungeon_level_from_lines(dungeon1)
 
 def get_dummy_actor():
     dummy_actor = Composite()
@@ -38,7 +38,7 @@ def get_dummy_actor():
 def get_dummy_player():
     game_state_dummy = GameStateDummy()
     dummy_actor = game_state_dummy.player
-    dummy_actor.dungeon_level.value = dungeon_level
+    dummy_actor.dungeon_level.value = get_test_level()
     dummy_actor.set_child(Position())
     dummy_actor.position.value = (1, 1)
     return dummy_actor

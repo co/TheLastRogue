@@ -58,7 +58,7 @@ class DungeonLevel(object):
             raise Exception(("Tried to access the player, "
                              "from DungeonLevel: " + str(self) +
                              ", but the player is not in the dungeon."))
-        square_side = 16  # Should be enough
+        square_side = 17  # Should be enough
         rect_pos = geo.sub_2d(the_player.position.value, (square_side / 2, square_side / 2))
         draw_rectangle = geo.Rect(rect_pos, square_side, square_side)
         self._dungeon_level_screen.draw_rectangle_seen_by_entity(draw_rectangle, self.tile_matrix, the_player)
@@ -120,8 +120,8 @@ class DungeonLevel(object):
         return [self.get_tile_or_unknown(geo.add_2d(offset, position))
                 for offset in direction.AXIS_DIRECTIONS]
 
-    def tick(self):
-        self.actor_scheduler.tick()
+    def tick(self, time):
+        self.actor_scheduler.tick(time)
 
     def signal_terrain_changed(self, point):
         self.terrain_changed_timestamp = turn.current_turn

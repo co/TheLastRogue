@@ -69,6 +69,10 @@ class PlayerThrowItemAction(PlayerMissileAction):
         self.name = "Throw"
         self.display_order = 95
 
+    # todo: will be handled properly by triggered effect. This whole file needs refactoring, ill deal with it then.
+    def add_energy_spent_to_entity(self, entity):
+        pass
+
     def max_missile_distance(self, **kwargs):
         """
         The distance the item can be thrown by the player.
@@ -85,10 +89,12 @@ class PlayerThrowItemAction(PlayerMissileAction):
     def missile_hit_effect(self, dungeon_level, position, game_state, source_entity):
         if is_hitting_ground(dungeon_level, position):
             for c in self.parent.get_children_with_tag("hit_floor_action_tag"):
-                c.act(source_entity=source_entity, game_state=game_state, target_position=position)
+                c.act(source_entity=source_entity, target_entity=self.parent,
+                      game_state=game_state, target_position=position)
         else:
             for c in self.parent.get_children_with_tag("hit_chasm_action_tag"):
-                c.act(source_entity=source_entity, game_state=game_state, target_position=position)
+                c.act(source_entity=source_entity, target_entity=self.parent,
+                      game_state=game_state, target_position=position)
 
 
 def is_hitting_ground(dungeon_level, position):
@@ -103,9 +109,6 @@ class PlayerThrowStoneAction(PlayerMissileAction):
         self.display_order = 95
 
     def add_energy_spent_to_entity(self, entity):
-        """
-        Help method for spending energy for the act performing entity.
-        """
         entity.actor.newly_spent_energy += entity.throw_speed.value
 
     def missile_hit_effect(self, dungeon_level, position, game_state, source_entity):

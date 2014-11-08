@@ -21,7 +21,7 @@ class Position(Leaf):
     def value(self, new_value):
         self._value = new_value
         if self.has_parent() and not self.value is None:
-            self.parent.message(CompositeMessage.POSITION_CHANGED)
+            self.parent.send_message(CompositeMessage.POSITION_CHANGED)
 
 
 class DungeonLevel(Leaf):
@@ -63,7 +63,7 @@ class DungeonLevel(Leaf):
         Is called when dungeon level has changed.
         """
         if self.has_parent() and not self.value is None:
-            self.parent.message(CompositeMessage.DUNGEON_LEVEL_CHANGED)
+            self.parent.send_message(CompositeMessage.DUNGEON_LEVEL_CHANGED)
             if self.has_sibling("actor"):
                 self.value.add_actor_if_not_present(self.parent)
             if self.has_sibling("is_dungeon_feature"):

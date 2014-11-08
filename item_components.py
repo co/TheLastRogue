@@ -5,7 +5,7 @@ from action import Action
 import action
 import animation
 from attacker import DamageTypes, calculate_damage
-from cloud import new_fire_cloud
+from cloud import new_fire_cloud, new_explosion_cloud
 import colors
 from compositecommon import PoisonEntityEffectFactory, frost_effect_factory
 from compositecore import Leaf
@@ -227,6 +227,7 @@ class BlinksDeviceAction(ActivateDeviceAction):
                 break
 
 
+# todo replace with trigger, effect
 class HealDeviceAction(ActivateDeviceAction):
     """
     Defines the device activate action.
@@ -355,28 +356,40 @@ class AddSpoofChildEquipEffect2(Leaf):
             entity.effect_queue.add(entityeffect.StatusIconEntityEffect(entity, self.status_icon, 1))
 
 
-class HealTriggeredEffect(TriggeredEffect):
+class MoveTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(HealTriggeredEffect, self).__init__("heal_triggered_effect")
+        super(MoveTriggeredEffect, self).__init__("move_triggered_effect")
 
     def trigger(self, **kwargs):
-        min_heal = 10
-        max_heal = 15
         target_entity = kwargs[action.TARGET_ENTITY]
-        heal = random.randrange(min_heal, max_heal + 1)
-        heal_effect = entityeffect.Heal(target_entity, heal, heal_message=messenger.HEALTH_POTION_MESSAGE)
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        target_position = kwargs[action.TARGET_POSITION]
+        target_entity.mover.try_move(target_position, source_entity.dungeon_level.value)
+
+
+class HealTriggeredEffect(TriggeredEffect):
+    def __init__(self, min_heal, max_heal, message=None):
+        super(HealTriggeredEffect, self).__init__("heal_triggered_effect")
+        self.max_heal = max_heal
+        self.min_heal = min_heal
+        self.message = message
+
+    def trigger(self, **kwargs):
+        target_entity = kwargs[action.TARGET_ENTITY]
+        heal = random.randrange(self.min_heal, self.max_heal + 1)
+        heal_effect = entityeffect.Heal(target_entity, heal, heal_message=self.message)
         target_entity.effect_queue.add(heal_effect)
 
 
 class ApplyPoisonTriggeredEffect(TriggeredEffect):
-    def __init__(self):
+    def __init__(self, min_damage, max_damage):
         super(ApplyPoisonTriggeredEffect, self).__init__("apply_poison_triggered_effect")
+        self.max_damage = max_damage
+        self.min_damage = min_damage
 
     def trigger(self, **kwargs):
-        min_damage = 10
-        max_damage = 15
         target_entity = kwargs[action.TARGET_ENTITY]
-        damage = random.randrange(min_damage, max_damage + 1)
+        damage = random.randrange(self.min_damage, self.max_damage + 1)
         damage_effect_factory = PoisonEntityEffectFactory(target_entity, damage, 2, random.randrange(8, 12))
         target_entity.effect_queue.add(damage_effect_factory())
 
@@ -395,6 +408,28 @@ class CreateFlameCloudTriggeredEffect(TriggeredEffect):
                                                max_fire_time, game_state)
 
 
+class ExplodeTriggeredEffect(TriggeredEffect):
+    def __init__(self):
+        super(ExplodeTriggeredEffect, self).__init__("explode_triggered_effect")
+
+    def trigger(self, **kwargs):
+        #message = messenger.ENTITY_EXPLODES % {"target_entity": self.parent.description.name}
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        target_position = kwargs[action.TARGET_POSITION]
+        game_state = kwargs[action.GAME_STATE]
+        explosion = new_explosion_cloud(game_state, 1)
+        explosion.graphic_char.color_fg = colors.YELLOW
+        explosion.mover.replace_move(target_position, source_entity.dungeon_level.value)
+        for d in direction.DIRECTIONS:
+            if d in direction.AXIS_DIRECTIONS:
+                color = colors.ORANGE
+            else:
+                color = colors.RED
+            point = geometry.add_2d(d, target_position)
+            explosion = new_explosion_cloud(game_state, 1)
+            explosion.graphic_char.color_fg = color
+            explosion.mover.replace_move(point, source_entity.dungeon_level.value)
+
 def put_tile_and_surrounding_tiles_on_fire(dungeon_level, position, min_fire_time, max_fire_time, game_state):
     fire = new_fire_cloud(game_state, random.randrange(min_fire_time, max_fire_time))
     fire.mover.replace_move(position, dungeon_level)
@@ -402,6 +437,20 @@ def put_tile_and_surrounding_tiles_on_fire(dungeon_level, position, min_fire_tim
         point = geometry.add_2d(d, position)
         fire = new_fire_cloud(game_state, random.randrange(min_fire_time, max_fire_time))
         fire.mover.replace_move(point, dungeon_level)
+
+
+class CreateCloudTriggeredEffect(TriggeredEffect):
+    def __init__(self, cloud_factory, density=32):
+        super(CreateCloudTriggeredEffect, self).__init__("create_cloud_triggered_effect")
+        self.density = density
+        self.cloud_factory = cloud_factory
+
+    def trigger(self, **kwargs):
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        target_position = kwargs[action.TARGET_POSITION]
+        game_state = kwargs[action.GAME_STATE]
+        steam = self.cloud_factory(game_state, self.density)
+        steam.mover.try_move(target_position, source_entity.dungeon_level.value)
 
 
 class ApplyFrostTriggeredEffect(TriggeredEffect):
@@ -539,12 +588,18 @@ class FlashItemEffect(TriggeredEffect):
 class LocalMessageEffect(TriggeredEffect):
     def __init__(self, message):
         super(LocalMessageEffect, self).__init__("local_message_effect")
-        self.the_message = message
+        self.message = message
 
     def trigger(self, **kwargs):
-        print "wot"
         source_entity = kwargs[action.SOURCE_ENTITY]
-        msg.send_visual_message(self.the_message, source_entity.position.value)
+        target_entity = kwargs[action.TARGET_ENTITY]
+        message_arguments = {}
+        if source_entity and source_entity.has("description"):
+            message_arguments["source_entity"] = source_entity.description.long_name
+        if target_entity and target_entity.has("description"):
+            message_arguments["target_entity"] = target_entity.description.long_name
+
+        msg.send_visual_message(self.message % message_arguments, source_entity.position.value)
 
 
 class Trigger(Leaf):

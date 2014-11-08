@@ -24,19 +24,17 @@ class ActionScheduler(object):
         if entity.has("effect_queue"):
             entity.effect_queue.update(gametime.normal_energy_gain)
 
-    def _actors_tick(self):
+    def _actors_tick(self, time):
         if len(self._actors) > 0:
             entity = self._actors[0]
             entity.reset_spoofed_children()
-            entity.first_tick(gametime.normal_energy_gain)  # Equipped effects.
+            entity.first_tick(time)  # Equipped effects.
             self.effects_tick(entity)
-            entity.before_tick(gametime.normal_energy_gain)
+            entity.before_tick(time)
             self.on_tick(entity)
-            if entity.dungeon_level.value is None or entity.position.value is None:
-                return
             entity.actor.tick()
-            entity.on_tick(gametime.normal_energy_gain)
-            entity.after_tick(gametime.normal_energy_gain)
+            entity.on_tick(time)
+            entity.after_tick(time)
             self._actors.rotate()
 
     def on_tick(self, entity):
@@ -51,5 +49,5 @@ class ActionScheduler(object):
                 for share_effect in piece.get_children_with_tag("entity_share_tile_effect"):
                     share_effect.share_tile_effect_tick(actor, gametime.normal_energy_gain)
 
-    def tick(self):
-        self._actors_tick()
+    def tick(self, time):
+        self._actors_tick(time)

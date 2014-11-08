@@ -74,7 +74,7 @@ class MemoryMap(Leaf):
                     seen_tiles.append(t)
         return len(seen_tiles)
 
-    def message(self, message):
+    def send_message(self, message):
         """
         Handles messages recieved.
         """

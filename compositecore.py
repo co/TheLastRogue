@@ -89,7 +89,7 @@ class Component(object):
         """
         pass
 
-    def message(self, message):
+    def send_message(self, message):
         """
         A method hook for broadcasting a message down the component tree.
         """
@@ -298,11 +298,11 @@ class Composite(Component):
         for component in components_without_spoof:
             component.after_tick(time)
 
-    def message(self, message):
+    def send_message(self, message):
         """
         Sends message to all child components.
         """
-        map(lambda x: x.message(message), self._children.values())
+        map(lambda x: x.send_message(message), self._children.values())
 
     def __getattr__(self, component_type):
         if component_type == "_spoofed_children" or component_type == "_children":

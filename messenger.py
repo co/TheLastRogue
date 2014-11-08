@@ -31,10 +31,6 @@ PRESS_ENTER_TO_ACCEPT = "Press ENTER to accept, another key to reject."
 PLAYER_TELEPORT_MESSAGE = "Your surroundings seem different."
 PLAYER_SWITCH_MESSAGE = "Your surrounding is replaced."
 
-POTION_SMASH_TO_GROUND = "The %(target_entity)s smashes to the ground and breaks into pieces."
-ITEM_HITS_THE_GROUND = "The %(target_entity)s hits the ground with a thud."
-ENTITY_EXPLODES = "%(target_entity)s explodes!"
-
 PLAYER_MAP_MESSAGE = "You surroundings suddenly seem familiar."
 PLAYER_PUSH_SCROLL_MESSAGE = "You as you form the words of the scroll your voice turns into a strong wind."
 
@@ -47,9 +43,19 @@ HEALTH_DEVICE_MESSAGE = "%(target_entity)s is healed by the device for %(health)
 STARE_PARALYZE_MESSAGE = "%(source_entity)s stares at %(target_entity)s, it's paralyzed!."
 NO_LONGER_PARALYZED_MESSAGE = "%(source_entity)s is no longer paralyzed."
 
-
 FROST_POTION_DRINK_MESSAGE = "That potion was cold as ice! You feel yourself slow down."
+FROST_POTION_BREAKS_MESSAGE = "The potion smashes to the ground and creates a freezing cloud of mist!"
 POTION_SMASHES_AGAINST_FLOOR_MESSAGE = "The potion smashes to the ground and breaks into pieces."
+FLAME_POTION_DRINK_MESSAGE = "As you drink the potion the liquid ignites!"
+FLAME_POTION_BREAKS_MESSAGE = "The potion smashes to the ground and creates a roaring fire!"
+POISON_POTION_DRINK_MESSAGE = "The potion tastes really nasty, you feel sick!"
+POISON_POTION_BREAK_MESSAGE = "The potion smashes to the ground and creates a poisonous cloud of gas!"
+
+POTION_SMASH_TO_GROUND = "The %(target_entity)s smashes to the ground and breaks into pieces."
+ITEM_HITS_THE_GROUND_HEAVY = "The %(target_entity)s hits the ground with a thud."
+ITEM_HITS_THE_GROUND_LIGHT = "The %(target_entity)s falls to the ground."
+ITEM_FALLS_DOWN_CHASM = "The %(target_entity)s falls into the chasm and disappears."
+ENTITY_EXPLODES = "%(target_entity)s explodes!"
 
 
 class Messenger(object):

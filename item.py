@@ -3,7 +3,7 @@ import random
 from Status import DAMAGE_REFLECT_STATUS_DESCRIPTION
 from action import Action
 from actor import DoNothingActor
-from cloud import new_steam_cloud, new_explosion_cloud, new_poison_cloud, new_frost_cloud
+from cloud import new_explosion_cloud, new_frost_cloud, new_poison_cloud
 from compositecore import Leaf, Composite
 import direction
 import geometry
@@ -12,10 +12,11 @@ from health import ReflectDamageTakenEffect
 from item_components import ChargeADeviceAction, DarknessDeviceAction, GlassDeviceAction, \
     SwapDeviceAction, HeartStopDeviceAction, BlinksDeviceAction, HealDeviceAction, ZapDeviceAction, Stacker, \
     AddSpoofChildEquipEffect, HealTriggeredEffect, ApplyPoisonTriggeredEffect, CreateFlameCloudTriggeredEffect, \
-    put_tile_and_surrounding_tiles_on_fire, ApplyFrostTriggeredEffect, ReEquipAction, DropItemTriggeredEffect, \
+    ApplyFrostTriggeredEffect, ReEquipAction, DropItemTriggeredEffect, \
     AddEnergySpentEffect, PutToSleepTriggeredEffect, RemoveItemEffect, FlashItemEffect, LocalMessageEffect, Trigger, \
     TeleportTriggeredEffect, SingleSwapTriggeredEffect, MagicMappingTriggeredEffect, PushOthersTriggeredEffect, \
-    EquipmentType, PlayerAutoPickUp, ItemType, _item_flash_animation
+    EquipmentType, PlayerAutoPickUp, ItemType, _item_flash_animation, CreateCloudTriggeredEffect, MoveTriggeredEffect, \
+    ExplodeTriggeredEffect
 import messenger
 from missileaction import PlayerThrowItemAction
 from mover import Mover
@@ -42,7 +43,8 @@ def set_item_components(item, game_state):
     item.set_child(CharPrinter())
     new_drop_action(DROP_ACTION_TAG, item)
     item.set_child(PlayerThrowItemAction())
-    #item.set_child(ThrowerNonBreak())
+    set_thrown_item_hit_floor_action(item, [MoveTriggeredEffect(), LocalMessageEffect(messenger.ITEM_HITS_THE_GROUND_HEAVY)])
+    set_thrown_item_hit_chasm_action(item, [MoveTriggeredEffect(), LocalMessageEffect(messenger.ITEM_FALLS_DOWN_CHASM)])
     return item
 
 
@@ -361,12 +363,11 @@ def new_health_potion(game_state):
     set_item_components(potion, game_state)
     set_potion_components(potion)
     potion.set_child(GraphicChar(None, colors.PINK, icon.POTION))
-    set_drink_item_action(potion, [HealTriggeredEffect()])
+    set_drink_item_action(potion, [HealTriggeredEffect(10, 15, messenger.HEALTH_POTION_MESSAGE)])
     potion.set_child(Description("Potion of Health",
                                  "An unusually thick liquid contained in a glass bottle."
                                  "Drinking from it will heal you."))
-    potion.set_child(ThrowerBreakCreateSteam())
-    set_thrown_item_hit_floor_action(potion, [LocalMessageEffect(messenger.POTION_SMASHES_AGAINST_FLOOR_MESSAGE)])
+    set_thrown_item_hit_floor_action(potion, [LocalMessageEffect(messenger.POTION_SMASH_TO_GROUND)])
     return potion
 
 
@@ -375,11 +376,13 @@ def new_poison_potion(game_state):
     set_item_components(potion, game_state)
     set_potion_components(potion)
     potion.set_child(GraphicChar(None, colors.GREEN, icon.POTION))
-    set_drink_item_action(potion, [ApplyPoisonTriggeredEffect()])
+    set_drink_item_action(potion, [ApplyPoisonTriggeredEffect(10, 15),
+                                   LocalMessageEffect(messenger.POISON_POTION_DRINK_MESSAGE)])
     potion.set_child(Description("Potion of Poison",
                                  "An unusually sluggish liquid contained in a glass bottle."
                                  "Drinking from it would poison you."))
-    potion.set_child(ThrowerBreakCreatePoisonCloud())
+    set_thrown_item_hit_floor_action(potion, [CreateCloudTriggeredEffect(cloud_factory=new_poison_cloud),
+                                              LocalMessageEffect(messenger.POISON_POTION_BREAK_MESSAGE)])
     return potion
 
 
@@ -388,12 +391,13 @@ def new_flame_potion(game_state):
     set_item_components(potion, game_state)
     set_potion_components(potion)
     potion.set_child(GraphicChar(None, colors.RED, icon.POTION))
-    set_drink_item_action(potion, [CreateFlameCloudTriggeredEffect()])
+    set_drink_item_action(potion, [CreateFlameCloudTriggeredEffect(),
+                                   LocalMessageEffect(messenger.FLAME_POTION_DRINK_MESSAGE)])
     potion.set_child(Description("Potion of Fire",
                                  "An unusually muddy liquid contained in a glass bottle."
                                  "Drinking from it would burn you badly."))
-    #potion.set_child(ThrowerBreakCreateFire())
-    set_thrown_item_hit_floor_action(potion, [CreateFlameCloudTriggeredEffect()])
+    set_thrown_item_hit_floor_action(potion, [CreateFlameCloudTriggeredEffect(),
+                                              LocalMessageEffect(messenger.FLAME_POTION_BREAKS_MESSAGE)])
     return potion
 
 
@@ -406,7 +410,8 @@ def new_frost_potion(game_state):
     potion.set_child(Description("Potion of Frost",
                                  "A soapy liquid contained in a glass bottle."
                                  "Drinking from it would freeze you badly."))
-    potion.set_child(ThrowerBreakCreateCloud(cloud_factory=new_frost_cloud))
+    set_thrown_item_hit_floor_action(potion, [CreateCloudTriggeredEffect(cloud_factory=new_frost_cloud),
+                                              LocalMessageEffect(messenger.FROST_POTION_BREAKS_MESSAGE)])
     return potion
 
 
@@ -431,6 +436,7 @@ def set_scroll_components(item):
     item.set_child(PlayerAutoPickUp())
     item.set_child(DataPoint(DataTypes.WEIGHT, 1))
     item.set_child(GraphicChar(None, colors.CHAMPAGNE, icon.SCROLL))
+    set_thrown_item_hit_floor_action(item, [MoveTriggeredEffect(), LocalMessageEffect(messenger.ITEM_HITS_THE_GROUND_LIGHT)])
 
 
 def new_teleport_scroll(game_state):
@@ -531,7 +537,8 @@ def new_bomb(game_state):
     bomb.set_child(Description("Bomb",
                                "A ball filled gunpowder, with a fuse attached."
                                "Throwing it will cause some serious damage."))
-    bomb.set_child(ThrowerCreateExplosion())
+    set_thrown_item_hit_floor_action(bomb, [ExplodeTriggeredEffect(),
+                                            LocalMessageEffect(messenger.ENTITY_EXPLODES)])
     return bomb
 
 
@@ -566,154 +573,3 @@ DROP_ACTION_TAG = "drop_action"
 THROW_ACTION_TAG = "throw_action"
 HIT_FLOOR_ACTION_TAG = "hit_floor_action_tag"
 HIT_CHASM_ACTION_TAG = "hit_chasm_action_tag"
-
-
-#TODO Delete
-class Thrower(Leaf):
-    """
-    Items with this component can be thrown.
-    """
-
-    def __init__(self):
-        super(Thrower, self).__init__()
-        self.component_type = "thrower"
-
-    def hit_ground_effect(self, position):
-        """
-        The effect of the item has when it hits the ground.
-
-        position: The point at which the item hits the ground.
-        """
-        pass
-
-    def _non_break(self, dungeon_level, position):
-        """
-        When the floor is a chasm it should not break the chasm will take care of the fall.
-        """
-        self.parent.mover.try_move(position, dungeon_level)
-
-
-#TODO Delete
-class ThrowerNonBreak(Thrower):
-    """
-    Items with this component can be thrown, but will survive the fall.
-    """
-
-    def __init__(self):
-        super(ThrowerNonBreak, self).__init__()
-
-    def throw_effect(self, dungeon_level, position):
-        """
-        The item will be placed at the tile where it lands.
-
-        position: The point at which the item hits the ground.
-        """
-        self._non_break(dungeon_level, position)
-        message = messenger.ITEM_HITS_THE_GROUND % {"target_entity": self.parent.description.name}
-        msg.send_visual_message(message, position)
-
-
-#TODO Delete
-class ThrowerBreak(Thrower):
-    """
-    Items with this component can be thrown, but will survive the fall.
-    """
-
-    def __init__(self):
-        super(ThrowerBreak, self).__init__()
-
-    def throw_effect(self, dungeon_level, position):
-        if is_hitting_ground(dungeon_level, position):
-            self._break_effect(dungeon_level, position)
-        else:
-            self._non_break(dungeon_level, position)
-
-    def _break_effect(self, dungeon_level, position):
-        message = "The " + self.parent.description.name.lower() + \
-                  " smashes to the ground and breaks into pieces."
-        msg.send_visual_message(message, position)
-
-    def _non_break(self, dungeon_level, position):
-        """
-        When the floor is a chasm it should not break the chasm will take care of the fall.
-        """
-        self.parent.mover.try_move(position, dungeon_level)
-        message = "The " + self.parent.description.name.lower() + \
-                  " hits the ground with a thud."
-        msg.send_visual_message(message, position)
-
-
-#TODO Delete
-def is_hitting_ground(dungeon_level, position):
-    return not dungeon_level.get_tile_or_unknown(position).get_terrain().has("is_chasm")
-
-
-# TODO DELETE
-class ThrowerBreakCreateCloud(ThrowerBreak):
-    """
-    Should be sub-classed to items with this component will create and create a puff of cloud.
-    """
-
-    def __init__(self, cloud_factory=None, density=32):
-        super(ThrowerBreakCreateCloud, self).__init__()
-        self.density = density
-        self.cloud_factory = cloud_factory
-
-    def _break_effect(self, dungeon_level, position):
-        message = messenger.POTION_SMASH_TO_GROUND % {"target_entity": self.parent.description.name}
-        msg.send_visual_message(message, position)
-        steam = self.cloud_factory(self.parent.game_state.value, self.density)
-        steam.mover.try_move(position, dungeon_level)
-
-
-# TODO DELETE
-class ThrowerBreakCreateSteam(ThrowerBreakCreateCloud):
-    def __init__(self):
-        super(ThrowerBreakCreateSteam, self).__init__()
-        self.cloud_factory = new_steam_cloud
-
-
-# TODO DELETE
-class ThrowerBreakCreatePoisonCloud(ThrowerBreakCreateCloud):
-    def __init__(self):
-        super(ThrowerBreakCreatePoisonCloud, self).__init__()
-        self.cloud_factory = new_poison_cloud
-
-
-# TODO DELETE
-class ThrowerBreakCreateFire(ThrowerBreakCreateCloud):
-    def __init__(self):
-        super(ThrowerBreakCreateFire, self).__init__()
-        self.min_fire_time = 3
-        self.max_fire_time = 8
-
-    def _break_effect(self, dungeon_level, position):
-        put_tile_and_surrounding_tiles_on_fire(dungeon_level, position, self.min_fire_time, self.max_fire_time,
-                                               self.parent.game_state.value)
-
-
-# TODO DELETE
-class ThrowerCreateExplosion(ThrowerBreak):
-    """
-    Items with this component will create and create a puff of steam.
-    """
-
-    def __init__(self):
-        super(ThrowerCreateExplosion, self).__init__()
-
-    def _break_effect(self, dungeon_level, position):
-        message = messenger.ENTITY_EXPLODES % {"target_entity": self.parent.description.name}
-        msg.send_visual_message(message, position)
-        game_state = self.parent.game_state.value
-        explosion = new_explosion_cloud(game_state, 1)
-        explosion.graphic_char.color_fg = colors.YELLOW
-        explosion.mover.replace_move(position, dungeon_level)
-        for d in direction.DIRECTIONS:
-            if d in direction.AXIS_DIRECTIONS:
-                color = colors.ORANGE
-            else:
-                color = colors.RED
-            point = geometry.add_2d(d, position)
-            explosion = new_explosion_cloud(game_state, 1)
-            explosion.graphic_char.color_fg = color
-            explosion.mover.replace_move(point, dungeon_level)
