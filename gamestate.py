@@ -1,3 +1,4 @@
+from player_class import new_rogue_player
 from cloud import new_steam_cloud
 import colors
 from dungeon import Dungeon, ReflexiveDungeon
@@ -7,7 +8,7 @@ import gametime
 import libtcodpy
 import monster
 from mover import teleport_monsters
-from player import Player
+from player import new_player
 import camera
 import console
 import constants
@@ -15,13 +16,14 @@ import gui
 import item
 import menufactory
 import messenger
+from player_class import new_rogue_player
 import rectfactory
 from save import save, delete_save_file_of_game_state
 import settings
 import state
 import statestack
 import turn
-from weapon import new_flame_orb, new_gun, new_sling, new_dagger
+from weapon import new_gun, new_sling, new_dagger
 import weapon
 
 
@@ -64,7 +66,7 @@ class GameStateBase(GameStateInterface):
     def __init__(self, player_name=""):
         super(GameStateBase, self).__init__()
         self.dungeon = Dungeon(self)
-        self.player = Player(self)
+        self.player = new_rogue_player(self)
         if player_name == "":
             self.player.description.name = "Roland"
         else:
@@ -237,6 +239,10 @@ class TestGameState(GameStateBase):
             element = e(self)
             element.mover.try_move((23 + i, 15), self.dungeon_level)
 
+        for i, e in enumerate(item.device_factories):
+            element = e(self)
+            element.mover.try_move((23 + i, 16), self.dungeon_level)
+
         potion = item.new_frost_potion(self)
         potion.mover.try_move((20, 12), self.dungeon_level)
 
@@ -350,7 +356,7 @@ class GameStateDummy(GameStateInterface):
     def __init__(self):
         super(GameStateDummy, self).__init__()
         self.dungeon = Dungeon(self)
-        self.player = Player(self)
+        self.player = new_player(self)
         self.player.description.name = "Mr. Test Hero"
         reset_globals(self.player)
 

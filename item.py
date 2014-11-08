@@ -16,7 +16,7 @@ from item_components import ChargeADeviceAction, DarknessDeviceAction, GlassDevi
     AddEnergySpentEffect, PutToSleepTriggeredEffect, RemoveItemEffect, FlashItemEffect, LocalMessageEffect, Trigger, \
     TeleportTriggeredEffect, SingleSwapTriggeredEffect, MagicMappingTriggeredEffect, PushOthersTriggeredEffect, \
     EquipmentType, PlayerAutoPickUp, ItemType, _item_flash_animation, CreateCloudTriggeredEffect, MoveTriggeredEffect, \
-    ExplodeTriggeredEffect
+    ExplodeTriggeredEffect, RemoveAChargeEffect, DarknessTriggeredEffect
 import messenger
 from missileaction import PlayerThrowItemAction
 from mover import Mover
@@ -69,7 +69,7 @@ def new_darkness_device(game_state):
     set_device_components(device)
     device.set_child(Description("Device of Darkness",
                                  "This ancient device will dim the vision of all creatures on the floor."))
-    device.set_child(DarknessDeviceAction())
+    set_device_item_action(device, [DarknessTriggeredEffect(), LocalMessageEffect(messenger.DARKNESS_MESSAGE)])
     device.set_child(GraphicChar(None, colors.GREEN, icon.MACHINE))
     return device
 
@@ -140,6 +140,18 @@ def new_blinks_device(game_state):
     return device
 
 
+def set_device_item_action(item, triggered_effects):
+    triggered_effects += [action.TriggerAction("Use", 90, [DEVICE_ACTION_TAG, USER_ACTION_TAG])]
+    item_trigger_effect = Composite(DEVICE_ACTION_TAG)
+    item_trigger_effect.set_child(FlashItemEffect())  # todo: does this do anything?
+    item_trigger_effect.set_child(AddEnergySpentEffect())
+    item_trigger_effect.set_child(RemoveAChargeEffect())
+    for triggered_effect in triggered_effects:
+        item_trigger_effect.set_child(triggered_effect)
+    item_trigger_effect.set_child(DataPoint("item", item))
+    item.set_child(item_trigger_effect)
+
+
 def new_energy_sphere(game_state):
     """
     A composite component representing a gun ammunition item.
@@ -155,6 +167,10 @@ def new_energy_sphere(game_state):
     charge.set_child(PlayerAutoPickUp())
     charge.set_child(ChargeADeviceAction())
     return charge
+
+
+device_factories = [new_blinks_device, new_darkness_device, new_glass_device, new_healing_device,
+                    new_swap_device, new_zap_device, new_heart_stop_device]
 
 
 def new_ammunition(game_state):
@@ -568,6 +584,7 @@ class UsableOnceItemAction(Action):
 
 USER_ACTION_TAG = "user_action" # An element with this tag will be visible in menus.
 READ_ACTION_TAG = "read_action"
+DEVICE_ACTION_TAG = "device_action"
 DRINK_ACTION_TAG = "drink_action"
 DROP_ACTION_TAG = "drop_action"
 THROW_ACTION_TAG = "throw_action"

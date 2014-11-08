@@ -294,7 +294,8 @@ class ItemActionsMenu(Menu):
         game_state = self._player.game_state.value
         self.menu_items = []
         for item_action in self._actions:
-            action_function = item_action.delayed_call(source_entity=self._player, target_entity=self._player,
+            action_function = item_action.delayed_call(source_entity=self._player,
+                                                       target_entity=self._player,
                                                        game_state=game_state,
                                                        target_position=self._player.position.value)
             back_to_game_function = BackToGameFunction(self._state_stack)

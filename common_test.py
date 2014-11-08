@@ -6,7 +6,7 @@ from gamestate import GameState, GameStateDummy
 import gametime
 from graphic import CharPrinter
 from inventory import Inventory
-from player import Player
+from player import new_player
 from position import DungeonLevel, Position
 from stats import DataPoint, DataTypes
 from vision import Vision

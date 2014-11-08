@@ -51,7 +51,7 @@ class Damage(Leaf):
         self.max = max
 
 
-class Jobs:
+class Class:
     ROGUE = "Rogue"
     KNIGHT = "Knight"
     GUNSLINGER = "Gunslinger"
@@ -71,7 +71,7 @@ class Tags:
 
 
 class DataTypes:
-    JOB = "job"
+    CLASS = "job"
     RACE = "race"
 
     ENERGY = "energy"

@@ -86,11 +86,25 @@ class ActivateDeviceAction(Action):
         pass
 
 
+class DarknessTriggeredEffect(TriggeredEffect):
+    def __init__(self):
+        super(DarknessTriggeredEffect, self).__init__("darkness_triggered_effect")
+
+    def trigger(self, **kwargs):
+        ttl = gametime.single_turn * rng.random_variance(10, 5)
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        entities = source_entity.dungeon_level.value.entities
+        for entity in entities:
+            sight_radius_spoof = DataPoint(DataTypes.SIGHT_RADIUS, 1)
+            darkness_effect = entityeffect.AddSpoofChild(source_entity, sight_radius_spoof, time_to_live=ttl)
+            entity.effect_queue.add(darkness_effect)
+
+
+#TODO remove
 class DarknessDeviceAction(ActivateDeviceAction):
     """
     Defines the device activate action.
     """
-
     def __init__(self):
         super(DarknessDeviceAction, self).__init__()
         self.component_type = "darkness_device_activate_action"
@@ -365,6 +379,17 @@ class MoveTriggeredEffect(TriggeredEffect):
         source_entity = kwargs[action.SOURCE_ENTITY]
         target_position = kwargs[action.TARGET_POSITION]
         target_entity.mover.try_move(target_position, source_entity.dungeon_level.value)
+
+
+class RemoveAChargeEffect(TriggeredEffect):
+    def __init__(self):
+        super(RemoveAChargeEffect, self).__init__("remove_a_charge_effect")
+
+    def trigger(self, **kwargs):
+        self.parent.item.value.charge.charges -= 1
+
+    def can_trigger(self, **kwargs):
+        return self.parent.item.value.charge.charges > 0
 
 
 class HealTriggeredEffect(TriggeredEffect):
