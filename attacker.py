@@ -1,9 +1,13 @@
 import random
+import action
 import entityeffect
 import geometry
 import rng
-from compositecore import Leaf
+from compositecore import Leaf, Composite
 from stats import DataTypes, Flag, Tags
+from trigger import Trigger, ON_ATTACKED_TRIGGER_TAG, STEP_NEXT_TO_ENEMY_TRIGGER_TAG, \
+    ENEMY_STEPPING_NEXT_TO_ME_TRIGGER_TAG
+from triggeredeffect import TriggeredEffect
 from util import entity_stunned_turn
 
 
@@ -389,79 +393,36 @@ def calculate_damage(damage_min, damage_max, bonus_damage, damage_multiplier):
     return (random.randrange(damage_min, damage_max + 1) + bonus_damage) * damage_multiplier
 
 
-class OnAttackedEffect(Leaf):
-    """
-    Subclasses may define an effect that happens when parent takes damage.
-    """
-
-    def __init__(self):
-        super(OnAttackedEffect, self).__init__()
-        self.tags.add("on_attacked_effect")
-
-    def attacked_effect(self, source_entity, damage_types=[]):
-        pass
+def set_counter_attack(entity):
+    trigger_effect = Composite("counter_attack")
+    trigger_effect.set_child(Trigger([ON_ATTACKED_TRIGGER_TAG]))
+    trigger_effect.set_child(AttackEnemyTriggeredEffect(DataTypes.COUNTER_ATTACK_CHANCE))
+    entity.set_child(trigger_effect)
 
 
-class CounterAttackOnDamageTakenEffect(OnAttackedEffect):
-    def __init__(self):
-        super(CounterAttackOnDamageTakenEffect, self).__init__()
-        self.component_type = "counter_attack_on_damage_taken"
-
-    def attacked_effect(self, source_entity, damage_types=[]):
-        target_entity = self.parent
-        melee_hit_entity_help_function(DataTypes.COUNTER_ATTACK_CHANCE, target_entity, source_entity)
+def set_attack_enemy_i_step_next_to(entity):
+    trigger_effect = Composite("attack_enemy_i_step_next_to")
+    trigger_effect.set_child(Trigger([STEP_NEXT_TO_ENEMY_TRIGGER_TAG]))
+    trigger_effect.set_child(AttackEnemyTriggeredEffect(DataTypes.OFFENCIVE_ATTACK_CHANCE))
+    entity.set_child(trigger_effect)
 
 
-class EnemySteppingNextToMeEffect(Leaf):
-    """
-    Subclasses may define an effect that happens when an entity steps next to parent entity.
-    """
-
-    TAG = "enemy_stepping_next_to_me_effect"
-
-    def __init__(self):
-        super(EnemySteppingNextToMeEffect, self).__init__()
-        self.tags.add(EnemySteppingNextToMeEffect.TAG)
-
-    def effect(self, source_entity, damage_types=[]):
-        pass
+def set_attack_enemy_stepping_next_to_me(entity):
+    trigger_effect = Composite("set_attack_enemy_stepping_next_to_me")
+    trigger_effect.set_child(Trigger([ENEMY_STEPPING_NEXT_TO_ME_TRIGGER_TAG]))
+    trigger_effect.set_child(AttackEnemyTriggeredEffect(DataTypes.DEFENCIVE_ATTACK_CHANCE))
+    entity.set_child(trigger_effect)
 
 
-class StepNextToEnemyEffect(Leaf):
-    """
-    Subclasses may define an effect that happens when parent takes damage.
-    """
+class AttackEnemyTriggeredEffect(TriggeredEffect):
+    def __init__(self, entity_trigger_chance_attribute):
+        super(AttackEnemyTriggeredEffect, self).__init__("attack_enemy_triggered_effect")
+        self.entity_trigger_chance_attribute = entity_trigger_chance_attribute
 
-    TAG = "step_next_to_enemy_effect"
-
-    def __init__(self):
-        super(StepNextToEnemyEffect, self).__init__()
-        self.tags.add(StepNextToEnemyEffect.TAG)
-
-    def effect(self, source_entity, damage_types=[]):
-        pass
-
-
-class AttackEnemyIStepNextToEffect(StepNextToEnemyEffect):
-    def __init__(self):
-        super(AttackEnemyIStepNextToEffect, self).__init__()
-        self.component_type = "attack_enemy_i_step_next_to_effect"
-
-    def effect(self, target_entity):
-        melee_hit_entity_help_function(DataTypes.OFFENCIVE_ATTACK_CHANCE, self.parent, target_entity)
-
-
-class AttackEnemySteppingNextToMeEffect(EnemySteppingNextToMeEffect):
-    def __init__(self):
-        super(AttackEnemySteppingNextToMeEffect, self).__init__()
-        self.component_type = "attack_enemy_stepping_next_to_me_effect"
-
-    def effect(self, target_entity):
-        melee_hit_entity_help_function(DataTypes.DEFENCIVE_ATTACK_CHANCE, self.parent, target_entity)
-
-
-def melee_hit_entity_help_function(attack_chance, source_entity, target_entity):
-    distance = geometry.chess_distance(source_entity.position.value, source_entity.position.value)
-    if (distance <= 1 and source_entity.has(attack_chance) and
-                random.random() < source_entity.get_child(attack_chance).value):
-        source_entity.melee_attacker.try_hit(target_entity)
+    def trigger(self, **kwargs):
+        source_entity = kwargs[action.SOURCE_ENTITY]
+        target_entity = kwargs[action.TARGET_ENTITY]
+        distance = geometry.chess_distance(source_entity.position.value, source_entity.position.value)
+        if (distance <= 1 and source_entity.has(self.entity_trigger_chance_attribute) and
+                    random.random() < source_entity.get_child(self.entity_trigger_chance_attribute).value):
+            source_entity.melee_attacker.try_hit(target_entity)

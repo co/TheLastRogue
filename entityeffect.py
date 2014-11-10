@@ -1,5 +1,6 @@
 import random
 
+import trigger
 from animation import animate_point
 import colors
 from compositecore import Leaf
@@ -275,8 +276,8 @@ class AttackEntityEffect(EntityEffect):
                 effect.attack_effect(self.source_entity, self.target_entity)
 
     def on_attacked_effects(self):
-        for effect in self.target_entity.get_children_with_tag("on_attacked_effect"):
-            effect.attacked_effect(self.source_entity, self.damage_types)
+        for t in self.target_entity.get_children_with_tag(trigger.ON_ATTACKED_TRIGGER_TAG):
+            t.trigger(target_entity=self.source_entity, source_entity=self.target_entity)
 
 
 class UndodgeableAttackEntityEffect(AttackEntityEffect):

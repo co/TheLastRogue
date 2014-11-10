@@ -10,7 +10,7 @@ from health import ReflectDamageTakenEffect
 from item_components import Stacker, \
     AddSpoofChildEquipEffect, HealTriggeredEffect, ApplyPoisonTriggeredEffect, CreateFlameCloudTriggeredEffect, \
     ApplyFrostTriggeredEffect, ReEquipAction, DropItemTriggeredEffect, \
-    AddEnergySpentEffect, PutToSleepTriggeredEffect, RemoveItemEffect, FlashItemEffect, LocalMessageEffect, Trigger, \
+    AddEnergySpentEffect, PutToSleepTriggeredEffect, RemoveItemEffect, FlashItemEffect, LocalMessageEffect, \
     TeleportTriggeredEffect, SingleSwapTriggeredEffect, MagicMappingTriggeredEffect, PushOthersTriggeredEffect, \
     EquipmentType, PlayerAutoPickUp, ItemType, _item_flash_animation, CreateCloudTriggeredEffect, MoveTriggeredEffect, \
     ExplodeTriggeredEffect, RemoveAChargeEffect, DarknessTriggeredEffect, WallToGlassTriggeredEffect, \
@@ -28,6 +28,7 @@ import equipment
 import gametime
 import icon
 from equipmenteffect import StatBonusEquipEffect, LifeStealEffect, SetInvisibilityFlagEquippedEffect
+from trigger import Trigger
 
 
 def set_item_components(item, game_state):
@@ -560,31 +561,7 @@ def new_bomb(game_state):
     return bomb
 
 
-#TODO to be removed
-class UsableOnceItemAction(Action):
-    """
-    Abstract class, drink actions should inherit from this class.
-    """
-
-    def act(self, **kwargs):
-        """
-        Performs the drink action, subclasses should not override this.
-        """
-        target_entity = kwargs[action.TARGET_ENTITY]
-        source_entity = kwargs[action.SOURCE_ENTITY]
-        self._act(target_entity)
-        self.remove_from_inventory(target_entity)
-        _item_flash_animation(source_entity, self.parent)
-        self.add_energy_spent_to_entity(source_entity)
-
-    def remove_from_inventory(self, target_entity):
-        """
-        Removes the parent item from the inventory.
-        """
-        target_entity.inventory.remove_one_item_from_stack(self.parent)
-
-
-USER_ACTION_TAG = "user_action" # An element with this tag will be visible in menus.
+USER_ACTION_TAG = "user_action"  # An element with this tag will be visible in menus.
 READ_ACTION_TAG = "read_action"
 DEVICE_ACTION_TAG = "device_action"
 CHARGE_ACTION_TAG = "charge_action"

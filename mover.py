@@ -6,6 +6,7 @@ import geometry
 from position import DungeonLevel
 from stats import max_instances_of_composite_on_tile, IntelligenceLevel
 from statusflags import StatusFlags
+import trigger
 
 
 class Mover(Leaf):
@@ -218,10 +219,12 @@ class Stepper(Leaf):
             entities = self.parent.dungeon_level.value.get_tile_or_unknown(p).get_entities()
             if len(entities) > 0:
                 entity = entities[0]
-                for e in entity.get_children_with_tag("enemy_stepping_next_to_me_effect"):
-                    e.effect(self.parent)
-                for e in self.parent.get_children_with_tag("step_next_to_enemy_effect"):
-                    e.effect(entity)
+                for e in entity.get_children_with_tag(trigger.ENEMY_STEPPING_NEXT_TO_ME_TRIGGER_TAG):
+                    if e.can_trigger(source_entity=entity, target_entity=self.parent):
+                        e.trigger(source_entity=entity, target_entity=self.parent)
+                for e in self.parent.get_children_with_tag(trigger.STEP_NEXT_TO_ENEMY_TRIGGER_TAG):
+                    if e.can_trigger(source_entity=self.parent, target_entity=entity):
+                        e.trigger(source_entity=self.parent, target_entity=entity)
 
     def try_step_in_direction(self, direction):
         return self.try_move_or_bump(geometry.add_2d(self.parent.position.value, direction))

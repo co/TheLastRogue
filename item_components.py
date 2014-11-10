@@ -1,5 +1,6 @@
 import random
 from time import sleep
+
 from Status import FROST_SLOW_STATUS_DESCRIPTION
 from action import Action
 import action
@@ -27,6 +28,7 @@ from statusflags import StatusFlags
 from terrain import GlassWall
 from triggeredeffect import TriggeredEffect
 import util
+
 
 __author__ = 'co'
 
@@ -542,21 +544,6 @@ class LocalMessageEffect(TriggeredEffect):
             message_arguments["target_entity"] = target_entity.description.long_name
 
         msg.send_visual_message(self.message % message_arguments, source_entity.position.value)
-
-
-class Trigger(Leaf):
-    def __init__(self, extra_tags=[]):
-        super(Trigger, self).__init__()
-        self.component_type = "trigger"
-        self.tags |= set(extra_tags)
-
-    def act(self, **kwargs):
-        for c in self.parent.get_children_with_tag("triggered_effect"):
-            if c.can_trigger(**kwargs):
-                c.trigger(**kwargs)
-
-    def can_act(self, **kwargs):
-        return all(c.can_trigger(**kwargs) for c in self.parent.get_children_with_tag("triggered_effect"))
 
 
 class TeleportTriggeredEffect(TriggeredEffect):

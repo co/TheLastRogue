@@ -86,15 +86,24 @@ class PlayerThrowItemAction(PlayerMissileAction):
         """
         source_entity.inventory.remove_item(self.parent)
 
+    def handle_hit_ground(self, game_state, position, source_entity):
+        self.handle_item_hit("hit_floor_action_tag", game_state, position, source_entity)
+
+    def handle_hit_chasm(self, game_state, position, source_entity):
+        self.handle_item_hit("hit_chasm_action_tag", game_state, position, source_entity)
+
+    def handle_item_hit(self, tag, game_state, position, source_entity):
+        for c in self.parent.get_children_with_tag(tag):
+            if c.can_trigger(source_entity=source_entity, target_entity=self.parent,
+                             game_state=game_state, target_position=position):
+                c.trigger(source_entity=source_entity, target_entity=self.parent,
+                          game_state=game_state, target_position=position)
+
     def missile_hit_effect(self, dungeon_level, position, game_state, source_entity):
         if is_hitting_ground(dungeon_level, position):
-            for c in self.parent.get_children_with_tag("hit_floor_action_tag"):
-                c.act(source_entity=source_entity, target_entity=self.parent,
-                      game_state=game_state, target_position=position)
+            self.handle_hit_ground(game_state, position, source_entity)
         else:
-            for c in self.parent.get_children_with_tag("hit_chasm_action_tag"):
-                c.act(source_entity=source_entity, target_entity=self.parent,
-                      game_state=game_state, target_position=position)
+            self.handle_hit_chasm(game_state, position, source_entity)
 
 
 def is_hitting_ground(dungeon_level, position):

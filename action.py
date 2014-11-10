@@ -66,13 +66,19 @@ class TriggerAction(Action):
         self.display_order = display_order
         self._energy_cost = gametime.single_turn
 
-    def act(self, **kwargs):
+    def trigger(self, **kwargs):
         for c in self.parent.get_children_with_tag("triggered_effect"):
             if c.can_trigger(**kwargs):
                 c.trigger(**kwargs)
 
-    def can_act(self, **kwargs):
+    def can_trigger(self, **kwargs):
         return all(c.can_trigger(**kwargs) for c in self.parent.get_children_with_tag("triggered_effect"))
+
+    def act(self, **kwargs):
+        return self.trigger(**kwargs)
+
+    def can_act(self, **kwargs):
+        return self.can_trigger(**kwargs)
 
 
 class DelayedFunctionCall(object):

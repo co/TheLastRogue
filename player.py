@@ -1,12 +1,13 @@
 from Status import StatusDescriptionBar
 import constants
 from equipment import Equipment
-from attacker import Dodger, ArmorChecker, ResistanceChecker, CounterAttackOnDamageTakenEffect, AttackEnemyIStepNextToEffect, AttackEnemySteppingNextToMeEffect, UnarmedAttacker, ThrowRockAttacker
+from attacker import Dodger, ArmorChecker, ResistanceChecker, UnarmedAttacker, ThrowRockAttacker, \
+    set_attack_enemy_i_step_next_to, set_counter_attack, set_attack_enemy_stepping_next_to_me
 from compositecore import Composite
 from dungeonmask import DungeonMask, Path
 from entityeffect import EffectQueue
 from graphic import CharPrinter, GraphicChar
-from health import Health, HealthModifier, BleedWhenDamaged, LoseParalyzeWhenDamaged
+from health import HealthModifier, BleedWhenDamaged, LoseParalyzeWhenDamaged
 from inputactor import InputActor
 from inventory import Inventory
 from item_components import PickUpItemAction
@@ -15,7 +16,7 @@ from missileaction import PlayerThrowStoneAction
 from mover import Mover, PlayerStepper
 from ondeath import LeaveCorpseOnDeath
 from position import Position, DungeonLevel
-from stats import GamePieceTypes, Flag, DataPoint, DataTypes, Factions, IntelligenceLevel, Races, Class
+from stats import GamePieceTypes, Flag, DataPoint, DataTypes, Factions, IntelligenceLevel, Races
 
 from statusflags import StatusFlags
 from text import Description
@@ -85,9 +86,9 @@ def new_player(game_state):
     player.set_child(BleedWhenDamaged())
     player.set_child(LoseParalyzeWhenDamaged())
 
-    player.set_child(CounterAttackOnDamageTakenEffect())
-    player.set_child(AttackEnemyIStepNextToEffect())
-    player.set_child(AttackEnemySteppingNextToMeEffect())
+    set_counter_attack(player)
+    set_attack_enemy_i_step_next_to(player)
+    set_attack_enemy_stepping_next_to_me(player)
 
     player.set_child(PlayerThrowStoneAction())
 
