@@ -57,7 +57,7 @@ class InputActor(Actor):
         if player.pick_up_item_action.can_act(source_entity=self.parent,
                                               target_entity=self.parent,
                                               game_state=self.parent.game_state.value):
-            pickup_option = player.pick_up_item_action.delayed_call(source_entity=player,
+            pickup_option = player.pick_up_item_action.delayed_act(source_entity=player,
                                                                     target_entity=player,
                                                                     game_state=player.game_state.value)
             functions = [pickup_option, stack_pop_function]

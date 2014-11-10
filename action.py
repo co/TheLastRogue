@@ -28,8 +28,11 @@ class Action(Leaf):
     def __call__(self, *args, **kwargs):
         self.act(*args, **kwargs)
 
-    def delayed_call(self, *args, **kwargs):
-        return DelayedFunctionCall(self, *args, **kwargs)
+    def delayed_act(self, *args, **kwargs):
+        return DelayedFunctionCall(self.act, *args, **kwargs)
+
+    def delayed_can_act(self, *args, **kwargs):
+        return DelayedFunctionCall(self.can_act, *args, **kwargs)
 
     def act(self, **kwargs):
         """
@@ -71,10 +74,11 @@ class TriggerAction(Action):
     def can_act(self, **kwargs):
         return all(c.can_trigger(**kwargs) for c in self.parent.get_children_with_tag("triggered_effect"))
 
+
 class DelayedFunctionCall(object):
     def __init__(self, function, **kwargs):
         self.function = function
         self.kwargs = kwargs
 
     def __call__(self):
-        self.function(**self.kwargs)
+        return self.function(**self.kwargs)

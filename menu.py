@@ -248,14 +248,14 @@ class EquipSlotMenu(Menu):
         items = self.player.inventory.items_of_equipment_type(self.equipment_slot.equipment_type)
         self.menu_items = []
         for item in items:
-            reequip_function = item.reequip_action.delayed_call(source_entity=self.player, target_entity=self.player,
+            reequip_function = item.reequip_action.delayed_act(source_entity=self.player, target_entity=self.player,
                                                                 equipment_slot=self.equipment_slot)
             stack_pop_function = BackToGameFunction(self._state_stack)
             functions = [reequip_function, stack_pop_function]
             self.menu_items.append(MenuOptionWithSymbols(item.description.name, item.graphic_char,
                                                           item.graphic_char, functions, payload=item))
 
-        unequip_function = equipactions.UnequipAction().delayed_call(source_entity=self.player, target_entity=self.player,
+        unequip_function = equipactions.UnequipAction().delayed_act(source_entity=self.player, target_entity=self.player,
                                                                      equipment_slot=self.equipment_slot)
         stack_pop_function = BackToGameFunction(self._state_stack)
         unequip_functions = [unequip_function, stack_pop_function]
@@ -294,13 +294,17 @@ class ItemActionsMenu(Menu):
         game_state = self._player.game_state.value
         self.menu_items = []
         for item_action in self._actions:
-            action_function = item_action.delayed_call(source_entity=self._player,
+            action_act = item_action.delayed_act(source_entity=self._player,
                                                        target_entity=self._player,
                                                        game_state=game_state,
                                                        target_position=self._player.position.value)
+            action_can_act = item_action.delayed_can_act(source_entity=self._player,
+                                                         target_entity=self._player,
+                                                         game_state=game_state,
+                                                         target_position=self._player.position.value)
             back_to_game_function = BackToGameFunction(self._state_stack)
-            functions = [action_function, back_to_game_function]
-            option = MenuOption(item_action.name, functions, can_activate=item_action.can_act)
+            functions = [action_act, back_to_game_function]
+            option = MenuOption(item_action.name, functions, can_activate=action_can_act)
             self.menu_items.append(option)
 
 

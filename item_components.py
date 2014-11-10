@@ -31,59 +31,26 @@ import util
 __author__ = 'co'
 
 
-class ChargeADeviceAction(Action):
+class ChooseChargeDeviceTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(ChargeADeviceAction, self).__init__()
-        self.component_type = "charge_device_action"
-        self.name = "Charge Device"
-        self.display_order = 30
+        super(ChooseChargeDeviceTriggeredEffect, self).__init__("choose_charge_device_triggered_effect")
 
-    def can_act(self, **kwargs):
-        return self.parent.game_state.value.player.inventory.has_item_of_type(ItemType.DEVICE)
+    def can_trigger(self, **kwargs):
+        print kwargs
+        return kwargs[action.GAME_STATE].player.inventory.has_item_of_type(ItemType.DEVICE)
 
-    def act(self, **kwargs):
+    def trigger(self, **kwargs):
         source_entity = kwargs[action.SOURCE_ENTITY]
+        game_state = kwargs[action.GAME_STATE]
         callback = lambda item, source_entity=source_entity, **kwargs: self._charge_device(item, source_entity)
         choose_device_menu = menufactory.item_type_menu_callback_menu(source_entity,
-                                                                      self.parent.game_state.value.menu_prompt_stack,
+                                                                      game_state.menu_prompt_stack,
                                                                       ItemType.DEVICE, "Device to Charge:", callback)
-        self.parent.game_state.value.start_prompt(choose_device_menu)
-        self.add_energy_spent_to_entity(source_entity)
+        game_state.start_prompt(choose_device_menu)
 
     def _charge_device(self, device, entity):
         device.charge.charges += 1
-        entity.inventory.remove_one_item_from_stack(self.parent)
-
-
-class ActivateDeviceAction(Action):
-    def __init__(self):
-        super(ActivateDeviceAction, self).__init__()
-        self.name = "Activate"
-        self.display_order = 90
-
-    def act(self, **kwargs):
-        """
-        Performs the drink action, subclasses should not override this.
-        """
-        source_entity = kwargs[action.SOURCE_ENTITY]
-
-        self._activate(source_entity)
-        _item_flash_animation(source_entity, self.parent)
-        self.parent.charge.charges -= 1
-        self.add_energy_spent_to_entity(source_entity)
-
-    def can_act(self, **kwargs):
-        """
-        You cannot use a device without charges.
-        """
-        return self.parent.charge.charges > 0
-
-    def _activate(self, source_entity):
-        """
-        The activate action subclasses should override
-        and define the activate action here.
-        """
-        pass
+        entity.inventory.remove_one_item_from_stack(self.parent.item.value)
 
 
 class DarknessTriggeredEffect(TriggeredEffect):
@@ -100,39 +67,12 @@ class DarknessTriggeredEffect(TriggeredEffect):
             entity.effect_queue.add(darkness_effect)
 
 
-#TODO remove
-class DarknessDeviceAction(ActivateDeviceAction):
-    """
-    Defines the device activate action.
-    """
+class WallToGlassTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(DarknessDeviceAction, self).__init__()
-        self.component_type = "darkness_device_activate_action"
+        super(WallToGlassTriggeredEffect, self).__init__("wall_to_glass_triggered_effect")
 
-    def _activate(self, source_entity):
-        ttl = gametime.single_turn * rng.random_variance(10, 5)
-        entities = source_entity.dungeon_level.value.entities
-        msg.send_global_message(messenger.DARKNESS_MESSAGE)
-        for entity in entities:
-            sight_radius_spoof = DataPoint(DataTypes.SIGHT_RADIUS, 1)
-            darkness_effect = entityeffect.AddSpoofChild(source_entity, sight_radius_spoof, time_to_live=ttl)
-            entity.effect_queue.add(darkness_effect)
-
-
-class GlassDeviceAction(ActivateDeviceAction):
-    def __init__(self):
-        super(GlassDeviceAction, self).__init__()
-        self.component_type = "glass_device_activate_action"
-
-    def _turn_to_glass_if_wall(self, position, dungeon_level):
-        terrain = dungeon_level.get_tile(position).get_terrain()
-        if terrain.has("is_wall"):
-            glass_wall = GlassWall()
-            glass_wall.mover.replace_move(position, dungeon_level)
-            return True
-        return False
-
-    def _activate(self, source_entity):
+    def trigger(self, **kwargs):
+        source_entity = kwargs[action.SOURCE_ENTITY]
         sight_radius = source_entity.sight_radius.value
         dungeon_level = source_entity.dungeon_level.value
         top = source_entity.position.value[1] - sight_radius
@@ -148,15 +88,25 @@ class GlassDeviceAction(ActivateDeviceAction):
         if turned_something_to_glass:
             msg.send_global_message(messenger.GLASS_TURNING_MESSAGE)
 
+    def _turn_to_glass_if_wall(self, position, dungeon_level):
+        terrain = dungeon_level.get_tile(position).get_terrain()
+        if terrain.has("is_wall"):
+            glass_wall = GlassWall()
+            glass_wall.mover.replace_move(position, dungeon_level)
+            return True
+        return False
 
-class SwapDeviceAction(ActivateDeviceAction):
+
+class SwapsTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(SwapDeviceAction, self).__init__()
-        self.component_type = "swap_device_activate_action"
+        super(SwapsTriggeredEffect, self).__init__("swaps_glass_triggered_effect")
 
-    def _activate(self, source_entity):
+    def trigger(self, **kwargs):
+        source_entity = kwargs[action.SOURCE_ENTITY]
         dungeon_level = source_entity.dungeon_level.value
         entities_in_sight = source_entity.vision.get_seen_entities()
+        if not any(entities_in_sight):
+            return
         entities_in_sight.append(source_entity)
 
         positions = [e.position.value for e in entities_in_sight]
@@ -170,20 +120,12 @@ class SwapDeviceAction(ActivateDeviceAction):
         msg.send_global_message(messenger.SWAP_DEVICE_MESSAGE)
 
 
-class HeartStopDeviceAction(ActivateDeviceAction):
-    """
-    Defines the device activate action.
-    """
-
+class HeartStopTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(HeartStopDeviceAction, self).__init__()
-        self.component_type = "heart_stop_device_activate_action"
+        super(HeartStopTriggeredEffect, self).__init__("heart_stop_triggered_effect")
 
-    def _activate(self, source_entity):
-        """
-        The activate action subclasses should override
-        and define the activate action here.
-        """
+    def trigger(self, **kwargs):
+        source_entity = kwargs[action.SOURCE_ENTITY]
         ttl = gametime.single_turn * (random.randrange(3) + 2)
         entities = [entity for entity in source_entity.dungeon_level.value.entities
                     if entity.status_flags.has_status(StatusFlags.HAS_HEART) and not entity is source_entity]
@@ -194,20 +136,12 @@ class HeartStopDeviceAction(ActivateDeviceAction):
         target.effect_queue.add(heart_stop_effect)
 
 
-class BlinksDeviceAction(ActivateDeviceAction):
-    """
-    Defines the device activate action.
-    """
-
+class BlinksTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(BlinksDeviceAction, self).__init__()
-        self.component_type = "blinks_device_activate_action"
+        super(BlinksTriggeredEffect, self).__init__("blinks_triggered_effect")
 
-    def _activate(self, source_entity):
-        """
-        The activate action subclasses should override
-        and define the activate action here.
-        """
+    def trigger(self, **kwargs):
+        source_entity = kwargs[action.SOURCE_ENTITY]
         min_blinks = 2
         max_blinks = 6
         times = random.randrange(min_blinks, max_blinks + 1)
@@ -241,21 +175,12 @@ class BlinksDeviceAction(ActivateDeviceAction):
                 break
 
 
-# todo replace with trigger, effect
-class HealDeviceAction(ActivateDeviceAction):
-    """
-    Defines the device activate action.
-    """
-
+class HealAllSeenTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(HealDeviceAction, self).__init__()
-        self.component_type = "heal_device_activate_action"
+        super(HealAllSeenTriggeredEffect, self).__init__("heal_all_seen_triggered_effect")
 
-    def _activate(self, source_entity):
-        """
-        The activate action subclasses should override
-        and define the activate action here.
-        """
+    def trigger(self, **kwargs):
+        source_entity = kwargs[action.SOURCE_ENTITY]
         player = source_entity
         entities = [entity for entity in source_entity.vision.get_seen_entities()
                     if entity.health.is_damaged()] + [player]  # And the player too.
@@ -269,20 +194,12 @@ class HealDeviceAction(ActivateDeviceAction):
             target_entity.effect_queue.add(heal_effect)
 
 
-class ZapDeviceAction(ActivateDeviceAction):
-    """
-    Defines the device activate action.
-    """
-
+class ZapRandomSeenEntityTriggeredEffect(TriggeredEffect):
     def __init__(self):
-        super(ZapDeviceAction, self).__init__()
-        self.component_type = "zap_device_activate_action"
+        super(ZapRandomSeenEntityTriggeredEffect, self).__init__("zap_random_seen_entity_triggered_effect")
 
-    def _activate(self, source_entity):
-        """
-        The activate action subclasses should override
-        and define the activate action here.
-        """
+    def trigger(self, **kwargs):
+        source_entity = kwargs[action.SOURCE_ENTITY]
         entities = [entity for entity in source_entity.vision.get_seen_entities()
                     if not entity is source_entity]
         if len(entities) <= 0:

@@ -3,20 +3,19 @@ import random
 from Status import DAMAGE_REFLECT_STATUS_DESCRIPTION
 from action import Action
 from actor import DoNothingActor
-from cloud import new_explosion_cloud, new_frost_cloud, new_poison_cloud
+from cloud import new_frost_cloud, new_poison_cloud
 from compositecore import Leaf, Composite
-import direction
-import geometry
 from graphic import GraphicChar, CharPrinter
 from health import ReflectDamageTakenEffect
-from item_components import ChargeADeviceAction, DarknessDeviceAction, GlassDeviceAction, \
-    SwapDeviceAction, HeartStopDeviceAction, BlinksDeviceAction, HealDeviceAction, ZapDeviceAction, Stacker, \
+from item_components import Stacker, \
     AddSpoofChildEquipEffect, HealTriggeredEffect, ApplyPoisonTriggeredEffect, CreateFlameCloudTriggeredEffect, \
     ApplyFrostTriggeredEffect, ReEquipAction, DropItemTriggeredEffect, \
     AddEnergySpentEffect, PutToSleepTriggeredEffect, RemoveItemEffect, FlashItemEffect, LocalMessageEffect, Trigger, \
     TeleportTriggeredEffect, SingleSwapTriggeredEffect, MagicMappingTriggeredEffect, PushOthersTriggeredEffect, \
     EquipmentType, PlayerAutoPickUp, ItemType, _item_flash_animation, CreateCloudTriggeredEffect, MoveTriggeredEffect, \
-    ExplodeTriggeredEffect, RemoveAChargeEffect, DarknessTriggeredEffect
+    ExplodeTriggeredEffect, RemoveAChargeEffect, DarknessTriggeredEffect, WallToGlassTriggeredEffect, \
+    HeartStopTriggeredEffect, SwapsTriggeredEffect, ZapRandomSeenEntityTriggeredEffect, HealAllSeenTriggeredEffect, \
+    BlinksTriggeredEffect, ChooseChargeDeviceTriggeredEffect
 import messenger
 from missileaction import PlayerThrowItemAction
 from mover import Mover
@@ -27,7 +26,6 @@ import action
 import colors
 import equipment
 import gametime
-from messenger import msg
 import icon
 from equipmenteffect import StatBonusEquipEffect, LifeStealEffect, SetInvisibilityFlagEquippedEffect
 
@@ -80,7 +78,7 @@ def new_heart_stop_device(game_state):
     set_device_components(device)
     device.set_child(Description("Dev. of Heart Stop",
                                  "This ancient device will cause a random creature on the floor to have a heart attack."))
-    device.set_child(HeartStopDeviceAction())
+    set_device_item_action(device, [HeartStopTriggeredEffect()])
     device.set_child(GraphicChar(None, colors.BLUE, icon.MACHINE))
     return device
 
@@ -91,7 +89,7 @@ def new_glass_device(game_state):
     set_device_components(device)
     device.set_child(Description("Dev. of Glassmaking",
                                  "This ancient device will turn all nearby stone into glass."))
-    device.set_child(GlassDeviceAction())
+    set_device_item_action(device, [WallToGlassTriggeredEffect()])
     device.set_child(GraphicChar(None, colors.CYAN, icon.MACHINE))
     return device
 
@@ -102,7 +100,7 @@ def new_swap_device(game_state):
     set_device_components(device)
     device.set_child(Description("Device of Swaping",
                                  "This ancient device will swap places with every creature in view."))
-    device.set_child(SwapDeviceAction())
+    set_device_item_action(device, [SwapsTriggeredEffect()])
     device.set_child(GraphicChar(None, colors.YELLOW, icon.MACHINE))
     return device
 
@@ -113,7 +111,7 @@ def new_zap_device(game_state):
     set_device_components(device)
     device.set_child(Description("Device of Zapping",
                                  "This ancient device will zap a random creature within view."))
-    device.set_child(ZapDeviceAction())
+    set_device_item_action(device, [ZapRandomSeenEntityTriggeredEffect()])
     device.set_child(GraphicChar(None, colors.GRAY, icon.MACHINE))
     return device
 
@@ -124,7 +122,7 @@ def new_healing_device(game_state):
     set_device_components(device)
     device.set_child(Description("Device of Healing",
                                  "This ancient device will heal everything within view."))
-    device.set_child(HealDeviceAction())
+    set_device_item_action(device, [HealAllSeenTriggeredEffect()])
     device.set_child(GraphicChar(None, colors.PINK, icon.MACHINE))
     return device
 
@@ -135,7 +133,7 @@ def new_blinks_device(game_state):
     set_device_components(device)
     device.set_child(Description("Device of Blinks",
                                  "This ancient device will repeatedly teleport all creatuers within view short distances."))
-    device.set_child(BlinksDeviceAction())
+    set_device_item_action(device, [BlinksTriggeredEffect()])
     device.set_child(GraphicChar(None, colors.PURPLE, icon.MACHINE))
     return device
 
@@ -160,12 +158,12 @@ def new_energy_sphere(game_state):
     set_item_components(charge, game_state)
     charge.set_child(ItemType(ItemType.ENERGY_SHPERE))
     charge.set_child(Stacker("charge", 5, random.randrange(1, 3)))
-    charge.set_child(Description("Energy Sphere",
-                                 "These spheres are used to power ancient devices."))
+    charge.set_child(Description("Energy Sphere", "These spheres are used to power ancient devices."))
     charge.set_child(GraphicChar(None, colors.LIGHT_ORANGE, icon.BIG_CENTER_DOT))
     charge.set_child(DataPoint(DataTypes.WEIGHT, 1))
     charge.set_child(PlayerAutoPickUp())
-    charge.set_child(ChargeADeviceAction())
+    set_use_item_action(CHARGE_ACTION_TAG, charge, [action.TriggerAction("Charge Device", 90, [CHARGE_ACTION_TAG]),
+                                                    ChooseChargeDeviceTriggeredEffect()])
     return charge
 
 
@@ -432,15 +430,15 @@ def new_frost_potion(game_state):
 
 
 def set_drink_item_action(item, triggered_effects):
-    set_use_item_action(DRINK_ACTION_TAG, item, [action.TriggerAction("Drink", 90, [DRINK_ACTION_TAG])] + triggered_effects)
+    set_use_up_item_action(DRINK_ACTION_TAG, item, [action.TriggerAction("Drink", 90, [DRINK_ACTION_TAG])] + triggered_effects)
 
 
 def set_thrown_item_hit_floor_action(item, triggered_effects):
-    set_use_item_action(HIT_FLOOR_ACTION_TAG, item, [Trigger([HIT_FLOOR_ACTION_TAG])] + triggered_effects)
+    set_use_up_item_action(HIT_FLOOR_ACTION_TAG, item, [Trigger([HIT_FLOOR_ACTION_TAG])] + triggered_effects)
 
 
 def set_thrown_item_hit_chasm_action(item, triggered_effects):
-    set_use_item_action(HIT_CHASM_ACTION_TAG, item, [Trigger([HIT_CHASM_ACTION_TAG])] + triggered_effects)
+    set_use_up_item_action(HIT_CHASM_ACTION_TAG, item, [Trigger([HIT_CHASM_ACTION_TAG])] + triggered_effects)
 
 
 potion_factories = [new_health_potion, new_poison_potion, new_flame_potion, new_frost_potion]
@@ -510,16 +508,20 @@ def new_sleep_scroll(game_state):
 
 
 def set_read_item_action(item, triggered_effects):
-    set_use_item_action(READ_ACTION_TAG, item, [action.TriggerAction("Read", 90, [READ_ACTION_TAG, USER_ACTION_TAG])] + triggered_effects)
+    set_use_up_item_action(READ_ACTION_TAG, item, [action.TriggerAction("Read", 90, [READ_ACTION_TAG, USER_ACTION_TAG])] + triggered_effects)
 
 
 scroll_factories = [new_sleep_scroll, new_map_scroll, new_teleport_scroll, new_swap_scroll]
 
 
+def set_use_up_item_action(component_type, item, triggered_effects):
+    triggered_effects.append(RemoveItemEffect())
+    set_use_item_action(component_type, item, triggered_effects)
+
+
 def set_use_item_action(component_type, item, triggered_effects):
     item_trigger_effect = Composite(component_type)
     item_trigger_effect.set_child(FlashItemEffect())  # todo: does this do anything?
-    item_trigger_effect.set_child(RemoveItemEffect())
     item_trigger_effect.set_child(AddEnergySpentEffect())
     for triggered_effect in triggered_effects:
         item_trigger_effect.set_child(triggered_effect)
@@ -585,6 +587,7 @@ class UsableOnceItemAction(Action):
 USER_ACTION_TAG = "user_action" # An element with this tag will be visible in menus.
 READ_ACTION_TAG = "read_action"
 DEVICE_ACTION_TAG = "device_action"
+CHARGE_ACTION_TAG = "charge_action"
 DRINK_ACTION_TAG = "drink_action"
 DROP_ACTION_TAG = "drop_action"
 THROW_ACTION_TAG = "throw_action"

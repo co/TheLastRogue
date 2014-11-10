@@ -522,7 +522,7 @@ def get_dungeon_feature_menu_options(player, stack_pop_function):
     feature_options = []
     game_state = player.game_state.value
     for feature_action in get_tile_actions(player):
-        feature_option = feature_action.delayed_call(source_entity=player,
+        feature_option = feature_action.delayed_act(source_entity=player,
                                                      target_entity=player,
                                                      game_state=game_state)
         functions = [feature_option, stack_pop_function]
